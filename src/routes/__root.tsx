@@ -65,6 +65,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "Lumiere Events" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Lumiere Events — Premium Event Planning & Management" },
+      { name: "twitter:title", content: "Lumiere Events — Premium Event Planning & Management" },
+      { property: "og:description", content: "Award-winning event planners crafting weddings, corporate events, concerts and launches with premium production." },
+      { name: "twitter:description", content: "Award-winning event planners crafting weddings, corporate events, concerts and launches with premium production." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8359fcfc-78b5-4b1d-b57a-ebbe19f3e9ef" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8359fcfc-78b5-4b1d-b57a-ebbe19f3e9ef" },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
     scripts: [{
