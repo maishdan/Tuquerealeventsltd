@@ -12,6 +12,10 @@ import {
   MessageSquare,
   User,
   ClipboardList,
+  BarChart3,
+  ShieldCheck,
+  Briefcase,
+  History,
 } from "lucide-react";
 
 export type DashboardNavItem = {
@@ -19,18 +23,27 @@ export type DashboardNavItem = {
   label: string;
   icon: LucideIcon;
   description?: string;
+  category?: string;
 };
 
 export const adminNav: DashboardNavItem[] = [
-  { to: "/admin", label: "Executive Overview", icon: LayoutDashboard, description: "KPIs & CEO insights" },
-  { to: "/admin/bookings", label: "Bookings & Inquiries", icon: ClipboardList, description: "New leads from website" },
-  { to: "/admin/command", label: "Event Command", icon: Radio, description: "Live event tracking" },
-  { to: "/admin/calendar", label: "Event Calendar", icon: Calendar },
-  { to: "/admin/categories", label: "Event Categories", icon: Layers },
-  { to: "/admin/operations", label: "Operations", icon: Settings2 },
-  { to: "/admin/finance", label: "Financial Hub", icon: Wallet },
-  { to: "/admin/team", label: "Team Management", icon: Users },
-  { to: "/admin/ai", label: "AI Insights", icon: Sparkles },
+  // CORE
+  { to: "/admin", label: "Executive Overview", icon: LayoutDashboard, description: "KPIs & CEO insights", category: "Core" },
+  { to: "/admin/analytics", label: "Sales Analytics", icon: BarChart3, description: "Revenue & growth trends", category: "Core" },
+
+  // MANAGEMENT
+  { to: "/admin/bookings", label: "Booking Management", icon: ClipboardList, description: "Leads & inquiries", category: "Management" },
+  { to: "/admin/calendar", label: "Event Schedule", icon: Calendar, description: "Operational timeline", category: "Management" },
+  { to: "/admin/team", label: "Staff & Teams", icon: Users, description: "Performance & scheduling", category: "Management" },
+
+  // LOGISTICS
+  { to: "/admin/command", label: "Command Center", icon: Radio, description: "Live event logistics", category: "Operations" },
+  { to: "/admin/categories", label: "Service Catalog", icon: Layers, description: "Event types & pricing", category: "Operations" },
+  { to: "/admin/finance", label: "Financial Hub", icon: Wallet, description: "Invoices & payroll", category: "Operations" },
+
+  // ADVANCED
+  { to: "/admin/ai", label: "AI Prediction", icon: Sparkles, description: "Demand forecasting", category: "System" },
+  { to: "/admin/operations", label: "System Settings", icon: Settings2, description: "Portal configuration", category: "System" },
 ];
 
 export const customerNav: DashboardNavItem[] = [
