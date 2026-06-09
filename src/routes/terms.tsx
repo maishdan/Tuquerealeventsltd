@@ -43,7 +43,7 @@ function TermsPage() {
           </div>
           <div>
             <h2 className="text-foreground font-display text-2xl">6. Contact</h2>
-            <p>Questions about these terms: <a className="text-gold" href="tel:+254701460110">+254 701 460 110</a>.</p>
+            <p>Questions about these terms: <a className="text-gold" href="tel:+254795365334">+254 795 365 334</a>.</p>
           </div>
         </div>
       </div>

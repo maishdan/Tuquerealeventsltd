@@ -32,8 +32,8 @@ export function Footer() {
         <div>
           <h4 className="text-sm uppercase tracking-widest text-gold mb-4">Contact</h4>
           <ul className="space-y-3 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Phone size={14} /> +254 701 460 110</li>
-            <li className="flex items-center gap-2"><Mail size={14} /> hello@royaltouchevents.co.ke</li>
+            <li className="flex items-center gap-2"><Phone size={14} /> +254 795 365 334</li>
+            <li className="flex items-center gap-2"><Mail size={14} /> eventsroyaltouch7@gmail.com</li>
             <li className="flex items-center gap-2"><MapPin size={14} /> Nairobi, Kenya</li>
           </ul>
         </div>
