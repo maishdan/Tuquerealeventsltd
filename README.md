@@ -707,7 +707,7 @@ Premium Event Planning & Management Platform
 
 © 2026 **Daniwest Tech Ltd**. All Rights Reserved.
 
-**Designed & Developed with ❤️ by Daniwest Technologies**
+**Designed & Developed with ❤️ by Daniwest Tech Ltd**
 
 </div>
 
