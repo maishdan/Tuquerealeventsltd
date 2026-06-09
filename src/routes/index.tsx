@@ -134,7 +134,7 @@ function Home() {
       </section>
 
       {/* WHY US */}
-      <section className="border-y border-border bg-card/40">
+      <section className="border-y border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <img src={concert} alt="" loading="lazy" className="rounded-2xl aspect-[5/6] object-cover" />
