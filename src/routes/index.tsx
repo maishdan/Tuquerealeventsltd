@@ -182,15 +182,15 @@ function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-card/60 p-10 md:p-16 text-center">
-          <div className="absolute inset-0 -z-10 opacity-30">
+        <div className="relative overflow-hidden rounded-3xl glass-strong glass-gold p-10 md:p-16 text-center">
+          <div className="absolute inset-0 -z-10 opacity-25">
             <img src={corporate} alt="" loading="lazy" className="h-full w-full object-cover" />
           </div>
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Ready when you are</p>
           <h2 className="mt-4 font-display text-4xl md:text-6xl">Let's plan something <span className="text-gradient-gold">remarkable</span>.</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/booking" className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground">Book Your Event</Link>
-            <Link to="/contact" className="rounded-full border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
+            <Link to="/booking" className="rounded-full bg-gold text-background px-7 py-3.5 text-sm font-semibold hover:opacity-90 transition">Book Your Event</Link>
+            <Link to="/contact" className="rounded-full glass border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
           </div>
         </div>
       </section>
