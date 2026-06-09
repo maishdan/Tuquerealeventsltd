@@ -1,17 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Briefcase, Heart, Cake, Music, Users, Rocket, Sparkles, Lightbulb, Camera, Mic } from "lucide-react";
 import { SectionHeader } from "../components/site/Section";
+import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
-    meta: [
-      { title: "Services — Royal Touch Events" },
-      { name: "description", content: "Weddings, corporate events, concerts, decoration, sound & lighting, photography and more." },
-      { property: "og:title", content: "Services — Royal Touch Events" },
-      { property: "og:description", content: "Full-service event production across East Africa." },
-      { property: "og:url", content: "/services" },
+    ...createPageSeo({
+      title: "Services — One Studio. Every Moving Piece.",
+      description:
+        "Plan, design, produce, capture. Royal Touch Events covers corporate events, weddings, birthday parties, concerts, conferences, product launches, decoration, sound & lighting, photography, video and MC entertainment in Nairobi.",
+      path: "/services",
+      keywords: SERVICE_KEYWORDS,
+    }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Royal Touch Events Services",
+          description:
+            "One studio. Every moving piece. Full-stack event production across Nairobi and East Africa.",
+          url: "/services",
+        }),
+      },
     ],
-    links: [{ rel: "canonical", href: "/services" }],
   }),
   component: Services,
 });

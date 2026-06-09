@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms & Conditions — Royal Touch Events" },
-      { name: "description", content: "Terms and conditions for engaging Royal Touch Events for event planning and production services." },
-      { property: "og:title", content: "Terms & Conditions — Royal Touch Events" },
-      { property: "og:description", content: "Read our terms of engagement." },
-    ],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Terms & Conditions",
+      description:
+        "Terms and conditions for engaging Royal Touch Events for event planning, production and related services in Nairobi, Kenya.",
+      path: "/terms",
+    }),
   component: TermsPage,
 });
 

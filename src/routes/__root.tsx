@@ -20,6 +20,14 @@ import { useEffect, type ReactNode } from "react";
 import bgVenue from "../assets/bg-venue.jpg";
 import homeBackground from "../assets/background.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import {
+  SITE_NAME,
+  SITE_TAGLINE,
+  createPageSeo,
+  defaultSiteLinks,
+  organizationJsonLd,
+  servicesJsonLd,
+} from "../lib/seo";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
 import { WhatsAppButton } from "../components/site/WhatsAppButton";
@@ -59,32 +67,30 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Royal Touch Events — Premium Event Planning Nairobi" },
-      { name: "description", content: "Royal Touch Events plans weddings, corporate events, concerts and private parties in Nairobi — we plan, you celebrate, we make it memorable." },
-      { property: "og:site_name", content: "Royal Touch Events" },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Royal Touch Events — Premium Event Planning Nairobi" },
-      { name: "twitter:title", content: "Royal Touch Events — Premium Event Planning Nairobi" },
-      { property: "og:description", content: "We plan. You celebrate. We make it memorable." },
-      { name: "twitter:description", content: "We plan. You celebrate. We make it memorable." },
-    ],
-    scripts: [{
-      type: "application/ld+json",
-      children: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        name: "Royal Touch Events",
-        telephone: "+254795365334",
-        address: { "@type": "PostalAddress", addressLocality: "Nairobi", addressCountry: "KE" },
-        url: "/",
-      }),
-    }],
-  }),
+  head: () => {
+    const seo = createPageSeo({
+      title: `${SITE_NAME} — Premium Event Planning Nairobi, Kenya`,
+      description: `${SITE_TAGLINE} Full-service event production: weddings, corporate events, concerts, decoration, sound & lighting, photography and entertainment in Nairobi.`,
+      path: "/",
+      keywords:
+        "event planning Nairobi, wedding planner Kenya, corporate events Nairobi, concert production, Royal Touch Events",
+    });
+
+    return {
+      meta: [{ charSet: "utf-8" }, { name: "viewport", content: "width=device-width, initial-scale=1" }, ...seo.meta],
+      links: [...defaultSiteLinks(), ...seo.links],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(organizationJsonLd()),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(servicesJsonLd()),
+        },
+      ],
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

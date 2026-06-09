@@ -2,18 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { Phone, Mail, MapPin, MessageCircle, Check } from "lucide-react";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact Us — Royal Touch Events" },
-      { name: "description", content: "Reach Royal Touch Events by phone, email, WhatsApp, or visit our Nairobi studio." },
-      { property: "og:title", content: "Contact Us — Royal Touch Events" },
-      { property: "og:description", content: "Get in touch with our team." },
-      { property: "og:url", content: "/contact" },
-    ],
-    links: [{ rel: "canonical", href: "/contact" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Contact Us — Nairobi Event Planners",
+      description:
+        "Contact Royal Touch Events in Nairobi. Call +254 795 365 334, email eventsroyaltouch7@gmail.com, or chat on WhatsApp for weddings, corporate events and concerts.",
+      path: "/contact",
+      keywords: "contact event planner Nairobi, Royal Touch Events phone, WhatsApp event booking Kenya",
+    }),
   component: Contact,
 });
 

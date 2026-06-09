@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy — Royal Touch Events" },
-      { name: "description", content: "How Royal Touch Events collects, uses and protects your personal information." },
-      { property: "og:title", content: "Privacy Policy — Royal Touch Events" },
-      { property: "og:description", content: "Your data, handled with care." },
-    ],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Privacy Policy",
+      description:
+        "How Royal Touch Events collects, uses and protects your personal information when you inquire, book or interact with our event planning services.",
+      path: "/privacy",
+    }),
   component: PrivacyPage,
 });
 

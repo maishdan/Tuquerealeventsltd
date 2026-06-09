@@ -2,18 +2,17 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { Check } from "lucide-react";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/booking")({
-  head: () => ({
-    meta: [
-      { title: "Book an Event — Royal Touch Events" },
-      { name: "description", content: "Tell us about your event and we'll send a tailored quote within 24 hours." },
-      { property: "og:title", content: "Book an Event — Royal Touch Events" },
-      { property: "og:description", content: "Start your event inquiry." },
-      { property: "og:url", content: "/booking" },
-    ],
-    links: [{ rel: "canonical", href: "/booking" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Book an Event — Free Quote Within 24 Hours",
+      description:
+        "Book your wedding, corporate event, concert or private party with Royal Touch Events. Share your vision and receive a tailored quote within 24 hours.",
+      path: "/booking",
+      keywords: "book event Nairobi, wedding booking Kenya, corporate event quote, event inquiry form",
+    }),
   component: Booking,
 });
 

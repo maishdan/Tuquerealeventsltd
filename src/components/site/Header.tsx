@@ -47,8 +47,23 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="hidden md:flex items-center gap-3">
-          <Link to="/booking" className="inline-flex items-center rounded-full glass glass-gold px-5 py-2 text-sm font-medium text-gold hover:bg-gold/10 transition">
+        <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
+          <Link
+            to="/sign-in"
+            className="text-sm text-muted-foreground hover:text-foreground transition px-2 py-1"
+          >
+            Sign In
+          </Link>
+          <Link
+            to="/sign-up"
+            className="inline-flex items-center rounded-full border border-gold/40 text-gold px-4 py-2 text-sm font-medium hover:bg-gold/10 transition"
+          >
+            Sign Up
+          </Link>
+          <Link
+            to="/booking"
+            className="inline-flex items-center rounded-full glass glass-gold px-4 lg:px-5 py-2 text-sm font-medium text-gold hover:bg-gold/10 transition"
+          >
             Book an Event
           </Link>
         </div>
@@ -95,7 +110,21 @@ export function Header() {
             ))}
           </nav>
 
-          <div className="mt-auto px-4 pb-6 pt-2 border-t border-white/10">
+          <div className="mt-auto px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
+            <Link
+              to="/sign-in"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center rounded-xl border border-white/15 px-5 py-3 text-sm font-medium text-foreground/90 hover:bg-white/5 transition"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/sign-up"
+              onClick={() => setOpen(false)}
+              className="flex items-center justify-center rounded-xl border border-gold/40 text-gold px-5 py-3 text-sm font-medium hover:bg-gold/10 transition"
+            >
+              Sign Up
+            </Link>
             <Link
               to="/booking"
               onClick={() => setOpen(false)}

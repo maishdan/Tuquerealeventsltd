@@ -1,17 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SectionHeader } from "../components/site/Section";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/blog")({
-  head: () => ({
-    meta: [
-      { title: "Blog & News — Royal Touch Events" },
-      { name: "description", content: "Event planning tips, industry trends and Royal Touch updates." },
-      { property: "og:title", content: "Blog & News — Royal Touch Events" },
-      { property: "og:description", content: "Tips, trends, and stories from behind the scenes." },
-      { property: "og:url", content: "/blog" },
-    ],
-    links: [{ rel: "canonical", href: "/blog" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Blog & News — Event Planning Tips & Trends",
+      description:
+        "Royal Touch Events blog: wedding planning tips, corporate event trends, décor inspiration and behind-the-scenes stories from Nairobi's premier event production team.",
+      path: "/blog",
+      keywords: "event planning blog Kenya, wedding tips Nairobi, corporate event trends",
+    }),
   component: Blog,
 });
 

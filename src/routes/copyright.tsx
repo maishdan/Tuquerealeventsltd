@@ -1,14 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/copyright")({
-  head: () => ({
-    meta: [
-      { title: "Copyright — Royal Touch Events" },
-      { name: "description", content: "Copyright notice for content, photography and brand assets of Royal Touch Events." },
-      { property: "og:title", content: "Copyright — Royal Touch Events" },
-      { property: "og:description", content: "Brand and content ownership notice." },
-    ],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Copyright Notice",
+      description:
+        "Copyright notice for content, photography, video and brand assets of Royal Touch Events. All rights reserved.",
+      path: "/copyright",
+    }),
   component: CopyrightPage,
 });
 

@@ -6,18 +6,17 @@ import corporate from "../assets/gallery-corporate.jpg";
 import concert from "../assets/gallery-concert.jpg";
 import decor from "../assets/gallery-decor.jpg";
 import { SectionHeader } from "../components/site/Section";
+import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Royal Touch Events — Premium Event Planning in Nairobi" },
-      { name: "description", content: "Weddings, corporate galas, concerts and launches — beautifully produced end to end." },
-      { property: "og:title", content: "Royal Touch Events — Premium Event Planning" },
-      { property: "og:description", content: "Beautifully produced events end to end." },
-      { property: "og:url", content: "/" },
-    ],
-    links: [{ rel: "canonical", href: "/" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Premium Event Planning in Nairobi, Kenya",
+      description:
+        "Royal Touch Events produces weddings, corporate galas, concerts and launches in Nairobi. Plan, design, produce and capture — beautifully executed end to end.",
+      path: "/",
+      keywords: SERVICE_KEYWORDS,
+    }),
   component: Home,
 });
 

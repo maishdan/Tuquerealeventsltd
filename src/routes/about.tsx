@@ -1,18 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { SectionHeader } from "../components/site/Section";
 import decor from "../assets/gallery-decor.jpg";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — Royal Touch Events" },
-      { name: "description", content: "Our story, mission and the team behind East Africa's most-loved event house." },
-      { property: "og:title", content: "About — Royal Touch Events" },
-      { property: "og:description", content: "Our story, mission and team." },
-      { property: "og:url", content: "/about" },
-    ],
-    links: [{ rel: "canonical", href: "/about" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "About Us — Twelve Years of Unforgettable Events",
+      description:
+        "Founded in 2013, Royal Touch Events is Nairobi's full-service event house. Our mission: translate every client's vision into a flawlessly executed, emotionally resonant experience.",
+      path: "/about",
+      keywords: "about Royal Touch Events, event company Nairobi, luxury event production Kenya",
+    }),
   component: About,
 });
 

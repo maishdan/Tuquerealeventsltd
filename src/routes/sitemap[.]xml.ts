@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-
-const BASE_URL = "";
+import { SITE_URL } from "../lib/seo";
 
 interface SitemapEntry {
   path: string;
@@ -21,12 +20,15 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/booking", changefreq: "monthly", priority: "0.9" },
           { path: "/blog", changefreq: "weekly", priority: "0.6" },
           { path: "/contact", changefreq: "monthly", priority: "0.7" },
+          { path: "/terms", changefreq: "yearly", priority: "0.3" },
+          { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+          { path: "/copyright", changefreq: "yearly", priority: "0.3" },
         ];
 
         const urls = entries.map((e) =>
           [
             `  <url>`,
-            `    <loc>${BASE_URL}${e.path}</loc>`,
+            `    <loc>${SITE_URL}${e.path}</loc>`,
             e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
             e.priority ? `    <priority>${e.priority}</priority>` : null,
             `  </url>`,

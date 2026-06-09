@@ -7,18 +7,17 @@ import concert from "../assets/gallery-concert.jpg";
 import birthday from "../assets/gallery-birthday.jpg";
 import launch from "../assets/gallery-launch.jpg";
 import decor from "../assets/gallery-decor.jpg";
+import { createPageSeo } from "../lib/seo";
 
 export const Route = createFileRoute("/portfolio")({
-  head: () => ({
-    meta: [
-      { title: "Portfolio — Royal Touch Events" },
-      { name: "description", content: "Selected work — weddings, corporate galas, concerts, launches and bespoke productions." },
-      { property: "og:title", content: "Portfolio — Royal Touch Events" },
-      { property: "og:description", content: "A gallery of our work." },
-      { property: "og:url", content: "/portfolio" },
-    ],
-    links: [{ rel: "canonical", href: "/portfolio" }],
-  }),
+  head: () =>
+    createPageSeo({
+      title: "Portfolio — Weddings, Corporate Galas & Concerts",
+      description:
+        "Explore Royal Touch Events portfolio: weddings, corporate galas, concerts, product launches, birthdays and bespoke event productions across Nairobi and East Africa.",
+      path: "/portfolio",
+      keywords: "event portfolio Nairobi, wedding gallery Kenya, corporate event photos",
+    }),
   component: Portfolio,
 });
 
