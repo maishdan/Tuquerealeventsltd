@@ -30,8 +30,11 @@ import { Route as DashboardEventsRouteImport } from './routes/dashboard/events'
 import { Route as DashboardBookingsRouteImport } from './routes/dashboard/bookings'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminReceiptsRouteImport } from './routes/admin/receipts'
 import { Route as AdminOperationsRouteImport } from './routes/admin/operations'
 import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
+import { Route as AdminEventsRouteImport } from './routes/admin/events'
+import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminCommandRouteImport } from './routes/admin/command'
 import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
 import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
@@ -144,6 +147,11 @@ const AdminTeamRoute = AdminTeamRouteImport.update({
   path: '/admin/team',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminReceiptsRoute = AdminReceiptsRouteImport.update({
+  id: '/admin/receipts',
+  path: '/admin/receipts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOperationsRoute = AdminOperationsRouteImport.update({
   id: '/admin/operations',
   path: '/admin/operations',
@@ -152,6 +160,16 @@ const AdminOperationsRoute = AdminOperationsRouteImport.update({
 const AdminFinanceRoute = AdminFinanceRouteImport.update({
   id: '/admin/finance',
   path: '/admin/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/admin/events',
+  path: '/admin/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminContactsRoute = AdminContactsRouteImport.update({
+  id: '/admin/contacts',
+  path: '/admin/contacts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminCommandRoute = AdminCommandRouteImport.update({
@@ -205,8 +223,11 @@ export interface FileRoutesByFullPath {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/command': typeof AdminCommandRoute
+  '/admin/contacts': typeof AdminContactsRoute
+  '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/receipts': typeof AdminReceiptsRoute
   '/admin/team': typeof AdminTeamRoute
   '/dashboard': typeof DashboardLayoutRoute
   '/dashboard/bookings': typeof DashboardBookingsRoute
@@ -236,8 +257,11 @@ export interface FileRoutesByTo {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/command': typeof AdminCommandRoute
+  '/admin/contacts': typeof AdminContactsRoute
+  '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/receipts': typeof AdminReceiptsRoute
   '/admin/team': typeof AdminTeamRoute
   '/dashboard': typeof DashboardIndexRoute
   '/dashboard/bookings': typeof DashboardBookingsRoute
@@ -266,8 +290,11 @@ export interface FileRoutesById {
   '/admin/calendar': typeof AdminCalendarRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/command': typeof AdminCommandRoute
+  '/admin/contacts': typeof AdminContactsRoute
+  '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/receipts': typeof AdminReceiptsRoute
   '/admin/team': typeof AdminTeamRoute
   '/dashboard/_layout': typeof DashboardLayoutRoute
   '/dashboard/bookings': typeof DashboardBookingsRoute
@@ -299,8 +326,11 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/categories'
     | '/admin/command'
+    | '/admin/contacts'
+    | '/admin/events'
     | '/admin/finance'
     | '/admin/operations'
+    | '/admin/receipts'
     | '/admin/team'
     | '/dashboard'
     | '/dashboard/bookings'
@@ -330,8 +360,11 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/categories'
     | '/admin/command'
+    | '/admin/contacts'
+    | '/admin/events'
     | '/admin/finance'
     | '/admin/operations'
+    | '/admin/receipts'
     | '/admin/team'
     | '/dashboard'
     | '/dashboard/bookings'
@@ -359,8 +392,11 @@ export interface FileRouteTypes {
     | '/admin/calendar'
     | '/admin/categories'
     | '/admin/command'
+    | '/admin/contacts'
+    | '/admin/events'
     | '/admin/finance'
     | '/admin/operations'
+    | '/admin/receipts'
     | '/admin/team'
     | '/dashboard/_layout'
     | '/dashboard/bookings'
@@ -391,8 +427,11 @@ export interface RootRouteChildren {
   AdminCalendarRoute: typeof AdminCalendarRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCommandRoute: typeof AdminCommandRoute
+  AdminContactsRoute: typeof AdminContactsRoute
+  AdminEventsRoute: typeof AdminEventsRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminOperationsRoute: typeof AdminOperationsRoute
+  AdminReceiptsRoute: typeof AdminReceiptsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   DashboardLayoutRoute: typeof DashboardLayoutRoute
   DashboardBookingsRoute: typeof DashboardBookingsRoute
@@ -552,6 +591,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminTeamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/receipts': {
+      id: '/admin/receipts'
+      path: '/admin/receipts'
+      fullPath: '/admin/receipts'
+      preLoaderRoute: typeof AdminReceiptsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/operations': {
       id: '/admin/operations'
       path: '/admin/operations'
@@ -564,6 +610,20 @@ declare module '@tanstack/react-router' {
       path: '/admin/finance'
       fullPath: '/admin/finance'
       preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/admin/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/contacts': {
+      id: '/admin/contacts'
+      path: '/admin/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof AdminContactsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/command': {
@@ -631,8 +691,11 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCalendarRoute: AdminCalendarRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCommandRoute: AdminCommandRoute,
+  AdminContactsRoute: AdminContactsRoute,
+  AdminEventsRoute: AdminEventsRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminOperationsRoute: AdminOperationsRoute,
+  AdminReceiptsRoute: AdminReceiptsRoute,
   AdminTeamRoute: AdminTeamRoute,
   DashboardLayoutRoute: DashboardLayoutRoute,
   DashboardBookingsRoute: DashboardBookingsRoute,

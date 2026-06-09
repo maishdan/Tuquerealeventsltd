@@ -16,6 +16,13 @@ import {
   ShieldCheck,
   Briefcase,
   History,
+  TrendingUp,
+  DollarSign,
+  Package,
+  Truck,
+  PieChart,
+  LineChart,
+  Activity,
 } from "lucide-react";
 
 export type DashboardNavItem = {
@@ -27,23 +34,33 @@ export type DashboardNavItem = {
 };
 
 export const adminNav: DashboardNavItem[] = [
-  // CORE
-  { to: "/admin", label: "Executive Overview", icon: LayoutDashboard, description: "KPIs & CEO insights", category: "Core" },
-  { to: "/admin/analytics", label: "Sales Analytics", icon: BarChart3, description: "Revenue & growth trends", category: "Core" },
+  // EXECUTIVE & GROWTH
+  { to: "/admin", label: "Executive Overview", icon: LayoutDashboard, category: "Executive" },
+  { to: "/admin/analytics", label: "Revenue Analytics", icon: LineChart, category: "Executive" },
+  { to: "/admin/investor", label: "Investor & Board", icon: PieChart, category: "Executive" },
 
-  // MANAGEMENT
-  { to: "/admin/bookings", label: "Booking Management", icon: ClipboardList, description: "Leads & inquiries", category: "Management" },
-  { to: "/admin/calendar", label: "Event Schedule", icon: Calendar, description: "Operational timeline", category: "Management" },
-  { to: "/admin/team", label: "Staff & Teams", icon: Users, description: "Performance & scheduling", category: "Management" },
+  // EVENT OPERATIONS
+  { to: "/admin/events", label: "All Events", icon: PartyPopper, category: "Operations" },
+  { to: "/admin/command", label: "Event Command Center", icon: Radio, category: "Operations" },
+  { to: "/admin/projects", label: "Project (Work Done)", icon: Briefcase, category: "Operations" },
+  { to: "/admin/calendar", label: "Event Calendar", icon: Calendar, category: "Operations" },
+  { to: "/admin/bookings", label: "Bookings & Orders", icon: ClipboardList, category: "Operations" },
 
-  // LOGISTICS
-  { to: "/admin/command", label: "Command Center", icon: Radio, description: "Live event logistics", category: "Operations" },
-  { to: "/admin/categories", label: "Service Catalog", icon: Layers, description: "Event types & pricing", category: "Operations" },
-  { to: "/admin/finance", label: "Financial Hub", icon: Wallet, description: "Invoices & payroll", category: "Operations" },
+  // LOGISTICS & ASSETS
+  { to: "/admin/team", label: "Staff Management", icon: Users, category: "Logistics" },
+  { to: "/admin/contacts", label: "Contact Inquiries", icon: MessageSquare, category: "Logistics" },
+  { to: "/admin/vehicles", label: "Vehicle Tracking", icon: Truck, category: "Logistics" },
+  { to: "/admin/inventory", label: "Inventory Status", icon: Package, category: "Logistics" },
+  { to: "/admin/vendors", label: "Vendor Management", icon: MessageSquare, category: "Logistics" },
 
-  // ADVANCED
-  { to: "/admin/ai", label: "AI Prediction", icon: Sparkles, description: "Demand forecasting", category: "System" },
-  { to: "/admin/operations", label: "System Settings", icon: Settings2, description: "Portal configuration", category: "System" },
+  // INTELLIGENCE & FINANCE
+  { to: "/admin/ai", label: "AI CEO Insights", icon: Sparkles, category: "Intelligence" },
+  { to: "/admin/finance", label: "Financial Hub", icon: Wallet, category: "Intelligence" },
+  { to: "/admin/receipts", label: "Official Receipts", icon: FileText, category: "Intelligence" },
+  { to: "/admin/forecasting", label: "Success Forecast", icon: TrendingUp, category: "Intelligence" },
+
+  // SYSTEM
+  { to: "/admin/operations", label: "System Settings", icon: Settings2, category: "System" },
 ];
 
 export const customerNav: DashboardNavItem[] = [

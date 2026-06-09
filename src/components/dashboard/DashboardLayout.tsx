@@ -15,6 +15,11 @@ import {
   Moon,
   User,
   Crown,
+  MessageSquare,
+  RotateCcw,
+  FileText,
+  Plus,
+  ShieldCheck,
 } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
@@ -46,22 +51,22 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 
   return (
     <div className={cn(
-      "min-h-screen flex transition-colors duration-300",
+      "min-h-screen flex transition-colors duration-300 font-sans",
       isDark
-        ? "bg-[linear-gradient(135deg,oklch(0.12_0.05_280),oklch(0.16_0.06_275))] text-white"
+        ? "bg-[#0b0e14] text-white"
         : "bg-slate-50 text-slate-900"
     )}>
       {/* Sidebar — desktop */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 border-r transition-all duration-500 ease-in-out transform",
-          isDark ? "glass-strong border-white/10" : "bg-white border-slate-200 shadow-xl",
-          collapsed ? "w-20" : "w-72",
+          "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 border-r transition-all duration-300 ease-in-out transform",
+          isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200 shadow-xl",
+          collapsed ? "w-20" : "w-64",
         )}
       >
         <SidebarInner
           collapsed={collapsed}
-          title={title}
+          title="Admin Dashboard"
           subtitle={subtitle}
           nav={nav}
           role={role}
@@ -80,8 +85,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
       )}>
         <button className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileOpen(false)} aria-label="Close menu" />
         <aside className={cn(
-          "relative h-full w-[min(85vw,300px)] border-r flex flex-col transition-transform duration-500 ease-out shadow-2xl",
-          isDark ? "glass-strong border-white/10" : "bg-white border-slate-200",
+          "relative h-full w-[min(85vw,280px)] border-r flex flex-col transition-transform duration-500 ease-out shadow-2xl",
+          isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200",
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <button
@@ -93,7 +98,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
           </button>
           <SidebarInner
             collapsed={false}
-            title={title}
+            title="Admin Dashboard"
             subtitle={subtitle}
             nav={nav}
             role={role}
@@ -108,16 +113,16 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 
       {/* Main Content Area */}
       <div className={cn(
-        "flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out",
-        collapsed ? "lg:pl-20" : "lg:pl-72"
+        "flex-1 flex flex-col min-w-0 transition-all duration-300",
+        collapsed ? "lg:pl-20" : "lg:pl-64"
       )}>
         <header className={cn(
           "sticky top-0 z-40 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-4 transition-all duration-300",
-          isDark ? "glass border-white/10" : "bg-white/80 backdrop-blur-md border-slate-200 shadow-sm"
+          isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200 shadow-sm"
         )}>
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <button
-              className={cn("p-2 rounded-lg transition", isDark ? "hover:bg-white/5" : "hover:bg-slate-100")}
+              className={cn("p-1.5 rounded transition", isDark ? "hover:bg-white/5" : "hover:bg-slate-100")}
               onClick={() => {
                 if (window.innerWidth >= 1024) {
                   setCollapsed(!collapsed);
@@ -127,111 +132,115 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
               }}
               aria-label="Toggle menu"
             >
-              <Menu size={22} className="text-gold" />
+              <Menu size={20} className="text-white" />
             </button>
 
-            {/* Slide down search bar simulation */}
-            <div className="hidden md:flex items-center flex-1 max-w-md relative group">
-              <Search className="absolute left-3 text-muted-foreground group-focus-within:text-gold transition-colors" size={18} />
-              <input
-                type="text"
-                placeholder="Quick search (Ctrl+K)..."
-                className={cn(
-                  "w-full pl-10 pr-4 py-2.5 rounded-xl text-sm border transition-all outline-none",
-                  isDark
-                    ? "bg-white/5 border-white/10 focus:bg-white/10 focus:border-gold/50"
-                    : "bg-slate-100 border-slate-200 focus:bg-white focus:border-gold/50"
-                )}
-              />
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-8 w-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 overflow-hidden">
+                <img src={eventsLogo} alt="Logo" className="h-full w-full object-cover" />
+              </div>
+              <h1 className="text-white font-semibold text-lg truncate hidden sm:block">Royal Touch Events Admin Dashboard</h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <div className="hidden sm:flex items-center gap-1">
-              <button
-                onClick={() => setIsDark(!isDark)}
-                className={cn("p-2.5 rounded-xl transition", isDark ? "hover:bg-white/5 text-gold" : "hover:bg-slate-100 text-slate-600")}
-                aria-label="Toggle theme"
-              >
-                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
+            <div className="hidden lg:flex items-center gap-4 mr-2">
+              <Home size={18} className="text-gray-400 hover:text-white cursor-pointer" />
+              <button onClick={() => setIsDark(!isDark)}>
+                {isDark ? <Sun size={18} className="text-gray-400 hover:text-white" /> : <Moon size={18} className="text-gray-600" />}
               </button>
-              <button className={cn("relative p-2.5 rounded-xl transition", isDark ? "hover:bg-white/5 text-muted-foreground" : "hover:bg-slate-100 text-slate-600")} aria-label="Notifications">
-                <Bell size={20} />
-                <span className="absolute top-2.5 right-2.5 h-2 w-2 rounded-full bg-red-500 border-2 border-transparent" />
+              <div className="relative">
+                <Bell size={18} className="text-gray-400 hover:text-white cursor-pointer" />
+                <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-red-600 text-[10px] flex items-center justify-center font-bold">50</span>
+              </div>
+              <button
+                onClick={handleSignOut}
+                className="text-gray-400 hover:text-rose-500 transition-colors"
+                title="Logout"
+              >
+                <LogOut size={18} />
               </button>
             </div>
 
-            <div className="h-8 w-px bg-white/10 hidden sm:block mx-1" />
-
-            <div className="relative">
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className={cn(
-                  "flex items-center gap-2 p-1.5 pr-3 rounded-xl transition border",
-                  isDark ? "border-white/10 hover:bg-white/5" : "border-slate-200 hover:bg-slate-50"
-                )}
-              >
-                <div className="h-8 w-8 rounded-full overflow-hidden ring-2 ring-gold/20 shrink-0">
-                  <img src={eventsLogo} alt="" className="h-full w-full object-cover" />
-                </div>
-                <div className="hidden sm:block text-left min-w-0">
-                  <p className="text-sm font-semibold truncate leading-tight">{profile?.full_name?.split(' ')[0] || "Justice"}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">Admin</p>
-                </div>
+            <div className="flex items-center gap-2">
+              <button className="hidden md:flex items-center gap-2 bg-[#1a2b4b] hover:bg-[#253d6b] text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">
+                <FileText size={16} /> Generate Reports
               </button>
-
-              {/* User Dropdown */}
-              {userMenuOpen && (
-                <>
-                  <div className="fixed inset-0 z-[-1]" onClick={() => setUserMenuOpen(false)} />
-                  <div className={cn(
-                    "absolute right-0 mt-2 w-64 rounded-2xl border p-2 shadow-2xl animate-in slide-in-from-top-2 duration-300",
-                    isDark ? "glass-strong border-white/10" : "bg-white border-slate-200"
-                  )}>
-                    <div className="px-4 py-3 border-b border-white/5 mb-1">
-                      <p className="text-xs font-bold text-gold uppercase tracking-[0.2em] mb-1">Authenticated</p>
-                      <p className="text-sm font-semibold truncate">{profile?.full_name || "Administrator"}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{profile?.email}</p>
-                    </div>
-                    <button className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition font-medium", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
-                      <User size={18} className="text-gold" /> Profile Settings
-                    </button>
-                    <button className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition font-medium", isDark ? "hover:bg-white/5" : "hover:bg-slate-50")}>
-                      <Settings size={18} className="text-gold" /> System Config
-                    </button>
-                    <div className="h-px bg-white/5 my-1" />
-                    <button
-                      onClick={handleSignOut}
-                      className={cn("flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-400 transition font-bold", isDark ? "hover:bg-white/10" : "hover:bg-red-50")}
-                    >
-                      <LogOut size={18} /> Sign out of Portal
-                    </button>
-                  </div>
-                </>
-              )}
+              <button className="flex items-center gap-2 bg-[#0061f2] hover:bg-[#0052cc] text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">
+                <Plus size={16} /> Add Event
+              </button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden relative">
+        {/* Search Bar Sub-Header */}
+        <div className="bg-[#0b0e14] border-b border-white/5 px-4 sm:px-6 py-2 flex items-center gap-3">
+          <div className="relative flex-1 max-w-xl group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-white transition-colors" size={16} />
+            <input
+              type="text"
+              placeholder="Search pages..."
+              className="w-full bg-[#1a1d23] border-none text-white pl-10 pr-4 py-1.5 rounded text-sm focus:ring-0 outline-none"
+            />
+          </div>
+          <button className="p-1.5 rounded bg-[#1a1d23] text-gray-400 hover:text-white transition">
+            <RotateCcw size={16} />
+          </button>
+        </div>
+
+        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden relative pb-24 lg:pb-6">
           <div className="max-w-[1600px] mx-auto">
-            {/* Welcome message section */}
-            {role === "admin" && (pathname === "/admin" || pathname === "/admin/") && (
-              <div className="mb-8 animate-in fade-in slide-in-from-left duration-700">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] font-bold uppercase tracking-widest mb-3">
-                  <ShieldCheck size={12} /> Secure Admin Session
-                </div>
-                <h2 className="text-3xl font-display leading-tight">
-                  Welcome back, <span className="text-gradient-gold">{profile?.full_name?.split(' ')[0] || "Justice"}</span>
-                </h2>
-                <p className="text-muted-foreground text-sm max-w-xl">
-                  Your premium events empire is performing exceptionally well today.
-                </p>
-              </div>
-            )}
             {content}
           </div>
+
+          {/* Floating Chat Button */}
+          <div className="fixed bottom-20 lg:bottom-6 right-6 z-50 flex flex-col items-end gap-2 group">
+            <div className="bg-[#0061f2] text-white px-3 py-1 rounded shadow-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+              Speak to us!
+            </div>
+            <button className="h-12 w-12 rounded-full bg-[#0061f2] shadow-2xl flex items-center justify-center text-white hover:scale-105 transition transform relative">
+              <MessageSquare size={24} />
+              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 border-2 border-[#0b0e14] text-[10px] flex items-center justify-center font-bold">1</span>
+            </button>
+          </div>
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#0b0e14]/90 backdrop-blur-lg border-t border-white/5 px-2 py-2 flex items-center justify-around">
+          {nav.slice(0, 5).map((item) => {
+            const active = pathname === item.to || (item.to !== "/admin" && item.to !== "/dashboard" && pathname.startsWith(item.to));
+            const isExactHome = item.to === "/admin" || item.to === "/dashboard";
+            const isActive = isExactHome ? pathname === item.to : active;
+
+            return (
+              <Link
+                key={item.to}
+                to={item.to}
+                className={cn(
+                  "flex flex-col items-center gap-1 p-2 rounded-lg transition-all",
+                  isActive ? "text-gold" : "text-gray-500"
+                )}
+              >
+                <item.icon size={20} />
+                <span className="text-[10px] font-medium">{item.label.split(' ')[0]}</span>
+              </Link>
+            );
+          })}
+          <button
+            onClick={handleSignOut}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg text-rose-500"
+          >
+            <LogOut size={20} />
+            <span className="text-[10px] font-medium">Exit</span>
+          </button>
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex flex-col items-center gap-1 p-2 rounded-lg text-gray-500"
+          >
+            <Menu size={20} />
+            <span className="text-[10px] font-medium">Menu</span>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -264,22 +273,21 @@ function SidebarInner({
 }) {
   return (
     <>
-      <div className={cn("flex items-center gap-3 border-b", isDark ? "border-white/10" : "border-slate-200", collapsed ? "p-4 justify-center" : "px-5 py-5")}>
-        <span className="inline-flex h-10 w-10 shrink-0 rounded-full overflow-hidden ring-1 ring-gold/40">
-          <img src={eventsLogo} alt="" className="h-full w-full object-cover" />
-        </span>
-        {!collapsed && (
-          <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <Crown size={14} className="text-gold shrink-0" />
-              <p className="font-display text-base leading-tight truncate">{title}</p>
-            </div>
-            <p className="text-[10px] uppercase tracking-widest text-muted-foreground truncate">{subtitle}</p>
-          </div>
+      <div className={cn("p-6 flex items-center justify-between", collapsed ? "flex-col gap-4" : "")}>
+        <h2 className={cn("text-white font-bold text-xl tracking-tight transition-all", collapsed ? "text-xs text-center" : "")}>
+          {collapsed ? "RT" : "Royal Touch"}
+        </h2>
+        {onToggle && (
+          <button
+            onClick={onToggle}
+            className="p-1.5 rounded bg-white/5 text-gray-400 hover:text-white transition-colors lg:flex hidden"
+          >
+            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          </button>
         )}
       </div>
 
-      <nav className="flex-1 overflow-y-auto p-3 space-y-6">
+      <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-6">
         {Object.entries(
           nav.reduce((acc, item) => {
             const cat = item.category || "General";
@@ -290,7 +298,7 @@ function SidebarInner({
         ).map(([category, items]) => (
           <div key={category} className="space-y-1">
             {!collapsed && (
-              <p className="px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 mb-2">
+              <p className="px-3 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em] mb-2">
                 {category}
               </p>
             )}
@@ -306,23 +314,21 @@ function SidebarInner({
                   onClick={onNavigate}
                   title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition border group",
-                    collapsed && "justify-center px-2",
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200 group relative",
+                    collapsed && "justify-center",
                     isActive
-                      ? "bg-gold/10 text-gold border-gold/30 shadow-[0_0_15px_rgba(212,175,55,0.1)]"
-                      : isDark
-                        ? "text-foreground/80 border-transparent hover:bg-white/5 hover:text-foreground"
-                        : "text-slate-600 border-transparent hover:bg-slate-100 hover:text-slate-900",
+                      ? "bg-gold text-black font-bold shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                      : "text-gray-400 hover:bg-white/5 hover:text-white",
                   )}
                 >
                   <item.icon size={18} className={cn("shrink-0 transition-transform duration-300", isActive ? "scale-110" : "group-hover:scale-110")} />
                   {!collapsed && (
-                    <span className="truncate font-medium">
+                    <span className="truncate flex-1">
                       {item.label}
-                      {item.description && (
-                        <span className="block text-[10px] text-muted-foreground font-normal truncate group-hover:text-muted-foreground/80 transition-colors">{item.description}</span>
-                      )}
                     </span>
+                  )}
+                  {isActive && !collapsed && (
+                    <div className="absolute right-2 h-1.5 w-1.5 rounded-full bg-black/40" />
                   )}
                 </Link>
               );
@@ -331,41 +337,24 @@ function SidebarInner({
         ))}
       </nav>
 
-      <div className={cn("p-3 border-t space-y-1", isDark ? "border-white/10" : "border-slate-200")}>
-        {onToggle && (
-          <button
-            onClick={onToggle}
-            className={cn(
-              "hidden lg:flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
-              isDark ? "text-muted-foreground hover:bg-white/5 hover:text-foreground" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
-              collapsed && "justify-center px-2",
-            )}
-          >
-            {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-            {!collapsed && <span>Collapse menu</span>}
-          </button>
+      <div className="p-4 border-t border-white/5 space-y-2">
+        {!collapsed && userLabel && (
+          <div className="px-3 py-2 rounded-lg bg-white/5 border border-white/5 mb-2">
+            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Active Admin</p>
+            <p className="text-xs text-white truncate font-medium">{userLabel}</p>
+          </div>
         )}
         <button
           type="button"
-          onClick={() => {
-            onNavigate?.();
-            onSignOut();
-          }}
+          onClick={onSignOut}
           className={cn(
-            "flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition",
-            isDark ? "text-muted-foreground hover:bg-white/5 hover:text-foreground" : "text-slate-500 hover:bg-slate-100 hover:text-slate-900",
-            collapsed && "justify-center px-2",
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-gray-400 hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-200",
+            collapsed && "justify-center",
           )}
         >
           <LogOut size={18} />
-          {!collapsed && <span>Sign out</span>}
+          {!collapsed && <span>Logout</span>}
         </button>
-        {!collapsed && userLabel && (
-          <div className="px-3 py-2 mt-2 rounded-xl bg-gold/5 border border-gold/10">
-            <p className="text-[10px] uppercase tracking-widest text-gold font-bold">Logged in as</p>
-            <p className="text-xs text-muted-foreground truncate">{userLabel}</p>
-          </div>
-        )}
       </div>
     </>
   );
