@@ -32,4 +32,4 @@ Premium event management and planning solutions based in Nairobi, Kenya. We plan
 *   **Location:** Nairobi, Kenya
 
 ---
-*Engineered by **[Daniwest Tech Ltd](https://daniwesttechnologies.vercel.app)**. Securing the digital future, one innovation at a time.*
+*Engineered by **[Daniwest Tech Ltd](https://daniwesttechnologies.vercel.app) 2026**. Securing the digital future, one innovation at a time.*
