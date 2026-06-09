@@ -167,10 +167,10 @@ function Home() {
         <SectionHeader eyebrow="Kind words" title="Trusted by couples & brands alike." center />
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           {testimonials.map((t) => (
-            <figure key={t.name} className="rounded-2xl border border-border bg-card/60 p-7">
+            <figure key={t.name} className="glass-strong tech-glow rounded-2xl p-7">
               <Quote className="text-gold" size={22} />
               <blockquote className="mt-5 text-base leading-relaxed text-foreground/90">"{t.quote}"</blockquote>
-              <figcaption className="mt-6 pt-5 border-t border-border">
+              <figcaption className="mt-6 pt-5 border-t border-white/10">
                 <div className="font-display text-lg">{t.name}</div>
                 <div className="text-xs text-muted-foreground uppercase tracking-widest">{t.role}</div>
                 <div className="mt-2 flex gap-0.5 text-gold">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} fill="currentColor" />)}</div>
