@@ -108,7 +108,21 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen flex flex-col bg-radial-indigo">
+      <div className="relative min-h-screen flex flex-col">
+        {/* Site-wide background */}
+        <div aria-hidden className="fixed inset-0 -z-10">
+          <img
+            src="/__l5e/assets-v1/006b9c84-58fa-4a80-8783-6ae996a274d4/royal-touch-logo.jpg"
+            alt=""
+            className="hidden"
+          />
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/src/assets/bg-venue.jpg')" }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.88))]" />
+          <div className="absolute inset-0 bg-radial-indigo opacity-50" />
+        </div>
         <Header />
         <main className="flex-1">
           <Outlet />
