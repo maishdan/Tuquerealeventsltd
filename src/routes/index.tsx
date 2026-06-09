@@ -104,13 +104,30 @@ function Home() {
         </div>
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s) => (
-            <div key={s.title} className="group rounded-2xl border border-border bg-card/60 p-6 hover:border-gold/50 transition">
-              <Calendar className="text-gold" size={22} />
-              <h3 className="mt-5 font-display text-2xl">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
-              <Link to="/services" className="mt-5 inline-flex items-center gap-1 text-xs uppercase tracking-widest text-gold opacity-0 group-hover:opacity-100 transition">
-                Explore <ArrowRight size={12} />
-              </Link>
+            <div key={s.title} className="flip-tile h-72 rounded-2xl tech-glow">
+              <div className="flip-inner rounded-2xl">
+                {/* Front */}
+                <div className="flip-face glass-strong rounded-2xl p-6 flex flex-col justify-end">
+                  <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                  <div className="relative">
+                    <Calendar className="text-gold" size={20} />
+                    <h3 className="mt-3 font-display text-2xl">{s.title}</h3>
+                    <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Hover to explore</p>
+                  </div>
+                </div>
+                {/* Back */}
+                <div className="flip-face flip-back glass-strong glass-gold rounded-2xl p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-2xl text-gradient-gold">{s.title}</h3>
+                    <p className="mt-3 text-sm text-foreground/85">{s.desc}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">{s.detail}</p>
+                  </div>
+                  <Link to="/services" className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-gold">
+                    Explore <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
