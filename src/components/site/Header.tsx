@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import logoAsset from "../../assets/royal-touch-logo.jpg.asset.json";
+import eventsLogo from "../../assets/events-logo.jpeg";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -19,7 +19,7 @@ export function Header() {
       <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3">
           <span className="relative inline-flex h-12 w-12 rounded-full overflow-hidden ring-1 ring-gold/40 shadow-[0_0_24px_oklch(0.82_0.13_85/0.35)]">
-            <img src={logoAsset.url} alt="Royal Touch Events" className="h-full w-full object-cover" />
+            <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
           </span>
           <span className="font-display text-xl md:text-2xl leading-tight">
             Royal <span className="text-gradient-gold">Touch</span> Events

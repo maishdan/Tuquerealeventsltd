@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
-import logoAsset from "../../assets/royal-touch-logo.jpg.asset.json";
+import eventsLogo from "../../assets/events-logo.jpeg";
 
 export function Footer() {
   return (
@@ -9,7 +9,7 @@ export function Footer() {
         <div>
           <div className="flex items-center gap-3">
             <span className="inline-flex h-12 w-12 rounded-full overflow-hidden ring-1 ring-gold/40">
-              <img src={logoAsset.url} alt="Royal Touch Events" className="h-full w-full object-cover" />
+              <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
             </span>
             <div className="font-display text-xl">Royal <span className="text-gradient-gold">Touch</span> Events</div>
           </div>
