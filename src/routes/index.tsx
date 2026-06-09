@@ -22,10 +22,10 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { title: "Weddings", desc: "Timeless ceremonies and luxurious receptions." },
-  { title: "Corporate Events", desc: "Galas, conferences, and brand experiences." },
-  { title: "Concerts", desc: "Full-scale production, stage, sound & lights." },
-  { title: "Product Launches", desc: "High-impact reveals worth talking about." },
+  { title: "Weddings", desc: "Timeless ceremonies and luxurious receptions.", img: wedding, detail: "Full planning, decor, MC, photography, catering." },
+  { title: "Corporate Events", desc: "Galas, conferences, and brand experiences.", img: corporate, detail: "AV, staging, branding and flawless logistics." },
+  { title: "Concerts", desc: "Full-scale production, stage, sound & lights.", img: concert, detail: "Rigging, line array sound, intelligent lighting." },
+  { title: "Private Parties", desc: "Birthdays, anniversaries, intimate celebrations.", img: decor, detail: "Themes, decor, entertainment & catering." },
 ];
 
 const why = [
