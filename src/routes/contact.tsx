@@ -49,14 +49,14 @@ function Contact() {
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-6 pt-24 pb-10">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-10">
         <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">Contact</p>
-        <h1 className="font-display text-5xl md:text-7xl leading-[1] max-w-3xl">
+        <h1 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[1] max-w-3xl">
           Let's start a <span className="text-gradient-gold">conversation</span>.
         </h1>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24 grid lg:grid-cols-2 gap-10">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24 grid lg:grid-cols-2 gap-10">
         <div className="space-y-5">
           <ContactRow icon={Phone} label="Call us" value="+254 795 365 334" href="tel:+254795365334" />
           <ContactRow icon={MessageCircle} label="WhatsApp" value="Chat with a planner" href={`https://wa.me/${phone}`} accent />

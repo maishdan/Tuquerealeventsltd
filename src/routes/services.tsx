@@ -32,9 +32,9 @@ const services = [
 function Services() {
   return (
     <>
-      <section className="mx-auto max-w-7xl px-6 pt-24 pb-12">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-12">
         <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">Services</p>
-        <h1 className="font-display text-5xl md:text-7xl leading-[1] max-w-4xl">
+        <h1 className="font-display text-4xl sm:text-5xl md:text-7xl leading-[1] max-w-4xl">
           One studio. <span className="text-gradient-gold">Every</span> moving piece.
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
@@ -42,7 +42,7 @@ function Services() {
         </p>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         {services.map((s) => (
           <div key={s.title} className="group rounded-2xl border border-border bg-card/60 p-7 hover:border-gold/50 transition">
             <div className="h-11 w-11 rounded-full bg-primary/15 text-gold flex items-center justify-center">
@@ -54,7 +54,7 @@ function Services() {
         ))}
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         <div className="rounded-3xl border border-gold/30 bg-card/60 p-10 md:p-16 text-center">
           <SectionHeader eyebrow="Custom packages" title={<>Tell us about your event — we'll <span className="text-gradient-gold">tailor</span> the rest.</>} center />
           <div className="mt-8 flex flex-wrap justify-center gap-3">

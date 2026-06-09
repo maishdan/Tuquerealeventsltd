@@ -41,7 +41,7 @@ function Portfolio() {
 
   return (
     <>
-      <section className="mx-auto max-w-7xl px-6 pt-24 pb-10">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-10">
         <SectionHeader eyebrow="Portfolio" title={<>A few moments we're <span className="text-gradient-gold">proud</span> of.</>} />
         <div className="mt-10 flex flex-wrap gap-2">
           {categories.map((c) => (
@@ -58,7 +58,7 @@ function Portfolio() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((item, i) => (
             <figure key={`${item.title}-${i}`} className="group relative overflow-hidden rounded-2xl border border-border">

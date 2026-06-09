@@ -6,7 +6,7 @@ import eventsLogo from "../../assets/events-logo.jpeg";
 export function Footer() {
   return (
     <footer className="mt-24 glass border-t border-white/10">
-      <div className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-4">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 grid gap-12 md:grid-cols-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="inline-flex h-12 w-12 rounded-full overflow-hidden ring-1 ring-gold/40">
@@ -52,7 +52,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-6 text-xs text-muted-foreground flex flex-col md:flex-row gap-3 justify-between items-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 text-xs text-muted-foreground flex flex-col md:flex-row gap-3 justify-between items-center text-center md:text-left">
           <p>© {new Date().getFullYear()} Royal Touch Events. All rights reserved.</p>
           <nav className="flex items-center gap-5">
             <Link to="/terms" className="hover:text-gold">Terms &amp; Conditions</Link>
@@ -60,13 +60,12 @@ export function Footer() {
             <Link to="/copyright" className="hover:text-gold">Copyright</Link>
           </nav>
         </div>
-        <div className="border-t border-white/5">
-          <p className="mx-auto max-w-7xl px-6 py-3 text-[10px] leading-relaxed text-muted-foreground/70 italic flex items-center justify-center gap-1.5 text-center">
+        <div className="border-t border-white/10 bg-white/[0.03]">
+          <p className="mx-auto max-w-7xl px-4 sm:px-6 py-4 text-xs sm:text-sm leading-relaxed text-muted-foreground flex flex-wrap items-center justify-center gap-2 text-center">
             <img
               src={daniwestIcon}
-              alt=""
-              aria-hidden
-              className="h-3.5 w-3.5 shrink-0 object-contain opacity-80"
+              alt="Daniwest Tech Ltd"
+              className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 object-contain"
             />
             <span>
               Engineered by{" "}
@@ -74,11 +73,11 @@ export function Footer() {
                 href="https://daniwesttechnologies.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="italic text-muted-foreground/90 hover:text-gold transition-colors"
+                className="font-medium text-gold hover:text-gold-soft underline underline-offset-2 transition-colors"
               >
                 Daniwest Tech Ltd
               </a>{" "}
-              2026. Securing the digital future, one innovation at a time.
+              © 2026. Securing the digital future, one innovation at a time.
             </span>
           </p>
         </div>

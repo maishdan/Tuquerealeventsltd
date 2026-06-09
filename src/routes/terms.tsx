@@ -14,7 +14,7 @@ export const Route = createFileRoute("/terms")({
 
 function TermsPage() {
   return (
-    <section className="mx-auto max-w-3xl px-6 py-24">
+    <section className="mx-auto max-w-3xl px-4 sm:px-6 py-24">
       <div className="glass-strong rounded-2xl p-10">
         <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">Legal</p>
         <h1 className="font-display text-4xl md:text-5xl">Terms &amp; Conditions</h1>

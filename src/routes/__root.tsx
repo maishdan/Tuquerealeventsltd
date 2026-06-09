@@ -18,6 +18,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import bgVenue from "../assets/bg-venue.jpg";
+import homeBackground from "../assets/background.png";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
@@ -110,21 +111,31 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative min-h-screen flex flex-col">
-        {/* Site-wide background (other pages); homepage uses its own background */}
-        {!isHome && (
-          <div aria-hidden className="fixed inset-0 -z-10">
-            <img src={bgVenue} alt="" className="absolute inset-0 h-full w-full object-cover" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.92))]" />
-            <div className="absolute inset-0 bg-radial-indigo opacity-40" />
-          </div>
-        )}
-        <Header />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-        <Footer />
-        <WhatsAppButton />
+      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+        {/* Site-wide background — fixed layer above body, below content */}
+        <div aria-hidden className="fixed inset-0 z-0 pointer-events-none">
+          <img
+            src={isHome ? homeBackground : bgVenue}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-center"
+          />
+          <div
+            className={`absolute inset-0 ${
+              isHome
+                ? "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.15),oklch(0.10_0.04_280/0.45))]"
+                : "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.35),oklch(0.10_0.04_280/0.65))]"
+            }`}
+          />
+        </div>
+
+        <div className="relative z-10 flex flex-col flex-1 min-h-screen">
+          <Header />
+          <main className="flex-1 min-w-0 pt-16 sm:pt-20">
+            <Outlet />
+          </main>
+          <Footer />
+          <WhatsAppButton />
+        </div>
       </div>
     </QueryClientProvider>
   );

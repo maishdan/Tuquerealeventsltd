@@ -68,7 +68,7 @@ function Booking() {
 
   if (submitted) {
     return (
-      <section className="mx-auto max-w-2xl px-6 py-32 text-center">
+      <section className="mx-auto max-w-2xl px-4 sm:px-6 py-32 text-center">
         <div className="mx-auto h-16 w-16 rounded-full bg-gold/20 text-gold flex items-center justify-center">
           <Check size={28} />
         </div>
@@ -80,15 +80,15 @@ function Booking() {
 
   return (
     <>
-      <section className="mx-auto max-w-4xl px-6 pt-24 pb-10">
+      <section className="mx-auto max-w-4xl px-4 sm:px-6 pt-24 pb-10">
         <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">Book your event</p>
-        <h1 className="font-display text-5xl md:text-6xl leading-[1.05]">
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl leading-[1.05]">
           Tell us your <span className="text-gradient-gold">vision</span>.
         </h1>
         <p className="mt-4 text-muted-foreground text-lg">Share a few details and we'll respond with a tailored quote.</p>
       </section>
 
-      <section className="mx-auto max-w-4xl px-6 pb-24">
+      <section className="mx-auto max-w-4xl px-4 sm:px-6 pb-24">
         <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-card/60 p-6 md:p-10 space-y-6">
           <div className="grid md:grid-cols-2 gap-5">
             <Field label="Full Name" name="name" error={errors.name} />

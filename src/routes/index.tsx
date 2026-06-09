@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Calendar, Sparkles, Award, HeartHandshake, Star, Quote } from "lucide-react";
-import homeBackground from "../assets/background.png";
+import { ArrowRight, Calendar, Sparkles, Award, HeartHandshake, Quote } from "lucide-react";
 import heroImg from "../assets/hero-event.jpg";
 import wedding from "../assets/gallery-wedding.jpg";
 import corporate from "../assets/gallery-corporate.jpg";
@@ -35,36 +34,21 @@ const why = [
   { icon: Sparkles, title: "Premium Craft", desc: "Curated decor, lighting & entertainment partners." },
 ];
 
-const testimonials = [
-  { name: "Amara & Joel", role: "Wedding, 2025", quote: "They turned our vision into something more magical than we imagined. Flawless from rehearsal to send-off." },
-  { name: "Equity Bank", role: "Annual Gala", quote: "Production value rivalled anything we've seen abroad. Our executives still talk about the show." },
-  { name: "Sauti Sol", role: "Concert Tour", quote: "The crew runs like clockwork. Lighting and stage design were on another level." },
-];
+const testimonialSlots = [0, 1, 2];
 
 function Home() {
   return (
-    <div className="relative">
-      {/* Homepage background — clear image with light overlay for readable content */}
-      <div aria-hidden className="fixed inset-0 -z-10 pointer-events-none">
-        <img
-          src={homeBackground}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover object-center"
-        />
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.45),oklch(0.10_0.04_280/0.65))]" />
-        <div className="absolute inset-0 bg-radial-indigo opacity-15" />
-      </div>
-
+    <div className="relative min-w-0">
       {/* HERO */}
       <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <img src={heroImg} alt="Elegant event ballroom" width={1920} height={1080} className="h-full w-full object-cover opacity-35" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/25 via-background/45 to-background/70" />
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <img src={heroImg} alt="Elegant event ballroom" width={1920} height={1080} className="h-full w-full object-cover opacity-20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/30 to-background/55" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 pt-28 pb-32 md:pt-40 md:pb-44">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-24 sm:pt-28 sm:pb-32 md:pt-40 md:pb-44">
           <p className="text-xs uppercase tracking-[0.3em] text-gold mb-6">Premium Event Management</p>
-          <h1 className="font-display text-5xl md:text-7xl lg:text-8xl leading-[0.98] max-w-4xl">
+          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.98] max-w-4xl">
             Moments that <span className="text-gradient-gold">linger</span>, long after the lights dim.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
@@ -91,7 +75,7 @@ function Home() {
       </section>
 
       {/* INTRO */}
-      <section className="mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
         <div>
           <SectionHeader
             eyebrow="Who we are"
@@ -109,7 +93,7 @@ function Home() {
       </section>
 
       {/* SERVICES */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
         <div className="flex items-end justify-between flex-wrap gap-6">
           <SectionHeader eyebrow="What we do" title="Services tailored to your vision." />
           <Link to="/services" className="text-sm uppercase tracking-widest text-gold story-link">All Services</Link>
@@ -147,10 +131,10 @@ function Home() {
 
       {/* WHY US */}
       <section className="border-y border-white/10">
-        <div className="mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <img src={concert} alt="" loading="lazy" className="rounded-2xl aspect-[5/6] object-cover" />
-            <div className="absolute -bottom-6 -right-6 hidden md:block rounded-2xl bg-background border border-gold/40 px-6 py-5">
+            <div className="absolute -bottom-4 -right-2 sm:-bottom-6 sm:-right-6 hidden sm:block rounded-2xl bg-background border border-gold/40 px-4 sm:px-6 py-4 sm:py-5">
               <div className="font-display text-3xl text-gradient-gold">Award<br />Winning</div>
               <p className="text-xs text-muted-foreground mt-1">EAEA 2024 Honoree</p>
             </div>
@@ -175,31 +159,29 @@ function Home() {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
         <SectionHeader eyebrow="Kind words" title="Trusted by couples & brands alike." center />
         <div className="mt-14 grid md:grid-cols-3 gap-5">
-          {testimonials.map((t) => (
-            <figure key={t.name} className="glass-strong tech-glow rounded-2xl p-7 border border-white/15 shadow-lg shadow-black/25">
-              <Quote className="text-gold" size={22} />
-              <blockquote className="mt-5 text-base leading-relaxed text-foreground/90">"{t.quote}"</blockquote>
-              <figcaption className="mt-6 pt-5 border-t border-white/10">
-                <div className="font-display text-lg">{t.name}</div>
-                <div className="text-xs text-muted-foreground uppercase tracking-widest">{t.role}</div>
-                <div className="mt-2 flex gap-0.5 text-gold">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} fill="currentColor" />)}</div>
-              </figcaption>
+          {testimonialSlots.map((slot) => (
+            <figure
+              key={slot}
+              aria-label="Testimonial placeholder"
+              className="glass-strong rounded-2xl p-7 border border-white/15 shadow-lg shadow-black/25 min-h-48 flex items-start"
+            >
+              <Quote className="text-gold" size={28} />
             </figure>
           ))}
         </div>
       </section>
 
       {/* CTA */}
-      <section className="mx-auto max-w-7xl px-6 pb-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
         <div className="relative overflow-hidden rounded-3xl glass-strong glass-gold p-10 md:p-16 text-center">
           <div className="absolute inset-0 -z-10 opacity-25">
             <img src={corporate} alt="" loading="lazy" className="h-full w-full object-cover" />
           </div>
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Ready when you are</p>
-          <h2 className="mt-4 font-display text-4xl md:text-6xl">Let's plan something <span className="text-gradient-gold">remarkable</span>.</h2>
+          <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-6xl">Let's plan something <span className="text-gradient-gold">remarkable</span>.</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link to="/booking" className="rounded-full bg-gold text-background px-7 py-3.5 text-sm font-semibold hover:opacity-90 transition">Book Your Event</Link>
             <Link to="/contact" className="rounded-full glass border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
