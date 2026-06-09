@@ -3,6 +3,7 @@ import "@fontsource/work-sans/300.css";
 import "@fontsource/work-sans/400.css";
 import "@fontsource/work-sans/500.css";
 import "@fontsource/work-sans/600.css";
+import "../styles.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -15,7 +16,6 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 
-import appCss from "../styles.css?url";
 import bgVenue from "../assets/bg-venue.jpg";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "../components/site/Header";
@@ -71,7 +71,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:description", content: "We plan. You celebrate. We make it memorable." },
       { name: "twitter:description", content: "We plan. You celebrate. We make it memorable." },
     ],
-    links: [{ rel: "stylesheet", href: appCss }],
     scripts: [{
       type: "application/ld+json",
       children: JSON.stringify({
@@ -112,10 +111,7 @@ function RootComponent() {
       <div className="relative min-h-screen flex flex-col">
         {/* Site-wide background */}
         <div aria-hidden className="fixed inset-0 -z-10">
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${bgVenue})` }}
-          />
+          <img src={bgVenue} alt="" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.92))]" />
           <div className="absolute inset-0 bg-radial-indigo opacity-40" />
         </div>
