@@ -6,9 +6,9 @@ import { Phone, Mail, MapPin, MessageCircle, Check } from "lucide-react";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact Us — Lumiere Events" },
-      { name: "description", content: "Reach Lumiere Events by phone, email, WhatsApp, or visit our Nairobi studio." },
-      { property: "og:title", content: "Contact Us — Lumiere Events" },
+      { title: "Contact Us — Royal Touch Events" },
+      { name: "description", content: "Reach Royal Touch Events by phone, email, WhatsApp, or visit our Nairobi studio." },
+      { property: "og:title", content: "Contact Us — Royal Touch Events" },
       { property: "og:description", content: "Get in touch with our team." },
       { property: "og:url", content: "/contact" },
     ],
@@ -60,12 +60,12 @@ function Contact() {
         <div className="space-y-5">
           <ContactRow icon={Phone} label="Call us" value="+254 701 460 110" href="tel:+254701460110" />
           <ContactRow icon={MessageCircle} label="WhatsApp" value="Chat with a planner" href={`https://wa.me/${phone}`} accent />
-          <ContactRow icon={Mail} label="Email" value="hello@lumiereevents.co" href="mailto:hello@lumiereevents.co" />
+          <ContactRow icon={Mail} label="Email" value="hello@royaltouchevents.co.ke" href="mailto:hello@royaltouchevents.co.ke" />
           <ContactRow icon={MapPin} label="Studio" value="Westlands Square, Nairobi, Kenya" />
 
           <div className="rounded-2xl overflow-hidden border border-border aspect-video">
             <iframe
-              title="Lumiere Events Location"
+              title="Royal Touch Events Location"
               src="https://www.google.com/maps?q=Westlands%20Square%20Nairobi&output=embed"
               loading="lazy"
               className="w-full h-full"

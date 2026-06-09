@@ -16,6 +16,7 @@ import {
 import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
+import bgVenue from "../assets/bg-venue.jpg";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
@@ -60,17 +61,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lumiere Events — Premium Event Planning & Management" },
-      { name: "description", content: "Award-winning event planners crafting weddings, corporate events, concerts and launches with premium production." },
-      { property: "og:site_name", content: "Lumiere Events" },
+      { title: "Royal Touch Events — Premium Event Planning Nairobi" },
+      { name: "description", content: "Royal Touch Events plans weddings, corporate events, concerts and private parties in Nairobi — we plan, you celebrate, we make it memorable." },
+      { property: "og:site_name", content: "Royal Touch Events" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Lumiere Events — Premium Event Planning & Management" },
-      { name: "twitter:title", content: "Lumiere Events — Premium Event Planning & Management" },
-      { property: "og:description", content: "Award-winning event planners crafting weddings, corporate events, concerts and launches with premium production." },
-      { name: "twitter:description", content: "Award-winning event planners crafting weddings, corporate events, concerts and launches with premium production." },
-      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8359fcfc-78b5-4b1d-b57a-ebbe19f3e9ef" },
-      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/8359fcfc-78b5-4b1d-b57a-ebbe19f3e9ef" },
+      { property: "og:title", content: "Royal Touch Events — Premium Event Planning Nairobi" },
+      { name: "twitter:title", content: "Royal Touch Events — Premium Event Planning Nairobi" },
+      { property: "og:description", content: "We plan. You celebrate. We make it memorable." },
+      { name: "twitter:description", content: "We plan. You celebrate. We make it memorable." },
     ],
     links: [{ rel: "stylesheet", href: appCss }],
     scripts: [{
@@ -78,8 +77,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       children: JSON.stringify({
         "@context": "https://schema.org",
         "@type": "Organization",
-        name: "Lumiere Events",
+        name: "Royal Touch Events",
         telephone: "+254701460110",
+        address: { "@type": "PostalAddress", addressLocality: "Nairobi", addressCountry: "KE" },
         url: "/",
       }),
     }],
@@ -109,7 +109,16 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen flex flex-col bg-radial-indigo">
+      <div className="relative min-h-screen flex flex-col">
+        {/* Site-wide background */}
+        <div aria-hidden className="fixed inset-0 -z-10">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: `url(${bgVenue})` }}
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.92))]" />
+          <div className="absolute inset-0 bg-radial-indigo opacity-40" />
+        </div>
         <Header />
         <main className="flex-1">
           <Outlet />

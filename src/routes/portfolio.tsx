@@ -11,9 +11,9 @@ import decor from "../assets/gallery-decor.jpg";
 export const Route = createFileRoute("/portfolio")({
   head: () => ({
     meta: [
-      { title: "Portfolio — Lumiere Events" },
+      { title: "Portfolio — Royal Touch Events" },
       { name: "description", content: "Selected work — weddings, corporate galas, concerts, launches and bespoke productions." },
-      { property: "og:title", content: "Portfolio — Lumiere Events" },
+      { property: "og:title", content: "Portfolio — Royal Touch Events" },
       { property: "og:description", content: "A gallery of our work." },
       { property: "og:url", content: "/portfolio" },
     ],

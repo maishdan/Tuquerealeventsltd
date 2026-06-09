@@ -10,9 +10,9 @@ import { SectionHeader } from "../components/site/Section";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumiere Events — Premium Event Planning in Nairobi" },
+      { title: "Royal Touch Events — Premium Event Planning in Nairobi" },
       { name: "description", content: "Weddings, corporate galas, concerts and launches — beautifully produced end to end." },
-      { property: "og:title", content: "Lumiere Events — Premium Event Planning" },
+      { property: "og:title", content: "Royal Touch Events — Premium Event Planning" },
       { property: "og:description", content: "Beautifully produced events end to end." },
       { property: "og:url", content: "/" },
     ],
@@ -22,10 +22,10 @@ export const Route = createFileRoute("/")({
 });
 
 const services = [
-  { title: "Weddings", desc: "Timeless ceremonies and luxurious receptions." },
-  { title: "Corporate Events", desc: "Galas, conferences, and brand experiences." },
-  { title: "Concerts", desc: "Full-scale production, stage, sound & lights." },
-  { title: "Product Launches", desc: "High-impact reveals worth talking about." },
+  { title: "Weddings", desc: "Timeless ceremonies and luxurious receptions.", img: wedding, detail: "Full planning, decor, MC, photography, catering." },
+  { title: "Corporate Events", desc: "Galas, conferences, and brand experiences.", img: corporate, detail: "AV, staging, branding and flawless logistics." },
+  { title: "Concerts", desc: "Full-scale production, stage, sound & lights.", img: concert, detail: "Rigging, line array sound, intelligent lighting." },
+  { title: "Private Parties", desc: "Birthdays, anniversaries, intimate celebrations.", img: decor, detail: "Themes, decor, entertainment & catering." },
 ];
 
 const why = [
@@ -56,7 +56,7 @@ function Home() {
             Moments that <span className="text-gradient-gold">linger</span>, long after the lights dim.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            From candle-lit weddings to flagship brand launches — Lumiere designs and produces unforgettable events with cinematic detail.
+            From candle-lit weddings to flagship brand launches — Royal Touch designs and produces unforgettable events with cinematic detail.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link to="/booking" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
@@ -84,7 +84,7 @@ function Home() {
           <SectionHeader
             eyebrow="Who we are"
             title={<>Designers of <em className="text-gradient-gold not-italic">defining</em> moments.</>}
-            subtitle="Lumiere Events is a full-service event house. We blend storytelling, design, and flawless logistics so you can be fully present at your own event."
+            subtitle="Royal Touch Events is a full-service event house. We blend storytelling, design, and flawless logistics so you can be fully present at your own event."
           />
           <Link to="/about" className="mt-8 inline-flex items-center gap-2 text-gold story-link text-sm uppercase tracking-widest">
             Our story <ArrowRight size={14} />
@@ -104,20 +104,37 @@ function Home() {
         </div>
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s) => (
-            <div key={s.title} className="group rounded-2xl border border-border bg-card/60 p-6 hover:border-gold/50 transition">
-              <Calendar className="text-gold" size={22} />
-              <h3 className="mt-5 font-display text-2xl">{s.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
-              <Link to="/services" className="mt-5 inline-flex items-center gap-1 text-xs uppercase tracking-widest text-gold opacity-0 group-hover:opacity-100 transition">
-                Explore <ArrowRight size={12} />
-              </Link>
+            <div key={s.title} className="flip-tile h-72 rounded-2xl tech-glow">
+              <div className="flip-inner rounded-2xl">
+                {/* Front */}
+                <div className="flip-face glass-strong rounded-2xl p-6 flex flex-col justify-end">
+                  <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                  <div className="relative">
+                    <Calendar className="text-gold" size={20} />
+                    <h3 className="mt-3 font-display text-2xl">{s.title}</h3>
+                    <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Hover to explore</p>
+                  </div>
+                </div>
+                {/* Back */}
+                <div className="flip-face flip-back glass-strong glass-gold rounded-2xl p-6 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-display text-2xl text-gradient-gold">{s.title}</h3>
+                    <p className="mt-3 text-sm text-foreground/85">{s.desc}</p>
+                    <p className="mt-3 text-xs text-muted-foreground">{s.detail}</p>
+                  </div>
+                  <Link to="/services" className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-gold">
+                    Explore <ArrowRight size={12} />
+                  </Link>
+                </div>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* WHY US */}
-      <section className="border-y border-border bg-card/40">
+      <section className="border-y border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
           <div className="relative">
             <img src={concert} alt="" loading="lazy" className="rounded-2xl aspect-[5/6] object-cover" />
@@ -150,10 +167,10 @@ function Home() {
         <SectionHeader eyebrow="Kind words" title="Trusted by couples & brands alike." center />
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           {testimonials.map((t) => (
-            <figure key={t.name} className="rounded-2xl border border-border bg-card/60 p-7">
+            <figure key={t.name} className="glass-strong tech-glow rounded-2xl p-7">
               <Quote className="text-gold" size={22} />
               <blockquote className="mt-5 text-base leading-relaxed text-foreground/90">"{t.quote}"</blockquote>
-              <figcaption className="mt-6 pt-5 border-t border-border">
+              <figcaption className="mt-6 pt-5 border-t border-white/10">
                 <div className="font-display text-lg">{t.name}</div>
                 <div className="text-xs text-muted-foreground uppercase tracking-widest">{t.role}</div>
                 <div className="mt-2 flex gap-0.5 text-gold">{Array.from({ length: 5 }).map((_, i) => <Star key={i} size={12} fill="currentColor" />)}</div>
@@ -165,15 +182,15 @@ function Home() {
 
       {/* CTA */}
       <section className="mx-auto max-w-7xl px-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-card/60 p-10 md:p-16 text-center">
-          <div className="absolute inset-0 -z-10 opacity-30">
+        <div className="relative overflow-hidden rounded-3xl glass-strong glass-gold p-10 md:p-16 text-center">
+          <div className="absolute inset-0 -z-10 opacity-25">
             <img src={corporate} alt="" loading="lazy" className="h-full w-full object-cover" />
           </div>
           <p className="text-xs uppercase tracking-[0.3em] text-gold">Ready when you are</p>
           <h2 className="mt-4 font-display text-4xl md:text-6xl">Let's plan something <span className="text-gradient-gold">remarkable</span>.</h2>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/booking" className="rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground">Book Your Event</Link>
-            <Link to="/contact" className="rounded-full border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
+            <Link to="/booking" className="rounded-full bg-gold text-background px-7 py-3.5 text-sm font-semibold hover:opacity-90 transition">Book Your Event</Link>
+            <Link to="/contact" className="rounded-full glass border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
           </div>
         </div>
       </section>

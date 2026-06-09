@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
+import logoAsset from "../../assets/royal-touch-logo.jpg.asset.json";
 
 const nav = [
   { to: "/", label: "Home" },
@@ -14,11 +15,15 @@ const nav = [
 export function Header() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 backdrop-blur-md bg-background/70 border-b border-border">
-      <div className="mx-auto max-w-7xl px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <span className="inline-block h-2.5 w-2.5 rounded-full bg-gold" />
-          <span className="font-display text-2xl">Lumiere <span className="text-gradient-gold">Events</span></span>
+    <header className="sticky top-0 z-40 glass border-b border-white/10">
+      <div className="mx-auto max-w-7xl px-6 h-20 flex items-center justify-between">
+        <Link to="/" className="flex items-center gap-3">
+          <span className="relative inline-flex h-12 w-12 rounded-full overflow-hidden ring-1 ring-gold/40 shadow-[0_0_24px_oklch(0.82_0.13_85/0.35)]">
+            <img src={logoAsset.url} alt="Royal Touch Events" className="h-full w-full object-cover" />
+          </span>
+          <span className="font-display text-xl md:text-2xl leading-tight">
+            Royal <span className="text-gradient-gold">Touch</span> Events
+          </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-8 text-sm">
@@ -36,7 +41,7 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-3">
-          <Link to="/booking" className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
+          <Link to="/booking" className="inline-flex items-center rounded-full glass glass-gold px-5 py-2 text-sm font-medium text-gold hover:bg-gold/10 transition">
             Book an Event
           </Link>
         </div>
@@ -47,14 +52,14 @@ export function Header() {
       </div>
 
       {open && (
-        <div className="md:hidden border-t border-border bg-background/95">
+        <div className="md:hidden border-t border-white/10 glass-strong">
           <div className="px-6 py-4 flex flex-col gap-3">
             {nav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="py-1 text-base text-foreground/90">
                 {n.label}
               </Link>
             ))}
-            <Link to="/booking" onClick={() => setOpen(false)} className="mt-2 inline-flex items-center justify-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground">
+            <Link to="/booking" onClick={() => setOpen(false)} className="mt-2 inline-flex items-center justify-center rounded-full bg-gold text-background px-5 py-2 text-sm font-medium">
               Book an Event
             </Link>
           </div>
