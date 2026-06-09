@@ -5,9 +5,9 @@ import { SectionHeader } from "../components/site/Section";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "Services — Lumiere Events" },
+      { title: "Services — Royal Touch Events" },
       { name: "description", content: "Weddings, corporate events, concerts, decoration, sound & lighting, photography and more." },
-      { property: "og:title", content: "Services — Lumiere Events" },
+      { property: "og:title", content: "Services — Royal Touch Events" },
       { property: "og:description", content: "Full-service event production across East Africa." },
       { property: "og:url", content: "/services" },
     ],

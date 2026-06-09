@@ -5,9 +5,9 @@ import { SectionHeader } from "../components/site/Section";
 export const Route = createFileRoute("/blog")({
   head: () => ({
     meta: [
-      { title: "Blog & News — Lumiere Events" },
-      { name: "description", content: "Event planning tips, industry trends and Lumiere updates." },
-      { property: "og:title", content: "Blog & News — Lumiere Events" },
+      { title: "Blog & News — Royal Touch Events" },
+      { name: "description", content: "Event planning tips, industry trends and Royal Touch updates." },
+      { property: "og:title", content: "Blog & News — Royal Touch Events" },
       { property: "og:description", content: "Tips, trends, and stories from behind the scenes." },
       { property: "og:url", content: "/blog" },
     ],
@@ -19,7 +19,7 @@ export const Route = createFileRoute("/blog")({
 const posts = [
   { tag: "Planning", title: "10 Questions to Ask Before You Book Your Wedding Venue", date: "Mar 14, 2026", excerpt: "From corkage fees to lighting limits — the practical checklist most couples forget." },
   { tag: "Trends", title: "2026 Color Stories: Why Indigo & Gold Are Everywhere", date: "Feb 28, 2026", excerpt: "Inside the palette dominating ballrooms this year, and how to make it your own." },
-  { tag: "News", title: "Lumiere Recognized at the East Africa Event Awards", date: "Feb 02, 2026", excerpt: "We're honored to be among this year's awardees in Corporate Production." },
+  { tag: "News", title: "Royal Touch Recognized at the East Africa Event Awards", date: "Feb 02, 2026", excerpt: "We're honored to be among this year's awardees in Corporate Production." },
   { tag: "Planning", title: "Budget Smart: Where to Spend and Where to Save", date: "Jan 21, 2026", excerpt: "A planner's honest take on the line items that actually move the needle." },
   { tag: "Trends", title: "Immersive Launch Events: Beyond the Keynote", date: "Jan 05, 2026", excerpt: "How brands are turning launches into multi-sensory experiences." },
   { tag: "Tips", title: "MC Briefing: The 7-Point Outline Pros Use", date: "Dec 12, 2025", excerpt: "Make sure your MC walks on stage with everything they need to nail the room." },

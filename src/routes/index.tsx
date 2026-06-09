@@ -10,9 +10,9 @@ import { SectionHeader } from "../components/site/Section";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Lumiere Events — Premium Event Planning in Nairobi" },
+      { title: "Royal Touch Events — Premium Event Planning in Nairobi" },
       { name: "description", content: "Weddings, corporate galas, concerts and launches — beautifully produced end to end." },
-      { property: "og:title", content: "Lumiere Events — Premium Event Planning" },
+      { property: "og:title", content: "Royal Touch Events — Premium Event Planning" },
       { property: "og:description", content: "Beautifully produced events end to end." },
       { property: "og:url", content: "/" },
     ],
@@ -56,7 +56,7 @@ function Home() {
             Moments that <span className="text-gradient-gold">linger</span>, long after the lights dim.
           </h1>
           <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            From candle-lit weddings to flagship brand launches — Lumiere designs and produces unforgettable events with cinematic detail.
+            From candle-lit weddings to flagship brand launches — Royal Touch designs and produces unforgettable events with cinematic detail.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link to="/booking" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
@@ -84,7 +84,7 @@ function Home() {
           <SectionHeader
             eyebrow="Who we are"
             title={<>Designers of <em className="text-gradient-gold not-italic">defining</em> moments.</>}
-            subtitle="Lumiere Events is a full-service event house. We blend storytelling, design, and flawless logistics so you can be fully present at your own event."
+            subtitle="Royal Touch Events is a full-service event house. We blend storytelling, design, and flawless logistics so you can be fully present at your own event."
           />
           <Link to="/about" className="mt-8 inline-flex items-center gap-2 text-gold story-link text-sm uppercase tracking-widest">
             Our story <ArrowRight size={14} />

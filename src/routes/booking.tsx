@@ -6,9 +6,9 @@ import { Check } from "lucide-react";
 export const Route = createFileRoute("/booking")({
   head: () => ({
     meta: [
-      { title: "Book an Event — Lumiere Events" },
+      { title: "Book an Event — Royal Touch Events" },
       { name: "description", content: "Tell us about your event and we'll send a tailored quote within 24 hours." },
-      { property: "og:title", content: "Book an Event — Lumiere Events" },
+      { property: "og:title", content: "Book an Event — Royal Touch Events" },
       { property: "og:description", content: "Start your event inquiry." },
       { property: "og:url", content: "/booking" },
     ],

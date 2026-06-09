@@ -5,9 +5,9 @@ import decor from "../assets/gallery-decor.jpg";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Lumiere Events" },
+      { title: "About — Royal Touch Events" },
       { name: "description", content: "Our story, mission and the team behind East Africa's most-loved event house." },
-      { property: "og:title", content: "About — Lumiere Events" },
+      { property: "og:title", content: "About — Royal Touch Events" },
       { property: "og:description", content: "Our story, mission and team." },
       { property: "og:url", content: "/about" },
     ],
@@ -27,7 +27,7 @@ function About() {
   return (
     <>
       <section className="mx-auto max-w-7xl px-6 pt-24 pb-16">
-        <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">About Lumiere</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-gold mb-4">About Royal Touch</p>
         <h1 className="font-display text-5xl md:text-7xl leading-[1] max-w-4xl">
           Twelve years of building moments worth <span className="text-gradient-gold">remembering</span>.
         </h1>
@@ -35,7 +35,7 @@ function About() {
 
       <section className="mx-auto max-w-7xl px-6 py-16 grid md:grid-cols-2 gap-16 items-start">
         <div className="space-y-6 text-muted-foreground text-lg leading-relaxed">
-          <p>Founded in 2013 by a small team of designers, planners, and producers, Lumiere Events grew from intimate garden weddings to full-scale corporate productions across East Africa.</p>
+          <p>Founded in 2013 by a small team of designers, planners, and producers, Royal Touch Events grew from intimate garden weddings to full-scale corporate productions across East Africa.</p>
           <p>Every event we touch is approached as a story — a sequence of carefully designed scenes, from first invitation to final farewell.</p>
         </div>
         <img src={decor} alt="" loading="lazy" className="rounded-2xl aspect-[4/5] object-cover" />
