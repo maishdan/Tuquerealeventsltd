@@ -30,7 +30,7 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 glass border-b border-white/10">
+    <header className="fixed inset-x-0 top-0 z-40 bg-background border-b border-white/10">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between gap-3">
         <Link to="/" className="flex items-center gap-2 sm:gap-3 min-w-0">
           <span className="relative inline-flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 rounded-full overflow-hidden ring-1 ring-gold/40 shadow-[0_0_24px_oklch(0.82_0.13_85/0.35)]">

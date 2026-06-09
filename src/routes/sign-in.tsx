@@ -116,6 +116,29 @@ function SignIn() {
             Sign up
           </Link>
         </p>
+
+        {/* Developer Bypass Buttons */}
+        <div className="mt-10 pt-6 border-t border-white/10 space-y-4">
+          <p className="text-center text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+            Development Access
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              to="/admin"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 p-3 text-center transition hover:bg-white/10 hover:border-gold/30"
+            >
+              <span className="text-xs font-bold text-gold">Admin</span>
+              <span className="text-[10px] text-muted-foreground">Dashboard</span>
+            </Link>
+            <Link
+              to="/dashboard"
+              className="flex flex-col items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 p-3 text-center transition hover:bg-white/10 hover:border-gold/30"
+            >
+              <span className="text-xs font-bold text-gold">Customer</span>
+              <span className="text-[10px] text-muted-foreground">Dashboard</span>
+            </Link>
+          </div>
+        </div>
       </div>
     </section>
   );
