@@ -24,7 +24,7 @@ function CopyrightPage() {
           <p>All content on this website — including the Royal Touch Events name, logo, photographs, videos, written copy, design, and code — is the exclusive property of Royal Touch Events and is protected by Kenyan and international copyright laws.</p>
           <p>No part of this website may be reproduced, distributed, or transmitted in any form or by any means without prior written permission from Royal Touch Events, except for brief quotations with full attribution.</p>
           <p>Third-party trademarks, logos and brand names mentioned on this site remain the property of their respective owners.</p>
-          <p>To request permission to use any material, please contact <a className="text-gold" href="mailto:hello@royaltouchevents.co.ke">hello@royaltouchevents.co.ke</a>.</p>
+          <p>To request permission to use any material, please contact <a className="text-gold" href="mailto:eventsroyaltouch7@gmail.com">eventsroyaltouch7@gmail.com</a>.</p>
         </div>
       </div>
     </section>

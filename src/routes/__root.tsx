@@ -78,7 +78,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         "@context": "https://schema.org",
         "@type": "Organization",
         name: "Royal Touch Events",
-        telephone: "+254701460110",
+        telephone: "+254795365334",
         address: { "@type": "PostalAddress", addressLocality: "Nairobi", addressCountry: "KE" },
         url: "/",
       }),

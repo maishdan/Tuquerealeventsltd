@@ -23,7 +23,7 @@ const schema = z.object({
   message: z.string().trim().min(5).max(1000),
 });
 
-const phone = "254701460110";
+const phone = "254795365334";
 
 function Contact() {
   const [submitted, setSubmitted] = useState(false);
@@ -58,15 +58,15 @@ function Contact() {
 
       <section className="mx-auto max-w-7xl px-6 pb-24 grid lg:grid-cols-2 gap-10">
         <div className="space-y-5">
-          <ContactRow icon={Phone} label="Call us" value="+254 701 460 110" href="tel:+254701460110" />
+          <ContactRow icon={Phone} label="Call us" value="+254 795 365 334" href="tel:+254795365334" />
           <ContactRow icon={MessageCircle} label="WhatsApp" value="Chat with a planner" href={`https://wa.me/${phone}`} accent />
-          <ContactRow icon={Mail} label="Email" value="hello@royaltouchevents.co.ke" href="mailto:hello@royaltouchevents.co.ke" />
-          <ContactRow icon={MapPin} label="Studio" value="Westlands Square, Nairobi, Kenya" />
+          <ContactRow icon={Mail} label="Email" value="eventsroyaltouch7@gmail.com" href="mailto:eventsroyaltouch7@gmail.com" />
+          <ContactRow icon={MapPin} label="Studio" value="Nairobi, Kenya" />
 
           <div className="rounded-2xl overflow-hidden border border-border aspect-video">
             <iframe
               title="Royal Touch Events Location"
-              src="https://www.google.com/maps?q=Westlands%20Square%20Nairobi&output=embed"
+              src="https://www.google.com/maps?q=Nairobi%2C%20Kenya&output=embed"
               loading="lazy"
               className="w-full h-full"
               style={{ filter: "grayscale(0.4) invert(0.9) hue-rotate(180deg)" }}
