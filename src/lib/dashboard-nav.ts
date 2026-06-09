@@ -23,6 +23,7 @@ import {
   PieChart,
   LineChart,
   Activity,
+  FileText,
 } from "lucide-react";
 
 export type DashboardNavItem = {
