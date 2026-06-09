@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { ChevronDown, ChevronUp, Menu } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import {
   Sheet,
@@ -17,6 +17,14 @@ const nav = [
   { to: "/blog", label: "Blog" },
   { to: "/contact", label: "Contact" },
 ] as const;
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function scrollToBottom() {
+  window.scrollTo({ top: document.documentElement.scrollHeight, behavior: "smooth" });
+}
 
 export function Header() {
   const [open, setOpen] = useState(false);
@@ -50,15 +58,9 @@ export function Header() {
         <div className="hidden md:flex items-center gap-2 lg:gap-3 shrink-0">
           <Link
             to="/sign-in"
-            className="text-sm text-muted-foreground hover:text-foreground transition px-2 py-1"
-          >
-            Sign In
-          </Link>
-          <Link
-            to="/sign-up"
             className="inline-flex items-center rounded-full border border-gold/40 text-gold px-4 py-2 text-sm font-medium hover:bg-gold/10 transition"
           >
-            Sign Up
+            Sign In
           </Link>
           <Link
             to="/booking"
@@ -110,20 +112,35 @@ export function Header() {
             ))}
           </nav>
 
+          <div className="px-4 py-3 border-t border-white/10">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 px-1">Scroll page</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={scrollToTop}
+                className="flex items-center justify-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-sm text-foreground/90 hover:bg-white/5 transition"
+              >
+                <ChevronUp size={16} />
+                Top
+              </button>
+              <button
+                type="button"
+                onClick={scrollToBottom}
+                className="flex items-center justify-center gap-2 rounded-xl border border-white/15 px-3 py-2.5 text-sm text-foreground/90 hover:bg-white/5 transition"
+              >
+                <ChevronDown size={16} />
+                Bottom
+              </button>
+            </div>
+          </div>
+
           <div className="mt-auto px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
             <Link
               to="/sign-in"
               onClick={() => setOpen(false)}
-              className="flex items-center justify-center rounded-xl border border-white/15 px-5 py-3 text-sm font-medium text-foreground/90 hover:bg-white/5 transition"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/sign-up"
-              onClick={() => setOpen(false)}
               className="flex items-center justify-center rounded-xl border border-gold/40 text-gold px-5 py-3 text-sm font-medium hover:bg-gold/10 transition"
             >
-              Sign Up
+              Sign In
             </Link>
             <Link
               to="/booking"

@@ -28,6 +28,7 @@ import {
   organizationJsonLd,
   servicesJsonLd,
 } from "../lib/seo";
+import { AuthProvider } from "../contexts/AuthContext";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
 import { WhatsAppButton } from "../components/site/WhatsAppButton";
@@ -113,36 +114,43 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isHome = pathname === "/";
+  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative min-h-screen flex flex-col overflow-x-hidden">
-        {/* Site-wide background — fixed layer above body, below content */}
-        <div aria-hidden className="fixed inset-0 z-0 pointer-events-none">
-          <img
-            src={isHome ? homeBackground : bgVenue}
-            alt=""
-            className="absolute inset-0 h-full w-full object-cover object-center"
-          />
-          <div
-            className={`absolute inset-0 ${
-              isHome
-                ? "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.15),oklch(0.10_0.04_280/0.45))]"
-                : "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.35),oklch(0.10_0.04_280/0.65))]"
-            }`}
-          />
-        </div>
+      <AuthProvider>
+      {isDashboard ? (
+        <Outlet />
+      ) : (
+        <div className="relative min-h-screen flex flex-col overflow-x-hidden">
+          <div aria-hidden className="fixed inset-0 z-0 pointer-events-none">
+            <img
+              src={isHome ? homeBackground : bgVenue}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover object-center"
+            />
+            <div
+              className={`absolute inset-0 ${
+                isHome
+                  ? "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.15),oklch(0.10_0.04_280/0.45))]"
+                  : "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.35),oklch(0.10_0.04_280/0.65))]"
+              }`}
+            />
+          </div>
 
-        <div className="relative z-10 flex flex-col flex-1 min-h-screen">
-          <Header />
-          <main className="flex-1 min-w-0 pt-16 sm:pt-20">
-            <Outlet />
-          </main>
-          <Footer />
-          <WhatsAppButton />
+          <div className="relative z-10 flex flex-col flex-1 min-h-screen">
+            <Header />
+            <main className="flex-1 min-w-0 pt-16 sm:pt-20">
+              <Outlet />
+            </main>
+            <Footer />
+            <WhatsAppButton />
+          </div>
         </div>
-      </div>
+      )}
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { Check } from "lucide-react";
+import { Check, Loader2 } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
+import { createBooking } from "@/lib/api/bookings";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/booking")({
   head: () =>
@@ -33,15 +35,19 @@ const budgets = ["Under $2,000", "$2,000 – $5,000", "$5,000 – $15,000", "$15
 const serviceOptions = ["Decoration", "Sound & Lighting", "Photography", "Videography", "MC / Entertainment", "Catering Coordination", "Full Planning"];
 
 function Booking() {
+  const { user } = useAuth();
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selServices, setSelServices] = useState<string[]>([]);
 
   const toggle = (s: string) =>
     setSelServices((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setSubmitError("");
     const fd = new FormData(e.currentTarget);
     const data = {
       name: String(fd.get("name") || ""),
@@ -62,7 +68,26 @@ function Booking() {
       return;
     }
     setErrors({});
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await createBooking({
+        name: res.data.name,
+        email: res.data.email,
+        phone: res.data.phone,
+        event_type: res.data.eventType,
+        event_date: res.data.date,
+        guests: res.data.guests,
+        budget: res.data.budget,
+        services: res.data.services,
+        notes: res.data.notes,
+        user_id: user?.id ?? null,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Could not submit booking. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -88,45 +113,59 @@ function Booking() {
       </section>
 
       <section className="mx-auto max-w-4xl px-4 sm:px-6 pb-24">
-        <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-card/60 p-6 md:p-10 space-y-6">
+        <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-card/60 p-6 md:p-10 space-y-6" noValidate>
+          {submitError && (
+            <p className="text-sm text-destructive rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3">{submitError}</p>
+          )}
           <div className="grid md:grid-cols-2 gap-5">
-            <Field label="Full Name" name="name" error={errors.name} />
-            <Field label="Email" name="email" type="email" error={errors.email} />
-            <Field label="Phone / WhatsApp" name="phone" error={errors.phone} />
-            <Field label="Event Date" name="date" type="date" error={errors.date} />
+            <Field label="Full Name" name="name" id="booking-name" error={errors.name} />
+            <Field label="Email" name="email" id="booking-email" type="email" error={errors.email} />
+            <Field label="Phone / WhatsApp" name="phone" id="booking-phone" error={errors.phone} />
+            <Field label="Event Date" name="date" id="booking-date" type="date" error={errors.date} />
           </div>
 
           <div className="grid md:grid-cols-2 gap-5">
-            <Select label="Event Type" name="eventType" options={eventTypes} error={errors.eventType} />
-            <Select label="Budget Range" name="budget" options={budgets} error={errors.budget} />
+            <Select label="Event Type" name="eventType" id="booking-event-type" options={eventTypes} error={errors.eventType} />
+            <Select label="Budget Range" name="budget" id="booking-budget" options={budgets} error={errors.budget} />
           </div>
 
-          <Field label="Expected Guests" name="guests" placeholder="Optional" />
+          <Field label="Expected Guests" name="guests" id="booking-guests" placeholder="Optional" />
 
-          <div>
-            <label className="text-xs uppercase tracking-widest text-muted-foreground">Services Needed</label>
+          <fieldset className="border-0 p-0 m-0 min-w-0">
+            <legend className="text-xs uppercase tracking-widest text-muted-foreground">Services Needed</legend>
             <div className="mt-3 flex flex-wrap gap-2">
-              {serviceOptions.map((s) => (
-                <button
-                  type="button"
-                  key={s}
-                  onClick={() => toggle(s)}
-                  className={`px-4 py-2 rounded-full text-xs border transition ${
-                    selServices.includes(s) ? "bg-gold text-background border-gold" : "border-border text-muted-foreground hover:border-gold/60"
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
+              {serviceOptions.map((s) => {
+                const id = `booking-service-${s.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
+                const checked = selServices.includes(s);
+                return (
+                  <label
+                    key={s}
+                    htmlFor={id}
+                    className={`cursor-pointer px-4 py-2 rounded-full text-xs border transition ${
+                      checked ? "bg-gold text-background border-gold" : "border-border text-muted-foreground hover:border-gold/60"
+                    }`}
+                  >
+                    <input
+                      id={id}
+                      type="checkbox"
+                      className="sr-only"
+                      checked={checked}
+                      onChange={() => toggle(s)}
+                    />
+                    {s}
+                  </label>
+                );
+              })}
             </div>
-          </div>
+          </fieldset>
 
           <div>
-            <label className="text-xs uppercase tracking-widest text-muted-foreground">Notes</label>
-            <textarea name="notes" rows={4} maxLength={1000} className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" placeholder="Tell us anything else about your event..." />
+            <label htmlFor="booking-notes" className="text-xs uppercase tracking-widest text-muted-foreground">Notes</label>
+            <textarea id="booking-notes" name="notes" rows={4} maxLength={1000} placeholder="Tell us anything else about your event..." className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
           </div>
 
-          <button type="submit" className="w-full md:w-auto inline-flex items-center justify-center rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
+          <button type="submit" disabled={submitting} className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-primary px-8 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition disabled:opacity-60">
+            {submitting && <Loader2 size={16} className="animate-spin" />}
             Submit Inquiry
           </button>
         </form>
@@ -135,11 +174,12 @@ function Booking() {
   );
 }
 
-function Field({ label, name, type = "text", placeholder, error }: { label: string; name: string; type?: string; placeholder?: string; error?: string }) {
+function Field({ label, name, id, type = "text", placeholder, error }: { label: string; name: string; id: string; type?: string; placeholder?: string; error?: string }) {
   return (
     <div>
-      <label className="text-xs uppercase tracking-widest text-muted-foreground">{label}</label>
+      <label htmlFor={id} className="text-xs uppercase tracking-widest text-muted-foreground">{label}</label>
       <input
+        id={id}
         name={name}
         type={type}
         placeholder={placeholder}
@@ -151,11 +191,11 @@ function Field({ label, name, type = "text", placeholder, error }: { label: stri
   );
 }
 
-function Select({ label, name, options, error }: { label: string; name: string; options: string[]; error?: string }) {
+function Select({ label, name, id, options, error }: { label: string; name: string; id: string; options: string[]; error?: string }) {
   return (
     <div>
-      <label className="text-xs uppercase tracking-widest text-muted-foreground">{label}</label>
-      <select name={name} defaultValue="" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60">
+      <label htmlFor={id} className="text-xs uppercase tracking-widest text-muted-foreground">{label}</label>
+      <select id={id} name={name} defaultValue="" aria-label={label} className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60">
         <option value="" disabled>Select...</option>
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>

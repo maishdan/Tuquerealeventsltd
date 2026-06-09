@@ -22,6 +22,22 @@ import { Route as BookingRouteImport } from './routes/booking'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
+import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
+import { Route as DashboardEventsRouteImport } from './routes/dashboard/events'
+import { Route as DashboardBookingsRouteImport } from './routes/dashboard/bookings'
+import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminOperationsRouteImport } from './routes/admin/operations'
+import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
+import { Route as AdminCommandRouteImport } from './routes/admin/command'
+import { Route as AdminCategoriesRouteImport } from './routes/admin/categories'
+import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
+import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminAiRouteImport } from './routes/admin/ai'
+import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -88,6 +104,86 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardProfileRoute = DashboardProfileRouteImport.update({
+  id: '/dashboard/profile',
+  path: '/dashboard/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardMessagesRoute = DashboardMessagesRouteImport.update({
+  id: '/dashboard/messages',
+  path: '/dashboard/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardEventsRoute = DashboardEventsRouteImport.update({
+  id: '/dashboard/events',
+  path: '/dashboard/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardBookingsRoute = DashboardBookingsRouteImport.update({
+  id: '/dashboard/bookings',
+  path: '/dashboard/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
+  id: '/dashboard/_layout',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOperationsRoute = AdminOperationsRouteImport.update({
+  id: '/admin/operations',
+  path: '/admin/operations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/admin/finance',
+  path: '/admin/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCommandRoute = AdminCommandRouteImport.update({
+  id: '/admin/command',
+  path: '/admin/command',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
+  id: '/admin/categories',
+  path: '/admin/categories',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCalendarRoute = AdminCalendarRouteImport.update({
+  id: '/admin/calendar',
+  path: '/admin/calendar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/admin/bookings',
+  path: '/admin/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/admin/ai',
+  path: '/admin/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLayoutRoute = AdminLayoutRouteImport.update({
+  id: '/admin/_layout',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -103,6 +199,22 @@ export interface FileRoutesByFullPath {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AdminLayoutRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/command': typeof AdminCommandRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/operations': typeof AdminOperationsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/dashboard': typeof DashboardLayoutRoute
+  '/dashboard/bookings': typeof DashboardBookingsRoute
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/admin/': typeof AdminIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -118,6 +230,20 @@ export interface FileRoutesByTo {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/command': typeof AdminCommandRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/operations': typeof AdminOperationsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/bookings': typeof DashboardBookingsRoute
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -134,6 +260,22 @@ export interface FileRoutesById {
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
+  '/admin/_layout': typeof AdminLayoutRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/calendar': typeof AdminCalendarRoute
+  '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/command': typeof AdminCommandRoute
+  '/admin/finance': typeof AdminFinanceRoute
+  '/admin/operations': typeof AdminOperationsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/dashboard/_layout': typeof DashboardLayoutRoute
+  '/dashboard/bookings': typeof DashboardBookingsRoute
+  '/dashboard/events': typeof DashboardEventsRoute
+  '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/profile': typeof DashboardProfileRoute
+  '/admin/': typeof AdminIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -151,6 +293,22 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin'
+    | '/admin/ai'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/categories'
+    | '/admin/command'
+    | '/admin/finance'
+    | '/admin/operations'
+    | '/admin/team'
+    | '/dashboard'
+    | '/dashboard/bookings'
+    | '/dashboard/events'
+    | '/dashboard/messages'
+    | '/dashboard/profile'
+    | '/admin/'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -166,6 +324,20 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin'
+    | '/admin/ai'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/categories'
+    | '/admin/command'
+    | '/admin/finance'
+    | '/admin/operations'
+    | '/admin/team'
+    | '/dashboard'
+    | '/dashboard/bookings'
+    | '/dashboard/events'
+    | '/dashboard/messages'
+    | '/dashboard/profile'
   id:
     | '__root__'
     | '/'
@@ -181,6 +353,22 @@ export interface FileRouteTypes {
     | '/sign-up'
     | '/sitemap.xml'
     | '/terms'
+    | '/admin/_layout'
+    | '/admin/ai'
+    | '/admin/bookings'
+    | '/admin/calendar'
+    | '/admin/categories'
+    | '/admin/command'
+    | '/admin/finance'
+    | '/admin/operations'
+    | '/admin/team'
+    | '/dashboard/_layout'
+    | '/dashboard/bookings'
+    | '/dashboard/events'
+    | '/dashboard/messages'
+    | '/dashboard/profile'
+    | '/admin/'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +385,22 @@ export interface RootRouteChildren {
   SignUpRoute: typeof SignUpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  AdminLayoutRoute: typeof AdminLayoutRoute
+  AdminAiRoute: typeof AdminAiRoute
+  AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminCalendarRoute: typeof AdminCalendarRoute
+  AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCommandRoute: typeof AdminCommandRoute
+  AdminFinanceRoute: typeof AdminFinanceRoute
+  AdminOperationsRoute: typeof AdminOperationsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
+  DashboardLayoutRoute: typeof DashboardLayoutRoute
+  DashboardBookingsRoute: typeof DashboardBookingsRoute
+  DashboardEventsRoute: typeof DashboardEventsRoute
+  DashboardMessagesRoute: typeof DashboardMessagesRoute
+  DashboardProfileRoute: typeof DashboardProfileRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -292,6 +496,118 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/profile': {
+      id: '/dashboard/profile'
+      path: '/dashboard/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/messages': {
+      id: '/dashboard/messages'
+      path: '/dashboard/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof DashboardMessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/events': {
+      id: '/dashboard/events'
+      path: '/dashboard/events'
+      fullPath: '/dashboard/events'
+      preLoaderRoute: typeof DashboardEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/bookings': {
+      id: '/dashboard/bookings'
+      path: '/dashboard/bookings'
+      fullPath: '/dashboard/bookings'
+      preLoaderRoute: typeof DashboardBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/_layout': {
+      id: '/dashboard/_layout'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/operations': {
+      id: '/admin/operations'
+      path: '/admin/operations'
+      fullPath: '/admin/operations'
+      preLoaderRoute: typeof AdminOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/admin/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/command': {
+      id: '/admin/command'
+      path: '/admin/command'
+      fullPath: '/admin/command'
+      preLoaderRoute: typeof AdminCommandRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/categories': {
+      id: '/admin/categories'
+      path: '/admin/categories'
+      fullPath: '/admin/categories'
+      preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/calendar': {
+      id: '/admin/calendar'
+      path: '/admin/calendar'
+      fullPath: '/admin/calendar'
+      preLoaderRoute: typeof AdminCalendarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/admin/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/admin/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_layout': {
+      id: '/admin/_layout'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminLayoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -309,6 +625,22 @@ const rootRouteChildren: RootRouteChildren = {
   SignUpRoute: SignUpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  AdminLayoutRoute: AdminLayoutRoute,
+  AdminAiRoute: AdminAiRoute,
+  AdminBookingsRoute: AdminBookingsRoute,
+  AdminCalendarRoute: AdminCalendarRoute,
+  AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCommandRoute: AdminCommandRoute,
+  AdminFinanceRoute: AdminFinanceRoute,
+  AdminOperationsRoute: AdminOperationsRoute,
+  AdminTeamRoute: AdminTeamRoute,
+  DashboardLayoutRoute: DashboardLayoutRoute,
+  DashboardBookingsRoute: DashboardBookingsRoute,
+  DashboardEventsRoute: DashboardEventsRoute,
+  DashboardMessagesRoute: DashboardMessagesRoute,
+  DashboardProfileRoute: DashboardProfileRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

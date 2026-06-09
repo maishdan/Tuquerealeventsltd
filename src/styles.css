@@ -93,6 +93,10 @@
   img, video, iframe { max-width: 100%; }
 }
 
+.contact-map-embed iframe {
+  filter: grayscale(0.4) invert(0.9) hue-rotate(180deg);
+}
+
 @utility text-gradient-gold {
   background: linear-gradient(120deg, oklch(0.9 0.08 85), oklch(0.78 0.15 75));
   -webkit-background-clip: text;
@@ -163,6 +167,32 @@
   overflow: hidden;
 }
 .flip-back { transform: rotateY(180deg); }
+
+/* ===== Dashboard progress (native <progress> — no inline width styles) ===== */
+.dashboard-progress {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: oklch(1 0 0 / 0.05);
+}
+.dashboard-progress::-webkit-progress-bar {
+  background: oklch(1 0 0 / 0.05);
+  border-radius: 9999px;
+}
+.dashboard-progress::-webkit-progress-value {
+  background: linear-gradient(to right, oklch(0.58 0.21 275), oklch(0.82 0.13 85));
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+.dashboard-progress::-moz-progress-bar {
+  background: linear-gradient(to right, oklch(0.58 0.21 275), oklch(0.82 0.13 85));
+  border-radius: 9999px;
+}
 
 @keyframes shimmer-x { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @utility shimmer-border {

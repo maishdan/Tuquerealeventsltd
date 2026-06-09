@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { UserPlus } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/sign-up")({
   head: () => ({
@@ -31,11 +32,16 @@ const schema = z
   });
 
 function SignUp() {
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [checkEmail, setCheckEmail] = useState(false);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setAuthError("");
     const fd = new FormData(e.currentTarget);
     const res = schema.safeParse({
       name: String(fd.get("name") || ""),
@@ -52,7 +58,28 @@ function SignUp() {
       return;
     }
     setErrors({});
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      await signUp(res.data.email, res.data.password, res.data.name);
+      setCheckEmail(true);
+      setTimeout(() => navigate({ to: "/sign-in" }), 2500);
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Could not create account.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (checkEmail) {
+    return (
+      <section className="mx-auto max-w-md px-4 sm:px-6 py-12 text-center">
+        <div className="rounded-2xl border border-white/15 glass-strong p-8">
+          <h1 className="font-display text-3xl">Check your email</h1>
+          <p className="mt-3 text-sm text-muted-foreground">Confirm your account, then sign in to open your dashboard.</p>
+          <Link to="/sign-in" className="mt-6 inline-flex rounded-full bg-gold text-background px-5 py-2.5 text-sm font-medium">Go to Sign In</Link>
+        </div>
+      </section>
+    );
   }
 
   return (
@@ -66,70 +93,37 @@ function SignUp() {
           Join Royal Touch Events to plan unforgettable moments.
         </p>
 
-        {submitted ? (
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Registration is coming soon. Start planning today via our{" "}
-            <Link to="/booking" className="text-gold hover:underline">
-              booking form
-            </Link>
-            .
-          </p>
-        ) : (
-          <form onSubmit={onSubmit} className="mt-8 space-y-5">
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Full Name</label>
-              <input
-                name="name"
-                type="text"
-                autoComplete="name"
-                maxLength={100}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
-              <input
-                name="email"
-                type="email"
-                autoComplete="email"
-                maxLength={255}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Password</label>
-              <input
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                maxLength={128}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Confirm Password</label>
-              <input
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                maxLength={128}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.confirmPassword && (
-                <p className="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>
-              )}
-            </div>
-            <button
-              type="submit"
-              className="w-full rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
-            >
-              Sign Up
-            </button>
-          </form>
-        )}
+        <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
+          {authError && (
+            <p className="text-sm text-destructive rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3">{authError}</p>
+          )}
+          <div>
+            <label htmlFor="signup-name" className="text-xs uppercase tracking-widest text-muted-foreground">Full Name</label>
+            <input id="signup-name" name="name" type="text" autoComplete="name" maxLength={100} placeholder="Your full name" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
+            {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
+          </div>
+          <div>
+            <label htmlFor="signup-email" className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
+            <input id="signup-email" name="email" type="email" autoComplete="email" maxLength={255} placeholder="you@example.com" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
+            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+          </div>
+          <div>
+            <label htmlFor="signup-password" className="text-xs uppercase tracking-widest text-muted-foreground">Password</label>
+            <input id="signup-password" name="password" type="password" autoComplete="new-password" maxLength={128} placeholder="At least 8 characters" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
+            {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
+          </div>
+          <div>
+            <label htmlFor="signup-confirm" className="text-xs uppercase tracking-widest text-muted-foreground">Confirm Password</label>
+            <input id="signup-confirm" name="confirmPassword" type="password" autoComplete="new-password" maxLength={128} placeholder="Repeat password" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
+            {errors.confirmPassword && (
+              <p className="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>
+            )}
+          </div>
+          <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition disabled:opacity-60">
+            {submitting && <Loader2 size={16} className="animate-spin" />}
+            Sign Up
+          </button>
+        </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Already have an account?{" "}

@@ -1,8 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
-import { LogIn } from "lucide-react";
+import { Loader2, LogIn } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/sign-in")({
   head: () => ({
@@ -24,11 +25,15 @@ const schema = z.object({
 });
 
 function SignIn() {
+  const navigate = useNavigate();
+  const { signIn } = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setAuthError("");
     const fd = new FormData(e.currentTarget);
     const res = schema.safeParse({
       email: String(fd.get("email") || ""),
@@ -43,7 +48,15 @@ function SignIn() {
       return;
     }
     setErrors({});
-    setSubmitted(true);
+    setSubmitting(true);
+    try {
+      const role = await signIn(res.data.email, res.data.password);
+      navigate({ to: role === "admin" ? "/admin" : "/dashboard" });
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : "Sign in failed. Check your email and password.");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -57,50 +70,45 @@ function SignIn() {
           Sign in to access your Royal Touch Events account.
         </p>
 
-        {submitted ? (
-          <p className="mt-8 text-center text-sm text-muted-foreground">
-            Sign-in is coming soon. For now, please{" "}
-            <Link to="/contact" className="text-gold hover:underline">
-              contact us
-            </Link>{" "}
-            or{" "}
-            <Link to="/booking" className="text-gold hover:underline">
-              book an event
-            </Link>
-            .
-          </p>
-        ) : (
-          <form onSubmit={onSubmit} className="mt-8 space-y-5">
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
-              <input
-                name="email"
-                type="email"
-                autoComplete="email"
-                maxLength={255}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
-            </div>
-            <div>
-              <label className="text-xs uppercase tracking-widest text-muted-foreground">Password</label>
-              <input
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                maxLength={128}
-                className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
-              />
-              {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
-            </div>
-            <button
-              type="submit"
-              className="w-full rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition"
-            >
-              Sign In
-            </button>
-          </form>
-        )}
+        <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
+          {authError && (
+            <p className="text-sm text-destructive rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3">{authError}</p>
+          )}
+          <div>
+            <label htmlFor="signin-email" className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
+            <input
+              id="signin-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              maxLength={255}
+              placeholder="you@example.com"
+              className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
+            />
+            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+          </div>
+          <div>
+            <label htmlFor="signin-password" className="text-xs uppercase tracking-widest text-muted-foreground">Password</label>
+            <input
+              id="signin-password"
+              name="password"
+              type="password"
+              autoComplete="current-password"
+              maxLength={128}
+              placeholder="Your password"
+              className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60"
+            />
+            {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
+          </div>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition disabled:opacity-60"
+          >
+            {submitting && <Loader2 size={16} className="animate-spin" />}
+            Sign In
+          </button>
+        </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           Don&apos;t have an account?{" "}
