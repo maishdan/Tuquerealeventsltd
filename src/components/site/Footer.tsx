@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import daniwestIcon from "../../assets/daniwest-icon.png";
 import eventsLogo from "../../assets/events-logo.jpeg";
 
 export function Footer() {
@@ -58,6 +59,28 @@ export function Footer() {
             <Link to="/privacy" className="hover:text-gold">Privacy Policy</Link>
             <Link to="/copyright" className="hover:text-gold">Copyright</Link>
           </nav>
+        </div>
+        <div className="border-t border-white/5">
+          <p className="mx-auto max-w-7xl px-6 py-3 text-[10px] leading-relaxed text-muted-foreground/70 italic flex items-center justify-center gap-1.5 text-center">
+            <img
+              src={daniwestIcon}
+              alt=""
+              aria-hidden
+              className="h-3.5 w-3.5 shrink-0 object-contain opacity-80"
+            />
+            <span>
+              Engineered by{" "}
+              <a
+                href="https://daniwesttechnologies.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="italic text-muted-foreground/90 hover:text-gold transition-colors"
+              >
+                Daniwest Tech Ltd
+              </a>{" "}
+              2026. Securing the digital future, one innovation at a time.
+            </span>
+          </p>
         </div>
       </div>
     </footer>

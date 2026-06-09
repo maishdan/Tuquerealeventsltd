@@ -11,6 +11,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -105,16 +106,19 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const isHome = useRouterState({ select: (s) => s.location.pathname === "/" });
 
   return (
     <QueryClientProvider client={queryClient}>
       <div className="relative min-h-screen flex flex-col">
-        {/* Site-wide background */}
-        <div aria-hidden className="fixed inset-0 -z-10">
-          <img src={bgVenue} alt="" className="absolute inset-0 h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.92))]" />
-          <div className="absolute inset-0 bg-radial-indigo opacity-40" />
-        </div>
+        {/* Site-wide background (other pages); homepage uses its own background */}
+        {!isHome && (
+          <div aria-hidden className="fixed inset-0 -z-10">
+            <img src={bgVenue} alt="" className="absolute inset-0 h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.78),oklch(0.10_0.04_280/0.92))]" />
+            <div className="absolute inset-0 bg-radial-indigo opacity-40" />
+          </div>
+        )}
         <Header />
         <main className="flex-1">
           <Outlet />

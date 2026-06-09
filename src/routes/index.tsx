@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Calendar, Sparkles, Award, HeartHandshake, Star, Quote } from "lucide-react";
+import homeBackground from "../assets/background.png";
 import heroImg from "../assets/hero-event.jpg";
 import wedding from "../assets/gallery-wedding.jpg";
 import corporate from "../assets/gallery-corporate.jpg";
@@ -42,12 +43,23 @@ const testimonials = [
 
 function Home() {
   return (
-    <>
+    <div className="relative">
+      {/* Homepage background — clear image with light overlay for readable content */}
+      <div aria-hidden className="fixed inset-0 -z-10 pointer-events-none">
+        <img
+          src={homeBackground}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.45),oklch(0.10_0.04_280/0.65))]" />
+        <div className="absolute inset-0 bg-radial-indigo opacity-15" />
+      </div>
+
       {/* HERO */}
       <section className="relative overflow-hidden">
         <div className="absolute inset-0 -z-10">
-          <img src={heroImg} alt="Elegant event ballroom" width={1920} height={1080} className="h-full w-full object-cover opacity-60" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/60 to-background" />
+          <img src={heroImg} alt="Elegant event ballroom" width={1920} height={1080} className="h-full w-full object-cover opacity-35" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/25 via-background/45 to-background/70" />
         </div>
 
         <div className="mx-auto max-w-7xl px-6 pt-28 pb-32 md:pt-40 md:pb-44">
@@ -104,12 +116,12 @@ function Home() {
         </div>
         <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {services.map((s) => (
-            <div key={s.title} className="flip-tile h-72 rounded-2xl tech-glow">
+            <div key={s.title} className="flip-tile h-72 rounded-2xl tech-glow shadow-lg shadow-black/30">
               <div className="flip-inner rounded-2xl">
                 {/* Front */}
-                <div className="flip-face glass-strong rounded-2xl p-6 flex flex-col justify-end">
-                  <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-40" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent" />
+                <div className="flip-face glass-strong rounded-2xl p-6 flex flex-col justify-end border border-white/15">
+                  <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-50" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/25" />
                   <div className="relative">
                     <Calendar className="text-gold" size={20} />
                     <h3 className="mt-3 font-display text-2xl">{s.title}</h3>
@@ -167,7 +179,7 @@ function Home() {
         <SectionHeader eyebrow="Kind words" title="Trusted by couples & brands alike." center />
         <div className="mt-14 grid md:grid-cols-3 gap-5">
           {testimonials.map((t) => (
-            <figure key={t.name} className="glass-strong tech-glow rounded-2xl p-7">
+            <figure key={t.name} className="glass-strong tech-glow rounded-2xl p-7 border border-white/15 shadow-lg shadow-black/25">
               <Quote className="text-gold" size={22} />
               <blockquote className="mt-5 text-base leading-relaxed text-foreground/90">"{t.quote}"</blockquote>
               <figcaption className="mt-6 pt-5 border-t border-white/10">
@@ -194,6 +206,6 @@ function Home() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
