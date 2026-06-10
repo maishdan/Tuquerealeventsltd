@@ -4,7 +4,7 @@ import { SITE_URL } from "../lib/seo";
 
 interface SitemapEntry {
   path: string;
-  changefreq?: "weekly" | "monthly";
+  changefreq?: "weekly" | "monthly" | "yearly";
   priority?: string;
 }
 

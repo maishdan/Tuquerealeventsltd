@@ -74,7 +74,7 @@ function AdminCalendar() {
                 <p className="font-medium truncate">{e.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{e.venue}</p>
               </div>
-              <EventStatusBadge status={e.status} />
+              <EventStatusBadge status={e.status as never} />
             </div>
           ))}
         </div>

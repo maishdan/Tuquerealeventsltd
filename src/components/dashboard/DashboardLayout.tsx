@@ -2,9 +2,11 @@ import { Link, Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, type ReactNode } from "react";
 import { BackToDashboard } from "./BackToDashboard";
+import { adminSections, customerSections, type DashboardNavSection } from "@/lib/dashboard-nav";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Menu,
   Bell,
   Home,
@@ -73,10 +75,12 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   const userLabel = profile?.full_name || profile?.email || "User";
   const roleLabel = role === "admin" ? "Administrator" : "Client";
 
+  const sections: DashboardNavSection[] = role === "admin" ? adminSections : customerSections;
+
   const sidebarProps = {
     collapsed,
     subtitle,
-    nav,
+    sections,
     role,
     pathname,
     onNavigate: () => setMobileOpen(false),
@@ -273,7 +277,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 type DashboardSidebarProps = {
   collapsed: boolean;
   subtitle: string;
-  nav: DashboardNavItem[];
+  sections: DashboardNavSection[];
   role: "admin" | "customer";
   pathname: string;
   onNavigate?: () => void;
@@ -288,7 +292,7 @@ type DashboardSidebarProps = {
 function DashboardSidebar({
   collapsed,
   subtitle,
-  nav,
+  sections,
   role,
   pathname,
   onNavigate,
@@ -299,27 +303,40 @@ function DashboardSidebar({
   onToggleCollapse,
   showCollapseToggle = true,
 }: DashboardSidebarProps) {
-  const grouped = nav.reduce(
-    (acc, item) => {
-      const cat = item.category || "Menu";
-      if (!acc[cat]) acc[cat] = [];
-      acc[cat].push(item);
-      return acc;
-    },
-    {} as Record<string, DashboardNavItem[]>,
+  // Auto-open the group containing the current pathname
+  const initialOpen: Record<string, boolean> = {};
+  sections.forEach((s) =>
+    s.items.forEach((g) => {
+      if (g.children?.some((c) => pathname === c.to || pathname.startsWith(`${c.to}/`))) {
+        initialOpen[g.key] = true;
+      }
+    }),
   );
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(initialOpen);
+
+  const toggleGroup = (key: string) =>
+    setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const isLinkActive = (to: string) => {
+    const isHome = to === "/admin" || to === "/dashboard";
+    return isHome ? pathname === to : pathname === to || pathname.startsWith(`${to}/`);
+  };
 
   return (
     <div className="flex flex-col h-full min-h-0">
-      {/* Brand + collapse toggle */}
+      {/* Brand */}
       <div
         className={cn(
-          "shrink-0 flex items-center border-b border-white/5",
+          "shrink-0 flex items-center border-b border-white/5 relative",
           collapsed ? "flex-col gap-3 px-3 py-4" : "justify-between px-4 py-5",
           !isDark && "border-slate-200",
         )}
       >
-        <Link to={role === "admin" ? "/admin" : "/dashboard"} onClick={onNavigate} className="flex items-center gap-3 min-w-0">
+        <Link
+          to={role === "admin" ? "/admin" : "/dashboard"}
+          onClick={onNavigate}
+          className="flex items-center gap-3 min-w-0"
+        >
           <span className="inline-flex h-10 w-10 shrink-0 rounded-full overflow-hidden ring-1 ring-gold/40">
             <img src={eventsLogo} alt="" className="h-full w-full object-cover" />
           </span>
@@ -337,53 +354,161 @@ function DashboardSidebar({
             type="button"
             onClick={onToggleCollapse}
             className={cn(
-              "p-1.5 rounded-lg transition shrink-0",
-              isDark ? "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10" : "bg-slate-100 text-slate-500",
+              "absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border flex items-center justify-center transition z-10",
+              isDark
+                ? "bg-[#0b0e14] border-white/10 text-gray-400 hover:text-white hover:border-gold/40"
+                : "bg-white border-slate-200 text-slate-500 hover:text-slate-900",
             )}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
           </button>
         )}
       </div>
 
-      {/* Nav links */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-5 scrollbar-thin">
-        {Object.entries(grouped).map(([category, items]) => (
-          <div key={category} className="space-y-0.5">
+      {/* Nav */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-6 scrollbar-thin">
+        {sections.map((sec) => (
+          <div key={sec.section} className="space-y-1">
             {!collapsed && (
-              <p className="px-3 mb-1.5 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
-                {category}
+              <p className="px-3 mb-2 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
+                {sec.section}
               </p>
             )}
-            {items.map((item) => {
-              const isHome = item.to === "/admin" || item.to === "/dashboard";
-              const isActive = isHome
-                ? pathname === item.to
-                : pathname === item.to || pathname.startsWith(`${item.to}/`);
+
+            {sec.items.map((item) => {
+              // Single link row
+              if (item.to) {
+                const active = isLinkActive(item.to);
+                const Icon = item.icon!;
+                return (
+                  <Link
+                    key={item.key}
+                    to={item.to}
+                    onClick={onNavigate}
+                    title={collapsed ? item.label : undefined}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all group relative",
+                      collapsed && "justify-center px-2",
+                      active
+                        ? "bg-gold text-black font-semibold shadow-[0_0_16px_rgba(212,175,55,0.25)]"
+                        : isDark
+                          ? "text-gray-400 hover:bg-white/5 hover:text-white"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                    )}
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    {!collapsed && <span className="truncate flex-1">{item.label}</span>}
+                  </Link>
+                );
+              }
+
+              // Expandable group with children
+              const children = item.children || [];
+              const open = openGroups[item.key] ?? false;
+              const hasActiveChild = children.some((c) => isLinkActive(c.to));
+              const Icon = item.icon!;
+
+              if (collapsed) {
+                // In collapsed mode, render each child as its own icon row + parent icon
+                return (
+                  <div key={item.key} className="space-y-1">
+                    <div
+                      title={item.label}
+                      className={cn(
+                        "flex items-center justify-center px-2 py-2 rounded-lg text-xs uppercase tracking-widest",
+                        hasActiveChild
+                          ? "text-gold"
+                          : isDark
+                            ? "text-gray-500"
+                            : "text-slate-400",
+                      )}
+                    >
+                      <Icon size={16} />
+                    </div>
+                    {children.map((c) => {
+                      const active = isLinkActive(c.to);
+                      return (
+                        <Link
+                          key={c.to}
+                          to={c.to}
+                          onClick={onNavigate}
+                          title={c.label}
+                          className={cn(
+                            "flex items-center justify-center px-2 py-2 rounded-lg transition",
+                            active
+                              ? "bg-gold text-black"
+                              : isDark
+                                ? "text-gray-400 hover:bg-white/5 hover:text-white"
+                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                          )}
+                        >
+                          <c.icon size={16} />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                );
+              }
 
               return (
-                <Link
-                  key={item.to}
-                  to={item.to}
-                  onClick={onNavigate}
-                  title={collapsed ? item.label : undefined}
-                  className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all duration-200 group relative",
-                    collapsed && "justify-center px-2",
-                    isActive
-                      ? "bg-gold text-black font-semibold shadow-[0_0_16px_rgba(212,175,55,0.25)]"
-                      : isDark
-                        ? "text-gray-400 hover:bg-white/5 hover:text-white"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                <div key={item.key} className="space-y-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(item.key)}
+                    className={cn(
+                      "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
+                      hasActiveChild
+                        ? isDark
+                          ? "text-white bg-white/[0.04]"
+                          : "text-slate-900 bg-slate-100"
+                        : isDark
+                          ? "text-gray-400 hover:bg-white/5 hover:text-white"
+                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                    )}
+                    aria-expanded={open}
+                  >
+                    <Icon size={18} className="shrink-0" />
+                    <span className="truncate flex-1 text-left">{item.label}</span>
+                    <ChevronDown
+                      size={14}
+                      className={cn("transition-transform shrink-0", open && "rotate-180")}
+                    />
+                  </button>
+
+                  {open && (
+                    <div
+                      className={cn(
+                        "ml-5 pl-4 border-l space-y-0.5 py-1",
+                        isDark ? "border-white/10" : "border-slate-200",
+                      )}
+                    >
+                      {children.map((c) => {
+                        const active = isLinkActive(c.to);
+                        return (
+                          <Link
+                            key={c.to}
+                            to={c.to}
+                            onClick={onNavigate}
+                            className={cn(
+                              "flex items-center gap-2 rounded-md px-3 py-2 text-[13px] transition",
+                              active
+                                ? isDark
+                                  ? "bg-gold/15 text-gold font-semibold"
+                                  : "bg-gold/15 text-gold font-semibold"
+                                : isDark
+                                  ? "text-gray-400 hover:bg-white/5 hover:text-white"
+                                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                            )}
+                          >
+                            <c.icon size={14} className="shrink-0 opacity-80" />
+                            <span className="truncate">{c.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
                   )}
-                >
-                  <item.icon size={18} className="shrink-0" />
-                  {!collapsed && <span className="truncate flex-1">{item.label}</span>}
-                  {isActive && !collapsed && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-black/30 shrink-0" />
-                  )}
-                </Link>
+                </div>
               );
             })}
           </div>
@@ -393,7 +518,12 @@ function DashboardSidebar({
       {/* Footer: user info + logout */}
       <div className={cn("shrink-0 border-t border-white/5 p-3 space-y-2", !isDark && "border-slate-200")}>
         {!collapsed && (
-          <div className={cn("px-3 py-2.5 rounded-lg mb-1", isDark ? "bg-white/5 border border-white/5" : "bg-slate-50 border border-slate-200")}>
+          <div
+            className={cn(
+              "px-3 py-2.5 rounded-lg mb-1",
+              isDark ? "bg-white/5 border border-white/5" : "bg-slate-50 border border-slate-200",
+            )}
+          >
             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{roleLabel}</p>
             <p className="text-xs truncate font-medium mt-0.5">{userLabel}</p>
           </div>
@@ -430,3 +560,4 @@ function DashboardSidebar({
     </div>
   );
 }
+
