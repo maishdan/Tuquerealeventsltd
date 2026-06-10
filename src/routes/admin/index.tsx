@@ -139,7 +139,7 @@ function AdminOverview() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Today's Revenue Card */}
-        <div className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-gold/30 transition-all">
+        <Link to="/admin/reminders" className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-gold/30 transition-all block">
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] mb-1">Live Revenue</p>
@@ -156,10 +156,11 @@ function AdminOverview() {
           <div className="mt-4 pt-4 border-t border-white/5">
             <p className="text-[10px] text-gray-500 font-medium">Daily transaction volume is peaking</p>
           </div>
-        </div>
+        </Link>
 
         {/* Monthly Revenue Card */}
-        <div className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-blue-500/30 transition-all">
+        <Link to="/admin/receipts" className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-blue-500/30 transition-all block">
+
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-1">Monthly Gross</p>
@@ -176,10 +177,11 @@ function AdminOverview() {
           <div className="mt-4 pt-4 border-t border-white/5">
             <p className="text-[10px] text-gray-500 font-medium">Targeting 10M milestone this month</p>
           </div>
-        </div>
+        </Link>
 
         {/* Active Events Card */}
-        <div className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-emerald-500/30 transition-all">
+        <Link to="/admin/events" className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-emerald-500/30 transition-all block">
+
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mb-1">Active Events</p>
@@ -196,10 +198,11 @@ function AdminOverview() {
           <div className="mt-4 pt-4 border-t border-white/5">
             <p className="text-[10px] text-gray-500 font-medium">Ops team at 85% capacity</p>
           </div>
-        </div>
+        </Link>
 
         {/* Total Clients Card */}
-        <div className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-purple-500/30 transition-all">
+        <Link to="/admin/customers" className="bg-[#0f172a] border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-purple-500/30 transition-all block">
+
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] mb-1">Total Clients</p>
@@ -216,8 +219,9 @@ function AdminOverview() {
           <div className="mt-4 pt-4 border-t border-white/5">
             <p className="text-[10px] text-gray-500 font-medium">CLV up by 12.5% this quarter</p>
           </div>
-        </div>
+        </Link>
       </div>
+
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Main Analytics Chart Area */}

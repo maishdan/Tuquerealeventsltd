@@ -1,6 +1,7 @@
-import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, type ReactNode } from "react";
+import { BackToDashboard } from "./BackToDashboard";
 import {
   ChevronLeft,
   ChevronRight,
@@ -46,7 +47,13 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const router = useRouter();
   const { signOut, profile } = useAuth();
+  const isDashboardRoot = pathname === "/admin" || pathname === "/dashboard";
+
+  function handleReload() {
+    router.invalidate();
+  }
 
   async function handleSignOut() {
     setMobileOpen(false);
@@ -226,6 +233,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
           </div>
           <button
             type="button"
+            onClick={handleReload}
+            title="Reload dashboard data"
             className={cn(
               "p-1.5 rounded transition",
               isDark ? "bg-[#1a1d23] text-gray-400 hover:text-white" : "bg-slate-100 text-slate-500",
@@ -236,7 +245,10 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         </div>
 
         <main className="flex-1 p-4 sm:p-6 overflow-x-hidden relative">
-          <div className="max-w-[1600px] mx-auto">{content}</div>
+          <div className="max-w-[1600px] mx-auto">
+            {!isDashboardRoot && <BackToDashboard role={role} />}
+            {content}
+          </div>
 
           <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 group">
             <div className="bg-gold text-black px-3 py-1 rounded shadow-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
