@@ -269,12 +269,12 @@ function AdminOverview() {
              <div className="bg-[#0b0e14] border border-white/5 rounded-2xl p-5">
                <h4 className="text-white font-bold text-sm mb-4">CEO Strategic Insights</h4>
                <div className="space-y-4">
-                 {[
-                   ["Top Performing Team", ceoInsights.topTeam, Trophy, "text-gold"],
-                   ["Top Client", ceoInsights.topClient, Users, "text-blue-400"],
-                   ["Most Profitable", ceoInsights.topEventType, DollarSign, "text-emerald-400"],
-                   ["Growth Opportunity", ceoInsights.growthOpportunity, TrendingUp, "text-amber-400"],
-                 ].map(([label, value, Icon, color]) => (
+                  {([
+                    ["Top Performing Team", ceoInsights.topTeam, Trophy, "text-gold"],
+                    ["Top Client", ceoInsights.topClient, Users, "text-blue-400"],
+                    ["Most Profitable", ceoInsights.topEventType, DollarSign, "text-emerald-400"],
+                    ["Growth Opportunity", ceoInsights.growthOpportunity, TrendingUp, "text-amber-400"],
+                  ] as const).map(([label, value, Icon, color]) => (
                    <div key={label} className="flex gap-3">
                      <div className={cn("mt-1 shrink-0 h-7 w-7 rounded-md bg-white/5 flex items-center justify-center", color)}>
                        <Icon size={14} />

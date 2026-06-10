@@ -74,7 +74,7 @@ function AdminCommand() {
                   <p className="font-display text-xl">{event.name}</p>
                   <p className="text-sm text-muted-foreground mt-1">{event.type} · {event.venue}</p>
                 </div>
-                <EventStatusBadge status={event.status} />
+                <EventStatusBadge status={event.status as never} />
               </div>
               <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1"><Users size={12} /> {event.team} team</span>
