@@ -24,7 +24,10 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as DashboardReceiptsRouteImport } from './routes/dashboard/receipts'
 import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
+import { Route as DashboardPaymentHistoryRouteImport } from './routes/dashboard/payment-history'
+import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
 import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
 import { Route as DashboardEventsRouteImport } from './routes/dashboard/events'
 import { Route as DashboardBookingsRouteImport } from './routes/dashboard/bookings'
@@ -32,8 +35,12 @@ import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminRemindersRouteImport } from './routes/admin/reminders'
 import { Route as AdminReceiptsRouteImport } from './routes/admin/receipts'
+import { Route as AdminPaymentHistoryRouteImport } from './routes/admin/payment-history'
+import { Route as AdminOrdersRouteImport } from './routes/admin/orders'
 import { Route as AdminOperationsRouteImport } from './routes/admin/operations'
+import { Route as AdminInventoryAnalyticsRouteImport } from './routes/admin/inventory-analytics'
 import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
 import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
@@ -120,9 +127,24 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardReceiptsRoute = DashboardReceiptsRouteImport.update({
+  id: '/dashboard/receipts',
+  path: '/dashboard/receipts',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardProfileRoute = DashboardProfileRouteImport.update({
   id: '/dashboard/profile',
   path: '/dashboard/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardPaymentHistoryRoute = DashboardPaymentHistoryRouteImport.update({
+  id: '/dashboard/payment-history',
+  path: '/dashboard/payment-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
+  id: '/dashboard/orders',
+  path: '/dashboard/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardMessagesRoute = DashboardMessagesRouteImport.update({
@@ -160,14 +182,34 @@ const AdminSettingsRoute = AdminSettingsRouteImport.update({
   path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRemindersRoute = AdminRemindersRouteImport.update({
+  id: '/admin/reminders',
+  path: '/admin/reminders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminReceiptsRoute = AdminReceiptsRouteImport.update({
   id: '/admin/receipts',
   path: '/admin/receipts',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminPaymentHistoryRoute = AdminPaymentHistoryRouteImport.update({
+  id: '/admin/payment-history',
+  path: '/admin/payment-history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminOrdersRoute = AdminOrdersRouteImport.update({
+  id: '/admin/orders',
+  path: '/admin/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminOperationsRoute = AdminOperationsRouteImport.update({
   id: '/admin/operations',
   path: '/admin/operations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminInventoryAnalyticsRoute = AdminInventoryAnalyticsRouteImport.update({
+  id: '/admin/inventory-analytics',
+  path: '/admin/inventory-analytics',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminFinanceRoute = AdminFinanceRouteImport.update({
@@ -245,8 +287,12 @@ export interface FileRoutesByFullPath {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
+  '/admin/inventory-analytics': typeof AdminInventoryAnalyticsRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-history': typeof AdminPaymentHistoryRoute
   '/admin/receipts': typeof AdminReceiptsRoute
+  '/admin/reminders': typeof AdminRemindersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
@@ -254,7 +300,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/bookings': typeof DashboardBookingsRoute
   '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/receipts': typeof DashboardReceiptsRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -282,8 +331,12 @@ export interface FileRoutesByTo {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
+  '/admin/inventory-analytics': typeof AdminInventoryAnalyticsRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-history': typeof AdminPaymentHistoryRoute
   '/admin/receipts': typeof AdminReceiptsRoute
+  '/admin/reminders': typeof AdminRemindersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
@@ -291,7 +344,10 @@ export interface FileRoutesByTo {
   '/dashboard/bookings': typeof DashboardBookingsRoute
   '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/receipts': typeof DashboardReceiptsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -318,8 +374,12 @@ export interface FileRoutesById {
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
+  '/admin/inventory-analytics': typeof AdminInventoryAnalyticsRoute
   '/admin/operations': typeof AdminOperationsRoute
+  '/admin/orders': typeof AdminOrdersRoute
+  '/admin/payment-history': typeof AdminPaymentHistoryRoute
   '/admin/receipts': typeof AdminReceiptsRoute
+  '/admin/reminders': typeof AdminRemindersRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
@@ -327,7 +387,10 @@ export interface FileRoutesById {
   '/dashboard/bookings': typeof DashboardBookingsRoute
   '/dashboard/events': typeof DashboardEventsRoute
   '/dashboard/messages': typeof DashboardMessagesRoute
+  '/dashboard/orders': typeof DashboardOrdersRoute
+  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
   '/dashboard/profile': typeof DashboardProfileRoute
+  '/dashboard/receipts': typeof DashboardReceiptsRoute
   '/admin/': typeof AdminIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
@@ -357,8 +420,12 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
+    | '/admin/inventory-analytics'
     | '/admin/operations'
+    | '/admin/orders'
+    | '/admin/payment-history'
     | '/admin/receipts'
+    | '/admin/reminders'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/users'
@@ -366,7 +433,10 @@ export interface FileRouteTypes {
     | '/dashboard/bookings'
     | '/dashboard/events'
     | '/dashboard/messages'
+    | '/dashboard/orders'
+    | '/dashboard/payment-history'
     | '/dashboard/profile'
+    | '/dashboard/receipts'
     | '/admin/'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
@@ -394,8 +464,12 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
+    | '/admin/inventory-analytics'
     | '/admin/operations'
+    | '/admin/orders'
+    | '/admin/payment-history'
     | '/admin/receipts'
+    | '/admin/reminders'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/users'
@@ -403,7 +477,10 @@ export interface FileRouteTypes {
     | '/dashboard/bookings'
     | '/dashboard/events'
     | '/dashboard/messages'
+    | '/dashboard/orders'
+    | '/dashboard/payment-history'
     | '/dashboard/profile'
+    | '/dashboard/receipts'
   id:
     | '__root__'
     | '/'
@@ -429,8 +506,12 @@ export interface FileRouteTypes {
     | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
+    | '/admin/inventory-analytics'
     | '/admin/operations'
+    | '/admin/orders'
+    | '/admin/payment-history'
     | '/admin/receipts'
+    | '/admin/reminders'
     | '/admin/settings'
     | '/admin/team'
     | '/admin/users'
@@ -438,7 +519,10 @@ export interface FileRouteTypes {
     | '/dashboard/bookings'
     | '/dashboard/events'
     | '/dashboard/messages'
+    | '/dashboard/orders'
+    | '/dashboard/payment-history'
     | '/dashboard/profile'
+    | '/dashboard/receipts'
     | '/admin/'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
@@ -467,8 +551,12 @@ export interface RootRouteChildren {
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
+  AdminInventoryAnalyticsRoute: typeof AdminInventoryAnalyticsRoute
   AdminOperationsRoute: typeof AdminOperationsRoute
+  AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminPaymentHistoryRoute: typeof AdminPaymentHistoryRoute
   AdminReceiptsRoute: typeof AdminReceiptsRoute
+  AdminRemindersRoute: typeof AdminRemindersRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -476,7 +564,10 @@ export interface RootRouteChildren {
   DashboardBookingsRoute: typeof DashboardBookingsRoute
   DashboardEventsRoute: typeof DashboardEventsRoute
   DashboardMessagesRoute: typeof DashboardMessagesRoute
+  DashboardOrdersRoute: typeof DashboardOrdersRoute
+  DashboardPaymentHistoryRoute: typeof DashboardPaymentHistoryRoute
   DashboardProfileRoute: typeof DashboardProfileRoute
+  DashboardReceiptsRoute: typeof DashboardReceiptsRoute
   AdminIndexRoute: typeof AdminIndexRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
@@ -588,11 +679,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/receipts': {
+      id: '/dashboard/receipts'
+      path: '/dashboard/receipts'
+      fullPath: '/dashboard/receipts'
+      preLoaderRoute: typeof DashboardReceiptsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard/profile': {
       id: '/dashboard/profile'
       path: '/dashboard/profile'
       fullPath: '/dashboard/profile'
       preLoaderRoute: typeof DashboardProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/payment-history': {
+      id: '/dashboard/payment-history'
+      path: '/dashboard/payment-history'
+      fullPath: '/dashboard/payment-history'
+      preLoaderRoute: typeof DashboardPaymentHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/orders': {
+      id: '/dashboard/orders'
+      path: '/dashboard/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/messages': {
@@ -644,6 +756,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/reminders': {
+      id: '/admin/reminders'
+      path: '/admin/reminders'
+      fullPath: '/admin/reminders'
+      preLoaderRoute: typeof AdminRemindersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/receipts': {
       id: '/admin/receipts'
       path: '/admin/receipts'
@@ -651,11 +770,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReceiptsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/payment-history': {
+      id: '/admin/payment-history'
+      path: '/admin/payment-history'
+      fullPath: '/admin/payment-history'
+      preLoaderRoute: typeof AdminPaymentHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/orders': {
+      id: '/admin/orders'
+      path: '/admin/orders'
+      fullPath: '/admin/orders'
+      preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/operations': {
       id: '/admin/operations'
       path: '/admin/operations'
       fullPath: '/admin/operations'
       preLoaderRoute: typeof AdminOperationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/inventory-analytics': {
+      id: '/admin/inventory-analytics'
+      path: '/admin/inventory-analytics'
+      fullPath: '/admin/inventory-analytics'
+      preLoaderRoute: typeof AdminInventoryAnalyticsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/finance': {
@@ -755,8 +895,12 @@ const rootRouteChildren: RootRouteChildren = {
   AdminCustomersRoute: AdminCustomersRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminFinanceRoute: AdminFinanceRoute,
+  AdminInventoryAnalyticsRoute: AdminInventoryAnalyticsRoute,
   AdminOperationsRoute: AdminOperationsRoute,
+  AdminOrdersRoute: AdminOrdersRoute,
+  AdminPaymentHistoryRoute: AdminPaymentHistoryRoute,
   AdminReceiptsRoute: AdminReceiptsRoute,
+  AdminRemindersRoute: AdminRemindersRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminUsersRoute: AdminUsersRoute,
@@ -764,7 +908,10 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardBookingsRoute: DashboardBookingsRoute,
   DashboardEventsRoute: DashboardEventsRoute,
   DashboardMessagesRoute: DashboardMessagesRoute,
+  DashboardOrdersRoute: DashboardOrdersRoute,
+  DashboardPaymentHistoryRoute: DashboardPaymentHistoryRoute,
   DashboardProfileRoute: DashboardProfileRoute,
+  DashboardReceiptsRoute: DashboardReceiptsRoute,
   AdminIndexRoute: AdminIndexRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
