@@ -2,9 +2,11 @@ import { Link, Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/
 import { useAuth } from "@/contexts/AuthContext";
 import { useState, type ReactNode } from "react";
 import { BackToDashboard } from "./BackToDashboard";
+import { adminSections, customerSections, type DashboardNavSection } from "@/lib/dashboard-nav";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Menu,
   Bell,
   Home,
