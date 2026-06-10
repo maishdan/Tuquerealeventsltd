@@ -22,8 +22,6 @@ import {
 } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type _Keep = DashboardNavItem;
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
