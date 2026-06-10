@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GlassPanel } from "@/components/dashboard/GlassPanel";
-import { useAdminBookings, useAdminContacts, useUpdateBookingStatus } from "@/hooks/use-dashboard-data";
+import { useAdminBookings, useUpdateBookingStatus } from "@/hooks/use-dashboard-data";
 import type { BookingStatus } from "@/lib/database.types";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/bookings")({
   component: AdminBookings,
@@ -9,29 +10,54 @@ export const Route = createFileRoute("/admin/bookings")({
 
 const statusOptions: BookingStatus[] = ["pending", "confirmed", "planning", "inquiry", "cancelled"];
 
+const statusStyles: Record<BookingStatus, string> = {
+  pending: "border-amber-400/40 bg-amber-500/10 text-amber-300",
+  confirmed: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
+  planning: "border-blue-400/40 bg-blue-500/10 text-blue-300",
+  inquiry: "border-white/20 bg-white/5 text-muted-foreground",
+  cancelled: "border-rose-400/40 bg-rose-500/10 text-rose-300",
+};
+
 function AdminBookings() {
-  const { data: bookings = [], isLoading: loadingBookings, error: bookingsError } = useAdminBookings();
-  const { data: contacts = [], isLoading: loadingContacts, error: contactsError } = useAdminContacts();
+  const { data: bookings = [], isLoading, error } = useAdminBookings();
   const updateStatus = useUpdateBookingStatus();
+
+  const pending = bookings.filter((b) => b.status === "pending").length;
+  const confirmed = bookings.filter((b) => b.status === "confirmed").length;
 
   return (
     <div className="space-y-8">
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">Bookings & Inquiries</p>
+        <p className="text-xs uppercase tracking-[0.3em] text-gold">Bookings</p>
         <h2 className="mt-2 font-display text-3xl sm:text-4xl">
-          Website <span className="text-gradient-gold">leads</span>
+          Event <span className="text-gradient-gold">requests</span>
         </h2>
         <p className="mt-2 text-muted-foreground">
-          Bookings from the booking page and messages from the contact form appear here in real time.
+          All booking submissions from the website booking form. Review, update status and follow up with clients.
         </p>
       </div>
 
-      <GlassPanel title="Event Bookings" subtitle={`${bookings.length} total inquiries`}>
-        {loadingBookings && <p className="text-sm text-muted-foreground">Loading bookings…</p>}
-        {bookingsError && (
+      <div className="grid sm:grid-cols-3 gap-4">
+        <div className="glass-strong rounded-2xl border border-white/15 p-5 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Total Bookings</p>
+          <p className="mt-2 font-display text-3xl text-gradient-gold">{bookings.length}</p>
+        </div>
+        <div className="glass-strong rounded-2xl border border-white/15 p-5 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Pending Review</p>
+          <p className="mt-2 font-display text-3xl">{pending}</p>
+        </div>
+        <div className="glass-strong rounded-2xl border border-white/15 p-5 text-center">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Confirmed</p>
+          <p className="mt-2 font-display text-3xl">{confirmed}</p>
+        </div>
+      </div>
+
+      <GlassPanel title="Booking Requests" subtitle={`${bookings.length} total from /booking`}>
+        {isLoading && <p className="text-sm text-muted-foreground">Loading bookings…</p>}
+        {error && (
           <p className="text-sm text-destructive">Could not load bookings. Run supabase/schema.sql first.</p>
         )}
-        {!loadingBookings && bookings.length === 0 && (
+        {!isLoading && bookings.length === 0 && (
           <p className="text-sm text-muted-foreground">No bookings yet. Submissions from /booking will appear here.</p>
         )}
         <div className="space-y-3">
@@ -44,7 +70,9 @@ function AdminBookings() {
                     {b.email} · {b.phone || "No phone"}
                   </p>
                 </div>
-                <span className="inline-flex rounded-full border border-gold/30 bg-gold/10 px-3 py-1 text-xs capitalize text-gold">{b.status}</span>
+                <span className={cn("inline-flex rounded-full border px-3 py-1 text-xs capitalize", statusStyles[b.status])}>
+                  {b.status}
+                </span>
               </div>
               <dl className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
                 <div><dt className="text-xs text-muted-foreground uppercase tracking-widest">Event</dt><dd>{b.event_type}</dd></div>
@@ -71,29 +99,10 @@ function AdminBookings() {
                     <option key={s} value={s}>{s}</option>
                   ))}
                 </select>
+                <span className="text-xs text-muted-foreground ml-auto">
+                  Submitted {new Date(b.created_at).toLocaleString()}
+                </span>
               </div>
-            </div>
-          ))}
-        </div>
-      </GlassPanel>
-
-      <GlassPanel title="Contact Form Messages" subtitle={`${contacts.length} messages`}>
-        {loadingContacts && <p className="text-sm text-muted-foreground">Loading messages…</p>}
-        {contactsError && (
-          <p className="text-sm text-destructive">Could not load contact inquiries.</p>
-        )}
-        {!loadingContacts && contacts.length === 0 && (
-          <p className="text-sm text-muted-foreground">No contact messages yet.</p>
-        )}
-        <div className="space-y-3">
-          {contacts.map((c) => (
-            <div key={c.id} className="rounded-xl glass border border-white/10 p-4">
-              <div className="flex flex-wrap justify-between gap-2">
-                <p className="font-medium">{c.name}</p>
-                <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
-              </div>
-              <p className="text-sm text-gold mt-1">{c.email}</p>
-              <p className="mt-3 text-sm text-foreground/85">{c.message}</p>
             </div>
           ))}
         </div>

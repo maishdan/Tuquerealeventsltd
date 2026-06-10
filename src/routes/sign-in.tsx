@@ -51,7 +51,11 @@ function SignIn() {
     setSubmitting(true);
     try {
       const role = await signIn(res.data.email, res.data.password);
-      navigate({ to: role === "admin" ? "/admin" : "/dashboard" });
+      if (role === "admin") {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : "Sign in failed. Check your email and password.");
     } finally {

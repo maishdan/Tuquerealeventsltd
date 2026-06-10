@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAllBookings, fetchUserBookings, updateBookingStatus } from "@/lib/api/bookings";
-import { fetchContactInquiries } from "@/lib/api/contact";
+import { fetchContactInquiries, updateContactStatus } from "@/lib/api/contact";
+import type { ContactStatus } from "@/lib/database.types";
 import { fetchAllEvents, fetchUserEvents } from "@/lib/api/events";
 import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchTeamMembers } from "@/lib/api/team";
@@ -59,6 +60,16 @@ export function useUpdateBookingStatus() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "bookings"] });
       qc.invalidateQueries({ queryKey: ["customer", "bookings"] });
+    },
+  });
+}
+
+export function useUpdateContactStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ContactStatus }) => updateContactStatus(id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "contacts"] });
     },
   });
 }

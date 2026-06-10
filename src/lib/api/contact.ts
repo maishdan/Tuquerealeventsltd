@@ -21,3 +21,15 @@ export async function fetchContactInquiries() {
   if (error) throw error;
   return (data ?? []) as ContactInquiry[];
 }
+
+export async function updateContactStatus(id: string, status: ContactInquiry["status"]) {
+  const { data, error } = await supabase
+    .from("contact_inquiries")
+    .update({ status })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as ContactInquiry;
+}

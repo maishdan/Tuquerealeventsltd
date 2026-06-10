@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { adminNav } from "@/lib/dashboard-nav";
 import {
   DollarSign,
   CalendarDays,
@@ -101,7 +102,23 @@ function AdminOverview() {
         </div>
       </div>
 
-      {/* Option 5: Executive Overview Section */}
+      {/* Quick navigation */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {adminNav.filter((item) => item.to !== "/admin").map((item) => (
+          <Link
+            key={item.to}
+            to={item.to}
+            className="flex items-center gap-3 rounded-xl bg-[#0f172a] border border-white/5 hover:border-gold/30 p-4 transition-all group"
+          >
+            <div className="h-9 w-9 rounded-lg bg-gold/10 flex items-center justify-center text-gold group-hover:bg-gold/20 transition">
+              <item.icon size={18} />
+            </div>
+            <span className="text-sm font-medium text-gray-300 group-hover:text-white truncate">{item.label}</span>
+          </Link>
+        ))}
+      </div>
+
+      {/* Executive Overview Section */}
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-xl font-semibold text-white">Executive Overview</h3>
         <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-md">
