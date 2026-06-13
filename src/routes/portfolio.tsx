@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowRight,
   Search,
@@ -9,7 +9,8 @@ import {
   ShieldCheck,
   Users,
   Calendar,
-  Filter
+  Filter,
+  ChevronDown
 } from "lucide-react";
 import wedding from "../assets/gallery-wedding.jpg";
 import corporate from "../assets/gallery-corporate.jpg";
@@ -31,6 +32,17 @@ export const Route = createFileRoute("/portfolio")({
   component: Portfolio,
 });
 
+const heroImages = [
+  "/back/e1.jfif",
+  "/back/e2.jfif",
+  "/back/e3.jfif",
+  "/back/e4.jfif",
+  "/back/e5.jfif",
+  "/back/e7.jpg",
+  "/back/e8.jpg",
+  "/back/e9.jpg",
+];
+
 const items = [
   { src: corporate, cat: "Corporate", title: "Global Leadership Summit", location: "Upper Hill, Nairobi", scale: "500+ Executives" },
   { src: wedding, cat: "Weddings", title: "Grand Ballroom Nuptials", location: "Windsor Golf Club", scale: "Elite VIP" },
@@ -47,28 +59,62 @@ const categories = ["All", "Corporate", "Weddings", "Concerts", "Launches", "Dec
 function Portfolio() {
   const [filter, setFilter] = useState("All");
   const filtered = filter === "All" ? items : items.filter((i) => i.cat === filter);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 60000); // Switch every 1 minute
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <div className="bg-[#0b0e14] text-white font-sans">
-      {/* 1. STRATEGIC PORTFOLIO HEADER */}
-      <section className="relative pt-32 pb-20 overflow-hidden border-b border-white/5">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gold/5 rounded-full blur-[140px] -mr-80 -mt-80" />
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10">
-          <div className="flex items-center gap-3 text-gold mb-6">
-             <div className="h-[1px] w-12 bg-gold" />
-             <p className="text-[10px] font-bold uppercase tracking-[0.4em]">The Royal Vault</p>
+    <div className="bg-[#0b0e14] text-white font-sans min-w-0">
+      {/* 1. HERO SECTION (MATCHES HOME PAGE DESIGN) */}
+      <section className="relative min-h-[85vh] flex flex-col items-center justify-start overflow-hidden pt-20">
+        <div className="absolute inset-0 z-0">
+          {heroImages.map((src, idx) => (
+            <img
+              key={src}
+              src={src}
+              alt={`Royal Vault Hero ${idx}`}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out ${
+                idx === currentImgIndex ? "opacity-100 scale-105" : "opacity-0 scale-100"
+              }`}
+            />
+          ))}
+          <div className="absolute inset-0 bg-[#0b0e14]/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-transparent to-[#0b0e14]" />
+        </div>
+
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
+          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 rounded-[32px] space-y-8 animate-in fade-in zoom-in duration-1000">
+            <div className="space-y-4">
+              <div className="flex justify-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] font-black uppercase tracking-widest">
+                  <ShieldCheck size={12} /> Established Industry Leader
+                </div>
+              </div>
+              <h1 className="text-4xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-[0.85]">
+                The Royal <br />
+                <span className="text-gold">Vault.</span>
+              </h1>
+              <p className="max-w-2xl mx-auto text-base md:text-xl text-gray-200 font-medium leading-relaxed">
+                Explore our curated selection of high-impact productions. Each project represents our commitment to operational precision and cinematic design for the world's most demanding clients.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap justify-center gap-4 pt-4">
+               <div className="flex items-center gap-2 text-white/60 text-xs font-bold uppercase tracking-widest">
+                 <Search size={14} className="text-gold" />
+                 <span>Explore 1,200+ Delivered Projects</span>
+               </div>
+            </div>
           </div>
-          <h1 className="font-display text-5xl sm:text-7xl lg:text-[100px] leading-[0.85] tracking-tighter max-w-5xl">
-            Proven <span className="text-gold">Success</span>. <br />
-            Visualized.
-          </h1>
-          <p className="mt-10 max-w-3xl text-lg md:text-xl text-gray-400 font-light leading-relaxed">
-            A curated selection of our high-impact productions. Each project represents our commitment to operational precision and cinematic design for the world's most demanding clients.
-          </p>
         </div>
       </section>
 
-      {/* 2. PROFESSIONAL FILTER SYSTEM */}
+      {/* 2. PROFESSIONAL FILTER SYSTEM (SMOOTH & FUNCTIONAL) */}
       <section className="sticky top-16 sm:top-20 z-30 bg-[#0b0e14]/90 backdrop-blur-xl border-b border-white/5 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 md:pb-0 w-full md:w-auto">
@@ -92,46 +138,50 @@ function Portfolio() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
             <input
               type="text"
-              placeholder="Search Projects..."
-              className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-6 text-xs text-white focus:ring-1 focus:ring-gold outline-none w-64"
+              placeholder="Filter by Project Name..."
+              className="bg-white/5 border border-white/10 rounded-full py-2 pl-10 pr-6 text-xs text-white focus:ring-1 focus:ring-gold outline-none w-64 transition-all"
             />
           </div>
         </div>
       </section>
 
-      {/* 3. CASE STUDY GRID (BUSINESS FOCUS) */}
+      {/* 3. CASE STUDY GRID (BUSINESS FOCUS & CLEAR IMAGES) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-12">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-12 md:gap-16">
           {filtered.map((item, i) => (
-            <div key={`${item.title}-${i}`} className="group relative space-y-6">
-              <div className="relative aspect-[16/10] overflow-hidden rounded-[40px] border border-white/5 shadow-2xl">
+            <div key={`${item.title}-${i}`} className="group relative space-y-8">
+              <div className="relative aspect-[16/10] overflow-hidden rounded-[32px] md:rounded-[48px] border border-white/5 shadow-2xl bg-white/5 transition-all duration-500 group-hover:border-gold/30">
                 <img
                   src={item.src}
                   alt={item.title}
                   loading="lazy"
-                  className="h-full w-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+                  className="h-full w-full object-cover transition-all duration-1000 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-transparent to-transparent opacity-60" />
 
                 {/* View Project Badge */}
-                <div className="absolute top-8 right-8 h-12 w-12 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100 shadow-xl">
+                <div className="absolute top-8 right-8 h-12 w-12 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100 shadow-xl">
                   <ExternalLink size={18} />
                 </div>
               </div>
 
-              <div className="flex justify-between items-start px-4">
-                <div className="space-y-2">
+              <div className="flex justify-between items-start px-2">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <span className="text-gold text-[10px] font-black uppercase tracking-widest">{item.cat}</span>
-                    <div className="h-[1px] w-4 bg-white/10" />
+                    <div className="h-[1px] w-6 bg-white/10" />
                     <span className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">{item.scale}</span>
                   </div>
-                  <h3 className="font-display text-3xl md:text-4xl text-white group-hover:text-gold transition-colors">{item.title}</h3>
-                  <div className="flex items-center gap-2 text-gray-500 text-xs">
-                    <Calendar size={12} className="text-gold" />
-                    <span>2024 Production</span>
-                    <span className="mx-2">•</span>
-                    <span>{item.location}</span>
+                  <h3 className="font-display text-4xl md:text-5xl text-white group-hover:text-gold transition-colors">{item.title}</h3>
+                  <div className="flex items-center gap-4 text-gray-500 text-xs font-medium">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={12} className="text-gold" />
+                      <span>2024 PRODUCTION</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users size={12} className="text-gold" />
+                      <span>{item.location}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -141,19 +191,19 @@ function Portfolio() {
       </section>
 
       {/* 4. TRUST & QUALITY STANDARDS */}
-      <section className="py-24 bg-white/[0.02] border-y border-white/5">
+      <section className="py-24 bg-white/[0.01] border-y border-white/5">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid md:grid-cols-3 gap-12 text-center">
+          <div className="grid md:grid-cols-3 gap-16 text-center">
             {[
               { icon: ShieldCheck, title: "Absolute Security", desc: "We maintain 100% discretion and security for our high-profile and private VIP engagements." },
               { icon: Award, title: "Award Winning", desc: "Recognized internationally for our standards in production and creative execution." },
               { icon: Users, title: "Elite Coordination", desc: "Every project is overseen by a senior executive producer to ensure perfect delivery." }
             ].map((feature, i) => (
-              <div key={i} className="space-y-4">
-                 <div className="h-14 w-14 rounded-2xl bg-gold/5 border border-gold/10 flex items-center justify-center text-gold mx-auto">
-                    <feature.icon size={24} />
+              <div key={i} className="space-y-6">
+                 <div className="h-16 w-16 rounded-2xl bg-gold/5 border border-gold/10 flex items-center justify-center text-gold mx-auto group-hover:bg-gold transition-all">
+                    <feature.icon size={28} />
                  </div>
-                 <h4 className="font-display text-2xl text-white">{feature.title}</h4>
+                 <h4 className="font-display text-3xl text-white">{feature.title}</h4>
                  <p className="text-sm text-gray-500 leading-relaxed max-w-xs mx-auto">{feature.desc}</p>
               </div>
             ))}
@@ -161,24 +211,21 @@ function Portfolio() {
         </div>
       </section>
 
-      {/* 5. PORTFOLIO CTA */}
+      {/* 5. PORTFOLIO CTA (MATCHES HOME PAGE) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-32">
-        <div className="relative rounded-[48px] overflow-hidden bg-white/5 border border-white/10 p-12 md:p-24 text-center">
-          <div className="absolute inset-0 bg-radial-indigo opacity-20" />
-          <div className="relative z-10 max-w-3xl mx-auto space-y-10">
+        <div className="relative rounded-[40px] md:rounded-[60px] overflow-hidden bg-white/5 border border-white/10 p-12 md:p-32 text-center">
+          <div className="absolute inset-0 bg-radial-indigo opacity-30" />
+          <div className="relative z-10 max-w-4xl mx-auto space-y-12">
             <div className="flex justify-center">
-               <Camera size={48} className="text-gold animate-pulse" />
+               <Camera size={64} className="text-gold animate-pulse" />
             </div>
-            <h2 className="font-display text-5xl md:text-8xl leading-none text-white tracking-tight">Your Event is the <br /><span className="text-gold italic">Next Success Story</span>.</h2>
-            <p className="text-gray-400 text-lg md:text-xl font-light">
+            <h2 className="font-display text-5xl md:text-9xl leading-none text-white tracking-tighter">Your Event is the <br /><span className="text-gold">Next Legacy.</span></h2>
+            <p className="text-gray-400 text-lg md:text-2xl font-light max-w-2xl mx-auto">
               We focus on a limited number of projects to ensure world-class attention to detail. Discuss your project with us today.
             </p>
             <div className="flex flex-wrap justify-center gap-6 pt-10">
-              <Link to="/booking" className="h-16 px-12 rounded-full bg-gold text-[#0b0e14] font-black text-sm flex items-center gap-2 hover:scale-105 transition-all shadow-[0_0_50px_rgba(212,175,55,0.3)]">
-                Secure Your Date <ArrowRight size={18} />
-              </Link>
-              <Link to="/contact" className="h-16 px-12 rounded-full border border-white/10 bg-white/5 text-white font-bold text-sm flex items-center hover:bg-white/10 transition">
-                Consult With Us
+              <Link to="/booking" className="h-16 md:h-20 px-12 md:px-20 rounded-full bg-gold text-[#0b0e14] font-black text-sm uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-[0_0_50px_rgba(212,175,55,0.3)]">
+                Secure Your Date <ArrowRight size={20} />
               </Link>
             </div>
           </div>
