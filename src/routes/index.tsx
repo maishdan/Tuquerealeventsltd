@@ -1,189 +1,318 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Calendar, Sparkles, Award, HeartHandshake, Quote } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  ArrowRight,
+  Search,
+  PlayCircle,
+  Star,
+  ChevronDown,
+  ShieldCheck,
+  Zap,
+  Globe,
+  Award,
+  Users,
+  BarChart3,
+  CheckCircle2,
+  Clock,
+  Briefcase,
+  History
+} from "lucide-react";
 import heroImg from "../assets/hero-event.jpg";
-import wedding from "../assets/gallery-wedding.jpg";
 import corporate from "../assets/gallery-corporate.jpg";
+import wedding from "../assets/gallery-wedding.jpg";
 import concert from "../assets/gallery-concert.jpg";
-import decor from "../assets/gallery-decor.jpg";
-import { SectionHeader } from "../components/site/Section";
 import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () =>
     createPageSeo({
-      title: "Premium Event Planning in Nairobi, Kenya",
+      title: "Royal Touch Events | Corporate & Luxury Production Nairobi",
       description:
-        "Royal Touch Events produces weddings, corporate galas, concerts and launches in Nairobi. Plan, design, produce and capture — beautifully executed end to end.",
+        "Nairobi's premier event production agency. We specialize in high-impact corporate events, luxury weddings, and world-class concert production. Royally delivered excellence.",
       path: "/",
       keywords: SERVICE_KEYWORDS,
     }),
   component: Home,
 });
 
-const services = [
-  { title: "Weddings", desc: "Timeless ceremonies and luxurious receptions.", img: wedding, detail: "Full planning, decor, MC, photography, catering." },
-  { title: "Corporate Events", desc: "Galas, conferences, and brand experiences.", img: corporate, detail: "AV, staging, branding and flawless logistics." },
-  { title: "Concerts", desc: "Full-scale production, stage, sound & lights.", img: concert, detail: "Rigging, line array sound, intelligent lighting." },
-  { title: "Private Parties", desc: "Birthdays, anniversaries, intimate celebrations.", img: decor, detail: "Themes, decor, entertainment & catering." },
+const heroImages = [
+  "/back/e1.jfif",
+  "/back/e2.jfif",
+  "/back/e3.jfif",
+  "/back/e4.jfif",
+  "/back/e5.jfif",
+  "/back/e7.jpg",
+  "/back/e8.jpg",
+  "/back/e9.jpg",
 ];
 
-const why = [
-  { icon: Award, title: "12+ Years", desc: "Of producing flagship events across East Africa." },
-  { icon: HeartHandshake, title: "End-to-end", desc: "From concept to last guest, we handle everything." },
-  { icon: Sparkles, title: "Premium Craft", desc: "Curated decor, lighting & entertainment partners." },
+const trustPillars = [
+  { icon: ShieldCheck, title: "Risk Mitigation", desc: "Redundant power & audio systems for zero-failure production." },
+  { icon: BarChart3, title: "ROI Focused", desc: "Strategic events designed to drive brand value and engagement." },
+  { icon: Globe, title: "Global Standards", desc: "International production protocols and elite logistics." },
+  { icon: History, title: "15-Year Legacy", desc: "Over a decade of successful high-stakes event delivery." },
 ];
 
-const testimonialSlots = [0, 1, 2];
+const featuredAssets = [
+  {
+    title: "Corporate Command",
+    img: corporate,
+    features: ["AGM Management", "Product Reveals", "Stakeholder Summits"],
+    status: "Priority Service"
+  },
+  {
+    title: "Luxury Production",
+    img: wedding,
+    features: ["Bespoke Design", "VIP Concierge", "Elite Catering"],
+    status: "Limited Availability"
+  },
+  {
+    title: "Massive Venues",
+    img: concert,
+    features: ["Stadium Sound", "Intelligent Light", "Stage Rigging"],
+    status: "Technical Mastery"
+  }
+];
 
 function Home() {
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 60000); // Switch every 1 minute
+    return () => clearInterval(timer);
+  }, []);
+
   return (
-    <div className="relative min-w-0">
-      {/* HERO */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 pointer-events-none">
-          <img src={heroImg} alt="Elegant event ballroom" width={1920} height={1080} className="h-full w-full object-cover opacity-20" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/30 to-background/55" />
+    <div className="relative min-w-0 bg-[#0b0e14] text-white font-sans">
+      {/* 1. HERO SECTION (HIGH-IMPACT MARKETING) */}
+      <section className="relative min-h-screen flex flex-col items-center justify-start overflow-hidden pt-20">
+        <div className="absolute inset-0 z-0">
+          {heroImages.map((src, idx) => (
+            <img
+              key={src}
+              src={src}
+              alt={`Royal Touch Hero ${idx}`}
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out ${
+                idx === currentImgIndex ? "opacity-100 scale-105" : "opacity-0 scale-100"
+              }`}
+            />
+          ))}
+          <div className="absolute inset-0 bg-[#0b0e14]/40" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-transparent to-[#0b0e14]" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 pt-24 pb-24 sm:pt-28 sm:pb-32 md:pt-40 md:pb-44">
-          <p className="text-xs uppercase tracking-[0.3em] text-gold mb-6">Premium Event Management</p>
-          <h1 className="font-display text-4xl sm:text-5xl md:text-7xl lg:text-8xl leading-[0.98] max-w-4xl">
-            Moments that <span className="text-gradient-gold">linger</span>, long after the lights dim.
-          </h1>
-          <p className="mt-6 max-w-xl text-lg text-muted-foreground">
-            From candle-lit weddings to flagship brand launches — Royal Touch designs and produces unforgettable events with cinematic detail.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-3">
-            <Link to="/booking" className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition">
-              Book an Event <ArrowRight size={16} />
-            </Link>
-            <Link to="/contact" className="inline-flex items-center gap-2 rounded-full border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10 transition">
-              Get a Free Quote
-            </Link>
-          </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
+          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 rounded-[32px] space-y-8 animate-in fade-in zoom-in duration-1000">
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-[0.85]">
+                Architecting <br />
+                <span className="text-gold">Excellence.</span>
+              </h1>
+              <p className="max-w-2xl mx-auto text-base md:text-xl text-gray-200 font-medium leading-relaxed">
+                Experience the pinnacle of event production. Premium planning, 100% technical uptime, and professional logistics at your command.
+              </p>
+            </div>
 
-          <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl">
-            {[["500+", "Events Produced"], ["12yrs", "Experience"], ["40+", "Trusted Partners"], ["99%", "Client Satisfaction"]].map(([n, l]) => (
-              <div key={l}>
-                <div className="font-display text-3xl md:text-4xl text-gradient-gold">{n}</div>
-                <div className="text-xs uppercase tracking-widest text-muted-foreground mt-1">{l}</div>
+            <div className="flex flex-wrap justify-center gap-4 pt-4">
+              <Link to="/portfolio" className="h-14 sm:h-16 px-8 sm:px-12 rounded-xl bg-gold text-[#0b0e14] font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white transition-all shadow-2xl w-full sm:w-auto">
+                Execute Portfolio
+              </Link>
+              <Link to="/booking" className="h-14 sm:h-16 px-8 sm:px-12 rounded-xl border border-white/20 bg-[#0b0e14]/40 backdrop-blur-md text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white/10 transition-all w-full sm:w-auto">
+                Request Strategy Session
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. SEARCH DATABASE (FUNCTIONALITY) */}
+        <div className="absolute bottom-0 left-0 right-0 z-20">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6">
+            <div className="bg-[#121212] border-t-4 border-gold p-8 rounded-t-3xl shadow-2xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+                <div className="lg:col-span-5 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Live Project Database</p>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search projects by type or scale..."
+                      className="w-full h-14 bg-[#1a1a1a] border border-white/10 rounded-xl px-6 text-sm text-white focus:border-gold outline-none transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4 space-y-3">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Select Discipline</p>
+                  <div className="relative">
+                    <select className="w-full h-14 bg-[#1a1a1a] border border-white/10 rounded-xl px-6 text-sm text-white appearance-none focus:border-gold outline-none cursor-pointer">
+                      <option>All Services</option>
+                      <option>Corporate Galas</option>
+                      <option>Concert Productions</option>
+                      <option>Luxury Weddings</option>
+                    </select>
+                    <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold pointer-events-none" size={18} />
+                  </div>
+                </div>
+
+                <div className="lg:col-span-3">
+                  <button className="w-full h-14 bg-gold text-[#0b0e14] rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all">
+                    <Search size={20} />
+                    Run Search
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. TRUST PILLARS (BUSINESS ORIENTED TILES) */}
+      <section className="py-32 bg-white/[0.01]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trustPillars.map((pillar, i) => (
+              <div key={i} className="p-10 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
+                <div className="h-14 w-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold mb-8 group-hover:bg-gold group-hover:text-black transition-all">
+                  <pillar.icon size={28} />
+                </div>
+                <h3 className="font-display text-2xl text-white mb-4 tracking-tight">{pillar.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{pillar.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* INTRO */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24 grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <SectionHeader
-            eyebrow="Who we are"
-            title={<>Designers of <em className="text-gradient-gold not-italic">defining</em> moments.</>}
-            subtitle="Royal Touch Events is a full-service event house. We blend storytelling, design, and flawless logistics so you can be fully present at your own event."
-          />
-          <Link to="/about" className="mt-8 inline-flex items-center gap-2 text-gold story-link text-sm uppercase tracking-widest">
-            Our story <ArrowRight size={14} />
-          </Link>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <img src={wedding} alt="" loading="lazy" className="rounded-xl aspect-[4/5] object-cover" />
-          <img src={decor} alt="" loading="lazy" className="rounded-xl aspect-[4/5] object-cover mt-10" />
-        </div>
-      </section>
+      {/* 4. STRATEGIC ASSETS GRID (CLEAR DETAILS & FEATURES) */}
+      <section className="py-32 border-y border-white/5 bg-[#0b0e14]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-10 mb-20">
+             <div className="max-w-2xl space-y-6">
+                <p className="text-gold text-[10px] font-black uppercase tracking-[0.4em]">Core Capabilities</p>
+                <h2 className="font-display text-5xl md:text-8xl tracking-tighter">Premium Asset <br />Management.</h2>
+             </div>
+             <Link to="/services" className="h-12 px-8 rounded-full border border-white/10 text-xs font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all">
+                View All Disciplines
+             </Link>
+          </div>
 
-      {/* SERVICES */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
-        <div className="flex items-end justify-between flex-wrap gap-6">
-          <SectionHeader eyebrow="What we do" title="Services tailored to your vision." />
-          <Link to="/services" className="text-sm uppercase tracking-widest text-gold story-link">All Services</Link>
-        </div>
-        <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {services.map((s) => (
-            <div key={s.title} className="flip-tile h-72 rounded-2xl tech-glow shadow-lg shadow-black/30">
-              <div className="flip-inner rounded-2xl">
-                {/* Front */}
-                <div className="flip-face glass-strong rounded-2xl p-6 flex flex-col justify-end border border-white/15">
-                  <img src={s.img} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-50" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/55 to-background/25" />
-                  <div className="relative">
-                    <Calendar className="text-gold" size={20} />
-                    <h3 className="mt-3 font-display text-2xl">{s.title}</h3>
-                    <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">Hover to explore</p>
+          <div className="grid lg:grid-cols-3 gap-8">
+            {featuredAssets.map((asset, i) => (
+              <div key={i} className="flex flex-col bg-white/[0.02] border border-white/5 rounded-[40px] overflow-hidden hover:border-gold/30 transition-all duration-500 group">
+                <div className="h-64 relative overflow-hidden">
+                  <img src={asset.img} alt={asset.title} className="h-full w-full object-cover grayscale opacity-40 group-hover:grayscale-0 group-hover:opacity-100 group-hover:scale-105 transition-all duration-1000" />
+                  <div className="absolute top-6 left-6 px-3 py-1 rounded-full bg-gold text-[#0b0e14] text-[9px] font-black uppercase tracking-widest">
+                    {asset.status}
                   </div>
                 </div>
-                {/* Back */}
-                <div className="flip-face flip-back glass-strong glass-gold rounded-2xl p-6 flex flex-col justify-between">
-                  <div>
-                    <h3 className="font-display text-2xl text-gradient-gold">{s.title}</h3>
-                    <p className="mt-3 text-sm text-foreground/85">{s.desc}</p>
-                    <p className="mt-3 text-xs text-muted-foreground">{s.detail}</p>
+
+                <div className="p-10 space-y-8 flex flex-col justify-between flex-1">
+                  <div className="space-y-4">
+                    <h3 className="font-display text-4xl text-white">{asset.title}</h3>
+                    <p className="text-gray-500 text-sm">Engineered for high-impact performance and flawless execution in {asset.title.toLowerCase()} environments.</p>
                   </div>
-                  <Link to="/services" className="inline-flex items-center gap-1 text-xs uppercase tracking-widest text-gold">
-                    Explore <ArrowRight size={12} />
-                  </Link>
+
+                  <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gold/60">Key Performance Indicators</p>
+                    <ul className="space-y-3">
+                      {asset.features.map((feature, fIdx) => (
+                        <li key={fIdx} className="flex items-center gap-3 text-xs font-bold text-gray-400">
+                          <CheckCircle2 size={14} className="text-gold" />
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <button className="w-full h-14 mt-4 border border-white/10 rounded-2xl text-[10px] font-black uppercase tracking-widest group-hover:bg-gold group-hover:text-black transition-all">
+                    Request Strategy Brief
+                  </button>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* WHY US */}
-      <section className="border-y border-white/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 grid md:grid-cols-2 gap-16 items-center">
-          <div className="relative">
-            <img src={concert} alt="" loading="lazy" className="rounded-2xl aspect-[5/6] object-cover" />
-            <div className="absolute -bottom-4 -right-2 sm:-bottom-6 sm:-right-6 hidden sm:block rounded-2xl bg-background border border-gold/40 px-4 sm:px-6 py-4 sm:py-5">
-              <div className="font-display text-3xl text-gradient-gold">Award<br />Winning</div>
-              <p className="text-xs text-muted-foreground mt-1">EAEA 2024 Honoree</p>
-            </div>
-          </div>
-          <div>
-            <SectionHeader eyebrow="Why choose us" title="Production with conscience and craft." />
-            <div className="mt-10 space-y-8">
-              {why.map((w) => (
-                <div key={w.title} className="flex gap-5">
-                  <div className="h-11 w-11 rounded-full bg-primary/15 text-gold flex items-center justify-center shrink-0">
-                    <w.icon size={18} />
-                  </div>
-                  <div>
-                    <h4 className="font-display text-xl">{w.title}</h4>
-                    <p className="text-sm text-muted-foreground mt-1">{w.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* TESTIMONIALS */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-24">
-        <SectionHeader eyebrow="Kind words" title="Trusted by couples & brands alike." center />
-        <div className="mt-14 grid md:grid-cols-3 gap-5">
-          {testimonialSlots.map((slot) => (
-            <figure
-              key={slot}
-              aria-label="Testimonial placeholder"
-              className="glass-strong rounded-2xl p-7 border border-white/15 shadow-lg shadow-black/25 min-h-48 flex items-start"
-            >
-              <Quote className="text-gold" size={28} />
-            </figure>
-          ))}
+      {/* 5. LIVE OPERATIONS STATUS (FUNCTIONALITY & TRUST) */}
+      <section className="py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+           <div className="grid lg:grid-cols-2 gap-20 items-center">
+              <div className="space-y-10">
+                 <div className="space-y-4">
+                    <p className="text-gold text-xs font-bold uppercase tracking-[0.4em]">Live Intelligence</p>
+                    <h2 className="font-display text-5xl md:text-7xl">Mission Control Ready.</h2>
+                 </div>
+
+                 <div className="grid sm:grid-cols-2 gap-8">
+                    {[
+                      { icon: Clock, label: "Response Time", val: "< 15 Mins" },
+                      { icon: ShieldCheck, label: "Uptime Record", val: "100.0%" },
+                      { icon: Users, label: "Active Team", val: "42 Members" },
+                      { icon: Zap, label: "Tech Readiness", val: "98.5%" },
+                    ].map((stat, i) => (
+                      <div key={i} className="flex items-center gap-4 p-6 rounded-2xl bg-white/[0.03] border border-white/5">
+                         <div className="h-10 w-10 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
+                            <stat.icon size={20} />
+                         </div>
+                         <div>
+                            <p className="text-[9px] font-bold uppercase tracking-widest text-gray-500">{stat.label}</p>
+                            <p className="text-xl font-black text-white">{stat.val}</p>
+                         </div>
+                      </div>
+                    ))}
+                 </div>
+
+                 <p className="text-gray-500 leading-relaxed max-w-xl">
+                   Our integrated command center provides real-time oversight of all logistical and technical assets, ensuring absolute precision from first arrival to final load-out.
+                 </p>
+              </div>
+
+              <div className="relative group">
+                 <div className="aspect-square rounded-[48px] overflow-hidden border border-white/10 shadow-2xl relative">
+                    <img src={heroImg} alt="Command Center" className="h-full w-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-transparent to-transparent" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                       <PlayCircle size={100} className="text-gold animate-pulse" />
+                    </div>
+                 </div>
+                 {/* Trust Badge */}
+                 <div className="absolute -top-6 -right-6 glass-strong p-6 rounded-2xl animate-float-slow hidden xl:block">
+                    <Award size={32} className="text-gold mb-3" />
+                    <p className="font-display text-lg text-white">Top 5% Agency</p>
+                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-gray-500 mt-1">Nairobi Region 2026</p>
+                 </div>
+              </div>
+           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 pb-24">
-        <div className="relative overflow-hidden rounded-3xl glass-strong glass-gold p-10 md:p-16 text-center">
-          <div className="absolute inset-0 -z-10 opacity-25">
-            <img src={corporate} alt="" loading="lazy" className="h-full w-full object-cover" />
+      {/* 6. TRUSTED PARTNERS (UPRIGHT MARQUEE) */}
+      <section className="py-16 bg-white/[0.01] border-y border-white/5 overflow-hidden">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-20 hover:opacity-100 transition-opacity duration-700">
+            {["SAFARICOM", "KCB BANK", "UNEP", "COCA-COLA", "BMW KENYA", "AIRTEL"].map(brand => (
+              <span key={brand} className="text-xl font-black tracking-tighter text-white font-sans">{brand}</span>
+            ))}
           </div>
-          <p className="text-xs uppercase tracking-[0.3em] text-gold">Ready when you are</p>
-          <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-6xl">Let's plan something <span className="text-gradient-gold">remarkable</span>.</h2>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link to="/booking" className="rounded-full bg-gold text-background px-7 py-3.5 text-sm font-semibold hover:opacity-90 transition">Book Your Event</Link>
-            <Link to="/contact" className="rounded-full glass border border-gold/40 text-gold px-7 py-3.5 text-sm font-medium hover:bg-gold/10">Contact Us Today</Link>
+        </div>
+      </section>
+
+      {/* 7. HIGH-CONVERSION CTA */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-32">
+        <div className="relative rounded-[60px] overflow-hidden bg-white/5 border border-white/10 p-12 md:p-32 text-center">
+          <div className="absolute inset-0 bg-radial-indigo opacity-30" />
+          <div className="relative z-10 max-w-3xl mx-auto space-y-10">
+            <h2 className="font-display text-5xl md:text-9xl leading-none tracking-tighter text-white">Your Success <br /><span className="text-gold">Architected.</span></h2>
+            <p className="text-gray-400 text-lg md:text-2xl font-light">
+              Connect with our senior producers to discuss your project's technical and creative blueprint.
+            </p>
+            <div className="flex flex-wrap justify-center gap-6 pt-10">
+              <Link to="/booking" className="h-20 px-16 rounded-full bg-gold text-[#0b0e14] font-black text-sm uppercase tracking-widest flex items-center gap-3 hover:scale-105 transition-all shadow-2xl">
+                Start Strategy <ArrowRight size={20} />
+              </Link>
+            </div>
           </div>
         </div>
       </section>

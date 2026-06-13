@@ -1,85 +1,153 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from "lucide-react";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe } from "lucide-react";
 import daniwestIcon from "../../assets/daniwest-icon.png";
 import eventsLogo from "../../assets/events-logo.jpeg";
 
 export function Footer() {
   return (
-    <footer className="mt-24 glass border-t border-white/10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-16 grid gap-12 md:grid-cols-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <span className="inline-flex h-12 w-12 rounded-full overflow-hidden ring-1 ring-gold/40">
-              <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
-            </span>
-            <div className="font-display text-xl">Royal <span className="text-gradient-gold">Touch</span> Events</div>
+    <footer className="bg-[#0b0e14] border-t-2 border-gold/20 pt-24 font-sans">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        {/* Top: Brand & Newsletter Strategic Row */}
+        <div className="grid lg:grid-cols-12 gap-12 pb-16 border-b border-white/5">
+          <div className="lg:col-span-4 space-y-8">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5">
+                <img src={eventsLogo} alt="Royal Touch Logo" className="h-full w-full object-cover" />
+              </div>
+              <span className="text-2xl font-black uppercase tracking-tighter text-white">
+                Royal <span className="text-gold">Touch</span> Events
+              </span>
+            </Link>
+            <p className="text-sm text-gray-500 leading-relaxed max-w-sm font-medium">
+              Architecting extraordinary moments for the world's most discerning brands and individuals. Nairobi's premier choice for executive production.
+            </p>
+            <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-black uppercase tracking-widest bg-emerald-500/5 px-4 py-2 rounded-full border border-emerald-500/20 w-fit">
+              <ShieldCheck size={14} /> Certified Event Agency 2026
+            </div>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground max-w-xs italic">
-            We plan. You celebrate. We make it memorable.
-          </p>
-        </div>
 
-        <div>
-          <h4 className="text-sm uppercase tracking-widest text-gold mb-4">Explore</h4>
-          <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/about" className="hover:text-foreground">About</Link></li>
-            <li><Link to="/services" className="hover:text-foreground">Services</Link></li>
-            <li><Link to="/portfolio" className="hover:text-foreground">Portfolio</Link></li>
-            <li><Link to="/blog" className="hover:text-foreground">Blog</Link></li>
-            <li><Link to="/booking" className="hover:text-foreground">Book an Event</Link></li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm uppercase tracking-widest text-gold mb-4">Contact</h4>
-          <ul className="space-y-3 text-sm text-muted-foreground">
-            <li className="flex items-center gap-2"><Phone size={14} /> +254 795 365 334</li>
-            <li className="flex items-center gap-2"><Mail size={14} /> eventsroyaltouch7@gmail.com</li>
-            <li className="flex items-center gap-2"><MapPin size={14} /> Nairobi, Kenya</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-sm uppercase tracking-widest text-gold mb-4">Follow</h4>
-          <div className="flex gap-3">
-            <a href="#" aria-label="Instagram" className="h-9 w-9 inline-flex items-center justify-center rounded-full glass hover:border-gold hover:text-gold transition"><Instagram size={16} /></a>
-            <a href="#" aria-label="Facebook" className="h-9 w-9 inline-flex items-center justify-center rounded-full glass hover:border-gold hover:text-gold transition"><Facebook size={16} /></a>
-            <a href="#" aria-label="Twitter" className="h-9 w-9 inline-flex items-center justify-center rounded-full glass hover:border-gold hover:text-gold transition"><Twitter size={16} /></a>
+          <div className="lg:col-span-3 lg:col-start-6 space-y-6">
+             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Executive Briefing</h4>
+             <p className="text-xs text-gray-500 leading-relaxed">Join 2,500+ leaders receiving our monthly production insights.</p>
+             <div className="relative group">
+                <input
+                  type="email"
+                  placeholder="Professional Email"
+                  className="w-full bg-[#121212] border border-white/10 rounded-lg py-3 pl-4 pr-12 text-xs text-white focus:border-gold outline-none transition-all"
+                />
+                <button className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-md bg-gold text-[#0b0e14] flex items-center justify-center hover:bg-white transition-all">
+                  <ArrowRight size={16} />
+                </button>
+             </div>
           </div>
-          <Link to="/booking" className="mt-6 inline-flex items-center rounded-full bg-gold text-background px-5 py-2 text-sm font-medium hover:opacity-90 transition">
-            Get a Free Quote
-          </Link>
+
+          <div className="lg:col-span-3 lg:col-start-10 space-y-6">
+             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-white">Global Reach</h4>
+             <div className="flex items-center gap-3 text-gold">
+                <Globe size={24} className="opacity-50" />
+                <div>
+                   <p className="text-xl font-black text-white leading-none">EAST AFRICA</p>
+                   <p className="text-[9px] uppercase tracking-widest text-gray-500 font-bold mt-1">Operational Hub</p>
+                </div>
+             </div>
+          </div>
         </div>
-      </div>
-      <div className="border-t border-white/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-6 text-xs text-muted-foreground flex flex-col md:flex-row gap-3 justify-between items-center text-center md:text-left">
-          <p>© {new Date().getFullYear()} Royal Touch Events. All rights reserved.</p>
-          <nav className="flex items-center gap-5">
-            <Link to="/terms" className="hover:text-gold">Terms &amp; Conditions</Link>
-            <Link to="/privacy" className="hover:text-gold">Privacy Policy</Link>
-            <Link to="/copyright" className="hover:text-gold">Copyright</Link>
-          </nav>
+
+        {/* Middle: Navigation & Details modular grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-12 py-16">
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">The Firm</h4>
+            <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <li><Link to="/about" className="hover:text-white transition-colors">The Royal Story</Link></li>
+              <li><Link to="/services" className="hover:text-white transition-colors">Our Disciplines</Link></li>
+              <li><Link to="/portfolio" className="hover:text-white transition-colors">The Royal Vault</Link></li>
+              <li><Link to="/blog" className="hover:text-white transition-colors">Insight Hub</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-6">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Solutions</h4>
+            <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <li><Link to="/services" className="hover:text-white transition-colors">Corporate Strategy</Link></li>
+              <li><Link to="/services" className="hover:text-white transition-colors">Luxury Production</Link></li>
+              <li><Link to="/services" className="hover:text-white transition-colors">Technical AV</Link></li>
+              <li><Link to="/booking" className="hover:text-white transition-colors">Custom Brief</Link></li>
+            </ul>
+          </div>
+
+          <div className="space-y-6 lg:col-span-2">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Headquarters</h4>
+            <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
+              <li className="flex items-start gap-4">
+                <MapPin size={18} className="text-gold shrink-0 mt-0.5" />
+                <span className="leading-relaxed">Upper Hill District,<br />Nairobi, Kenya</span>
+              </li>
+              <li className="flex items-center gap-4">
+                <Phone size={16} className="text-gold shrink-0" />
+                <span>+254 795 365 334</span>
+              </li>
+              <li className="flex items-center gap-4">
+                <Mail size={16} className="text-gold shrink-0" />
+                <span className="lowercase">eventsroyaltouch7@gmail.com</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="space-y-8">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Connect</h4>
+            <div className="flex flex-wrap gap-4">
+              {[
+                { icon: Instagram, label: "Instagram" },
+                { icon: Facebook, label: "Facebook" },
+                { icon: Twitter, label: "Twitter" }
+              ].map((social, i) => (
+                <a
+                  key={social.label}
+                  href="#"
+                  aria-label={social.label}
+                  className="h-10 w-10 inline-flex items-center justify-center rounded-xl border border-white/10 text-gray-400 hover:border-gold hover:text-gold hover:bg-gold/5 transition-all duration-300"
+                >
+                  <social.icon size={18} />
+                </a>
+              ))}
+            </div>
+            <Link
+              to="/booking"
+              className="w-full h-12 inline-flex items-center justify-center rounded-lg bg-gold text-[#0b0e14] text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/10"
+            >
+              Request Quote
+            </Link>
+          </div>
         </div>
-        <div className="border-t border-white/10 bg-white/[0.03]">
-          <p className="mx-auto max-w-7xl px-4 sm:px-6 py-4 text-xs sm:text-sm leading-relaxed text-muted-foreground flex flex-wrap items-center justify-center gap-2 text-center">
-            <img
-              src={daniwestIcon}
-              alt="Daniwest Tech Ltd"
-              className="h-5 w-5 sm:h-6 sm:w-6 shrink-0 object-contain"
-            />
-            <span>
-              Engineered by{" "}
+
+        {/* Bottom: Legal & Credits (Formal Layout) */}
+        <div className="border-t border-white/5 py-12 flex flex-col md:grid md:grid-cols-12 gap-8 items-center md:items-start text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+           <div className="md:col-span-4 text-center md:text-left">
+             © {new Date().getFullYear()} Royal Touch Events Group. All Rights Reserved.
+           </div>
+
+           <nav className="md:col-span-4 flex justify-center gap-10">
+             <Link to="/terms" className="hover:text-gold transition-colors">Terms</Link>
+             <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
+             <Link to="/copyright" className="hover:text-gold transition-colors">Copyright</Link>
+           </nav>
+
+           <div className="md:col-span-4 flex justify-center md:justify-end items-center gap-3">
+              <img
+                src={daniwestIcon}
+                alt="Daniwest Tech"
+                className="h-4 w-4 grayscale opacity-40"
+              />
+              <span className="opacity-60">Engineered by</span>
               <a
                 href="https://daniwesttechnologies.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-medium text-gold hover:text-gold-soft underline underline-offset-2 transition-colors"
+                className="text-gold hover:text-white transition-colors"
               >
                 Daniwest Tech Ltd
-              </a>{" "}
-              © 2026. Securing the digital future, one innovation at a time.
-            </span>
-          </p>
+              </a>
+           </div>
         </div>
       </div>
     </footer>
