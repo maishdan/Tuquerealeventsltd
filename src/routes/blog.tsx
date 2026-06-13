@@ -103,7 +103,7 @@ function Blog() {
   return (
     <div className="bg-[#0b0e14] text-white font-sans min-h-screen min-w-0">
       {/* 1. HERO SECTION (MATCHES HOME PAGE) */}
-      <section className="relative min-h-[85vh] flex flex-col items-center justify-start overflow-hidden pt-20">
+      <section className="relative min-h-[60vh] flex flex-col items-center justify-start overflow-hidden pt-20">
         <div className="absolute inset-0 z-0">
           {heroImages.map((src, idx) => (
             <img
@@ -143,7 +143,7 @@ function Blog() {
       </section>
 
       {/* 2. FEATURED ARTICLE (MARKETING TECH) */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 -mt-24 relative z-20 pb-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 mt-12 relative z-20 pb-24">
         <div className="group relative rounded-[48px] overflow-hidden border border-white/10 bg-[#121212]/90 backdrop-blur-2xl flex flex-col lg:flex-row items-stretch hover:border-gold/30 transition-all duration-700 shadow-2xl">
           <div className="lg:w-1/2 relative h-80 lg:h-auto overflow-hidden">
             <img src={featuredPost.image} alt={featuredPost.title} className="h-full w-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000" />

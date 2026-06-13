@@ -103,23 +103,23 @@ function Home() {
           <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-transparent to-[#0b0e14]" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
-          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 rounded-[32px] space-y-8 animate-in fade-in zoom-in duration-1000">
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-[0.85]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-8 md:mt-16">
+          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-6 md:p-12 rounded-[24px] md:rounded-[32px] space-y-6 md:space-y-8 animate-in fade-in zoom-in duration-1000">
+            <div className="space-y-3 md:space-y-4">
+              <h1 className="text-3xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-tight md:leading-[0.85]">
                 Architecting <br />
                 <span className="text-gold">Excellence.</span>
               </h1>
-              <p className="max-w-2xl mx-auto text-base md:text-xl text-gray-200 font-medium leading-relaxed">
+              <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-xl text-gray-200 font-medium leading-relaxed">
                 Experience the pinnacle of event production. Premium planning, 100% technical uptime, and professional logistics at your command.
               </p>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Link to="/portfolio" className="h-14 sm:h-16 px-8 sm:px-12 rounded-xl bg-gold text-[#0b0e14] font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white transition-all shadow-2xl w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row justify-center gap-4 pt-2">
+              <Link to="/portfolio" className="h-12 sm:h-16 px-6 sm:px-12 rounded-xl bg-gold text-[#0b0e14] font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white transition-all shadow-2xl w-full sm:w-auto">
                 Execute Portfolio
               </Link>
-              <Link to="/booking" className="h-14 sm:h-16 px-8 sm:px-12 rounded-xl border border-white/20 bg-[#0b0e14]/40 backdrop-blur-md text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white/10 transition-all w-full sm:w-auto">
+              <Link to="/booking" className="h-12 sm:h-16 px-6 sm:px-12 rounded-xl border border-white/20 bg-[#0b0e14]/40 backdrop-blur-md text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center hover:bg-white/10 transition-all w-full sm:w-auto">
                 Request Strategy Session
               </Link>
             </div>
@@ -127,37 +127,37 @@ function Home() {
         </div>
 
         {/* 2. SEARCH DATABASE (FUNCTIONALITY) */}
-        <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="relative mt-auto w-full z-20 pt-8 md:pt-12">
           <div className="mx-auto max-w-7xl px-4 sm:px-6">
-            <div className="bg-[#121212] border-t-4 border-gold p-8 rounded-t-3xl shadow-2xl">
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
-                <div className="lg:col-span-5 space-y-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Live Project Database</p>
+            <div className="bg-[#121212] border-t-4 border-gold p-6 md:p-8 rounded-t-2xl md:rounded-t-3xl shadow-2xl">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-end">
+                <div className="lg:col-span-5 space-y-2 md:space-y-3">
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Live Project Database</p>
                   <div className="relative">
                     <input
                       type="text"
                       placeholder="Search projects by type or scale..."
-                      className="w-full h-14 bg-[#1a1a1a] border border-white/10 rounded-xl px-6 text-sm text-white focus:border-gold outline-none transition-all"
+                      className="w-full h-12 md:h-14 bg-[#1a1a1a] border border-white/10 rounded-lg md:rounded-xl px-4 md:px-6 text-sm text-white focus:border-gold outline-none transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="lg:col-span-4 space-y-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Select Discipline</p>
+                <div className="lg:col-span-4 space-y-2 md:space-y-3">
+                  <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Select Discipline</p>
                   <div className="relative">
-                    <select className="w-full h-14 bg-[#1a1a1a] border border-white/10 rounded-xl px-6 text-sm text-white appearance-none focus:border-gold outline-none cursor-pointer">
+                    <select className="w-full h-12 md:h-14 bg-[#1a1a1a] border border-white/10 rounded-lg md:rounded-xl px-4 md:px-6 text-sm text-white appearance-none focus:border-gold outline-none cursor-pointer">
                       <option>All Services</option>
                       <option>Corporate Galas</option>
                       <option>Concert Productions</option>
                       <option>Luxury Weddings</option>
                     </select>
-                    <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold pointer-events-none" size={18} />
+                    <ChevronDown className="absolute right-4 md:right-6 top-1/2 -translate-y-1/2 text-gold pointer-events-none" size={18} />
                   </div>
                 </div>
 
                 <div className="lg:col-span-3">
-                  <button className="w-full h-14 bg-gold text-[#0b0e14] rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all">
-                    <Search size={20} />
+                  <button className="w-full h-12 md:h-14 bg-gold text-[#0b0e14] rounded-lg md:rounded-xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-white transition-all">
+                    <Search size={18} />
                     Run Search
                   </button>
                 </div>

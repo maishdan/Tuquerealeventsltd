@@ -1,23 +1,33 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Loader2, UserPlus } from "lucide-react";
+import { Loader2, UserPlus, ShieldCheck, ArrowRight, Check } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/sign-up")({
   head: () => ({
     ...createPageSeo({
-      title: "Sign Up",
+      title: "Establish Membership | Royal Touch Events",
       description:
-        "Create your Royal Touch Events account to plan weddings, corporate events, concerts and private celebrations in Nairobi.",
+        "Join Royal Touch Events. Create your account to access Nairobi's premier event planning and production services.",
       path: "/sign-up",
-      keywords: "Royal Touch Events register, create account, event planning Nairobi",
       noindex: true,
     }),
   }),
   component: SignUp,
 });
+
+const heroImages = [
+  "/back/e1.jfif",
+  "/back/e2.jfif",
+  "/back/e3.jfif",
+  "/back/e4.jfif",
+  "/back/e5.jfif",
+  "/back/e7.jpg",
+  "/back/e8.jpg",
+  "/back/e9.jpg",
+];
 
 const schema = z
   .object({
@@ -38,6 +48,14 @@ function SignUp() {
   const [authError, setAuthError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checkEmail, setCheckEmail] = useState(false);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 60000);
+    return () => clearInterval(timer);
+  }, []);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -62,7 +80,7 @@ function SignUp() {
     try {
       await signUp(res.data.email, res.data.password, res.data.name);
       setCheckEmail(true);
-      setTimeout(() => navigate({ to: "/sign-in" }), 2500);
+      setTimeout(() => navigate({ to: "/sign-in" }), 3500);
     } catch (err) {
       setAuthError(err instanceof Error ? err.message : "Could not create account.");
     } finally {
@@ -72,66 +90,100 @@ function SignUp() {
 
   if (checkEmail) {
     return (
-      <section className="mx-auto max-w-md px-4 sm:px-6 py-12 text-center">
-        <div className="rounded-2xl border border-white/15 glass-strong p-8">
-          <h1 className="font-display text-3xl">Check your email</h1>
-          <p className="mt-3 text-sm text-muted-foreground">Confirm your account, then sign in to open your dashboard.</p>
-          <Link to="/sign-in" className="mt-6 inline-flex rounded-full bg-gold text-background px-5 py-2.5 text-sm font-medium">Go to Sign In</Link>
+      <div className="bg-[#0b0e14] min-h-screen flex flex-col items-center justify-center text-white px-4">
+        <div className="max-w-xl w-full glass-strong p-12 rounded-[40px] border border-gold/30 text-center space-y-8 animate-in fade-in zoom-in duration-700">
+          <div className="mx-auto h-20 w-20 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center border border-emerald-500/30">
+            <Check size={40} />
+          </div>
+          <div className="space-y-4">
+            <h1 className="font-display text-5xl md:text-7xl uppercase font-black tracking-tighter leading-tight">Verification Required.</h1>
+            <p className="text-gray-400 text-lg">We have dispatched a verification link to your professional email. Please confirm your membership to proceed.</p>
+          </div>
+          <Link to="/sign-in" className="inline-flex items-center gap-2 text-gold font-black uppercase tracking-widest text-xs hover:text-white transition-colors">
+            Proceed to Sign In <ArrowRight size={14} />
+          </Link>
         </div>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="mx-auto max-w-md px-4 sm:px-6 py-12 sm:py-16">
-      <div className="rounded-2xl border border-white/15 glass-strong p-8 sm:p-10">
-        <div className="mx-auto h-12 w-12 rounded-full bg-primary/15 text-gold flex items-center justify-center">
-          <UserPlus size={22} />
-        </div>
-        <h1 className="mt-6 font-display text-3xl sm:text-4xl text-center">Create account</h1>
-        <p className="mt-2 text-sm text-muted-foreground text-center">
-          Join Royal Touch Events to plan unforgettable moments.
-        </p>
-
-        <form onSubmit={onSubmit} className="mt-8 space-y-5" noValidate>
-          {authError && (
-            <p className="text-sm text-destructive rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3">{authError}</p>
-          )}
-          <div>
-            <label htmlFor="signup-name" className="text-xs uppercase tracking-widest text-muted-foreground">Full Name</label>
-            <input id="signup-name" name="name" type="text" autoComplete="name" maxLength={100} placeholder="Your full name" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
-            {errors.name && <p className="mt-1 text-xs text-destructive">{errors.name}</p>}
-          </div>
-          <div>
-            <label htmlFor="signup-email" className="text-xs uppercase tracking-widest text-muted-foreground">Email</label>
-            <input id="signup-email" name="email" type="email" autoComplete="email" maxLength={255} placeholder="you@example.com" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
-            {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
-          </div>
-          <div>
-            <label htmlFor="signup-password" className="text-xs uppercase tracking-widest text-muted-foreground">Password</label>
-            <input id="signup-password" name="password" type="password" autoComplete="new-password" maxLength={128} placeholder="At least 8 characters" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
-            {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password}</p>}
-          </div>
-          <div>
-            <label htmlFor="signup-confirm" className="text-xs uppercase tracking-widest text-muted-foreground">Confirm Password</label>
-            <input id="signup-confirm" name="confirmPassword" type="password" autoComplete="new-password" maxLength={128} placeholder="Repeat password" className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm focus:outline-none focus:border-gold/60" />
-            {errors.confirmPassword && (
-              <p className="mt-1 text-xs text-destructive">{errors.confirmPassword}</p>
-            )}
-          </div>
-          <button type="submit" disabled={submitting} className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-medium text-primary-foreground hover:opacity-90 transition disabled:opacity-60">
-            {submitting && <Loader2 size={16} className="animate-spin" />}
-            Sign Up
-          </button>
-        </form>
-
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/sign-in" className="text-gold hover:underline">
-            Sign in
-          </Link>
-        </p>
+    <div className="bg-[#0b0e14] text-white font-sans min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-4">
+      {/* Background Switcher */}
+      <div className="absolute inset-0 z-0">
+        {heroImages.map((src, idx) => (
+          <img
+            key={src}
+            src={src}
+            alt={`Auth Background ${idx}`}
+            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out ${
+              idx === currentImgIndex ? "opacity-40 scale-105" : "opacity-0 scale-100"
+            }`}
+          />
+        ))}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-[#0b0e14]/40 to-[#0b0e14]" />
       </div>
-    </section>
+
+      <div className="relative z-10 w-full max-w-xl">
+        <div className="text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
+           <div className="flex justify-center">
+             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] font-black uppercase tracking-widest">
+               <ShieldCheck size={12} /> Membership Registry
+             </div>
+           </div>
+           <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none">Join the <br /><span className="text-gold">Firm.</span></h1>
+        </div>
+
+        <div className="bg-[#121212]/90 backdrop-blur-2xl border border-white/10 p-8 md:p-12 rounded-[40px] shadow-2xl space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+          {authError && (
+            <div className="p-5 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-3">
+              <ShieldCheck size={16} />
+              <p>{authError}</p>
+            </div>
+          )}
+
+          <form onSubmit={onSubmit} className="space-y-6" noValidate>
+            <div className="space-y-4">
+               <AuthField label="Full Legal Name" name="name" id="signup-name" error={errors.name} />
+               <AuthField label="Official Email" name="email" id="signup-email" type="email" error={errors.email} />
+               <AuthField label="Establish Security Key" name="password" id="signup-password" type="password" error={errors.password} />
+               <AuthField label="Verify Security Key" name="confirmPassword" id="signup-confirm" type="password" error={errors.confirmPassword} />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full h-16 rounded-full bg-gold text-[#0b0e14] font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-[0_0_40px_rgba(212,175,55,0.2)] disabled:opacity-50"
+            >
+              {submitting ? <Loader2 size={20} className="animate-spin" /> : <>Register Membership <ArrowRight size={18} /></>}
+            </button>
+          </form>
+
+          <div className="pt-6 border-t border-white/5 flex flex-col items-center gap-4">
+             <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Already have an account?</p>
+             <Link to="/sign-in" className="text-gold font-black uppercase tracking-[0.2em] text-xs hover:text-white transition-colors">
+               Return to Access
+             </Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AuthField({ label, name, id, type = "text", error }: { label: string; name: string; id: string; type?: string; error?: string }) {
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">{label}</label>
+      <input
+        id={id}
+        name={name}
+        type={type}
+        maxLength={255}
+        placeholder={`Enter ${label.toLowerCase()}`}
+        className="w-full h-14 bg-[#1a1a1a] border border-white/5 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none transition-all placeholder:text-gray-700"
+      />
+      {error && <p className="mt-1 text-[9px] font-bold text-destructive uppercase tracking-widest ml-4">{error}</p>}
+    </div>
   );
 }

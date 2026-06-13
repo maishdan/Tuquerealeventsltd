@@ -147,18 +147,18 @@ function Services() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
-          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-8 md:p-12 rounded-[32px] space-y-8 animate-in fade-in zoom-in duration-1000">
-            <div className="space-y-4">
+          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-6 md:p-12 rounded-[24px] md:rounded-[32px] space-y-6 md:space-y-8 animate-in fade-in zoom-in duration-1000">
+            <div className="space-y-3 md:space-y-4">
               <div className="flex justify-center">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] font-black uppercase tracking-widest">
                   <Star size={12} className="fill-gold" /> Comprehensive Industry Solutions
                 </div>
               </div>
-              <h1 className="text-4xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-[0.85]">
+              <h1 className="text-3xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-tight md:leading-[0.85]">
                 Operational <br />
                 <span className="text-gold">Disciplines.</span>
               </h1>
-              <p className="max-w-2xl mx-auto text-base md:text-xl text-gray-200 font-medium leading-relaxed">
+              <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-xl text-gray-200 font-medium leading-relaxed">
                 We deliver a vertically integrated service model. Royal Touch Events eliminates operational fragmentation by managing every technical and creative vertical in-house.
               </p>
             </div>
