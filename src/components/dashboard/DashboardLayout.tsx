@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { BackToDashboard } from "./BackToDashboard";
 import { adminSections, customerSections, type DashboardNavSection } from "@/lib/dashboard-nav";
 import {
@@ -42,16 +42,35 @@ type DashboardLayoutProps = {
 const SIDEBAR_EXPANDED = "w-64";
 const SIDEBAR_COLLAPSED = "w-[4.5rem]";
 
+const heroImages = [
+  "/back/e1.jfif",
+  "/back/e2.jfif",
+  "/back/e3.jfif",
+  "/back/e4.jfif",
+  "/back/e5.jfif",
+  "/back/e7.jpg",
+  "/back/e8.jpg",
+  "/back/e9.jpg",
+];
+
 export function DashboardLayout({ title, subtitle, nav, role, children }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isDark, setIsDark] = useState(true);
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const router = useRouter();
   const { signOut, profile } = useAuth();
   const isDashboardRoot = pathname === "/admin" || pathname === "/dashboard";
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
+    }, 60000); // Switch every 1 minute
+    return () => clearInterval(timer);
+  }, []);
 
   function handleReload() {
     router.invalidate();
@@ -95,15 +114,36 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   return (
     <div
       className={cn(
-        "min-h-screen flex transition-colors duration-300 font-sans",
+        "min-h-screen flex transition-colors duration-300 font-sans relative",
         isDark ? "bg-[#0b0e14] text-white" : "bg-slate-50 text-slate-900",
       )}
     >
+      {/* Global Background (Matches Frontend) */}
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
+        {heroImages.map((src, idx) => (
+          <img
+            key={src}
+            src={src}
+            alt=""
+            className={cn(
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out",
+              idx === currentImgIndex ? "opacity-20" : "opacity-0"
+            )}
+          />
+        ))}
+        <div className={cn(
+          "absolute inset-0",
+          isDark
+            ? "bg-gradient-to-b from-[#0b0e14]/80 via-[#0b0e14]/40 to-[#0b0e14]"
+            : "bg-white/80"
+        )} />
+      </div>
+
       {/* Desktop collapsible sidebar */}
       <aside
         className={cn(
           "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 border-r transition-all duration-300 ease-in-out",
-          isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200 shadow-xl",
+          isDark ? "bg-[#0b0e14]/80 backdrop-blur-xl border-white/5" : "bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl",
           collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
         )}
       >
@@ -116,7 +156,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
           side="left"
           className={cn(
             "w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r",
-            isDark ? "bg-[#0b0e14] border-white/10" : "bg-white border-slate-200",
+            isDark ? "bg-[#0b0e14]/90 backdrop-blur-xl border-white/10" : "bg-white/90 backdrop-blur-xl border-slate-200",
           )}
         >
           <SheetHeader className="sr-only">
@@ -129,14 +169,14 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
       {/* Main content */}
       <div
         className={cn(
-          "flex-1 flex flex-col min-w-0 transition-all duration-300",
+          "flex-1 flex flex-col min-w-0 transition-all duration-300 relative z-10",
           collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64",
         )}
       >
         <header
           className={cn(
-            "sticky top-0 z-40 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-4",
-            isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200 shadow-sm",
+            "sticky top-0 z-40 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-4 backdrop-blur-md",
+            isDark ? "bg-[#0b0e14]/60 border-white/5" : "bg-white/60 border-slate-200 shadow-sm",
           )}
         >
           <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -157,7 +197,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                 <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 hidden sm:block">
-                <h1 className="font-semibold text-sm sm:text-base truncate">{title}</h1>
+                <h1 className="font-semibold text-sm sm:text-base truncate uppercase tracking-tighter">{title}</h1>
                 <p className="text-[10px] text-gray-500 uppercase tracking-widest truncate">{subtitle}</p>
               </div>
             </div>
@@ -202,7 +242,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                 </button>
                 <button
                   type="button"
-                  className="flex items-center gap-2 bg-gold hover:bg-gold/90 text-black px-3 py-2 rounded-md text-xs font-bold transition"
+                  className="flex items-center gap-2 bg-gold hover:bg-gold/90 text-black px-3 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition"
                 >
                   <Plus size={14} /> Add Event
                 </button>
@@ -214,8 +254,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         {/* Search sub-header */}
         <div
           className={cn(
-            "border-b px-4 sm:px-6 py-2 flex items-center gap-3",
-            isDark ? "bg-[#0b0e14] border-white/5" : "bg-white border-slate-200",
+            "border-b px-4 sm:px-6 py-2 flex items-center gap-3 backdrop-blur-sm",
+            isDark ? "bg-[#0b0e14]/40 border-white/5" : "bg-white/40 border-slate-200",
           )}
         >
           <div className="relative flex-1 max-w-xl group">
@@ -230,8 +270,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
               type="text"
               placeholder="Search pages..."
               className={cn(
-                "w-full border-none pl-10 pr-4 py-1.5 rounded text-sm outline-none focus:ring-1 focus:ring-gold/40",
-                isDark ? "bg-[#1a1d23] text-white" : "bg-slate-100 text-slate-900",
+                "w-full border-none pl-10 pr-4 py-1.5 rounded text-sm outline-none focus:ring-1 focus:ring-gold/40 transition-all",
+                isDark ? "bg-[#1a1d23]/80 text-white" : "bg-slate-100/80 text-slate-900",
               )}
             />
           </div>
@@ -241,7 +281,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
             title="Reload dashboard data"
             className={cn(
               "p-1.5 rounded transition",
-              isDark ? "bg-[#1a1d23] text-gray-400 hover:text-white" : "bg-slate-100 text-slate-500",
+              isDark ? "bg-[#1a1d23]/80 text-gray-400 hover:text-white" : "bg-slate-100/80 text-slate-500",
             )}
           >
             <RotateCcw size={16} />
@@ -303,258 +343,137 @@ function DashboardSidebar({
   onToggleCollapse,
   showCollapseToggle = true,
 }: DashboardSidebarProps) {
-  // Auto-open the group containing the current pathname
-  const initialOpen: Record<string, boolean> = {};
-  sections.forEach((s) =>
-    s.items.forEach((g) => {
-      if (g.children?.some((c) => pathname === c.to || pathname.startsWith(`${c.to}/`))) {
-        initialOpen[g.key] = true;
-      }
-    }),
-  );
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(initialOpen);
-
-  const toggleGroup = (key: string) =>
-    setOpenGroups((prev) => ({ ...prev, [key]: !prev[key] }));
-
   const isLinkActive = (to: string) => {
     const isHome = to === "/admin" || to === "/dashboard";
     return isHome ? pathname === to : pathname === to || pathname.startsWith(`${to}/`);
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0">
-      {/* Brand */}
+    <div className="flex flex-col h-full min-h-0 bg-[#0b0e14] border-r border-white/5 shadow-2xl relative z-50">
+      {/* 1. BRAND SECTION (SLIDING ENTRY) */}
       <div
         className={cn(
-          "shrink-0 flex items-center border-b border-white/5 relative",
-          collapsed ? "flex-col gap-3 px-3 py-4" : "justify-between px-4 py-5",
-          !isDark && "border-slate-200",
+          "shrink-0 flex items-center relative transition-all duration-500",
+          collapsed ? "flex-col gap-4 px-3 py-6" : "justify-between px-6 py-8",
         )}
       >
         <Link
           to={role === "admin" ? "/admin" : "/dashboard"}
           onClick={onNavigate}
-          className="flex items-center gap-3 min-w-0"
+          className="flex items-center gap-4 min-w-0 group"
         >
-          <span className="inline-flex h-10 w-10 shrink-0 rounded-full overflow-hidden ring-1 ring-gold/40">
-            <img src={eventsLogo} alt="" className="h-full w-full object-cover" />
-          </span>
+          <div className="h-12 w-12 rounded-full overflow-hidden ring-2 ring-gold/20 shadow-[0_0_20px_rgba(212,175,55,0.2)] shrink-0 group-hover:scale-110 transition-transform duration-500">
+            <img src={eventsLogo} alt="Royal Touch" className="h-full w-full object-cover" />
+          </div>
           {!collapsed && (
-            <div className="min-w-0">
-              <p className="font-display text-base leading-tight truncate">
+            <div className="min-w-0 animate-in fade-in slide-in-from-left-4 duration-700">
+              <p className="font-display text-xl font-black uppercase tracking-tighter text-white">
                 Royal <span className="text-gold">Touch</span>
               </p>
-              <p className="text-[10px] text-gray-500 uppercase tracking-widest truncate">{subtitle}</p>
+              <div className="flex items-center gap-2 mt-1">
+                 <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
+                 <p className="text-[8px] text-gray-500 font-black uppercase tracking-[0.3em] truncate">{subtitle}</p>
+              </div>
             </div>
           )}
         </Link>
-        {showCollapseToggle && onToggleCollapse && (
-          <button
-            type="button"
-            onClick={onToggleCollapse}
-            className={cn(
-              "absolute -right-3 top-1/2 -translate-y-1/2 h-6 w-6 rounded-full border flex items-center justify-center transition z-10",
-              isDark
-                ? "bg-[#0b0e14] border-white/10 text-gray-400 hover:text-white hover:border-gold/40"
-                : "bg-white border-slate-200 text-slate-500 hover:text-slate-900",
-            )}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          >
-            {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-          </button>
-        )}
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-4 space-y-6 scrollbar-thin">
-        {sections.map((sec) => (
-          <div key={sec.section} className="space-y-1">
+      {/* 2. TILED NAVIGATION HUB (SMOOTH SLIDING GRID) */}
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-4 py-4 space-y-8 scrollbar-none">
+        {sections.map((sec, sIdx) => (
+          <div key={sec.section} className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${sIdx * 100}ms` }}>
             {!collapsed && (
-              <p className="px-3 mb-2 text-[10px] font-bold text-gray-500 uppercase tracking-[0.2em]">
-                {sec.section}
-              </p>
+              <div className="flex items-center gap-3 px-2">
+                 <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">
+                   {sec.section}
+                 </p>
+                 <div className="h-px flex-1 bg-white/5" />
+              </div>
             )}
 
-            {sec.items.map((item) => {
-              // Single link row
-              if (item.to) {
-                const active = isLinkActive(item.to);
+            <div className={cn(
+              "grid gap-2",
+              collapsed ? "grid-cols-1" : "grid-cols-2"
+            )}>
+              {sec.items.map((item) => {
+                const to = item.to || (item.children && item.children[0]?.to);
+                if (!to) return null;
+
+                const active = isLinkActive(to) || (item.children?.some(c => isLinkActive(c.to)));
                 const Icon = item.icon!;
+
                 return (
                   <Link
                     key={item.key}
-                    to={item.to}
+                    to={to}
                     onClick={onNavigate}
-                    title={collapsed ? item.label : undefined}
+                    title={item.label}
                     className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all group relative",
-                      collapsed && "justify-center px-2",
+                      "flex flex-col items-center justify-center gap-3 p-4 rounded-[20px] border transition-all duration-500 group relative overflow-hidden",
                       active
-                        ? "bg-gold text-black font-semibold shadow-[0_0_16px_rgba(212,175,55,0.25)]"
-                        : isDark
-                          ? "text-gray-400 hover:bg-white/5 hover:text-white"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
+                        ? "bg-gold border-gold shadow-[0_0_40px_rgba(212,175,55,0.4)] z-10 scale-[1.03]"
+                        : "bg-white/[0.02] border-white/5 hover:border-gold/40 hover:bg-white/[0.04]",
+                      collapsed && "h-14 w-14 p-0"
                     )}
                   >
-                    <Icon size={18} className="shrink-0" />
-                    {!collapsed && <span className="truncate flex-1">{item.label}</span>}
+                    {/* Background Slide Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                    <div className={cn(
+                      "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-500 relative z-10",
+                      active ? "bg-black/10 text-black" : "bg-white/5 text-gray-500 group-hover:text-gold group-hover:scale-110"
+                    )}>
+                      <Icon size={collapsed ? 22 : 20} strokeWidth={active ? 2.5 : 2} />
+                    </div>
+
+                    {!collapsed && (
+                      <span className={cn(
+                        "text-[9px] font-black uppercase tracking-widest text-center leading-tight relative z-10",
+                        active ? "text-black" : "text-gray-500 group-hover:text-white"
+                      )}>
+                        {item.label}
+                      </span>
+                    )}
+
+                    {/* Sliding Active Notch */}
+                    {active && (
+                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 animate-in slide-in-from-left duration-500" />
+                    )}
                   </Link>
                 );
-              }
-
-              // Expandable group with children
-              const children = item.children || [];
-              const open = openGroups[item.key] ?? false;
-              const hasActiveChild = children.some((c) => isLinkActive(c.to));
-              const Icon = item.icon!;
-
-              if (collapsed) {
-                // In collapsed mode, render each child as its own icon row + parent icon
-                return (
-                  <div key={item.key} className="space-y-1">
-                    <div
-                      title={item.label}
-                      className={cn(
-                        "flex items-center justify-center px-2 py-2 rounded-lg text-xs uppercase tracking-widest",
-                        hasActiveChild
-                          ? "text-gold"
-                          : isDark
-                            ? "text-gray-500"
-                            : "text-slate-400",
-                      )}
-                    >
-                      <Icon size={16} />
-                    </div>
-                    {children.map((c) => {
-                      const active = isLinkActive(c.to);
-                      return (
-                        <Link
-                          key={c.to}
-                          to={c.to}
-                          onClick={onNavigate}
-                          title={c.label}
-                          className={cn(
-                            "flex items-center justify-center px-2 py-2 rounded-lg transition",
-                            active
-                              ? "bg-gold text-black"
-                              : isDark
-                                ? "text-gray-400 hover:bg-white/5 hover:text-white"
-                                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                          )}
-                        >
-                          <c.icon size={16} />
-                        </Link>
-                      );
-                    })}
-                  </div>
-                );
-              }
-
-              return (
-                <div key={item.key} className="space-y-0.5">
-                  <button
-                    type="button"
-                    onClick={() => toggleGroup(item.key)}
-                    className={cn(
-                      "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition",
-                      hasActiveChild
-                        ? isDark
-                          ? "text-white bg-white/[0.04]"
-                          : "text-slate-900 bg-slate-100"
-                        : isDark
-                          ? "text-gray-400 hover:bg-white/5 hover:text-white"
-                          : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                    )}
-                    aria-expanded={open}
-                  >
-                    <Icon size={18} className="shrink-0" />
-                    <span className="truncate flex-1 text-left">{item.label}</span>
-                    <ChevronDown
-                      size={14}
-                      className={cn("transition-transform shrink-0", open && "rotate-180")}
-                    />
-                  </button>
-
-                  {open && (
-                    <div
-                      className={cn(
-                        "ml-5 pl-4 border-l space-y-0.5 py-1",
-                        isDark ? "border-white/10" : "border-slate-200",
-                      )}
-                    >
-                      {children.map((c) => {
-                        const active = isLinkActive(c.to);
-                        return (
-                          <Link
-                            key={c.to}
-                            to={c.to}
-                            onClick={onNavigate}
-                            className={cn(
-                              "flex items-center gap-2 rounded-md px-3 py-2 text-[13px] transition",
-                              active
-                                ? isDark
-                                  ? "bg-gold/15 text-gold font-semibold"
-                                  : "bg-gold/15 text-gold font-semibold"
-                                : isDark
-                                  ? "text-gray-400 hover:bg-white/5 hover:text-white"
-                                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900",
-                            )}
-                          >
-                            <c.icon size={14} className="shrink-0 opacity-80" />
-                            <span className="truncate">{c.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              })}
+            </div>
           </div>
         ))}
       </nav>
 
-      {/* Footer: user info + logout */}
-      <div className={cn("shrink-0 border-t border-white/5 p-3 space-y-2", !isDark && "border-slate-200")}>
+      {/* 3. EXECUTIVE FOOTER (SLIDING EXIT) */}
+      <div className="shrink-0 p-6 border-t border-white/5 space-y-4 bg-black/20">
         {!collapsed && (
-          <div
-            className={cn(
-              "px-3 py-2.5 rounded-lg mb-1",
-              isDark ? "bg-white/5 border border-white/5" : "bg-slate-50 border border-slate-200",
-            )}
-          >
-            <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{roleLabel}</p>
-            <p className="text-xs truncate font-medium mt-0.5">{userLabel}</p>
+          <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-4 duration-700">
+             <div className="h-8 w-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
+                <Users size={14} className="text-gold" />
+             </div>
+             <div className="min-w-0">
+                <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest leading-none">{roleLabel}</p>
+                <p className="text-[10px] font-bold text-white truncate mt-1">{userLabel}</p>
+             </div>
           </div>
         )}
-
-        <Link
-          to="/"
-          onClick={onNavigate}
-          className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
-            collapsed && "justify-center px-2",
-            isDark ? "text-gray-400 hover:bg-white/5 hover:text-white" : "text-slate-600 hover:bg-slate-100",
-          )}
-          title={collapsed ? "Visit website" : undefined}
-        >
-          <ExternalLink size={18} className="shrink-0" />
-          {!collapsed && <span>Visit Website</span>}
-        </Link>
 
         <button
           type="button"
           onClick={onSignOut}
           className={cn(
-            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
-            collapsed && "justify-center px-2",
-            "text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 border border-transparent hover:border-rose-500/20",
+            "flex w-full items-center gap-4 rounded-2xl p-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 group",
+            "bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white hover:shadow-[0_0_20px_rgba(244,63,94,0.4)]",
+            collapsed && "justify-center p-0 h-12 w-12 mx-auto"
           )}
-          title={collapsed ? "Logout" : undefined}
+          title="Secure Logout"
         >
-          <LogOut size={18} className="shrink-0" />
-          {!collapsed && <span>Logout</span>}
+          <LogOut size={18} className="group-hover:rotate-180 transition-transform duration-700" />
+          {!collapsed && <span className="animate-in fade-in slide-in-from-left-2">Terminate Session</span>}
         </button>
       </div>
     </div>
