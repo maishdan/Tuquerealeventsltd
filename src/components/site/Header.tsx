@@ -34,8 +34,8 @@ export function Header() {
           </span>
         </Link>
 
-        {/* Center: Navigation (Based on the Image structure) */}
-        <nav className="hidden xl:flex items-center gap-2">
+        {/* Center: Navigation (Visible on Tablet & Desktop) */}
+        <nav className="hidden md:flex items-center gap-1 xl:gap-2">
           {nav.map((n) => (
             <Link
               key={n.to}
@@ -43,7 +43,7 @@ export function Header() {
               activeOptions={{ exact: n.to === "/" }}
               activeProps={{ className: "text-gold bg-white/5" }}
               inactiveProps={{ className: "text-gray-400 hover:text-white" }}
-              className="px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all"
+              className="px-3 xl:px-4 py-2 rounded-md text-[9px] xl:text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap"
             >
               {n.label}
             </Link>

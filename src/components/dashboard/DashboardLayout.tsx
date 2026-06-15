@@ -19,6 +19,8 @@ import {
   MessageSquare,
   RotateCcw,
   ExternalLink,
+  Users,
+  ArrowLeft
 } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import type { DashboardNavItem } from "@/lib/dashboard-nav";
@@ -30,6 +32,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Header as SiteHeader } from "@/components/site/Header";
 
 type DashboardLayoutProps = {
   title: string;
@@ -106,89 +109,51 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   return (
     <div
       className={cn(
-        "min-h-screen flex transition-colors duration-300 font-sans relative",
+        "min-h-screen flex flex-col transition-colors duration-300 font-sans relative",
         "bg-[#f5f7f9] text-[#2d3748]",
       )}
     >
-      {/* Desktop sidebar */}
-      <aside
-        className={cn(
-          "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out bg-[#2b4c8c] text-white shadow-2xl",
-          collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
-        )}
-      >
-        <DashboardSidebar {...sidebarProps} />
-      </aside>
+      {/* Global Fixed Frontend Header */}
+      <SiteHeader />
 
-      {/* Mobile slide-out menu */}
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent
-          side="left"
-          className="w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r bg-[#2b4c8c] text-white"
+      <div className="flex flex-1 pt-20">
+        {/* Desktop sidebar */}
+        <aside
+          className={cn(
+            "hidden lg:flex flex-col fixed inset-y-0 left-0 top-20 z-50 transition-all duration-300 ease-in-out bg-[#2b4c8c] text-white shadow-2xl",
+            collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
+          )}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>{title} menu</SheetTitle>
-          </SheetHeader>
-          <DashboardSidebar {...sidebarProps} collapsed={false} showCollapseToggle={false} />
-        </SheetContent>
-      </Sheet>
+          <DashboardSidebar {...sidebarProps} />
+        </aside>
 
-      {/* Main content */}
-      <div
-        className={cn(
-          "flex-1 flex flex-col min-w-0 transition-all duration-300 relative z-10",
-          collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64",
-        )}
-      >
-        <header
-          className="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 sm:px-8 h-20 flex items-center justify-between gap-4"
+        {/* Mobile slide-out menu */}
+        <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+          <SheetContent
+            side="left"
+            className="w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r bg-[#2b4c8c] text-white"
+          >
+            <SheetHeader className="sr-only">
+              <SheetTitle>{title} menu</SheetTitle>
+            </SheetHeader>
+            <DashboardSidebar {...sidebarProps} collapsed={false} showCollapseToggle={false} />
+          </SheetContent>
+        </Sheet>
+
+        {/* Main content */}
+        <div
+          className={cn(
+            "flex-1 flex flex-col min-w-0 transition-all duration-300 relative z-10",
+            collapsed ? "lg:pl-[4.5rem]" : "lg:pl-64",
+          )}
         >
-          <div className="flex items-center gap-6 min-w-0 flex-1">
-            <button
-              type="button"
-              className="p-2 rounded-lg transition text-[#2b4c8c] hover:bg-gray-50"
-              onClick={toggleMenu}
-              aria-label={isMobile ? "Open menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
-            >
-              <Menu size={24} />
-            </button>
-
-            <div className="flex items-center gap-3 min-w-0">
-              <h1 className="font-bold text-xl sm:text-2xl text-[#2b4c8c] tracking-tight truncate">
-                Royal Touch Events
-              </h1>
+          <main className="flex-1 p-6 sm:p-10 overflow-x-hidden relative">
+            <div className="max-w-[1400px] mx-auto">
+              {!isDashboardRoot && <BackToDashboard role={role} />}
+              {content}
             </div>
-          </div>
-
-          <div className="flex items-center gap-4 sm:gap-6 shrink-0">
-            <div className="relative">
-              <button className="p-2 rounded-full text-gray-400 hover:bg-gray-50 transition-colors">
-                <Bell size={22} />
-                <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-600 text-[10px] flex items-center justify-center font-bold text-white border-2 border-white">
-                  0
-                </span>
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3 pl-4 border-l border-gray-100">
-              <div className="h-10 w-10 rounded-full overflow-hidden border border-gray-200 shadow-sm">
-                <img src={eventsLogo} alt="User" className="h-full w-full object-cover" />
-              </div>
-              <div className="hidden md:block text-sm">
-                <p className="font-semibold text-gray-700 flex items-center gap-1">
-                  Hi, {userLabel.split(' ')[0]} <ChevronDown size={14} className="text-gray-400" />
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
-
-        <main className="flex-1 p-6 sm:p-10 overflow-x-hidden relative">
-          <div className="max-w-[1400px] mx-auto">
-            {!isDashboardRoot && <BackToDashboard role={role} />}
-            {content}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </div>
   );
