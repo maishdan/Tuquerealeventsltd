@@ -1,9 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowDownLeft, ArrowUpRight, FileText, CreditCard, CheckCircle2, Clock } from "lucide-react";
-import { GlassPanel } from "@/components/dashboard/GlassPanel";
-import { KpiCard } from "@/components/dashboard/KpiCard";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  FileText,
+  CreditCard,
+  CheckCircle2,
+  Clock,
+  Search,
+  Filter,
+  Download,
+  ShieldCheck,
+  TrendingUp
+} from "lucide-react";
 import { financialHub, formatKes } from "@/lib/dashboard-mock-data";
 import { cn } from "@/lib/utils";
+import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
 
 export const Route = createFileRoute("/admin/receipts")({
   component: AdminReceipts,
@@ -36,97 +47,122 @@ function AdminReceipts() {
   const paidCount = receipts.filter((r) => r.status === "paid").length;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">Finance</p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl">
-          Receipts & <span className="text-gradient-gold">payments</span>
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Official receipts issued to clients and payment records across M-Pesa, bank transfer and card.
-        </p>
+    <div className="space-y-10 pb-20 font-sans text-white">
+      <BackToDashboard role="admin" />
+
+      {/* 1. STRATEGIC HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-gold">
+            <div className="h-[1px] w-10 bg-gold" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Financial Integrity</p>
+          </div>
+          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Ledger & Receipts</h1>
+          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
+            Real-time tracking of empire capital flow. Manage official documentation and verify incoming high-value transactions.
+          </p>
+        </div>
+        <button className="h-14 px-10 rounded-xl bg-gold text-[#0b0e14] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-white transition-all shadow-2xl">
+          <FileText size={16} /> Generate New Receipt
+        </button>
       </div>
 
-      <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        <KpiCard label="Total Received" value={formatKes(totalReceived)} icon={ArrowDownLeft} accent="emerald" />
-        <KpiCard label="Outstanding" value={formatKes(outstanding)} icon={ArrowUpRight} accent="rose" />
-        <KpiCard label="Receipts Issued" value={String(receipts.length)} icon={FileText} accent="gold" />
-        <KpiCard label="Paid In Full" value={String(paidCount)} icon={CheckCircle2} accent="primary" />
+      {/* 2. CORE FINANCIAL METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+          { label: "Total Capitalized", val: formatKes(totalReceived), icon: TrendingUp, color: "emerald" },
+          { label: "Accounts Receivable", val: formatKes(outstanding), icon: ArrowUpRight, color: "amber" },
+          { label: "Documents Issued", val: receipts.length, icon: FileText, color: "gold" },
+          { label: "Asset Compliance", val: "100%", icon: ShieldCheck, color: "blue" },
+        ].map((stat, i) => (
+          <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
+             <div className="flex justify-between items-start mb-6">
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border transition-all",
+                  stat.color === "emerald" ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" :
+                  stat.color === "amber" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
+                  stat.color === "gold" ? "bg-gold/10 text-gold border-gold/20" :
+                  "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                )}>
+                  <stat.icon size={24} />
+                </div>
+             </div>
+             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">{stat.label}</p>
+             <h3 className="text-2xl font-black text-white">{stat.val}</h3>
+          </div>
+        ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <GlassPanel title="Official Receipts" subtitle="Documents issued to clients">
-          <div className="space-y-3">
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Official Receipts Log */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+          <div className="flex items-center justify-between">
+            <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Official Registry</h4>
+            <button className="text-[10px] font-black uppercase text-gold hover:text-white transition-colors">View Full Archive</button>
+          </div>
+
+          <div className="space-y-4">
             {receipts.map((r) => (
-              <div key={r.id} className="rounded-xl glass border border-white/10 p-4">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <div>
-                    <p className="font-mono text-sm text-gold">{r.id}</p>
-                    <p className="font-medium mt-1">{r.client}</p>
-                    <p className="text-xs text-muted-foreground">{r.event}</p>
+              <div key={r.id} className="group p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all">
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <p className="font-mono text-[10px] text-gold font-bold">{r.id}</p>
+                    <h5 className="font-bold text-white uppercase tracking-tight">{r.client}</h5>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{r.event}</p>
                   </div>
-                  <span className={cn("inline-flex rounded-full border px-3 py-1 text-xs capitalize", receiptStatusStyles[r.status])}>
+                  <span className={cn("inline-flex rounded-lg border px-3 py-1 text-[8px] font-black uppercase tracking-widest", receiptStatusStyles[r.status])}>
                     {r.status}
                   </span>
                 </div>
-                <div className="mt-3 flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">{new Date(r.date).toLocaleDateString()}</span>
-                  <span className="font-display text-lg text-gradient-gold">{formatKes(r.amount)}</span>
-                </div>
-                <button
-                  type="button"
-                  className="mt-3 text-xs uppercase tracking-widest text-gold hover:underline flex items-center gap-1"
-                >
-                  <FileText size={12} /> Download PDF
-                </button>
-              </div>
-            ))}
-          </div>
-        </GlassPanel>
-
-        <GlassPanel title="Payment Records" subtitle="Incoming payments log">
-          <div className="space-y-3">
-            {payments.map((p) => (
-              <div key={p.id} className="rounded-xl glass border border-white/10 p-4">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-gold/10 flex items-center justify-center text-gold shrink-0">
-                      <CreditCard size={16} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-sm">{p.client}</p>
-                      <p className="text-xs text-muted-foreground">{p.method} · Ref {p.ref}</p>
-                    </div>
+                <div className="mt-6 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Clock size={12} />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">{new Date(r.date).toLocaleDateString()}</span>
                   </div>
-                  <span className="font-display text-lg text-gradient-gold">{formatKes(p.amount)}</span>
+                  <p className="text-xl font-black text-white tracking-tight">{formatKes(r.amount)}</p>
                 </div>
-                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                  <Clock size={12} />
-                  {new Date(p.date).toLocaleDateString()}
-                  <span className="font-mono text-gold ml-auto">{p.id}</span>
+                <div className="mt-6 pt-6 border-t border-white/5 flex justify-end">
+                   <button className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.2em] text-gray-500 group-hover:text-gold transition-colors">
+                      <Download size={14} /> Export Document
+                   </button>
                 </div>
               </div>
             ))}
-          </div>
-        </GlassPanel>
-      </div>
-
-      <GlassPanel title="Financial Summary" subtitle="Month-to-date overview">
-        <div className="grid sm:grid-cols-3 gap-4">
-          <div className="rounded-xl glass border border-white/10 p-4 text-center">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Cash Flow</p>
-            <p className="mt-2 font-display text-2xl text-gradient-gold">{formatKes(financialHub.cashFlow)}</p>
-          </div>
-          <div className="rounded-xl glass border border-white/10 p-4 text-center">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Expenses</p>
-            <p className="mt-2 font-display text-2xl">{formatKes(financialHub.expenses)}</p>
-          </div>
-          <div className="rounded-xl glass border border-white/10 p-4 text-center">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Profit Margin</p>
-            <p className="mt-2 font-display text-2xl">{financialHub.profitMargin}%</p>
           </div>
         </div>
-      </GlassPanel>
+
+        {/* Payment Verification Log */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+          <div className="flex items-center justify-between">
+            <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Payment Verification</h4>
+          </div>
+
+          <div className="space-y-4">
+            {payments.map((p) => (
+              <div key={p.id} className="p-6 rounded-3xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-all">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-500">
+                      <CreditCard size={18} />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-white uppercase tracking-tight">{p.client}</h5>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{p.method} • REF {p.ref}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                     <p className="text-lg font-black text-emerald-500">{formatKes(p.amount)}</p>
+                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest mt-1">{p.id}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="pt-8 text-center">
+             <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">End of Daily Settlement Log</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

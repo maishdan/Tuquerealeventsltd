@@ -1,7 +1,20 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Bot, TrendingUp, AlertTriangle, DollarSign, Sparkles } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  Bot,
+  TrendingUp,
+  AlertTriangle,
+  DollarSign,
+  Sparkles,
+  ShieldCheck,
+  ArrowRight,
+  Zap,
+  Target,
+  BarChart3
+} from "lucide-react";
 import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import { aiInsights, formatKes } from "@/lib/dashboard-mock-data";
+import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/ai")({
   component: AdminAI,
@@ -9,85 +22,94 @@ export const Route = createFileRoute("/admin/ai")({
 
 function AdminAI() {
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">AI-Powered Insights</p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl">
-          Futuristic <span className="text-gradient-gold">CEO Intelligence</span>
-        </h2>
-        <p className="mt-2 text-muted-foreground">Predictive analytics and strategic recommendations.</p>
-      </div>
+    <div className="space-y-10 pb-20 font-sans text-white">
+      <BackToDashboard role="admin" />
 
-      <div className="glass-strong rounded-2xl border border-gold/30 p-6 sm:p-8 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-gold/10 pointer-events-none" />
-        <div className="relative flex items-start gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-gold/15 text-gold flex items-center justify-center shrink-0">
-            <Bot size={28} />
+      {/* 1. STRATEGIC HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-gold">
+            <div className="h-[1px] w-10 bg-gold" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">CEO Intelligence Hub</p>
           </div>
-          <div>
-            <h3 className="font-display text-2xl">AI Assistant Panel</h3>
-            <p className="mt-2 text-sm text-muted-foreground max-w-2xl">
-              Based on 12 months of event data, client behaviour and market trends across East Africa.
-            </p>
-          </div>
+          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Predictive Analysis</h1>
+          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
+            AI-driven forecasting and strategic recommendations based on 12 months of historical performance and market behavioral data.
+          </p>
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 2. CORE INTELLIGENCE METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[
-          { label: "Predicted Revenue (Next Month)", value: formatKes(aiInsights.predictedRevenue), icon: TrendingUp, accent: "emerald" as const },
-          { label: "Event Success Forecast", value: `${aiInsights.successForecast}%`, icon: Sparkles, accent: "gold" as const },
-          { label: "High-Risk Events", value: String(aiInsights.highRiskEvents), icon: AlertTriangle, accent: "rose" as const },
-        ].map((item) => (
-          <div key={item.label} className="glass-strong rounded-2xl border border-white/15 p-6">
-            <item.icon size={22} className="text-gold" />
-            <p className="mt-4 text-xs uppercase tracking-widest text-muted-foreground">{item.label}</p>
-            <p className="mt-2 font-display text-3xl text-gradient-gold">{item.value}</p>
+          { label: "Predicted Revenue", val: formatKes(aiInsights.predictedRevenue), icon: TrendingUp, color: "blue" },
+          { label: "Success Forecast", val: `${aiInsights.successForecast}%`, icon: Sparkles, color: "gold" },
+          { label: "Anomalies Detected", val: aiInsights.highRiskEvents, icon: AlertTriangle, color: "rose" },
+        ].map((stat, i) => (
+          <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
+             <div className="flex justify-between items-start mb-6">
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border transition-all",
+                  stat.color === "blue" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
+                  stat.color === "gold" ? "bg-gold/10 text-gold border-gold/20" :
+                  "bg-rose-500/10 text-rose-500 border-rose-500/20"
+                )}>
+                  <stat.icon size={24} />
+                </div>
+             </div>
+             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">{stat.label}</p>
+             <h3 className="text-3xl font-black text-white">{stat.val}</h3>
           </div>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        <GlassPanel title="Suggested Pricing Adjustments" subtitle="AI recommendation">
-          <div className="rounded-xl glass border border-gold/30 p-5">
-            <div className="flex items-center gap-3">
-              <DollarSign className="text-gold" size={20} />
-              <p className="text-sm">{aiInsights.pricingSuggestion}</p>
-            </div>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Projected impact: +KES 340,000 monthly revenue with minimal churn risk.
-            </p>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel title="Best Performing Services" subtitle="Top revenue drivers">
-          <div className="space-y-3">
-            {aiInsights.topServices.map((service, i) => (
-              <div key={service} className="flex items-center gap-3 rounded-xl glass border border-white/10 px-4 py-3">
-                <span className="font-display text-lg text-gold">{i + 1}</span>
-                <span className="text-sm">{service}</span>
+      <div className="grid lg:grid-cols-2 gap-8">
+        {/* Pricing Strategy */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+           <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Pricing Optimization</h4>
+           <div className="bg-gold/5 border border-gold/20 p-8 rounded-3xl space-y-6">
+              <div className="flex items-center gap-4 text-gold">
+                 <DollarSign size={24} />
+                 <p className="font-bold text-lg leading-tight uppercase">{aiInsights.pricingSuggestion}</p>
               </div>
-            ))}
-          </div>
-        </GlassPanel>
+              <p className="text-sm text-gray-400 leading-relaxed">Projected impact: <span className="text-emerald-500 font-bold">+KES 340,000</span> monthly revenue with minimal client friction risk.</p>
+           </div>
+        </div>
+
+        {/* Top Drivers */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+           <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">High-Velocity Disciplines</h4>
+           <div className="space-y-4">
+              {aiInsights.topServices.map((service, i) => (
+                <div key={service} className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/[0.02] group hover:border-gold transition-colors">
+                   <div className="flex items-center gap-4">
+                      <span className="text-gold font-black text-xs">0{i + 1}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-white">{service}</span>
+                   </div>
+                   <ArrowRight size={14} className="text-gray-700 group-hover:text-gold transition-colors" />
+                </div>
+              ))}
+           </div>
+        </div>
       </div>
 
-      <GlassPanel title="Risk Alerts" subtitle="Events requiring executive attention">
-        <div className="space-y-3">
-          {[
-            { event: "Tech Summit 2026", risk: "Vendor delay — AV rigging", level: "High" },
-            { event: "Afro-Beats Night Live", risk: "Weather contingency needed", level: "Medium" },
-          ].map((alert) => (
-            <div key={alert.event} className="flex items-center justify-between gap-4 rounded-xl border border-rose-400/30 bg-rose-500/5 px-4 py-3">
-              <div>
-                <p className="font-medium text-sm">{alert.event}</p>
-                <p className="text-xs text-muted-foreground mt-1">{alert.risk}</p>
-              </div>
-              <span className="text-xs uppercase tracking-widest text-rose-400 shrink-0">{alert.level}</span>
-            </div>
-          ))}
-        </div>
-      </GlassPanel>
+      {/* Risk Alert Board */}
+      <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+         <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Strategic Alert Registry</h4>
+         <div className="grid md:grid-cols-2 gap-4">
+           {[
+             { event: "Tech Summit 2026", risk: "Vendor delay — AV rigging", level: "Critical" },
+             { event: "Afro-Beats Night Live", risk: "Weather contingency required", level: "Moderate" },
+           ].map((alert) => (
+             <div key={alert.event} className="p-6 rounded-3xl border border-rose-500/20 bg-rose-500/5 space-y-4">
+                <div className="flex justify-between items-center">
+                   <h5 className="font-bold text-white text-sm uppercase tracking-tight">{alert.event}</h5>
+                   <span className="px-2 py-0.5 rounded bg-rose-500 text-white text-[8px] font-black uppercase tracking-widest">{alert.level}</span>
+                </div>
+                <p className="text-[10px] text-gray-500 font-medium uppercase tracking-widest leading-relaxed">{alert.risk}</p>
+             </div>
+           ))}
+         </div>
+      </div>
     </div>
   );
 }

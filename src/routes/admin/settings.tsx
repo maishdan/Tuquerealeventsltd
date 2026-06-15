@@ -1,9 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { Bell, Building2, Globe, Mail, Phone, Save, Shield } from "lucide-react";
-import { GlassPanel } from "@/components/dashboard/GlassPanel";
+import {
+  Bell,
+  Building2,
+  Globe,
+  Mail,
+  Phone,
+  Save,
+  Shield,
+  ShieldCheck,
+  Settings2,
+  Zap,
+  Lock
+} from "lucide-react";
 import { SITE_EMAIL, SITE_NAME, SITE_PHONE, SITE_URL } from "@/lib/seo";
 import { cn } from "@/lib/utils";
+import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
 
 export const Route = createFileRoute("/admin/settings")({
   component: AdminSettings,
@@ -30,131 +42,138 @@ function AdminSettings() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">System</p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl">
-          Dashboard <span className="text-gradient-gold">settings</span>
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          Configure company details, notifications and admin preferences.
-        </p>
+    <div className="space-y-10 pb-20 font-sans text-white">
+      <BackToDashboard role="admin" />
+
+      {/* 1. STRATEGIC HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-gold">
+            <div className="h-[1px] w-10 bg-gold" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">System Governance</p>
+          </div>
+          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Settings</h1>
+          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
+            Configure global empire parameters, communication protocols, and administrative security standards.
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
-        <GlassPanel title="Company Information" subtitle="Displayed across the website and receipts">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <label className="space-y-1.5">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                <Building2 size={12} /> Company Name
-              </span>
-              <input
-                type="text"
+      <form onSubmit={handleSave} className="space-y-12">
+        {/* Company Identity */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+           <div className="flex items-center gap-3 text-gold">
+              <Building2 size={20} />
+              <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Company Identity</h4>
+           </div>
+
+           <div className="grid md:grid-cols-2 gap-8">
+              <SettingField
+                label="Full Corporate Name"
                 value={form.companyName}
-                onChange={(e) => setForm({ ...form, companyName: e.target.value })}
-                className="w-full rounded-lg bg-background/60 border border-border px-3 py-2 text-sm"
+                onChange={(v) => setForm({...form, companyName: v})}
               />
-            </label>
-            <label className="space-y-1.5">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                <Mail size={12} /> Email
-              </span>
-              <input
-                type="email"
+              <SettingField
+                label="Official Correspondence Email"
                 value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full rounded-lg bg-background/60 border border-border px-3 py-2 text-sm"
+                onChange={(v) => setForm({...form, email: v})}
+                type="email"
               />
-            </label>
-            <label className="space-y-1.5">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                <Phone size={12} /> Phone
-              </span>
-              <input
-                type="tel"
+              <SettingField
+                label="Executive Phone Line"
                 value={form.phone}
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full rounded-lg bg-background/60 border border-border px-3 py-2 text-sm"
+                onChange={(v) => setForm({...form, phone: v})}
               />
-            </label>
-            <label className="space-y-1.5">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-                <Globe size={12} /> Website URL
-              </span>
-              <input
-                type="url"
+              <SettingField
+                label="Primary Digital Domain"
                 value={form.website}
-                onChange={(e) => setForm({ ...form, website: e.target.value })}
-                className="w-full rounded-lg bg-background/60 border border-border px-3 py-2 text-sm"
+                onChange={(v) => setForm({...form, website: v})}
               />
-            </label>
-            <label className="space-y-1.5 sm:col-span-2">
-              <span className="text-xs uppercase tracking-widest text-muted-foreground">Office Address</span>
-              <input
-                type="text"
-                value={form.address}
-                onChange={(e) => setForm({ ...form, address: e.target.value })}
-                className="w-full rounded-lg bg-background/60 border border-border px-3 py-2 text-sm"
-              />
-            </label>
-          </div>
-        </GlassPanel>
-
-        <GlassPanel title="Notifications" subtitle="Admin alert preferences">
-          <div className="space-y-4">
-            {[
-              { key: "emailNotifications" as const, label: "Email notifications", desc: "Receive general admin email alerts" },
-              { key: "bookingAlerts" as const, label: "New booking alerts", desc: "Notify when a booking form is submitted" },
-              { key: "contactAlerts" as const, label: "Contact form alerts", desc: "Notify when someone sends a contact message" },
-              { key: "paymentAlerts" as const, label: "Payment alerts", desc: "Notify on incoming payments and receipts" },
-            ].map((item) => (
-              <label
-                key={item.key}
-                className="flex items-center justify-between gap-4 rounded-xl glass border border-white/10 p-4 cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <Bell size={18} className="text-gold shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium">{item.label}</p>
-                    <p className="text-xs text-muted-foreground">{item.desc}</p>
-                  </div>
-                </div>
-                <input
-                  type="checkbox"
-                  checked={form[item.key]}
-                  onChange={(e) => setForm({ ...form, [item.key]: e.target.checked })}
-                  className="h-4 w-4 rounded accent-gold"
+              <div className="md:col-span-2">
+                <SettingField
+                  label="Headquarters Address"
+                  value={form.address}
+                  onChange={(v) => setForm({...form, address: v})}
                 />
-              </label>
-            ))}
-          </div>
-        </GlassPanel>
+              </div>
+           </div>
+        </div>
 
-        <GlassPanel title="Security" subtitle="Access and session preferences">
-          <div className="flex items-start gap-3 rounded-xl glass border border-white/10 p-4">
-            <Shield size={20} className="text-gold shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium">Admin session protection</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Authentication is managed via Supabase. Only users with the admin role can access this dashboard.
-                To change admin access, update the role field in the Supabase profiles table.
+        {/* Intelligence Notifications */}
+        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
+           <div className="flex items-center gap-3 text-gold">
+              <Bell size={20} />
+              <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Intelligence Notifications</h4>
+           </div>
+
+           <div className="grid md:grid-cols-2 gap-4">
+              {[
+                { key: "emailNotifications" as const, label: "Global Email Alerts", desc: "Receive high-level system summaries." },
+                { key: "bookingAlerts" as const, label: "Project Intake Notifications", desc: "Real-time alerts for new client briefs." },
+                { key: "contactAlerts" as const, label: "Communication Registry Alerts", desc: "Notify on inbound strategic messages." },
+                { key: "paymentAlerts" as const, label: "Capital Flow Alerts", desc: "Immediate notification of verified payments." },
+              ].map((item) => (
+                <label key={item.key} className="group flex items-center justify-between p-6 rounded-3xl border border-white/5 bg-white/[0.02] hover:border-gold/30 transition-all cursor-pointer">
+                   <div className="space-y-1">
+                      <p className="text-[10px] font-black text-white uppercase tracking-widest">{item.label}</p>
+                      <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{item.desc}</p>
+                   </div>
+                   <input
+                    type="checkbox"
+                    checked={form[item.key]}
+                    onChange={(e) => setForm({ ...form, [item.key]: e.target.checked })}
+                    className="h-5 w-5 rounded-lg border-white/10 bg-black checked:bg-gold accent-gold transition-all"
+                  />
+                </label>
+              ))}
+           </div>
+        </div>
+
+        {/* Security & Access */}
+        <div className="bg-[#1a2b4b]/10 border border-blue-500/20 rounded-[40px] p-10 shadow-2xl space-y-8 relative overflow-hidden">
+           <div className="absolute top-0 right-0 p-8 opacity-5">
+              <ShieldCheck size={120} />
+           </div>
+           <div className="relative z-10 space-y-6">
+              <div className="flex items-center gap-3 text-blue-400">
+                 <Lock size={20} />
+                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em]">Administrative Security</h4>
+              </div>
+              <p className="text-white font-bold leading-relaxed max-w-2xl uppercase tracking-tight text-xs">
+                Authentication and session persistence are managed via end-to-end encrypted protocols. Administrative privileges are strictly governed by the master profile registry.
               </p>
-            </div>
-          </div>
-        </GlassPanel>
+           </div>
+        </div>
 
-        <div className="flex items-center gap-3">
+        {/* Action Bar */}
+        <div className="flex items-center gap-6 pt-6">
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-full bg-gold text-black px-6 py-2.5 text-sm font-bold hover:opacity-90 transition"
+            className="h-16 px-12 rounded-full bg-gold text-[#0b0e14] font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:scale-[1.02] transition-all shadow-2xl shadow-gold/10"
           >
-            <Save size={16} /> Save Settings
+            <Save size={18} /> Commit Configuration
           </button>
           {saved && (
-            <span className={cn("text-sm text-emerald-400 animate-in fade-in")}>Settings saved successfully.</span>
+            <div className="flex items-center gap-2 text-emerald-500 font-black text-[10px] uppercase tracking-widest animate-in fade-in">
+               <Zap size={14} className="fill-emerald-500" /> System State Updated
+            </div>
           )}
         </div>
       </form>
+    </div>
+  );
+}
+
+function SettingField({ label, value, onChange, type = "text" }: { label: string; value: string; onChange: (v: string) => void; type?: string }) {
+  return (
+    <div className="space-y-3">
+      <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em] ml-4">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full h-16 bg-[#1a1a1a] border border-white/5 rounded-2xl px-6 text-sm text-white font-bold focus:border-gold outline-none transition-all"
+      />
     </div>
   );
 }

@@ -56,21 +56,13 @@ const heroImages = [
 export function DashboardLayout({ title, subtitle, nav, role, children }: DashboardLayoutProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isDark, setIsDark] = useState(true);
-  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [isDark, setIsDark] = useState(false);
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const router = useRouter();
   const { signOut, profile } = useAuth();
   const isDashboardRoot = pathname === "/admin" || pathname === "/dashboard";
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
-    }, 60000); // Switch every 1 minute
-    return () => clearInterval(timer);
-  }, []);
 
   function handleReload() {
     router.invalidate();
@@ -115,35 +107,13 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
     <div
       className={cn(
         "min-h-screen flex transition-colors duration-300 font-sans relative",
-        isDark ? "bg-[#0b0e14] text-white" : "bg-slate-50 text-slate-900",
+        "bg-[#f5f7f9] text-[#2d3748]",
       )}
     >
-      {/* Global Background (Matches Frontend) */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {heroImages.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out",
-              idx === currentImgIndex ? "opacity-20" : "opacity-0"
-            )}
-          />
-        ))}
-        <div className={cn(
-          "absolute inset-0",
-          isDark
-            ? "bg-gradient-to-b from-[#0b0e14]/80 via-[#0b0e14]/40 to-[#0b0e14]"
-            : "bg-white/80"
-        )} />
-      </div>
-
-      {/* Desktop collapsible sidebar */}
+      {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 border-r transition-all duration-300 ease-in-out",
-          isDark ? "bg-[#0b0e14]/80 backdrop-blur-xl border-white/5" : "bg-white/80 backdrop-blur-xl border-slate-200 shadow-xl",
+          "hidden lg:flex flex-col fixed inset-y-0 left-0 z-50 transition-all duration-300 ease-in-out bg-[#2b4c8c] text-white shadow-2xl",
           collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
         )}
       >
@@ -154,10 +124,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent
           side="left"
-          className={cn(
-            "w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r",
-            isDark ? "bg-[#0b0e14]/90 backdrop-blur-xl border-white/10" : "bg-white/90 backdrop-blur-xl border-slate-200",
-          )}
+          className="w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r bg-[#2b4c8c] text-white"
         >
           <SheetHeader className="sr-only">
             <SheetTitle>{title} menu</SheetTitle>
@@ -174,139 +141,52 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         )}
       >
         <header
-          className={cn(
-            "sticky top-0 z-40 border-b px-4 sm:px-6 h-16 flex items-center justify-between gap-4 backdrop-blur-md",
-            isDark ? "bg-[#0b0e14]/60 border-white/5" : "bg-white/60 border-slate-200 shadow-sm",
-          )}
+          className="sticky top-0 z-40 bg-white border-b border-gray-100 px-4 sm:px-8 h-20 flex items-center justify-between gap-4"
         >
-          <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="flex items-center gap-6 min-w-0 flex-1">
             <button
               type="button"
-              className={cn(
-                "p-2 rounded-lg transition",
-                isDark ? "hover:bg-white/10 text-white" : "hover:bg-slate-100 text-slate-700",
-              )}
+              className="p-2 rounded-lg transition text-[#2b4c8c] hover:bg-gray-50"
               onClick={toggleMenu}
               aria-label={isMobile ? "Open menu" : collapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              <Menu size={20} />
+              <Menu size={24} />
             </button>
 
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="h-8 w-8 rounded-full overflow-hidden ring-1 ring-gold/30 shrink-0">
-                <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
-              </div>
-              <div className="min-w-0 hidden sm:block">
-                <h1 className="font-semibold text-sm sm:text-base truncate uppercase tracking-tighter">{title}</h1>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest truncate">{subtitle}</p>
-              </div>
+            <div className="flex items-center gap-3 min-w-0">
+              <h1 className="font-bold text-xl sm:text-2xl text-[#2b4c8c] tracking-tight truncate">
+                Royal Touch Events
+              </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
-              to="/"
-              className={cn(
-                "hidden md:inline-flex p-2 rounded-lg transition",
-                isDark ? "text-gray-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900",
-              )}
-              title="Back to website"
-            >
-              <Home size={18} />
-            </Link>
-            <button
-              type="button"
-              onClick={() => setIsDark(!isDark)}
-              className={cn(
-                "hidden md:inline-flex p-2 rounded-lg transition",
-                isDark ? "text-gray-400 hover:text-white hover:bg-white/5" : "text-slate-500 hover:text-slate-900",
-              )}
-              aria-label="Toggle theme"
-            >
-              {isDark ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <div className="relative hidden md:block">
-              <Bell size={18} className={cn("cursor-pointer", isDark ? "text-gray-400" : "text-slate-500")} />
-              <span className="absolute -top-1.5 -right-1.5 h-4 w-4 rounded-full bg-red-600 text-[10px] flex items-center justify-center font-bold text-white">
-                3
-              </span>
+          <div className="flex items-center gap-4 sm:gap-6 shrink-0">
+            <div className="relative">
+              <button className="p-2 rounded-full text-gray-400 hover:bg-gray-50 transition-colors">
+                <Bell size={22} />
+                <span className="absolute top-1 right-1 h-4 w-4 rounded-full bg-red-600 text-[10px] flex items-center justify-center font-bold text-white border-2 border-white">
+                  0
+                </span>
+              </button>
             </div>
 
-            {role === "admin" && (
-              <div className="hidden md:flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex items-center gap-2 bg-[#1a2b4b] hover:bg-[#253d6b] text-white px-3 py-2 rounded-md text-xs font-medium transition"
-                >
-                  <FileText size={14} /> Reports
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-2 bg-gold hover:bg-gold/90 text-black px-3 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition"
-                >
-                  <Plus size={14} /> Add Event
-                </button>
+            <div className="flex items-center gap-3 pl-4 border-l border-gray-100">
+              <div className="h-10 w-10 rounded-full overflow-hidden border border-gray-200 shadow-sm">
+                <img src={eventsLogo} alt="User" className="h-full w-full object-cover" />
               </div>
-            )}
+              <div className="hidden md:block text-sm">
+                <p className="font-semibold text-gray-700 flex items-center gap-1">
+                  Hi, {userLabel.split(' ')[0]} <ChevronDown size={14} className="text-gray-400" />
+                </p>
+              </div>
+            </div>
           </div>
         </header>
 
-        {/* Search sub-header */}
-        <div
-          className={cn(
-            "border-b px-4 sm:px-6 py-2 flex items-center gap-3 backdrop-blur-sm",
-            isDark ? "bg-[#0b0e14]/40 border-white/5" : "bg-white/40 border-slate-200",
-          )}
-        >
-          <div className="relative flex-1 max-w-xl group">
-            <Search
-              className={cn(
-                "absolute left-3 top-1/2 -translate-y-1/2 transition-colors",
-                isDark ? "text-gray-500 group-focus-within:text-white" : "text-slate-400",
-              )}
-              size={16}
-            />
-            <input
-              type="text"
-              placeholder="Search pages..."
-              className={cn(
-                "w-full border-none pl-10 pr-4 py-1.5 rounded text-sm outline-none focus:ring-1 focus:ring-gold/40 transition-all",
-                isDark ? "bg-[#1a1d23]/80 text-white" : "bg-slate-100/80 text-slate-900",
-              )}
-            />
-          </div>
-          <button
-            type="button"
-            onClick={handleReload}
-            title="Reload dashboard data"
-            className={cn(
-              "p-1.5 rounded transition",
-              isDark ? "bg-[#1a1d23]/80 text-gray-400 hover:text-white" : "bg-slate-100/80 text-slate-500",
-            )}
-          >
-            <RotateCcw size={16} />
-          </button>
-        </div>
-
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden relative">
-          <div className="max-w-[1600px] mx-auto">
+        <main className="flex-1 p-6 sm:p-10 overflow-x-hidden relative">
+          <div className="max-w-[1400px] mx-auto">
             {!isDashboardRoot && <BackToDashboard role={role} />}
             {content}
-          </div>
-
-          <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-2 group">
-            <div className="bg-gold text-black px-3 py-1 rounded shadow-lg text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-              Speak to us!
-            </div>
-            <button
-              type="button"
-              className="h-12 w-12 rounded-full bg-gold shadow-2xl flex items-center justify-center text-black hover:scale-105 transition transform relative"
-            >
-              <MessageSquare size={22} />
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-600 border-2 border-[#0b0e14] text-[10px] flex items-center justify-center font-bold text-white">
-                1
-              </span>
-            </button>
           </div>
         </main>
       </div>
@@ -393,8 +273,7 @@ function DashboardSidebar({
             )}
 
             <div className={cn(
-              "grid gap-2",
-              collapsed ? "grid-cols-1" : "grid-cols-2"
+              "grid gap-2 grid-cols-1"
             )}>
               {sec.items.map((item) => {
                 const to = item.to || (item.children && item.children[0]?.to);

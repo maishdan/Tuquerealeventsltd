@@ -1,9 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Mail, MessageSquare, Inbox } from "lucide-react";
-import { GlassPanel } from "@/components/dashboard/GlassPanel";
+import {
+  Mail,
+  MessageSquare,
+  Inbox,
+  Search,
+  Filter,
+  Clock,
+  ArrowRight,
+  MoreHorizontal,
+  ShieldCheck,
+  Send
+} from "lucide-react";
 import { useAdminContacts, useUpdateContactStatus } from "@/hooks/use-dashboard-data";
 import type { ContactStatus } from "@/lib/database.types";
 import { cn } from "@/lib/utils";
+import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
 
 export const Route = createFileRoute("/admin/contacts")({
   component: AdminContacts,
@@ -15,7 +26,7 @@ const statusStyles: Record<ContactStatus, string> = {
   new: "border-amber-400/40 bg-amber-500/10 text-amber-300",
   read: "border-blue-400/40 bg-blue-500/10 text-blue-300",
   replied: "border-emerald-400/40 bg-emerald-500/10 text-emerald-300",
-  archived: "border-white/20 bg-white/5 text-muted-foreground",
+  archived: "border-white/20 bg-white/5 text-gray-500",
 };
 
 function AdminContacts() {
@@ -26,99 +37,132 @@ function AdminContacts() {
   const repliedCount = contacts.filter((c) => c.status === "replied").length;
 
   return (
-    <div className="space-y-8">
-      <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-gold">Contact Inquiries</p>
-        <h2 className="mt-2 font-display text-3xl sm:text-4xl">
-          Website <span className="text-gradient-gold">messages</span>
-        </h2>
-        <p className="mt-2 text-muted-foreground">
-          All submissions from the public contact page. Update status as you read and reply.
-        </p>
-      </div>
+    <div className="space-y-10 pb-20 font-sans text-white">
+      <BackToDashboard role="admin" />
 
-      <div className="grid sm:grid-cols-3 gap-4">
-        <div className="glass-strong rounded-2xl border border-white/15 p-5 flex items-center gap-4">
-          <div className="h-11 w-11 rounded-xl bg-gold/10 flex items-center justify-center text-gold">
-            <Inbox size={20} />
+      {/* 1. STRATEGIC HEADER */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 text-gold">
+            <div className="h-[1px] w-10 bg-gold" />
+            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Intelligence Inbound</p>
           </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Total</p>
-            <p className="font-display text-2xl">{contacts.length}</p>
-          </div>
-        </div>
-        <div className="glass-strong rounded-2xl border border-white/15 p-5 flex items-center gap-4">
-          <div className="h-11 w-11 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-300">
-            <MessageSquare size={20} />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Unread</p>
-            <p className="font-display text-2xl">{newCount}</p>
-          </div>
-        </div>
-        <div className="glass-strong rounded-2xl border border-white/15 p-5 flex items-center gap-4">
-          <div className="h-11 w-11 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-300">
-            <Mail size={20} />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-widest text-muted-foreground">Replied</p>
-            <p className="font-display text-2xl">{repliedCount}</p>
-          </div>
+          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Communications</h1>
+          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
+            Centralized intake for all high-level inquiries and strategic partnerships. Monitor response latency and engagement quality.
+          </p>
         </div>
       </div>
 
-      <GlassPanel title="Contact Messages" subtitle={`${contacts.length} inquiries from /contact`}>
-        {isLoading && <p className="text-sm text-muted-foreground">Loading contact messages…</p>}
-        {error && (
-          <p className="text-sm text-destructive">Could not load contact inquiries. Check your Supabase connection.</p>
-        )}
-        {!isLoading && contacts.length === 0 && (
-          <p className="text-sm text-muted-foreground">No contact messages yet. Submissions from the contact page will appear here.</p>
-        )}
-        <div className="space-y-3">
+      {/* 2. CORE METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {[
+          { label: "Total Inquiries", val: contacts.length, icon: Inbox, color: "gold" },
+          { label: "Awaiting Action", val: newCount, icon: MessageSquare, color: "amber" },
+          { label: "Resolved/Replied", val: repliedCount, icon: Send, color: "emerald" },
+        ].map((stat, i) => (
+          <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
+             <div className="flex justify-between items-start mb-6">
+                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border transition-all",
+                  stat.color === "gold" ? "bg-gold/10 text-gold border-gold/20 group-hover:bg-gold group-hover:text-black" :
+                  stat.color === "amber" ? "bg-amber-500/10 text-amber-500 border-amber-500/20 group-hover:bg-amber-500 group-hover:text-black" :
+                  "bg-emerald-500/10 text-emerald-500 border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black"
+                )}>
+                  <stat.icon size={24} />
+                </div>
+             </div>
+             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">{stat.label}</p>
+             <h3 className="text-4xl font-black text-white">{stat.val}</h3>
+          </div>
+        ))}
+      </div>
+
+      {/* 3. MESSAGE REGISTRY */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-3 rounded-2xl">
+           <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <input
+                type="text"
+                placeholder="Search inbound intelligence..."
+                className="w-full bg-transparent border-none pl-12 pr-6 py-2 text-sm text-white focus:ring-0 outline-none"
+              />
+           </div>
+           <div className="h-8 w-[1px] bg-white/5" />
+           <button className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
+              <Filter size={14} /> Refine
+           </button>
+        </div>
+
+        <div className="space-y-4">
+          {isLoading && <p className="text-center py-20 text-gray-500 uppercase tracking-widest text-[10px] font-black animate-pulse">Syncing Secure Database...</p>}
+          {error && <p className="text-center py-20 text-rose-500 uppercase tracking-widest text-[10px] font-black">Database Synchronization Failure</p>}
+
           {contacts.map((c) => (
-            <div key={c.id} className="rounded-xl glass border border-white/10 p-4 sm:p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-display text-lg">{c.name}</p>
-                  <a href={`mailto:${c.email}`} className="text-sm text-gold mt-1 inline-block hover:underline">
-                    {c.email}
+            <div key={c.id} className="group relative bg-[#121212] border border-white/10 p-8 rounded-[40px] hover:border-gold/30 transition-all duration-500">
+               <div className="flex flex-wrap justify-between items-start gap-6 mb-8">
+                  <div className="flex gap-6">
+                     <div className="h-14 w-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-display text-2xl font-black">
+                        {c.name.charAt(0).toUpperCase()}
+                     </div>
+                     <div className="space-y-1">
+                        <h3 className="text-2xl font-black text-white uppercase tracking-tighter group-hover:text-gold transition-colors">{c.name}</h3>
+                        <div className="flex items-center gap-4">
+                           <a href={`mailto:${c.email}`} className="text-[10px] font-bold text-gray-500 hover:text-gold transition-colors uppercase tracking-widest">{c.email}</a>
+                           <div className="h-1 w-1 rounded-full bg-white/10" />
+                           <div className="flex items-center gap-1.5 text-[10px] font-bold text-gray-600 uppercase tracking-widest">
+                              <Clock size={12} /> {new Date(c.created_at).toLocaleDateString()}
+                           </div>
+                        </div>
+                     </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <span className={cn("inline-flex rounded-full border px-4 py-1.5 text-[9px] font-black uppercase tracking-widest", statusStyles[c.status])}>
+                        {c.status}
+                     </span>
+                     <button className="p-2 rounded-xl hover:bg-white/5 text-gray-500 transition-colors">
+                        <MoreHorizontal size={20} />
+                     </button>
+                  </div>
+               </div>
+
+               <div className="bg-white/[0.02] border border-white/5 p-6 rounded-3xl mb-8">
+                  <p className="text-gray-300 text-sm leading-relaxed italic">"{c.message}"</p>
+               </div>
+
+               <div className="flex flex-wrap items-center gap-6 border-t border-white/5 pt-8">
+                  <div className="flex items-center gap-3">
+                     <label htmlFor={`status-${c.id}`} className="text-[9px] font-black text-gray-600 uppercase tracking-widest">Update State:</label>
+                     <select
+                       id={`status-${c.id}`}
+                       value={c.status}
+                       onChange={(e) => updateStatus.mutate({ id: c.id, status: e.target.value as ContactStatus })}
+                       className="bg-[#1a1a1a] border border-white/10 rounded-lg px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-gold transition-all"
+                     >
+                       {statusOptions.map((s) => (
+                         <option key={s} value={s}>{s}</option>
+                       ))}
+                     </select>
+                  </div>
+
+                  <a
+                    href={`mailto:${c.email}?subject=Executive Response: Royal Touch Events`}
+                    className="ml-auto inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gold hover:text-white transition-colors"
+                  >
+                    Dispatch Executive Response <ArrowRight size={14} />
                   </a>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className={cn("inline-flex rounded-full border px-3 py-1 text-xs capitalize", statusStyles[c.status])}>
-                    {c.status}
-                  </span>
-                  <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString()}</span>
-                </div>
-              </div>
-              <p className="mt-4 text-sm text-foreground/85 leading-relaxed whitespace-pre-wrap">{c.message}</p>
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <label htmlFor={`contact-status-${c.id}`} className="text-xs uppercase tracking-widest text-muted-foreground">
-                  Status
-                </label>
-                <select
-                  id={`contact-status-${c.id}`}
-                  value={c.status}
-                  onChange={(e) => updateStatus.mutate({ id: c.id, status: e.target.value as ContactStatus })}
-                  className="rounded-lg bg-background/60 border border-border px-3 py-1.5 text-sm"
-                  aria-label={`Update status for ${c.name}`}
-                >
-                  {statusOptions.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-                <a
-                  href={`mailto:${c.email}?subject=Re: Your inquiry to Royal Touch Events`}
-                  className="ml-auto text-xs uppercase tracking-widest text-gold hover:underline"
-                >
-                  Reply via email
-                </a>
-              </div>
+               </div>
             </div>
           ))}
+
+          {!isLoading && contacts.length === 0 && (
+             <div className="py-32 text-center space-y-6">
+                <Inbox size={48} className="text-gray-800 mx-auto" />
+                <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.4em]">Communication Vault Empty</p>
+             </div>
+          )}
         </div>
-      </GlassPanel>
+      </div>
     </div>
   );
 }
