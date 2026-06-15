@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { adminNav } from "@/lib/dashboard-nav";
 import {
   DollarSign,
@@ -56,6 +56,7 @@ export const Route = createFileRoute("/admin/")({
 });
 
 function AdminOverview() {
+  const navigate = useNavigate();
   const { profile } = useAuth();
   const { data: bookings = [] } = useAdminBookings();
   const { data: clients = [] } = useAdminClients();
@@ -74,8 +75,8 @@ function AdminOverview() {
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-widest text-[#2b4c8c]/60">Dashboard Overview</h2>
         <div className="flex items-center gap-6 text-[11px] font-bold uppercase tracking-widest text-[#2b4c8c]">
-           <span className="cursor-pointer hover:underline">Finance</span>
-           <span className="cursor-pointer hover:underline">View Statement</span>
+           <span className="cursor-pointer hover:underline" onClick={() => navigate({ to: '/admin/finance' })}>Finance</span>
+           <span className="cursor-pointer hover:underline" onClick={() => navigate({ to: '/admin/receipts' })}>View Statement</span>
         </div>
       </div>
 
@@ -116,7 +117,11 @@ function AdminOverview() {
                  </thead>
                  <tbody className="divide-y divide-gray-50">
                    {adminNav.filter(n => n.to !== "/admin").slice(0, 6).map((nav) => (
-                     <tr key={nav.to} className="hover:bg-gray-50 transition-colors group">
+                     <tr
+                       key={nav.to}
+                       className="hover:bg-gray-50 transition-colors group cursor-pointer"
+                       onClick={() => navigate({ to: nav.to })}
+                     >
                         <td className="px-8 py-5">
                            <div className="flex items-center gap-4">
                               <div className="h-8 w-8 rounded-lg bg-gray-50 flex items-center justify-center text-[#2b4c8c] group-hover:bg-[#2b4c8c] group-hover:text-white transition-all">
