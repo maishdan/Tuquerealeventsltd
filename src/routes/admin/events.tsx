@@ -73,7 +73,7 @@ function AdminEvents() {
 
         <div className="grid gap-6 py-4">
           {displayEvents.map((e) => (
-            <div key={e.id} className="group relative overflow-hidden rounded-[32px] bg-muted/30 border border-border hover:border-gold/30 transition-all duration-500 p-6 md:p-8">
+            <div key={e.id} className="group relative overflow-hidden rounded-[32px] bg-white/5 dark:bg-white/[0.02] light:bg-black/[0.02] border border-border hover:border-gold/30 transition-all duration-500 p-6 md:p-8">
               <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
                  <Globe size={120} className="text-foreground" />
               </div>

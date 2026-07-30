@@ -47,6 +47,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -58,6 +63,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 
 type DashboardLayoutProps = {
   title: string;
@@ -67,7 +73,7 @@ type DashboardLayoutProps = {
   children?: ReactNode;
 };
 
-const SIDEBAR_EXPANDED = "w-64";
+const SIDEBAR_EXPANDED = "w-72";
 const SIDEBAR_COLLAPSED = "w-20";
 
 type Theme = "system" | "dark" | "light" | "classic-dark";
@@ -106,11 +112,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   }
 
   function toggleMenu() {
-    if (isMobile) {
-      setMobileOpen(true);
-    } else {
-      setCollapsed((c) => !c);
-    }
+    setMobileOpen(true);
   }
 
   const userLabel = profile?.full_name || profile?.email || "User";
@@ -136,7 +138,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
     )}>
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-           <div className="bg-card border border-border p-8 rounded-[32px] max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300">
+           <div className="bg-[#121212] border border-white/10 p-8 rounded-[32px] max-w-sm w-full shadow-2xl animate-in fade-in zoom-in duration-300">
               <div className="text-center space-y-6">
                  <div className="mx-auto h-16 w-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center border border-rose-500/20">
                     <LogOut size={32} />
@@ -148,7 +150,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                  <div className="grid grid-cols-2 gap-4">
                     <button
                       onClick={() => setShowLogoutConfirm(false)}
-                      className="h-12 rounded-xl bg-muted border border-border text-foreground font-bold text-xs uppercase tracking-widest hover:bg-accent transition-all"
+                      className="h-12 rounded-xl bg-white/5 border border-white/10 text-white font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all"
                     >
                       Cancel
                     </button>
@@ -165,34 +167,24 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
       )}
 
       <div className="flex flex-1">
-        {/* Desktop Sidebar */}
+        {/* Desktop Persistent Sidebar (Only for very wide screens) */}
         <aside
           className={cn(
-            "hidden lg:flex flex-col fixed inset-y-0 left-0 top-0 z-40 transition-all duration-500 ease-in-out border-r shadow-2xl overflow-hidden",
-            "bg-card border-border",
-            collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED,
+            "hidden xl:flex flex-col fixed inset-y-0 left-0 top-0 z-40 transition-all duration-500 ease-in-out border-r shadow-2xl overflow-hidden",
+            "bg-[#0b0e14] border-white/5",
+            collapsed ? "w-20" : "w-72",
           )}
         >
           <DashboardSidebar {...sidebarProps} theme={theme} />
         </aside>
 
-        {/* Mobile Sidebar */}
+        {/* The Slider Side Menu (Sheet) - Now accessible on all screens via menu button */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
-            className="w-[min(85vw,300px)] p-0 gap-0 flex flex-col border-r bg-background text-foreground border-border"
+            className="w-[300px] p-0 gap-0 flex flex-col border-r bg-[#0b0e14] text-white border-white/10 shadow-2xl"
           >
-            <SheetHeader className="px-6 py-5 border-b border-border text-left">
-              <div className="flex items-center gap-3">
-                <span className="inline-flex h-10 w-10 shrink-0 rounded-full overflow-hidden ring-1 ring-gold/40">
-                  <img src={eventsLogo} alt="" className="h-full w-full object-cover" />
-                </span>
-                <SheetTitle className="font-display text-lg leading-tight uppercase tracking-tighter text-foreground">
-                  Royal <span className="text-gold">Touch</span>
-                </SheetTitle>
-              </div>
-            </SheetHeader>
-            <DashboardSidebar {...sidebarProps} collapsed={false} theme={theme} />
+            <DashboardSidebar {...sidebarProps} collapsed={false} theme={theme} onNavigate={() => setMobileOpen(false)} />
           </SheetContent>
         </Sheet>
 
@@ -200,7 +192,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         <div
           className={cn(
             "flex-1 flex flex-col min-w-0 transition-all duration-500 relative z-10",
-            collapsed ? "lg:pl-20" : "lg:pl-64",
+            "xl:pl-72",
+            collapsed && "xl:pl-20"
           )}
         >
           <header className="sticky top-0 z-30 h-16 backdrop-blur-xl border-b border-border bg-background/80 flex items-center justify-between px-4 sm:px-6">
@@ -212,15 +205,11 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                 {mobileOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
 
-              <Link to="/" className="p-2 rounded-lg transition-all shrink-0 hover:bg-muted text-muted-foreground hover:text-gold" title="Return to Website Home">
-                <Home size={20} />
-              </Link>
-
               <div className="h-6 w-px bg-border mx-1 hidden xs:block" />
 
               <div className="flex items-center gap-3 min-w-0">
                  <h1 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-muted-foreground truncate">
-                   <span className="hidden sm:inline">{role === "admin" ? "Admin Mission Control" : "Client Portal Hub"} / </span>
+                   <span>{role === "admin" ? "Admin Mission Control" : "Client Portal Hub"} / </span>
                    <span className="text-foreground">{title}</span>
                  </h1>
               </div>
@@ -408,6 +397,15 @@ function DashboardSidebar({
   theme,
   profile
 }: any) {
+  const [openGroups, setOpenGroups] = useState<string[]>([]);
+  const [budgetLimit, setBudgetLimit] = useState([500000]);
+
+  const toggleGroup = (key: string) => {
+    setOpenGroups(prev =>
+      prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key]
+    );
+  };
+
   const isLinkActive = (to: string) => {
     const normalizedTo = to.replace(/\/$/, "");
     const normalizedPath = pathname.replace(/\/$/, "");
@@ -416,31 +414,81 @@ function DashboardSidebar({
   };
 
   return (
-    <div className="flex flex-col h-full min-h-0 bg-card transition-colors duration-500">
+    <div className="flex flex-col h-full min-h-0 bg-[#0b0e14] transition-colors duration-500">
       {/* Navigation List */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-8 scrollbar-none">
-        <div className="pb-4 border-b border-border mb-4">
+      <nav className="flex-1 overflow-y-auto overflow-x-hidden p-6 space-y-10 scrollbar-none">
+        <div className="pb-6 border-b border-white/5 mb-6">
            <Link to="/" className="flex items-center gap-4 px-4 py-2 group">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center transition-colors bg-muted text-muted-foreground group-hover:text-gold">
-                <Home size={16} />
+              <div className="h-10 w-10 rounded-xl flex items-center justify-center transition-all bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 shadow-inner">
+                <Home size={20} />
               </div>
-              {!collapsed && <span className="text-[10px] font-black uppercase tracking-widest transition-colors text-muted-foreground group-hover:text-foreground">Exit to Website</span>}
+              {!collapsed && <span className="text-[11px] font-black uppercase tracking-[0.2em] transition-colors text-gray-400 group-hover:text-white">Exit to Website</span>}
            </Link>
         </div>
 
         {sections.map((sec: any) => ( sec.items.length > 0 && (
-          <div key={sec.section} className="space-y-2">
+          <div key={sec.section} className="space-y-4">
             {!collapsed && (
-              <p className="px-4 text-[9px] font-black uppercase tracking-[0.3em] mb-4 text-muted-foreground opacity-60">
+              <p className="px-4 text-[10px] font-black uppercase tracking-[0.4em] mb-4 text-gray-600">
                 {sec.section}
               </p>
             )}
-            <div className="space-y-1">
+            <div className="space-y-2">
               {sec.items.map((item: any) => {
-                const to = item.to || (item.children && item.children[0]?.to);
-                if (!to) return null;
-                const active = isLinkActive(to);
+                const hasChildren = item.children && item.children.length > 0;
+                const to = item.to;
+                const active = to ? isLinkActive(to) : (item.children?.some((c: any) => isLinkActive(c.to)));
                 const Icon = item.icon;
+                const isOpen = openGroups.includes(item.key);
+
+                if (hasChildren) {
+                  return (
+                    <Collapsible
+                      key={item.key}
+                      open={isOpen && !collapsed}
+                      onOpenChange={() => toggleGroup(item.key)}
+                      className="space-y-1"
+                    >
+                      <CollapsibleTrigger asChild>
+                        <button
+                          className={cn(
+                            "w-full flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all duration-500 group relative text-left",
+                            active && !isOpen
+                              ? "bg-[#6a301a] text-white shadow-[0_15px_40px_rgba(106,48,26,0.4)]"
+                              : "text-gray-500 hover:bg-white/5 hover:text-white"
+                          )}
+                        >
+                          <Icon size={22} className={cn("shrink-0 transition-transform duration-500", active ? "text-white scale-110" : "text-gray-600 group-hover:text-gold group-hover:scale-110")} />
+                          {!collapsed && <span className="text-[11px] truncate leading-none font-black tracking-widest">{item.label}</span>}
+                          {!collapsed && (
+                            <div className="ml-auto flex items-center gap-2">
+                              {active && !isOpen && <Zap size={10} className="text-gold fill-gold animate-pulse" />}
+                              <ChevronDown size={14} className={cn("transition-transform duration-300", isOpen && "rotate-180")} />
+                            </div>
+                          )}
+                        </button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="space-y-1 pl-12 animate-in slide-in-from-top-2 duration-300">
+                        {item.children.map((child: any) => (
+                          <Link
+                            key={child.to}
+                            to={child.to}
+                            onClick={onNavigate}
+                            className={cn(
+                              "flex items-center gap-3 py-2 text-[10px] font-bold uppercase tracking-widest transition-colors",
+                              isLinkActive(child.to) ? "text-gold" : "text-gray-500 hover:text-white"
+                            )}
+                          >
+                            <div className={cn("h-1 w-1 rounded-full", isLinkActive(child.to) ? "bg-gold" : "bg-gray-700")} />
+                            {child.label}
+                          </Link>
+                        ))}
+                      </CollapsibleContent>
+                    </Collapsible>
+                  );
+                }
+
+                if (!to) return null;
 
                 return (
                   <Link
@@ -448,14 +496,17 @@ function DashboardSidebar({
                     to={to}
                     onClick={onNavigate}
                     className={cn(
-                      "flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold uppercase tracking-widest transition-all duration-300 group relative",
+                      "flex items-center gap-4 px-4 py-4 rounded-2xl text-sm font-bold uppercase tracking-widest transition-all duration-500 group relative",
                       active
-                        ? "bg-[#6a301a] text-white shadow-[0_10px_30px_rgba(106,48,26,0.3)] border-l-4 border-white"
-                        : "border-l-4 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
+                        ? "bg-[#6a301a] text-white shadow-[0_15px_40px_rgba(106,48,26,0.4)]"
+                        : "text-gray-500 hover:bg-white/5 hover:text-white"
                     )}
                   >
-                    <Icon size={20} className={cn("shrink-0 transition-transform duration-300", active ? "text-white scale-110" : "text-muted-foreground group-hover:text-gold group-hover:scale-110")} />
-                    {!collapsed && <span className="text-[11px] truncate leading-none">{item.label}</span>}
+                    {active && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-white rounded-r-full animate-in slide-in-from-left duration-500" />
+                    )}
+                    <Icon size={22} className={cn("shrink-0 transition-transform duration-500", active ? "text-white scale-110" : "text-gray-600 group-hover:text-gold group-hover:scale-110")} />
+                    {!collapsed && <span className="text-[11px] truncate leading-none font-black tracking-widest">{item.label}</span>}
                     {!collapsed && active && (
                       <div className="ml-auto">
                         <Zap size={10} className="text-gold fill-gold animate-pulse" />
@@ -467,26 +518,48 @@ function DashboardSidebar({
             </div>
           </div>
         )))}
+
+        {/* The Slider for Admin Dashboard */}
+        {role === "admin" && !collapsed && (
+          <div className="pt-10 px-4 space-y-6 border-t border-white/5">
+             <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">Operation Budget</p>
+                   <span className="text-[10px] font-black text-gold">KES {budgetLimit[0].toLocaleString()}</span>
+                </div>
+                <Slider
+                  value={budgetLimit}
+                  onValueChange={setBudgetLimit}
+                  max={2000000}
+                  step={10000}
+                  className="py-4"
+                />
+                <p className="text-[8px] font-bold text-gray-600 uppercase tracking-widest leading-relaxed">
+                   Adjusting this parameter recalibrates the Empire revenue forecasting engine.
+                </p>
+             </div>
+          </div>
+        )}
       </nav>
 
       {/* Footer Profile & Logout */}
-      <div className="shrink-0 p-4 border-t border-border bg-black/5 space-y-4">
+      <div className="shrink-0 p-6 border-t border-white/5 bg-black/40 space-y-6">
         {!collapsed && (
-          <div className="flex items-center gap-3 px-2">
-            <div className="h-9 w-9 rounded-full overflow-hidden border border-gold/30 ring-2 ring-gold/10">
+          <div className="flex items-center gap-4 px-2">
+            <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 ring-4 ring-gold/5 shadow-2xl">
               {profile?.avatar_url ? (
                 <img src={profile.avatar_url} alt="" className="h-full w-full object-cover" />
               ) : (
-                <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground">
-                  <UserIcon size={16} />
+                <div className="h-full w-full bg-[#1a1a1a] flex items-center justify-center text-gray-600">
+                  <UserIcon size={20} />
                 </div>
               )}
             </div>
             <div className="min-w-0">
-               <p className="text-[10px] font-black truncate uppercase tracking-tighter text-foreground">{userLabel}</p>
-               <div className="flex items-center gap-1.5 mt-0.5">
+               <p className="text-[11px] font-black truncate uppercase tracking-tight text-white">{userLabel}</p>
+               <div className="flex items-center gap-1.5 mt-1">
                   <ShieldCheck size={10} className="text-gold" />
-                  <p className="text-[8px] text-muted-foreground font-bold uppercase tracking-widest">{roleLabel}</p>
+                  <p className="text-[9px] text-gray-500 font-bold uppercase tracking-widest">{roleLabel}</p>
                </div>
             </div>
           </div>
@@ -494,12 +567,12 @@ function DashboardSidebar({
         <button
           onClick={onSignOut}
           className={cn(
-            "flex w-full items-center gap-4 px-4 py-3.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-500",
-            "bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white hover:shadow-[0_0_30px_rgba(244,63,94,0.3)]",
-            collapsed && "justify-center px-0 h-12 w-12 mx-auto rounded-full"
+            "flex w-full items-center gap-4 px-4 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500",
+            "bg-rose-500/5 text-rose-500 border border-rose-500/10 hover:bg-rose-500 hover:text-white hover:shadow-[0_15px_40px_rgba(244,63,94,0.3)]",
+            collapsed && "justify-center px-0 h-14 w-14 mx-auto rounded-full"
           )}
         >
-          <LogOut size={18} className="shrink-0" />
+          <LogOut size={20} className="shrink-0" />
           {!collapsed && <span>Terminate</span>}
         </button>
       </div>

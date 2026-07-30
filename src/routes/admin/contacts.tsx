@@ -68,7 +68,7 @@ function AdminContacts() {
             ) : (
               <div className="space-y-6 py-4">
                 {contacts.map((c) => (
-                  <div key={c.id} className="group bg-muted/30 border border-border p-8 rounded-[40px] hover:border-gold/30 transition-all duration-500">
+                  <div key={c.id} className="group bg-white/5 dark:bg-white/[0.02] light:bg-black/[0.02] border border-border p-8 rounded-[40px] hover:border-gold/30 transition-all duration-500">
                      <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
                         <div className="flex gap-6">
                            <div className="h-14 w-14 rounded-full bg-gold/10 border border-gold/20 flex items-center justify-center text-gold font-display text-2xl font-black shadow-inner">

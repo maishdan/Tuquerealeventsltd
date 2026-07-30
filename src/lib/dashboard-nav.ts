@@ -51,63 +51,42 @@ export type DashboardNavSection = {
 
 export const adminSections: DashboardNavSection[] = [
   {
-    section: "Intelligence Hub",
+    section: "Main Operations",
     items: [
       { key: "overview", label: "Mission Control", icon: Command, to: "/admin" },
-      { key: "contacts", label: "Comms Registry", icon: MessageSquare, to: "/admin/contacts" },
       { key: "events", label: "Empire Events", icon: Globe, to: "/admin/events" },
       { key: "bookings", label: "Project Intake", icon: ClipboardList, to: "/admin/bookings" },
+      { key: "orders", label: "Logistics Orders", icon: ShoppingCart, to: "/admin/orders" },
+      { key: "contacts", label: "Comms Registry", icon: MessageSquare, to: "/admin/contacts" },
     ],
   },
   {
-    section: "Personnel & Assets",
-    items: [
-      {
-        key: "audience",
-        label: "Audience",
-        icon: UsersRound,
-        children: [
-          { to: "/admin/users", label: "Executive Users", icon: Fingerprint },
-          { to: "/admin/customers", label: "Client Registry", icon: UserCircle },
-        ],
-      },
-      {
-        key: "operations",
-        label: "Operations",
-        icon: Activity,
-        children: [
-          { to: "/admin/reminders", label: "Ops Reminders", icon: BellRing },
-          { to: "/admin/orders", label: "Logistics Orders", icon: ShoppingCart },
-        ],
-      },
-    ],
-  },
-  {
-    section: "Capital Management",
+    section: "Financials",
     items: [
       {
         key: "finance",
-        label: "Finance",
+        label: "Capital Hub",
         icon: Wallet,
         children: [
+          { to: "/admin/finance", label: "Overview", icon: Activity },
           { to: "/admin/receipts", label: "Revenue Ledger", icon: Receipt },
-          { to: "/admin/payment-history", label: "Capital History", icon: History },
-        ],
-      },
-      {
-        key: "insights",
-        label: "Insights",
-        icon: BarChart3,
-        children: [
-          { to: "/admin/inventory-analytics", label: "Asset Analytics", icon: Boxes },
+          { to: "/admin/payment-history", label: "Transaction Logs", icon: History },
         ],
       },
     ],
   },
   {
-    section: "Governance",
+    section: "Executive Account",
     items: [
-      { key: "settings", label: "System Config", icon: Settings2, to: "/admin/settings" },
+      {
+        key: "system",
+        label: "System Control",
+        icon: ShieldCheck,
+        children: [
+          { key: "users", label: "Executive Force", icon: Fingerprint, to: "/admin/users" },
+          { key: "settings", label: "System Config", icon: Settings2, to: "/admin/settings" },
+        ],
+      },
     ],
   },
 ];

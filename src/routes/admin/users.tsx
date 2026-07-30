@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import {
   Shield,
   UserCog,
@@ -7,11 +8,12 @@ import {
   TrendingUp,
   ShieldCheck,
   ArrowUpRight,
-  UserPlus
+  UserPlus,
+  Fingerprint,
+  Loader2
 } from "lucide-react";
 import { useAdminTeam, useAdminClients } from "@/hooks/use-dashboard-data";
 import { teamPerformance } from "@/lib/dashboard-mock-data";
-import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/users")({
@@ -20,7 +22,7 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsers() {
   const { data: team = [], isLoading: loadingTeam } = useAdminTeam();
-  const { data: profiles = [] } = useAdminClients();
+  const { data: profiles = [], isLoading: loadingProfiles } = useAdminClients();
 
   const staffMembers = team.length > 0
     ? team.map((m) => ({
@@ -43,93 +45,90 @@ function AdminUsers() {
   const adminUsers = profiles.filter((p) => p.role === "admin");
 
   return (
-    <div className="space-y-10 pb-20 font-sans text-white">
-      <BackToDashboard role="admin" />
-
-      {/* 1. STRATEGIC HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-gold">
-            <div className="h-[1px] w-10 bg-gold" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Governance & Access</p>
-          </div>
-          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Internal Forces</h1>
-          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
-            Manage administrative privileges and internal production hierarchies. Maintain the strategic integrity of empire operations.
-          </p>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-wrap items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Governance & Access</p>
+          <h2 className="mt-2 font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-foreground">Personnel Registry</h2>
         </div>
-        <button className="h-14 px-10 rounded-xl bg-gold text-[#0b0e14] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-white transition-all shadow-2xl">
-          <UserPlus size={16} /> provision New Member
-        </button>
+        <div className="flex gap-4">
+          <button className="h-14 px-8 rounded-full bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-xl shadow-gold/20">
+            <UserPlus size={16} /> Provision Executive
+          </button>
+        </div>
       </div>
 
-      {/* 2. CORE ACCESS METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: "Active Producers", val: staffMembers.length, icon: Users, color: "gold" },
-          { label: "Executive Admins", val: adminUsers.length, icon: ShieldCheck, color: "blue" },
-          { label: "Force Efficiency", val: "92%", icon: TrendingUp, color: "emerald" },
-        ].map((stat, i) => (
-          <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
-             <div className="flex justify-between items-start mb-6">
-                <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center border transition-all",
-                  stat.color === "gold" ? "bg-gold/10 text-gold border-gold/20" :
-                  stat.color === "blue" ? "bg-blue-500/10 text-blue-500 border-blue-500/20" :
-                  "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
-                )}>
-                  <stat.icon size={24} />
-                </div>
-             </div>
-             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">{stat.label}</p>
-             <h3 className="text-4xl font-black text-white">{stat.val}</h3>
-          </div>
-        ))}
-      </div>
-
-      <div className="grid lg:grid-cols-2 gap-8">
-        {/* Production Team Registry */}
-        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
-           <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Production Registry</h4>
-           <div className="space-y-4">
-              {staffMembers.map((member, i) => (
-                <div key={member.id} className="group flex items-center gap-6 p-4 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all">
-                   <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center text-gray-500 border border-white/10 group-hover:text-gold transition-colors font-black">
-                      {i + 1}
-                   </div>
-                   <div className="flex-1 min-w-0">
-                      <h5 className="font-bold text-white uppercase tracking-tight truncate">{member.name}</h5>
-                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest">{member.role}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-sm font-black text-gold">{member.score}</p>
-                      <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">{member.events} EVENTS</p>
-                   </div>
-                </div>
-              ))}
-           </div>
+      <div className="grid lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-8 animate-in fade-in slide-in-from-left-8 duration-1000">
+          <GlassPanel title="Production Force" subtitle="Performance metrics for senior technical staff">
+            {loadingTeam ? (
+              <div className="py-24 flex flex-col items-center justify-center space-y-4">
+                 <Loader2 size={40} className="text-gold animate-spin" />
+                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Syncing Force Registry...</p>
+              </div>
+            ) : (
+              <div className="space-y-4 py-4">
+                {staffMembers.map((member, i) => (
+                  <div key={member.id} className="group flex items-center gap-6 p-5 rounded-[24px] bg-muted/30 border border-border hover:border-gold/30 transition-all duration-300">
+                     <div className="h-12 w-12 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground group-hover:text-gold transition-colors font-black text-xs shadow-inner">
+                        {String(i + 1).padStart(2, '0')}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                        <h5 className="font-bold text-foreground uppercase tracking-tight truncate">{member.name}</h5>
+                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">{member.role}</p>
+                     </div>
+                     <div className="text-right flex items-center gap-6">
+                        <div className="hidden sm:block">
+                           <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-1">{member.events} PROJECTS</p>
+                           <div className="h-1.5 w-20 bg-background rounded-full overflow-hidden border border-border shadow-inner">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${member.score}%` }} />
+                           </div>
+                        </div>
+                        <div>
+                           <p className="text-sm font-black text-gold">{member.score}</p>
+                           <p className="text-[7px] font-black text-muted-foreground uppercase tracking-widest">SCORE</p>
+                        </div>
+                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </GlassPanel>
         </div>
 
-        {/* Executive Access Registry */}
-        <div className="bg-[#121212] border border-white/10 rounded-[40px] p-10 shadow-2xl space-y-8">
-           <h4 className="text-white font-black text-xs uppercase tracking-[0.4em]">Executive Access Registry</h4>
-           <div className="space-y-4">
-              {adminUsers.map((user) => (
-                <div key={user.id} className="group flex items-center gap-6 p-4 rounded-3xl bg-white/[0.02] border border-white/5 hover:border-blue-500/30 transition-all">
-                   <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
-                      <Shield size={20} />
-                   </div>
-                   <div className="flex-1 min-w-0">
-                      <h5 className="font-bold text-white uppercase tracking-tight truncate">{user.full_name || "PROVISIONED ADMIN"}</h5>
-                      <p className="text-[8px] font-black text-gray-500 uppercase tracking-widest truncate">{user.email}</p>
-                   </div>
-                   <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[8px] font-black uppercase tracking-widest">
-                      <UserCog size={10} /> {user.role}
-                   </div>
+        <div className="lg:col-span-4 space-y-6 animate-in fade-in slide-in-from-right-8 duration-1000">
+           <GlassPanel title="Administrative Access" subtitle="Secure privilege registry">
+              {loadingProfiles ? (
+                 <div className="py-12 flex items-center justify-center">
+                    <Loader2 size={24} className="text-gold animate-spin" />
+                 </div>
+              ) : (
+                <div className="space-y-4 py-2">
+                   {adminUsers.map((user) => (
+                     <div key={user.id} className="group flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border hover:border-blue-500/30 transition-all">
+                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-inner shrink-0">
+                           <Shield size={18} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                           <h5 className="font-bold text-foreground text-[11px] uppercase tracking-tight truncate">{user.full_name || "PROVISIONED ADMIN"}</h5>
+                           <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest truncate">{user.email}</p>
+                        </div>
+                     </div>
+                   ))}
                 </div>
-              ))}
-              {adminUsers.length === 0 && (
-                <p className="text-center py-12 text-[10px] font-black text-gray-600 uppercase tracking-widest">No Secondary Administrators Discovered</p>
               )}
+           </GlassPanel>
+
+           <div className="bg-[#121212] border border-white/10 p-8 rounded-[40px] space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5">
+                 <Fingerprint size={80} />
+              </div>
+              <div className="relative z-10 space-y-4">
+                 <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Security Protocol</h4>
+                 <p className="text-gray-500 text-[10px] font-medium leading-relaxed uppercase tracking-widest leading-loose">
+                    All executive sessions are logged. Privilege escalation requires manual biometric verification and two-factor clearance.
+                 </p>
+              </div>
            </div>
         </div>
       </div>

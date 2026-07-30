@@ -74,7 +74,7 @@ function AdminBookings() {
             ) : (
               <div className="space-y-6 py-4">
                 {bookings.map((b) => (
-                  <div key={b.id} className="group bg-muted/30 border border-border p-6 rounded-[32px] hover:border-gold/30 transition-all duration-500">
+                  <div key={b.id} className="group bg-white/5 dark:bg-white/[0.02] light:bg-black/[0.02] border border-border p-6 rounded-[32px] hover:border-gold/30 transition-all duration-500">
                      <div className="flex flex-wrap justify-between items-start gap-4 mb-6">
                         <div className="flex items-center gap-4">
                            <div className="h-12 w-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
@@ -137,10 +137,10 @@ function AdminBookings() {
               </div>
               <div className="relative z-10 space-y-4">
                  <div className="flex items-center gap-3 text-gold">
-                    <ShieldCheck size={20} />
+                    <Star size={20} className="fill-gold" />
                     <h4 className="text-[10px] font-black uppercase tracking-widest text-white">Governance Active</h4>
                  </div>
-                 <p className="text-[11px] text-blue-100 leading-relaxed font-medium uppercase tracking-[0.1em] leading-loose">All inbound project briefs must undergo technical qualification before conversion to active production.</p>
+                 <p className="text-[11px] text-blue-100 leading-relaxed font-medium">All inbound project briefs must undergo technical qualification before conversion to active production.</p>
               </div>
            </div>
 
