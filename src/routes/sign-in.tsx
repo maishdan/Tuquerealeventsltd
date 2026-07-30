@@ -139,11 +139,8 @@ function SignIn() {
           </div>
         </div>
 
-        {/* Development Access */}
-        <div className="mt-8 flex justify-center gap-4 animate-in fade-in delay-500 duration-1000">
-           <Link to="/admin" className="px-6 py-2 rounded-full border border-white/5 bg-white/5 text-[8px] font-black uppercase tracking-[0.3em] text-gray-500 hover:border-gold/30 hover:text-gold transition-all">Quick Admin</Link>
-           <Link to="/dashboard" className="px-6 py-2 rounded-full border border-white/5 bg-white/5 text-[8px] font-black uppercase tracking-[0.3em] text-gray-500 hover:border-gold/30 hover:text-gold transition-all">Quick Client</Link>
-        </div>
+
+
       </div>
     </div>
   );
