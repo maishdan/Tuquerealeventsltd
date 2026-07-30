@@ -16,6 +16,14 @@ import {
   Wallet,
   Activity,
   BarChart3,
+  Sparkles,
+  Globe,
+  Command,
+  ShieldCheck,
+  Zap,
+  Briefcase,
+  TrendingUp,
+  Fingerprint
 } from "lucide-react";
 
 export type DashboardNavItem = {
@@ -43,19 +51,24 @@ export type DashboardNavSection = {
 
 export const adminSections: DashboardNavSection[] = [
   {
-    section: "Main",
+    section: "Intelligence Hub",
     items: [
-      { key: "overview", label: "Dashboard", icon: LayoutDashboard, to: "/admin" },
-      { key: "contacts", label: "Contacts", icon: MessageSquare, to: "/admin/contacts" },
-      { key: "events", label: "Events", icon: PartyPopper, to: "/admin/events" },
-      { key: "bookings", label: "Bookings", icon: ClipboardList, to: "/admin/bookings" },
+      { key: "overview", label: "Mission Control", icon: Command, to: "/admin" },
+      { key: "contacts", label: "Comms Registry", icon: MessageSquare, to: "/admin/contacts" },
+      { key: "events", label: "Empire Events", icon: Globe, to: "/admin/events" },
+      { key: "bookings", label: "Project Intake", icon: ClipboardList, to: "/admin/bookings" },
+    ],
+  },
+  {
+    section: "Personnel & Assets",
+    items: [
       {
         key: "audience",
         label: "Audience",
         icon: UsersRound,
         children: [
-          { to: "/admin/users", label: "Users", icon: Users },
-          { to: "/admin/customers", label: "Customers", icon: UserCircle },
+          { to: "/admin/users", label: "Executive Users", icon: Fingerprint },
+          { to: "/admin/customers", label: "Client Registry", icon: UserCircle },
         ],
       },
       {
@@ -63,17 +76,22 @@ export const adminSections: DashboardNavSection[] = [
         label: "Operations",
         icon: Activity,
         children: [
-          { to: "/admin/reminders", label: "Admin Reminders", icon: BellRing },
-          { to: "/admin/orders", label: "Orders", icon: ShoppingCart },
+          { to: "/admin/reminders", label: "Ops Reminders", icon: BellRing },
+          { to: "/admin/orders", label: "Logistics Orders", icon: ShoppingCart },
         ],
       },
+    ],
+  },
+  {
+    section: "Capital Management",
+    items: [
       {
         key: "finance",
         label: "Finance",
         icon: Wallet,
         children: [
-          { to: "/admin/receipts", label: "Receipts & Payments", icon: Receipt },
-          { to: "/admin/payment-history", label: "Payment History", icon: History },
+          { to: "/admin/receipts", label: "Revenue Ledger", icon: Receipt },
+          { to: "/admin/payment-history", label: "Capital History", icon: History },
         ],
       },
       {
@@ -81,43 +99,49 @@ export const adminSections: DashboardNavSection[] = [
         label: "Insights",
         icon: BarChart3,
         children: [
-          { to: "/admin/inventory-analytics", label: "Inventory & Analytics", icon: Boxes },
+          { to: "/admin/inventory-analytics", label: "Asset Analytics", icon: Boxes },
         ],
       },
     ],
   },
   {
-    section: "Settings",
+    section: "Governance",
     items: [
-      { key: "settings", label: "Settings", icon: Settings2, to: "/admin/settings" },
+      { key: "settings", label: "System Config", icon: Settings2, to: "/admin/settings" },
     ],
   },
 ];
 
 export const customerSections: DashboardNavSection[] = [
   {
-    section: "Main",
+    section: "Main Operations",
     items: [
-      { key: "overview", label: "Dashboard", icon: LayoutDashboard, to: "/dashboard" },
-      { key: "events", label: "My Events", icon: PartyPopper, to: "/dashboard/events" },
-      { key: "bookings", label: "Bookings", icon: ClipboardList, to: "/dashboard/bookings" },
-      { key: "orders", label: "Orders", icon: ShoppingCart, to: "/dashboard/orders" },
-      { key: "messages", label: "Messages", icon: MessageSquare, to: "/dashboard/messages" },
+      { key: "overview", label: "Portal Hub", icon: LayoutDashboard, to: "/dashboard" },
+      { key: "events", label: "My Portfolio", icon: PartyPopper, to: "/dashboard/events" },
+      { key: "bookings", label: "My Inquiries", icon: ClipboardList, to: "/dashboard/bookings" },
+      { key: "orders", label: "Service Orders", icon: ShoppingCart, to: "/dashboard/orders" },
+      { key: "messages", label: "Concierge", icon: MessageSquare, to: "/dashboard/messages" },
+    ],
+  },
+  {
+    section: "Financials",
+    items: [
       {
         key: "finance",
         label: "Finance",
         icon: Wallet,
         children: [
-          { to: "/dashboard/receipts", label: "Receipts & Payments", icon: Receipt },
-          { to: "/dashboard/payment-history", label: "Payment History", icon: History },
+          { to: "/dashboard/receipts", label: "Receipts & Ledger", icon: Receipt },
+          { to: "/dashboard/payment-history", label: "Transaction History", icon: History },
         ],
       },
     ],
   },
   {
-    section: "Account",
+    section: "Executive Account",
     items: [
-      { key: "profile", label: "Profile", icon: UserCircle, to: "/dashboard/profile" },
+      { key: "profile", label: "Identity Profile", icon: UserCircle, to: "/dashboard/profile" },
+      { key: "settings", label: "Portal Settings", icon: Settings2, to: "/dashboard/settings" },
     ],
   },
 ];

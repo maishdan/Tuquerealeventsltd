@@ -71,6 +71,7 @@ create table if not exists public.messages (
 
 create table if not exists public.financial_records (
   id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles (id) on delete cascade,
   record_type text not null check (record_type in ('revenue', 'expense', 'invoice')),
   label text not null,
   amount numeric not null default 0,
@@ -89,6 +90,16 @@ create table if not exists public.team_members (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references public.profiles (id) on delete set null,
+  item_name text not null,
+  order_date date not null default current_date,
+  total_amount numeric not null default 0,
+  status text not null default 'pending' check (status in ('pending', 'confirmed', 'shipped', 'delivered', 'cancelled')),
+  created_at timestamptz not null default now()
+);
+
 -- ---------------------------------------------------- DATA API GRANTS
 
 grant usage on schema public to anon, authenticated, service_role;
@@ -100,13 +111,15 @@ grant select, insert, update, delete on public.events to authenticated;
 grant select, insert, update, delete on public.messages to authenticated;
 grant select, insert, update, delete on public.financial_records to authenticated;
 grant select, insert, update, delete on public.team_members to authenticated;
+grant select, insert, update, delete on public.orders to authenticated;
 
 -- public website forms (not signed in)
 grant insert on public.bookings to anon;
 grant insert on public.contact_inquiries to anon;
 
 grant all on public.profiles, public.bookings, public.contact_inquiries,
-  public.events, public.messages, public.financial_records, public.team_members
+  public.events, public.messages, public.financial_records, public.team_members,
+  public.orders
   to service_role;
 
 -- ------------------------------------------------- TRIGGERS / HELPERS
@@ -241,7 +254,10 @@ create policy "messages_update_own" on public.messages
   with check (user_id = auth.uid() or public.is_admin());
 
 drop policy if exists "financial_admin" on public.financial_records;
-create policy "financial_admin" on public.financial_records
+create policy "financial_select_own" on public.financial_records
+  for select to authenticated using (user_id = auth.uid() or public.is_admin());
+
+create policy "financial_admin_all" on public.financial_records
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 drop policy if exists "team_select" on public.team_members;
@@ -250,6 +266,16 @@ create policy "team_select" on public.team_members
 
 drop policy if exists "team_admin" on public.team_members;
 create policy "team_admin" on public.team_members
+  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+
+alter table public.orders enable row level security;
+
+drop policy if exists "orders_select_own" on public.orders;
+create policy "orders_select_own" on public.orders
+  for select to authenticated using (user_id = auth.uid() or public.is_admin());
+
+drop policy if exists "orders_admin_all" on public.orders;
+create policy "orders_admin_all" on public.orders
   for all to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- --------------------------------------------------------- SEED DATA
@@ -262,6 +288,15 @@ select * from (values
   ('Wanjiru Karanja', 'Creative Director', 92, 22)
 ) as v(full_name, role, performance_score, events_managed)
 where not exists (select 1 from public.team_members);
+
+-- Seed some orders for demonstration (linked to potential admin email)
+-- In a real scenario, these would be created via the dashboard or website.
+insert into public.orders (item_name, order_date, total_amount, status)
+select * from (values
+  ('Premium Lighting Rig - Concert setup', current_date - interval '2 days', 45000, 'confirmed'),
+  ('Luxury Floral Architecture - Wedding Package', current_date - interval '5 days', 120000, 'shipped')
+) as v(item_name, order_date, total_amount, status)
+where not exists (select 1 from public.orders);
 
 -- ------------------------------------------------------ MAKE ADMIN
 -- After you register your account, run this once with your email:

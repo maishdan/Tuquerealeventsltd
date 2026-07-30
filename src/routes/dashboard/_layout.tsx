@@ -19,8 +19,8 @@ function CustomerLayout() {
   return (
     <DashboardGuard>
       <DashboardLayout
-        title="Royal Touch Events"
-        subtitle="Client Portal"
+        title="Client Portfolio"
+        subtitle="Secure Management"
         nav={customerNav}
         role="customer"
       >

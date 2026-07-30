@@ -12,7 +12,7 @@ export async function fetchProfile(userId: string) {
   return data as Profile;
 }
 
-export async function updateProfile(userId: string, updates: Partial<Pick<Profile, "full_name" | "phone" | "city">>) {
+export async function updateProfile(userId: string, updates: Partial<Pick<Profile, "full_name" | "phone" | "city" | "avatar_url">>) {
   const { data, error } = await supabase
     .from("profiles")
     .update(updates)

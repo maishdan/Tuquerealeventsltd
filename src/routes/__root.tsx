@@ -16,6 +16,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { AlertCircle } from "lucide-react";
 
 import bgVenue from "../assets/bg-venue.jpg";
 import homeBackground from "../assets/background.png";
@@ -31,17 +32,19 @@ import {
 import { AuthProvider } from "../contexts/AuthContext";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
-import { WhatsAppButton } from "../components/site/WhatsAppButton";
+import { cn } from "@/lib/utils";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="font-display text-7xl text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">The page you're looking for doesn't exist.</p>
-        <div className="mt-6">
-          <Link to="/" className="inline-flex items-center rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground">Go home</Link>
+    <div className="flex min-h-screen items-center justify-center bg-[#0b0e14] px-4 font-sans">
+      <div className="max-w-md text-center space-y-6">
+        <h1 className="font-display text-8xl text-gold font-black tracking-tighter">404</h1>
+        <div className="space-y-2">
+          <h2 className="text-xl font-black text-white uppercase tracking-widest">Route Not Found</h2>
+          <p className="text-sm text-gray-500 uppercase tracking-widest leading-loose">The requested sector of the Royal Touch engine is unavailable.</p>
+        </div>
+        <div className="pt-4">
+          <Link to="/" className="inline-flex h-14 px-10 items-center rounded-full bg-gold text-[#0b0e14] text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-2xl">Return to Command</Link>
         </div>
       </div>
     </div>
@@ -49,18 +52,37 @@ function NotFoundComponent() {
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
+  console.error("CRITICAL SYSTEM ERROR:", error);
   const router = useRouter();
-  useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold text-foreground">This page didn't load</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Something went wrong on our end.</p>
-        <div className="mt-6 flex justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="rounded-full bg-primary px-5 py-2 text-sm text-primary-foreground">Try again</button>
-          <a href="/" className="rounded-full border border-border px-5 py-2 text-sm">Go home</a>
+    <div className="flex min-h-screen items-center justify-center bg-[#0b0e14] text-white px-4 font-sans">
+      <div className="max-w-2xl w-full glass-strong p-12 rounded-[40px] border border-red-500/30 text-center space-y-8">
+        <div className="mx-auto h-20 w-20 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center border border-red-500/30">
+          <AlertCircle size={40} />
+        </div>
+        <div className="space-y-4">
+          <h1 className="font-display text-4xl md:text-6xl uppercase font-black tracking-tighter leading-tight text-white">System Malfunction.</h1>
+          <p className="text-gray-400 text-sm font-mono bg-black/40 p-4 rounded-xl border border-white/5 overflow-auto max-h-40">
+            {error.message || "An unexpected critical error has occurred in the Royal Touch engine."}
+          </p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-4 pt-4">
+          <button
+            onClick={() => { router.invalidate(); reset(); }}
+            className="h-14 px-10 rounded-full bg-red-600 text-white font-black uppercase tracking-widest text-[10px] hover:bg-red-700 transition-all shadow-2xl"
+          >
+            Reboot Application
+          </button>
+          <a
+            href="/"
+            className="h-14 px-10 rounded-full border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/5 transition-all flex items-center justify-center"
+          >
+            Return to Base
+          </a>
         </div>
       </div>
     </div>
@@ -71,10 +93,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => {
     const seo = createPageSeo({
       title: `${SITE_NAME} — Premium Event Planning Nairobi, Kenya`,
-      description: `${SITE_TAGLINE} Full-service event production: weddings, corporate events, concerts, decoration, sound & lighting, photography and entertainment in Nairobi.`,
+      description: `${SITE_TAGLINE} Full-service event production in Nairobi.`,
       path: "/",
-      keywords:
-        "event planning Nairobi, wedding planner Kenya, corporate events Nairobi, concert production, Royal Touch Events",
+      keywords: "event planning Nairobi, Royal Touch Events",
     });
 
     return {
@@ -88,6 +109,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         {
           type: "application/ld+json",
           children: JSON.stringify(servicesJsonLd()),
+        },
+        {
+          children: `
+            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/6a6b3fa2a70ec81d5099831d/1jupf15bv';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+            })();
+          `,
         },
       ],
     };
@@ -115,41 +149,21 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isHome = pathname === "/";
   const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  const isHome = pathname === "/";
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-      {isDashboard ? (
-        <Outlet />
-      ) : (
-        <div className="relative min-h-screen flex flex-col overflow-x-hidden">
-          <div aria-hidden className="fixed inset-0 z-0 pointer-events-none">
-            <img
-              src={isHome ? homeBackground : bgVenue}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover object-center"
-            />
-            <div
-              className={`absolute inset-0 ${
-                isHome
-                  ? "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.15),oklch(0.10_0.04_280/0.45))]"
-                  : "bg-[linear-gradient(180deg,oklch(0.10_0.04_280/0.35),oklch(0.10_0.04_280/0.65))]"
-              }`}
-            />
-          </div>
-
-          <div className="relative z-10 flex flex-col flex-1 min-h-screen">
-            <Header />
-            <main className="flex-1 min-w-0 pt-16 sm:pt-20">
+        <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
+          <div className="relative flex flex-col min-h-screen">
+            {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
+            <main className={cn("flex-1", !isDashboard && "pt-20")}>
               <Outlet />
             </main>
-            <Footer />
-            <WhatsAppButton />
+            {!isDashboard && <Footer />}
           </div>
         </div>
-      )}
       </AuthProvider>
     </QueryClientProvider>
   );

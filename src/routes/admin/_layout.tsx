@@ -19,7 +19,7 @@ function AdminLayout() {
   return (
     <DashboardGuard requiredRole="admin">
       <DashboardLayout
-        title="Premium Event Empire"
+        title="Empire Operations"
         subtitle="Executive Dashboard"
         nav={adminNav}
         role="admin"

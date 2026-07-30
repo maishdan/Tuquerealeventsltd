@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { History } from "lucide-react";
 
-export const Route = createFileRoute("/dashboard/payment-history")({
+export const Route = createFileRoute("/dashboard/_layout/payment-history")({
   component: CustomerPaymentHistory,
 });
 

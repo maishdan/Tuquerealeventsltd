@@ -16,21 +16,14 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as EventsRouteImport } from './routes/events'
 import { Route as CopyrightRouteImport } from './routes/copyright'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BookingRouteImport } from './routes/booking'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as DashboardReceiptsRouteImport } from './routes/dashboard/receipts'
-import { Route as DashboardProfileRouteImport } from './routes/dashboard/profile'
-import { Route as DashboardPaymentHistoryRouteImport } from './routes/dashboard/payment-history'
-import { Route as DashboardOrdersRouteImport } from './routes/dashboard/orders'
-import { Route as DashboardMessagesRouteImport } from './routes/dashboard/messages'
-import { Route as DashboardEventsRouteImport } from './routes/dashboard/events'
-import { Route as DashboardBookingsRouteImport } from './routes/dashboard/bookings'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
@@ -51,6 +44,17 @@ import { Route as AdminCalendarRouteImport } from './routes/admin/calendar'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminAiRouteImport } from './routes/admin/ai'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
+import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout.index'
+import { Route as DashboardLayoutSettingsRouteImport } from './routes/dashboard/_layout.settings'
+import { Route as DashboardLayoutReceiptsRouteImport } from './routes/dashboard/_layout.receipts'
+import { Route as DashboardLayoutProfileRouteImport } from './routes/dashboard/_layout.profile'
+import { Route as DashboardLayoutPaymentHistoryRouteImport } from './routes/dashboard/_layout.payment-history'
+import { Route as DashboardLayoutOrdersRouteImport } from './routes/dashboard/_layout.orders'
+import { Route as DashboardLayoutMessagesRouteImport } from './routes/dashboard/_layout.messages'
+import { Route as DashboardLayoutHostEventRouteImport } from './routes/dashboard/_layout.host-event'
+import { Route as DashboardLayoutEventsRouteImport } from './routes/dashboard/_layout.events'
+import { Route as DashboardLayoutBookingsRouteImport } from './routes/dashboard/_layout.bookings'
+import { Route as DashboardLayoutBookEventRouteImport } from './routes/dashboard/_layout.book-event'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -87,6 +91,11 @@ const PortfolioRoute = PortfolioRouteImport.update({
   path: '/portfolio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CopyrightRoute = CopyrightRouteImport.update({
   id: '/copyright',
   path: '/copyright',
@@ -117,49 +126,9 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardReceiptsRoute = DashboardReceiptsRouteImport.update({
-  id: '/dashboard/receipts',
-  path: '/dashboard/receipts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardProfileRoute = DashboardProfileRouteImport.update({
-  id: '/dashboard/profile',
-  path: '/dashboard/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardPaymentHistoryRoute = DashboardPaymentHistoryRouteImport.update({
-  id: '/dashboard/payment-history',
-  path: '/dashboard/payment-history',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardOrdersRoute = DashboardOrdersRouteImport.update({
-  id: '/dashboard/orders',
-  path: '/dashboard/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardMessagesRoute = DashboardMessagesRouteImport.update({
-  id: '/dashboard/messages',
-  path: '/dashboard/messages',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardEventsRoute = DashboardEventsRouteImport.update({
-  id: '/dashboard/events',
-  path: '/dashboard/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardBookingsRoute = DashboardBookingsRouteImport.update({
-  id: '/dashboard/bookings',
-  path: '/dashboard/bookings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
@@ -262,6 +231,64 @@ const AdminLayoutRoute = AdminLayoutRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutSettingsRoute = DashboardLayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutReceiptsRoute = DashboardLayoutReceiptsRouteImport.update({
+  id: '/receipts',
+  path: '/receipts',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutProfileRoute = DashboardLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutPaymentHistoryRoute =
+  DashboardLayoutPaymentHistoryRouteImport.update({
+    id: '/payment-history',
+    path: '/payment-history',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutOrdersRoute = DashboardLayoutOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutMessagesRoute = DashboardLayoutMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutHostEventRoute =
+  DashboardLayoutHostEventRouteImport.update({
+    id: '/host-event',
+    path: '/host-event',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutEventsRoute = DashboardLayoutEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutBookingsRoute = DashboardLayoutBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutBookEventRoute =
+  DashboardLayoutBookEventRouteImport.update({
+    id: '/book-event',
+    path: '/book-event',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -270,6 +297,7 @@ export interface FileRoutesByFullPath {
   '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/copyright': typeof CopyrightRoute
+  '/events': typeof EventsRoute
   '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/services': typeof ServicesRoute
@@ -296,16 +324,19 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard': typeof DashboardLayoutRoute
-  '/dashboard/bookings': typeof DashboardBookingsRoute
-  '/dashboard/events': typeof DashboardEventsRoute
-  '/dashboard/messages': typeof DashboardMessagesRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/receipts': typeof DashboardReceiptsRoute
+  '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/book-event': typeof DashboardLayoutBookEventRoute
+  '/dashboard/bookings': typeof DashboardLayoutBookingsRoute
+  '/dashboard/events': typeof DashboardLayoutEventsRoute
+  '/dashboard/host-event': typeof DashboardLayoutHostEventRoute
+  '/dashboard/messages': typeof DashboardLayoutMessagesRoute
+  '/dashboard/orders': typeof DashboardLayoutOrdersRoute
+  '/dashboard/payment-history': typeof DashboardLayoutPaymentHistoryRoute
+  '/dashboard/profile': typeof DashboardLayoutProfileRoute
+  '/dashboard/receipts': typeof DashboardLayoutReceiptsRoute
+  '/dashboard/settings': typeof DashboardLayoutSettingsRoute
+  '/dashboard/': typeof DashboardLayoutIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -314,6 +345,7 @@ export interface FileRoutesByTo {
   '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/copyright': typeof CopyrightRoute
+  '/events': typeof EventsRoute
   '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/services': typeof ServicesRoute
@@ -340,14 +372,17 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/dashboard/bookings': typeof DashboardBookingsRoute
-  '/dashboard/events': typeof DashboardEventsRoute
-  '/dashboard/messages': typeof DashboardMessagesRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/receipts': typeof DashboardReceiptsRoute
+  '/dashboard/book-event': typeof DashboardLayoutBookEventRoute
+  '/dashboard/bookings': typeof DashboardLayoutBookingsRoute
+  '/dashboard/events': typeof DashboardLayoutEventsRoute
+  '/dashboard/host-event': typeof DashboardLayoutHostEventRoute
+  '/dashboard/messages': typeof DashboardLayoutMessagesRoute
+  '/dashboard/orders': typeof DashboardLayoutOrdersRoute
+  '/dashboard/payment-history': typeof DashboardLayoutPaymentHistoryRoute
+  '/dashboard/profile': typeof DashboardLayoutProfileRoute
+  '/dashboard/receipts': typeof DashboardLayoutReceiptsRoute
+  '/dashboard/settings': typeof DashboardLayoutSettingsRoute
+  '/dashboard': typeof DashboardLayoutIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -357,6 +392,7 @@ export interface FileRoutesById {
   '/booking': typeof BookingRoute
   '/contact': typeof ContactRoute
   '/copyright': typeof CopyrightRoute
+  '/events': typeof EventsRoute
   '/portfolio': typeof PortfolioRoute
   '/privacy': typeof PrivacyRoute
   '/services': typeof ServicesRoute
@@ -383,16 +419,19 @@ export interface FileRoutesById {
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
-  '/dashboard/_layout': typeof DashboardLayoutRoute
-  '/dashboard/bookings': typeof DashboardBookingsRoute
-  '/dashboard/events': typeof DashboardEventsRoute
-  '/dashboard/messages': typeof DashboardMessagesRoute
-  '/dashboard/orders': typeof DashboardOrdersRoute
-  '/dashboard/payment-history': typeof DashboardPaymentHistoryRoute
-  '/dashboard/profile': typeof DashboardProfileRoute
-  '/dashboard/receipts': typeof DashboardReceiptsRoute
+  '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/_layout/book-event': typeof DashboardLayoutBookEventRoute
+  '/dashboard/_layout/bookings': typeof DashboardLayoutBookingsRoute
+  '/dashboard/_layout/events': typeof DashboardLayoutEventsRoute
+  '/dashboard/_layout/host-event': typeof DashboardLayoutHostEventRoute
+  '/dashboard/_layout/messages': typeof DashboardLayoutMessagesRoute
+  '/dashboard/_layout/orders': typeof DashboardLayoutOrdersRoute
+  '/dashboard/_layout/payment-history': typeof DashboardLayoutPaymentHistoryRoute
+  '/dashboard/_layout/profile': typeof DashboardLayoutProfileRoute
+  '/dashboard/_layout/receipts': typeof DashboardLayoutReceiptsRoute
+  '/dashboard/_layout/settings': typeof DashboardLayoutSettingsRoute
+  '/dashboard/_layout/': typeof DashboardLayoutIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -403,6 +442,7 @@ export interface FileRouteTypes {
     | '/booking'
     | '/contact'
     | '/copyright'
+    | '/events'
     | '/portfolio'
     | '/privacy'
     | '/services'
@@ -430,14 +470,17 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/users'
     | '/dashboard'
+    | '/admin/'
+    | '/dashboard/book-event'
     | '/dashboard/bookings'
     | '/dashboard/events'
+    | '/dashboard/host-event'
     | '/dashboard/messages'
     | '/dashboard/orders'
     | '/dashboard/payment-history'
     | '/dashboard/profile'
     | '/dashboard/receipts'
-    | '/admin/'
+    | '/dashboard/settings'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -447,6 +490,7 @@ export interface FileRouteTypes {
     | '/booking'
     | '/contact'
     | '/copyright'
+    | '/events'
     | '/portfolio'
     | '/privacy'
     | '/services'
@@ -473,14 +517,17 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/team'
     | '/admin/users'
-    | '/dashboard'
+    | '/dashboard/book-event'
     | '/dashboard/bookings'
     | '/dashboard/events'
+    | '/dashboard/host-event'
     | '/dashboard/messages'
     | '/dashboard/orders'
     | '/dashboard/payment-history'
     | '/dashboard/profile'
     | '/dashboard/receipts'
+    | '/dashboard/settings'
+    | '/dashboard'
   id:
     | '__root__'
     | '/'
@@ -489,6 +536,7 @@ export interface FileRouteTypes {
     | '/booking'
     | '/contact'
     | '/copyright'
+    | '/events'
     | '/portfolio'
     | '/privacy'
     | '/services'
@@ -516,15 +564,18 @@ export interface FileRouteTypes {
     | '/admin/team'
     | '/admin/users'
     | '/dashboard/_layout'
-    | '/dashboard/bookings'
-    | '/dashboard/events'
-    | '/dashboard/messages'
-    | '/dashboard/orders'
-    | '/dashboard/payment-history'
-    | '/dashboard/profile'
-    | '/dashboard/receipts'
     | '/admin/'
-    | '/dashboard/'
+    | '/dashboard/_layout/book-event'
+    | '/dashboard/_layout/bookings'
+    | '/dashboard/_layout/events'
+    | '/dashboard/_layout/host-event'
+    | '/dashboard/_layout/messages'
+    | '/dashboard/_layout/orders'
+    | '/dashboard/_layout/payment-history'
+    | '/dashboard/_layout/profile'
+    | '/dashboard/_layout/receipts'
+    | '/dashboard/_layout/settings'
+    | '/dashboard/_layout/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -534,6 +585,7 @@ export interface RootRouteChildren {
   BookingRoute: typeof BookingRoute
   ContactRoute: typeof ContactRoute
   CopyrightRoute: typeof CopyrightRoute
+  EventsRoute: typeof EventsRoute
   PortfolioRoute: typeof PortfolioRoute
   PrivacyRoute: typeof PrivacyRoute
   ServicesRoute: typeof ServicesRoute
@@ -560,16 +612,8 @@ export interface RootRouteChildren {
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
   AdminUsersRoute: typeof AdminUsersRoute
-  DashboardLayoutRoute: typeof DashboardLayoutRoute
-  DashboardBookingsRoute: typeof DashboardBookingsRoute
-  DashboardEventsRoute: typeof DashboardEventsRoute
-  DashboardMessagesRoute: typeof DashboardMessagesRoute
-  DashboardOrdersRoute: typeof DashboardOrdersRoute
-  DashboardPaymentHistoryRoute: typeof DashboardPaymentHistoryRoute
-  DashboardProfileRoute: typeof DashboardProfileRoute
-  DashboardReceiptsRoute: typeof DashboardReceiptsRoute
+  DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -623,6 +667,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PortfolioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/copyright': {
       id: '/copyright'
       path: '/copyright'
@@ -665,67 +716,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/admin/': {
       id: '/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/receipts': {
-      id: '/dashboard/receipts'
-      path: '/dashboard/receipts'
-      fullPath: '/dashboard/receipts'
-      preLoaderRoute: typeof DashboardReceiptsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/profile': {
-      id: '/dashboard/profile'
-      path: '/dashboard/profile'
-      fullPath: '/dashboard/profile'
-      preLoaderRoute: typeof DashboardProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/payment-history': {
-      id: '/dashboard/payment-history'
-      path: '/dashboard/payment-history'
-      fullPath: '/dashboard/payment-history'
-      preLoaderRoute: typeof DashboardPaymentHistoryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/orders': {
-      id: '/dashboard/orders'
-      path: '/dashboard/orders'
-      fullPath: '/dashboard/orders'
-      preLoaderRoute: typeof DashboardOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/messages': {
-      id: '/dashboard/messages'
-      path: '/dashboard/messages'
-      fullPath: '/dashboard/messages'
-      preLoaderRoute: typeof DashboardMessagesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/events': {
-      id: '/dashboard/events'
-      path: '/dashboard/events'
-      fullPath: '/dashboard/events'
-      preLoaderRoute: typeof DashboardEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/bookings': {
-      id: '/dashboard/bookings'
-      path: '/dashboard/bookings'
-      fullPath: '/dashboard/bookings'
-      preLoaderRoute: typeof DashboardBookingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/_layout': {
@@ -868,8 +863,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/_layout/': {
+      id: '/dashboard/_layout/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardLayoutIndexRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/settings': {
+      id: '/dashboard/_layout/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardLayoutSettingsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/receipts': {
+      id: '/dashboard/_layout/receipts'
+      path: '/receipts'
+      fullPath: '/dashboard/receipts'
+      preLoaderRoute: typeof DashboardLayoutReceiptsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/profile': {
+      id: '/dashboard/_layout/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardLayoutProfileRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/payment-history': {
+      id: '/dashboard/_layout/payment-history'
+      path: '/payment-history'
+      fullPath: '/dashboard/payment-history'
+      preLoaderRoute: typeof DashboardLayoutPaymentHistoryRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/orders': {
+      id: '/dashboard/_layout/orders'
+      path: '/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardLayoutOrdersRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/messages': {
+      id: '/dashboard/_layout/messages'
+      path: '/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof DashboardLayoutMessagesRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/host-event': {
+      id: '/dashboard/_layout/host-event'
+      path: '/host-event'
+      fullPath: '/dashboard/host-event'
+      preLoaderRoute: typeof DashboardLayoutHostEventRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/events': {
+      id: '/dashboard/_layout/events'
+      path: '/events'
+      fullPath: '/dashboard/events'
+      preLoaderRoute: typeof DashboardLayoutEventsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/bookings': {
+      id: '/dashboard/_layout/bookings'
+      path: '/bookings'
+      fullPath: '/dashboard/bookings'
+      preLoaderRoute: typeof DashboardLayoutBookingsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/book-event': {
+      id: '/dashboard/_layout/book-event'
+      path: '/book-event'
+      fullPath: '/dashboard/book-event'
+      preLoaderRoute: typeof DashboardLayoutBookEventRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
   }
 }
+
+interface DashboardLayoutRouteChildren {
+  DashboardLayoutBookEventRoute: typeof DashboardLayoutBookEventRoute
+  DashboardLayoutBookingsRoute: typeof DashboardLayoutBookingsRoute
+  DashboardLayoutEventsRoute: typeof DashboardLayoutEventsRoute
+  DashboardLayoutHostEventRoute: typeof DashboardLayoutHostEventRoute
+  DashboardLayoutMessagesRoute: typeof DashboardLayoutMessagesRoute
+  DashboardLayoutOrdersRoute: typeof DashboardLayoutOrdersRoute
+  DashboardLayoutPaymentHistoryRoute: typeof DashboardLayoutPaymentHistoryRoute
+  DashboardLayoutProfileRoute: typeof DashboardLayoutProfileRoute
+  DashboardLayoutReceiptsRoute: typeof DashboardLayoutReceiptsRoute
+  DashboardLayoutSettingsRoute: typeof DashboardLayoutSettingsRoute
+  DashboardLayoutIndexRoute: typeof DashboardLayoutIndexRoute
+}
+
+const DashboardLayoutRouteChildren: DashboardLayoutRouteChildren = {
+  DashboardLayoutBookEventRoute: DashboardLayoutBookEventRoute,
+  DashboardLayoutBookingsRoute: DashboardLayoutBookingsRoute,
+  DashboardLayoutEventsRoute: DashboardLayoutEventsRoute,
+  DashboardLayoutHostEventRoute: DashboardLayoutHostEventRoute,
+  DashboardLayoutMessagesRoute: DashboardLayoutMessagesRoute,
+  DashboardLayoutOrdersRoute: DashboardLayoutOrdersRoute,
+  DashboardLayoutPaymentHistoryRoute: DashboardLayoutPaymentHistoryRoute,
+  DashboardLayoutProfileRoute: DashboardLayoutProfileRoute,
+  DashboardLayoutReceiptsRoute: DashboardLayoutReceiptsRoute,
+  DashboardLayoutSettingsRoute: DashboardLayoutSettingsRoute,
+  DashboardLayoutIndexRoute: DashboardLayoutIndexRoute,
+}
+
+const DashboardLayoutRouteWithChildren = DashboardLayoutRoute._addFileChildren(
+  DashboardLayoutRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -878,6 +982,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookingRoute: BookingRoute,
   ContactRoute: ContactRoute,
   CopyrightRoute: CopyrightRoute,
+  EventsRoute: EventsRoute,
   PortfolioRoute: PortfolioRoute,
   PrivacyRoute: PrivacyRoute,
   ServicesRoute: ServicesRoute,
@@ -904,16 +1009,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
   AdminUsersRoute: AdminUsersRoute,
-  DashboardLayoutRoute: DashboardLayoutRoute,
-  DashboardBookingsRoute: DashboardBookingsRoute,
-  DashboardEventsRoute: DashboardEventsRoute,
-  DashboardMessagesRoute: DashboardMessagesRoute,
-  DashboardOrdersRoute: DashboardOrdersRoute,
-  DashboardPaymentHistoryRoute: DashboardPaymentHistoryRoute,
-  DashboardProfileRoute: DashboardProfileRoute,
-  DashboardReceiptsRoute: DashboardReceiptsRoute,
+  DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

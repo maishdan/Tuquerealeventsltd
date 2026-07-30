@@ -6,6 +6,8 @@ import { fetchAllEvents, fetchUserEvents } from "@/lib/api/events";
 import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchTeamMembers } from "@/lib/api/team";
 import { fetchAllProfiles } from "@/lib/api/profiles";
+import { fetchUserOrders } from "@/lib/api/orders";
+import { fetchUserFinancials } from "@/lib/api/financials";
 import type { BookingStatus } from "@/lib/database.types";
 import { formatKes } from "@/lib/dashboard-mock-data";
 
@@ -41,6 +43,22 @@ export function useCustomerEvents(userId?: string) {
   return useQuery({
     queryKey: ["customer", "events", userId],
     queryFn: () => fetchUserEvents(userId!),
+    enabled: !!userId,
+  });
+}
+
+export function useCustomerOrders(userId?: string) {
+  return useQuery({
+    queryKey: ["customer", "orders", userId],
+    queryFn: () => fetchUserOrders(userId!),
+    enabled: !!userId,
+  });
+}
+
+export function useCustomerFinancials(userId?: string) {
+  return useQuery({
+    queryKey: ["customer", "financials", userId],
+    queryFn: () => fetchUserFinancials(userId!),
     enabled: !!userId,
   });
 }

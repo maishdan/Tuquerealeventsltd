@@ -68,6 +68,7 @@ export type Message = {
 
 export type FinancialRecord = {
   id: string;
+  user_id: string | null;
   record_type: "revenue" | "expense" | "invoice";
   label: string;
   amount: number;
@@ -86,6 +87,16 @@ export type TeamMember = {
   created_at: string;
 };
 
+export type Order = {
+  id: string;
+  user_id: string | null;
+  item_name: string;
+  order_date: string;
+  total_amount: number;
+  status: "pending" | "confirmed" | "shipped" | "delivered" | "cancelled";
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -96,6 +107,7 @@ export type Database = {
       messages: { Row: Message; Insert: Omit<Message, "id" | "created_at" | "read">; Update: Partial<Message> };
       financial_records: { Row: FinancialRecord; Insert: Omit<FinancialRecord, "id" | "created_at">; Update: Partial<FinancialRecord> };
       team_members: { Row: TeamMember; Insert: Omit<TeamMember, "id" | "created_at">; Update: Partial<TeamMember> };
+      orders: { Row: Order; Insert: Partial<Order> & { item_name: string }; Update: Partial<Order> };
     };
   };
 };

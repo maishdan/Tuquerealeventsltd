@@ -1,30 +1,30 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import {
-  CalendarDays,
-  MapPin,
-  Users,
-  Handshake,
-  Plus,
-  LayoutDashboard,
-  Filter,
-  Search,
-  ChevronDown,
-  Globe,
-  ArrowRight
-} from "lucide-react";
 import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
 import { useAdminEvents } from "@/hooks/use-dashboard-data";
-import { liveEvents, formatKes } from "@/lib/dashboard-mock-data";
+import { formatKes, liveEvents } from "@/lib/dashboard-mock-data";
+import {
+  PartyPopper,
+  Calendar,
+  MapPin,
+  Wallet,
+  ArrowRight,
+  Sparkles,
+  Globe,
+  Users,
+  Plus,
+  Search,
+  Filter
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { EventRecord } from "@/lib/database.types";
-import { BackToDashboard } from "@/components/dashboard/BackToDashboard";
 
 export const Route = createFileRoute("/admin/events")({
   component: AdminEvents,
 });
 
 function AdminEvents() {
-  const { data: events = [], isLoading, error } = useAdminEvents();
+  const { data: events = [], isLoading } = useAdminEvents();
 
   const displayEvents: (EventRecord | (typeof liveEvents)[0])[] =
     events.length > 0
@@ -45,111 +45,97 @@ function AdminEvents() {
         }));
 
   const active = displayEvents.filter((e) => ["in-progress", "upcoming", "confirmed", "planning"].includes(e.status)).length;
-  const completed = displayEvents.filter((e) => e.status === "completed").length;
 
   return (
-    <div className="space-y-10 pb-20 font-sans text-white">
-      <BackToDashboard role="admin" />
-
-      {/* 1. STRATEGIC HEADER */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-        <div className="space-y-4">
-          <div className="flex items-center gap-3 text-gold">
-            <div className="h-[1px] w-10 bg-gold" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Operations Pipeline</p>
-          </div>
-          <h1 className="font-display text-5xl md:text-7xl font-black tracking-tighter uppercase">Empire Events</h1>
-          <p className="text-gray-400 text-sm md:text-base max-w-xl font-medium leading-relaxed">
-            Centralized management for every high-stakes production, from board retreats to stadium-scale celebrations.
-          </p>
+    <div className="space-y-10 pb-20">
+      <div className="flex flex-wrap items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Production Registry</p>
+          <h2 className="mt-2 font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-foreground">Empire Operations</h2>
         </div>
-        <button className="h-14 px-10 rounded-xl bg-gold text-[#0b0e14] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:bg-white transition-all shadow-2xl">
-          <Plus size={16} /> Orchestrate New Event
-        </button>
+        <div className="flex gap-4">
+          <Link to="/admin/events" className="h-14 px-8 rounded-full border border-border bg-card text-muted-foreground font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:text-gold transition-all">
+            <Filter size={16} /> Registry Filter
+          </Link>
+          <Link to="/admin/bookings" className="h-14 px-8 rounded-full bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-xl shadow-gold/20">
+            <Plus size={16} /> Orchestrate New
+          </Link>
+        </div>
       </div>
 
-      {/* 2. CORE METRICS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {[
-          { label: "Total Managed", val: displayEvents.length, icon: Globe },
-          { label: "Active/Upcoming", val: active, icon: CalendarDays },
-          { label: "Successfully Completed", val: completed, icon: Handshake },
-        ].map((stat, i) => (
-          <div key={i} className="p-8 rounded-[32px] bg-white/[0.02] border border-white/5 hover:border-gold/30 transition-all group">
-             <div className="flex justify-between items-start mb-6">
-                <div className="h-12 w-12 rounded-xl bg-gold/10 flex items-center justify-center text-gold border border-gold/20 group-hover:bg-gold group-hover:text-black transition-all">
-                  <stat.icon size={24} />
+      <GlassPanel title="Active Deployments" subtitle="Real-time oversight of all high-stakes productions">
+        {isLoading && (
+          <div className="py-20 flex flex-col items-center justify-center space-y-4">
+             <Loader size={40} className="text-gold animate-spin" />
+             <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Retrieving Empire Data...</p>
+          </div>
+        )}
+
+        <div className="grid gap-6 py-4">
+          {displayEvents.map((e) => (
+            <div key={e.id} className="group relative overflow-hidden rounded-[32px] bg-muted/30 border border-border hover:border-gold/30 transition-all duration-500 p-6 md:p-8">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                 <Globe size={120} className="text-foreground" />
+              </div>
+
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-8">
+                <div className="space-y-4 flex-1">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-gold/10 border border-gold/20 flex items-center justify-center text-gold">
+                       <Calendar size={20} />
+                    </div>
+                    <div>
+                       <p className="text-[10px] font-black text-gold uppercase tracking-widest leading-none mb-1">{e.event_type}</p>
+                       <h3 className="text-xl md:text-2xl font-bold text-foreground uppercase tracking-tight group-hover:text-gold transition-colors">{e.name}</h3>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-6 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                     <div className="flex items-center gap-2">
+                        <Calendar size={14} className="text-muted-foreground opacity-50" />
+                        <span>{e.event_date ? new Date(e.event_date).toLocaleDateString() : "Date TBD"}</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-muted-foreground opacity-50" />
+                        <span>{e.venue || "Venue TBD"}</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <Users size={14} className="text-muted-foreground opacity-50" />
+                        <span>{e.team_count || 0} Staff Assigned</span>
+                     </div>
+                  </div>
                 </div>
-             </div>
-             <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2">{stat.label}</p>
-             <h3 className="text-4xl font-black text-white">{stat.val}</h3>
-          </div>
-        ))}
-      </div>
 
-      {/* 3. EVENT PIPELINE GRID */}
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 bg-white/[0.02] border border-white/5 p-3 rounded-2xl">
-           <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-              <input
-                type="text"
-                placeholder="Search event registry..."
-                className="w-full bg-transparent border-none pl-12 pr-6 py-2 text-sm text-white focus:ring-0 outline-none"
-              />
-           </div>
-           <div className="h-8 w-[1px] bg-white/5" />
-           <button className="flex items-center gap-2 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-white transition-colors">
-              <Filter size={14} /> Filter
-           </button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {displayEvents.map((event: any) => (
-            <div key={event.id} className="group relative bg-[#121212] border border-white/10 p-8 rounded-[40px] hover:border-gold/30 transition-all duration-500">
-               <div className="flex justify-between items-start mb-8">
-                  <div className="space-y-2">
-                     <p className="text-gold text-[10px] font-black uppercase tracking-widest">{event.event_type}</p>
-                     <h3 className="text-3xl font-black text-white uppercase tracking-tighter group-hover:text-gold transition-colors">{event.name}</h3>
+                <div className="flex items-center gap-4 shrink-0">
+                  <EventStatusBadge status={e.status as any} />
+                  <div className="h-12 w-12 rounded-full border border-border flex items-center justify-center text-muted-foreground group-hover:border-gold/40 group-hover:text-gold transition-all">
+                     <ArrowRight size={20} />
                   </div>
-                  <EventStatusBadge status={event.status} />
-               </div>
-
-               <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
-                  <div className="space-y-1">
-                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Production Date</p>
-                     <p className="text-sm font-bold text-gray-300">{event.event_date ? new Date(event.event_date).toLocaleDateString() : "TBD"}</p>
-                  </div>
-                  <div className="space-y-1 text-right">
-                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Lead Venue</p>
-                     <p className="text-sm font-bold text-gray-300 truncate">{event.venue || "TBD"}</p>
-                  </div>
-                  <div className="space-y-1">
-                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Staffing Level</p>
-                     <p className="text-sm font-bold text-gray-300">{event.team_count} Members</p>
-                  </div>
-                  <div className="space-y-1 text-right">
-                     <p className="text-[8px] font-black text-gray-600 uppercase tracking-widest">Asset Budget</p>
-                     <p className="text-sm font-bold text-gold">{event.budget ? formatKes(event.budget) : "TBD"}</p>
-                  </div>
-               </div>
-
-               <div className="mt-10 flex items-center justify-between">
-                  <div className="flex -space-x-2">
-                     {[1,2,3].map(j => (
-                       <div key={j} className="h-8 w-8 rounded-full border-2 border-[#121212] bg-white/5 flex items-center justify-center">
-                          <Users size={12} className="text-gray-500" />
-                       </div>
-                     ))}
-                  </div>
-                  <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-gold transition-colors">
-                     Management Brief <ArrowRight size={14} />
-                  </button>
-               </div>
+                </div>
+              </div>
             </div>
           ))}
         </div>
-      </div>
+      </GlassPanel>
     </div>
+  );
+}
+
+function Loader({ size, className }: { size: number; className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={cn("animate-spin", className)}
+    >
+      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
   );
 }

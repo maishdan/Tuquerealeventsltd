@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { adminNav } from "@/lib/dashboard-nav";
 import {
   CalendarDays,
   ArrowRight,
@@ -7,16 +6,32 @@ import {
   Zap,
   LayoutDashboard,
   Settings2,
-  LogOut,
-  Power
+  Users,
+  ShieldCheck,
+  Star,
+  Clock,
+  Heart,
+  Trophy,
+  Globe,
+  User,
+  Activity,
+  BarChart3,
+  TrendingUp,
+  Briefcase
 } from "lucide-react";
 import {
-  formatKes,
+  formatKes
 } from "@/lib/dashboard-mock-data";
-import { useAdminBookings, useAdminClients, computeAdminKpis } from "@/hooks/use-dashboard-data";
+import {
+  useAdminBookings,
+  useAdminClients,
+  useAdminEvents,
+  useAdminTeam,
+  computeAdminKpis
+} from "@/hooks/use-dashboard-data";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
-import eventsLogo from "../../assets/events-logo.jpeg";
+import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminOverview,
@@ -24,179 +39,224 @@ export const Route = createFileRoute("/admin/")({
 
 function AdminOverview() {
   const navigate = useNavigate();
-  const { profile, signOut } = useAuth();
+  const { profile } = useAuth();
   const { data: bookings = [] } = useAdminBookings();
+  const { data: events = [] } = useAdminEvents();
   const { data: clients = [] } = useAdminClients();
+  const { data: team = [] } = useAdminTeam();
   const kpis = computeAdminKpis(bookings, clients);
 
-  async function handleLogout() {
-    await signOut();
-    navigate({ to: "/sign-in" });
-  }
+  const today = new Date();
+  const hours = today.getHours();
+  let greeting = "Evening";
+  if (hours < 12) greeting = "Morning";
+  else if (hours < 17) greeting = "Afternoon";
+  else if (hours < 21) greeting = "Evening";
+  else greeting = "Night";
 
   return (
-    <div className="space-y-6 md:space-y-8 font-sans pb-20 px-0 sm:px-2 md:px-0">
-      {/* Dashboard Sub-Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <h2 className="text-xs md:text-sm font-bold uppercase tracking-widest text-[#2b4c8c]/60">Dashboard Overview</h2>
-        <div className="flex items-center gap-4 md:gap-6 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-[#2b4c8c]">
-           <span className="cursor-pointer hover:underline" onClick={() => navigate({ to: '/admin/finance' })}>Finance</span>
-           <span className="cursor-pointer hover:underline" onClick={() => navigate({ to: '/admin/receipts' })}>View Statement</span>
-           <span className="cursor-pointer hover:text-red-500 transition-colors" onClick={handleLogout}>Logout</span>
+    <div className="space-y-6 pb-12">
+      {/* Header Profile Section */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-10">
+        <div className="flex items-center gap-4 flex-1">
+          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full overflow-hidden ring-4 ring-gold/10 shadow-2xl shrink-0 bg-white/5 flex items-center justify-center">
+            {profile?.avatar_url ? (
+              <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+            ) : (
+              <User size={40} className="text-gray-500" />
+            )}
+          </div>
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded bg-gold/10 border border-gold/20 text-gold text-[10px] font-bold uppercase tracking-widest mb-1.5">
+              <ShieldCheck size={10} className="fill-gold/20" /> Executive Administrator
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
+              Good {greeting}, {profile?.full_name?.split(' ')[0] || "Admin"}
+            </h2>
+            <p className="text-muted-foreground text-xs sm:text-sm mt-1 leading-relaxed">
+              System operational. Overseeing {events.length} active high-stakes productions across the region.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Link
+            to="/admin/settings"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 border border-border text-muted-foreground hover:text-gold rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg bg-card"
+          >
+            <Settings2 size={16} /> System Config
+          </Link>
+          <Link
+            to="/admin/events"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/20"
+          >
+            <Activity size={16} /> Live Operations
+          </Link>
         </div>
       </div>
 
-      {/* Stationary Welcome Section */}
-      <div className="sticky top-0 sm:top-2 z-30 -mx-4 sm:mx-0">
-        <div className="bg-white p-6 md:p-10 rounded-none sm:rounded-xl flex flex-col md:flex-row items-center justify-between relative overflow-hidden shadow-lg border-b sm:border border-gray-100 min-h-[160px] md:min-h-0">
-          <div className="relative z-10 space-y-3 md:space-y-4 text-center md:text-left">
-            <h1 className="text-2xl md:text-4xl font-bold text-[#2b4c8c] tracking-tight">
-              Welcome back, {profile?.full_name?.split(' ')[0] || "Admin"}
-            </h1>
-            <p className="text-gray-500 text-xs md:text-sm max-w-md leading-relaxed font-medium">
-              We're delighted to have you. Need help on system walk through? Navigate to virtual assistant on the side menu.
-            </p>
-            <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-4">
-              <button
-                onClick={() => navigate({ to: "/admin/settings" })}
-                className="h-9 px-5 rounded-lg bg-[#2b4c8c] text-white text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-[#1e3a75] transition-all"
-              >
-                <Settings2 size={14} /> System Settings
-              </button>
-              <button
-                onClick={handleLogout}
-                className="h-9 px-5 rounded-lg border border-red-200 text-red-500 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2 hover:bg-red-50 transition-all"
-              >
-                <Power size={14} /> Terminate Session
-              </button>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group hover:border-gold/30 transition-all shadow-sm">
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] mb-1">Monthly Revenue</p>
+              <h4 className="text-2xl font-bold text-foreground font-display tracking-tight">{formatKes(kpis.monthlyRevenue)}</h4>
+              <div className="flex items-center gap-1 mt-2">
+                <TrendingUp size={12} className="text-emerald-500" />
+                <span className="text-[10px] text-emerald-500 font-bold">+12.4% from LY</span>
+              </div>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center border border-gold/20">
+              <Zap size={20} className="text-gold" />
             </div>
           </div>
-          <div className="hidden sm:flex mt-6 md:mt-0 relative z-10">
-             <div className="h-20 w-20 md:h-32 md:w-32 bg-gray-50 rounded-full flex items-center justify-center border border-gray-100 shadow-inner">
-                <Sparkles size={40} className="text-[#2b4c8c]/20 md:w-[64px] md:h-[64px]" />
-             </div>
+        </div>
+
+        <div className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group hover:border-blue-500/30 transition-all shadow-sm">
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-1">Active Projects</p>
+              <h4 className="text-2xl font-bold text-foreground font-display tracking-tight">{events.length} Live</h4>
+              <div className="flex items-center gap-1 mt-2">
+                <Briefcase size={12} className="text-blue-400" />
+                <span className="text-[10px] text-blue-400 font-bold">Priority Status</span>
+              </div>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+              <BarChart3 size={20} className="text-blue-400" />
+            </div>
           </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gold/5 -mr-32 -mt-32 rounded-full hidden md:block" />
+        </div>
+
+        <div className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group hover:border-emerald-500/30 transition-all shadow-sm">
+          <div className="flex justify-between items-start relative z-10">
+            <div>
+              <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mb-1">Client Registry</p>
+              <h4 className="text-2xl font-bold text-foreground font-display tracking-tight">{clients.length} Profiles</h4>
+              <div className="flex items-center gap-1 mt-2">
+                <Users size={12} className="text-emerald-400" />
+                <span className="text-[10px] text-emerald-400 font-bold">Verified Executive Accounts</span>
+              </div>
+            </div>
+            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <Globe size={20} className="text-emerald-400" />
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 relative z-10">
-        {/* Main Content Area (8 Columns) */}
-        <div className="lg:col-span-8 space-y-6 md:space-y-8 order-2 lg:order-1">
-          {/* Empire Hub Table */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-gray-100">
-             <div className="p-4 md:p-6 border-b border-gray-50 flex items-center justify-between bg-white">
-                <h3 className="text-xs md:text-sm font-bold text-[#2b4c8c] uppercase tracking-wide">Current Operations Hub</h3>
-                <Link to="/admin/events" className="text-[#2b4c8c] text-[11px] font-bold uppercase tracking-widest hover:underline transition-all">View All</Link>
-             </div>
-             <div className="overflow-x-auto">
-               <table className="w-full text-left border-collapse min-w-[500px] md:min-w-full">
-                 <thead className="bg-gray-50/50">
-                   <tr className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                     <th className="px-4 md:px-8 py-4 md:py-5">Operation Name</th>
-                     <th className="px-4 md:px-8 py-4 md:py-5">System Code</th>
-                     <th className="px-4 md:px-8 py-4 md:py-5 text-right">State</th>
-                   </tr>
-                 </thead>
-                 <tbody className="divide-y divide-gray-50">
-                   {adminNav.filter(n => n.to !== "/admin").map((nav) => (
-                     <tr
-                       key={nav.to}
-                       className="hover:bg-gray-50 transition-colors group cursor-pointer"
-                       onClick={() => navigate({ to: nav.to })}
-                     >
-                        <td className="px-4 md:px-8 py-4 md:py-5">
-                           <div className="flex items-center gap-3 md:gap-4">
-                              <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-gray-50 flex items-center justify-center text-[#2b4c8c] group-hover:bg-[#2b4c8c] group-hover:text-white transition-all">
-                                 <nav.icon size={14} className="md:w-[16px] md:h-[16px]" />
-                              </div>
-                              <span className="font-bold text-[#2b4c8c] text-[11px] md:text-xs uppercase tracking-tight">{nav.label}</span>
-                           </div>
-                        </td>
-                        <td className="px-4 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">OP-{nav.label.slice(0, 3).toUpperCase()}</td>
-                        <td className="px-4 md:px-8 py-4 md:py-5 text-right">
-                           <span className="inline-flex px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-emerald-50 text-emerald-600 text-[8px] md:text-[9px] font-black uppercase tracking-widest">
-                             Active
-                           </span>
-                        </td>
-                     </tr>
-                   ))}
-                   {/* Explicit Logout Row */}
-                   <tr
-                      className="hover:bg-red-50 transition-colors group cursor-pointer"
-                      onClick={handleLogout}
-                    >
-                      <td className="px-4 md:px-8 py-4 md:py-5">
-                        <div className="flex items-center gap-3 md:gap-4">
-                          <div className="h-7 w-7 md:h-8 md:w-8 rounded-lg bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition-all">
-                            <LogOut size={14} className="md:w-[16px] md:h-[16px]" />
+      <div className="grid lg:grid-cols-12 gap-6">
+        {/* Left: Operations Activity */}
+        <div className="lg:col-span-8 bg-card border border-white/5 rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-border flex items-center justify-between">
+            <div>
+              <h4 className="text-foreground font-bold text-lg">Registry Activity</h4>
+              <p className="text-muted-foreground text-xs">Real-time project intake and status updates</p>
+            </div>
+            <Link to="/admin/bookings" className="text-xs text-gold hover:underline flex items-center gap-1 uppercase font-black tracking-widest">
+              View Ledger <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground border-b border-border">
+                  <th className="py-5 px-6">Source</th>
+                  <th className="py-5 px-6">Sector</th>
+                  <th className="py-5 px-6">Investment</th>
+                  <th className="py-5 px-6 text-right">Protocol</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {bookings.slice(0, 5).map((b) => (
+                  <tr key={b.id} className="group hover:bg-white/5 transition-all cursor-pointer" onClick={() => navigate({ to: '/admin/bookings' })}>
+                    <td className="py-5 px-6">
+                       <div className="flex items-center gap-3">
+                          <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-black text-[10px]">
+                             {b.name.charAt(0)}
                           </div>
-                          <span className="font-bold text-red-500 text-[11px] md:text-xs uppercase tracking-tight">System Logout</span>
-                        </div>
-                      </td>
-                      <td className="px-4 md:px-8 py-4 md:py-5 text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-widest">SYS-EXIT</td>
-                      <td className="px-4 md:px-8 py-4 md:py-5 text-right">
-                        <span className="inline-flex px-2 md:px-3 py-0.5 md:py-1 rounded-full bg-red-50 text-red-600 text-[8px] md:text-[9px] font-black uppercase tracking-widest">
-                          Offline
-                        </span>
-                      </td>
-                    </tr>
-                 </tbody>
-               </table>
-             </div>
+                          <div>
+                             <p className="text-xs font-bold text-foreground uppercase truncate w-32">{b.name}</p>
+                             <p className="text-[9px] text-muted-foreground font-medium">{b.email}</p>
+                          </div>
+                       </div>
+                    </td>
+                    <td className="py-5 px-6 text-xs font-bold text-muted-foreground uppercase tracking-tight">{b.event_type}</td>
+                    <td className="py-5 px-6 text-xs font-black text-foreground">{b.budget}</td>
+                    <td className="py-5 px-6 text-right">
+                       <EventStatusBadge status={b.status as any} />
+                    </td>
+                  </tr>
+                ))}
+                {bookings.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="py-20 text-center text-muted-foreground text-xs font-bold uppercase tracking-widest">No recent intake data available</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* Right Sidebar Area (4 Columns) */}
-        <div className="lg:col-span-4 space-y-6 md:space-y-6 order-1 lg:order-2">
-          {/* Revenue Card */}
-          <div className="bg-[#1a73e8] p-6 md:p-10 rounded-2xl flex flex-col items-center justify-center text-center space-y-6 md:space-y-8 shadow-xl relative overflow-hidden group hover:bg-[#1557b0] transition-all duration-300">
-             <div className="h-14 w-14 md:h-20 md:w-20 rounded-full bg-white/20 flex items-center justify-center text-white border-2 border-white/30">
-                <Zap size={24} className="fill-white md:w-[32px] md:h-[32px]" />
-             </div>
-             <div className="space-y-1 md:space-y-2">
-                <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-blue-100">Live Capital Balance</p>
-                <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">{formatKes(kpis.monthlyRevenue)}</h3>
-             </div>
-             <Link to="/admin/finance" className="w-full h-10 md:h-12 rounded-lg border-2 border-white/50 text-white flex items-center justify-center text-[10px] md:text-[11px] font-black uppercase tracking-widest hover:bg-white hover:text-[#1a73e8] transition-all">
-                Pay Now
-             </Link>
+        {/* Right: Support & System Health */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-[#2b4c8c] border border-blue-500/20 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Sparkles size={100} className="text-white" />
+            </div>
+            <div className="relative z-10 space-y-6">
+              <div className="flex items-center gap-2 text-gold">
+                <ShieldCheck size={18} />
+                <h4 className="font-black uppercase tracking-widest text-xs">Mission Control Ready</h4>
+              </div>
+              <p className="text-xs text-blue-100 leading-relaxed font-medium">
+                Administrative protocols are active. All logistical pipelines and technical infrastructures are synchronized for 100% operational uptime.
+              </p>
+
+              <div className="space-y-4">
+                 <div className="flex justify-between items-center text-[10px] font-black text-white uppercase tracking-widest">
+                    <span>System Capacity</span>
+                    <span className="text-emerald-400">Stable</span>
+                 </div>
+                 <div className="h-2 w-full bg-black/20 rounded-full overflow-hidden">
+                    <div className="h-full w-[85%] bg-gold rounded-full shadow-[0_0_15px_rgba(212,175,55,0.4)]" />
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-white/10 border border-white/10 rounded-xl p-3">
+                  <p className="text-[9px] text-blue-200 font-bold uppercase mb-1">Response Time</p>
+                  <p className="text-sm text-white font-black">EXECUTIVE</p>
+                </div>
+                <div className="bg-white/10 border border-white/10 rounded-xl p-3">
+                  <p className="text-[9px] text-blue-200 font-bold uppercase mb-1">Staff Count</p>
+                  <p className="text-sm text-white font-black">{team.length} Active</p>
+                </div>
+              </div>
+
+              <Link to="/admin/team" className="w-full h-11 bg-white text-blue-900 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition flex items-center justify-center gap-2 shadow-lg">
+                Manage Deployments
+              </Link>
+            </div>
           </div>
 
-          {/* Progress Card */}
-          <div className="bg-[#3e4a9e] p-6 md:p-10 rounded-2xl space-y-6 md:space-y-10 shadow-xl relative overflow-hidden group">
-             <div className="flex items-start gap-4 md:gap-5">
-                <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-white/10 flex items-center justify-center text-white border border-white/20">
-                   <LayoutDashboard size={20} className="md:w-[28px] md:h-[28px]" />
-                </div>
-                <div>
-                   <h4 className="text-[9px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-blue-100/60 leading-relaxed">EMPIRE CYCLE 2025/2026</h4>
-                   <p className="text-xs md:text-sm font-black text-white uppercase tracking-tight mt-0.5 md:mt-1">OPERATIONS PROGRESS</p>
-                </div>
-             </div>
-
-             <div className="space-y-3 md:space-y-5">
-                <div className="h-2.5 md:h-3 w-full bg-black/20 rounded-full overflow-hidden">
-                   <div className="h-full w-[45%] bg-white rounded-full shadow-[0_0_20px_rgba(255,255,255,0.4)]" />
-                </div>
-                <div className="flex justify-between items-center text-[9px] md:text-[10px] font-black text-white uppercase tracking-widest">
-                   <span>45% PROGRESS</span>
-                   <span className="opacity-60 italic">STABLE</span>
-                </div>
-             </div>
-          </div>
-
-          {/* Quick Metrics */}
-          <div className="grid grid-cols-2 gap-4">
-             {[
-               { label: "Daily", val: formatKes(kpis.todayRevenue), icon: Zap, color: "text-[#1a73e8]" },
-               { label: "Staff", val: "42", color: "text-[#3e4a9e]" },
-             ].map((stat, i) => (
-               <div key={i} className="bg-white border border-gray-100 p-4 md:p-6 rounded-xl shadow-sm space-y-1 md:space-y-2">
-                  <p className="text-[8px] md:text-[9px] font-bold uppercase tracking-widest text-gray-400">{stat.label}</p>
-                  <p className={cn("text-[11px] md:text-sm font-black uppercase", stat.color)}>{stat.val}</p>
-               </div>
-             ))}
+          <div className="bg-card border border-white/5 rounded-2xl p-6 shadow-sm space-y-5">
+            <h4 className="text-foreground font-black text-[10px] uppercase tracking-[0.2em]">Deployment Readiness</h4>
+            <div className="space-y-4">
+               {[
+                 { label: "Technical AV", val: "Ready", state: "text-emerald-500" },
+                 { label: "Logistics Hub", val: "Synchronized", state: "text-emerald-500" },
+                 { label: "Vendor Registry", val: "Verified", state: "text-emerald-500" },
+                 { label: "Financial Ops", val: "Critical", state: "text-gold" },
+               ].map((sys, i) => (
+                 <div key={i} className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase">{sys.label}</span>
+                    <span className={cn("text-[9px] font-black uppercase tracking-widest", sys.state)}>{sys.val}</span>
+                 </div>
+               ))}
+            </div>
           </div>
         </div>
       </div>

@@ -21,3 +21,14 @@ export async function fetchUserEvents(userId: string) {
   if (error) throw error;
   return (data ?? []) as EventRecord[];
 }
+
+export async function createEvent(event: Partial<EventRecord>) {
+  const { data, error } = await supabase
+    .from("events")
+    .insert([event])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as EventRecord;
+}
