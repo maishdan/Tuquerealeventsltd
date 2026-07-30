@@ -45,7 +45,7 @@ function AdminOverview() {
 
   const handleLogout = async () => {
     await signOut();
-    navigate({ to: "/sign-in" });
+    navigate({ to: "/" });
   };
 
   const today = new Date();

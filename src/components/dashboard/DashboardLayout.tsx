@@ -108,7 +108,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   async function handleSignOut() {
     setShowLogoutConfirm(false);
     await signOut();
-    navigate({ to: "/sign-in" });
+    navigate({ to: "/" });
   }
 
   function toggleMenu() {

@@ -152,6 +152,10 @@ function RootComponent() {
   const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
   const isHome = pathname === "/";
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
