@@ -143,7 +143,7 @@ function Home() {
         {/* 2. REAL-TIME SEARCH PANEL */}
         <div className="relative mt-auto w-full z-20 pb-12">
           <div className="mx-auto max-w-6xl px-4 sm:px-6">
-            <div className="bg-[#1a1f2e] border border-white/5 p-6 md:p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
+            <div className="bg-[#0b0e14]/80 backdrop-blur-2xl border border-white/10 p-6 md:p-8 rounded-[40px] shadow-2xl relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-r from-gold/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end relative z-10">
@@ -156,7 +156,7 @@ function Home() {
                     <input
                       type="text"
                       placeholder="Identify project by scale or sector..."
-                      className="w-full h-16 bg-[#0b0e14] border border-white/10 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none transition-all placeholder:text-gray-600"
+                      className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none transition-all placeholder:text-gray-600"
                     />
                   </div>
                 </div>
@@ -164,7 +164,7 @@ function Home() {
                 <div className="lg:col-span-4 space-y-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 ml-2">Active Disciplines</p>
                   <div className="relative">
-                    <select className="w-full h-16 bg-[#0b0e14] border border-white/10 rounded-2xl px-6 text-sm text-white appearance-none focus:border-gold outline-none cursor-pointer">
+                    <select className="w-full h-16 bg-white/5 border border-white/10 rounded-2xl px-6 text-sm text-white appearance-none focus:border-gold outline-none cursor-pointer">
                       <option className="bg-[#0b0e14]">All Operations</option>
                       <option className="bg-[#0b0e14]">Corporate Governance</option>
                       <option className="bg-[#0b0e14]">Technical Production</option>
