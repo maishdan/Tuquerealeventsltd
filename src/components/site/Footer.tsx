@@ -4,23 +4,8 @@ import daniwestIcon from "../../assets/daniwest-icon.png";
 import eventsLogo from "../../assets/events-logo.jpeg";
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   return (
     <footer className="bg-[#0b0e14] border-t-2 border-gold/20 pt-24 font-sans relative">
-      <button
-        onClick={scrollToTop}
-        className="fixed bottom-28 right-6 z-[100] h-12 w-12 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-2xl hover:scale-110 transition-all active:scale-95 animate-bounce group"
-        title="Scroll to Top"
-      >
-        <ChevronUp size={24} className="group-hover:-translate-y-1 transition-transform" />
-      </button>
-
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Top: Brand & Newsletter Strategic Row */}
         <div className="grid lg:grid-cols-12 gap-12 pb-16 border-b border-white/5">

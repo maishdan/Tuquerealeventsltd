@@ -16,7 +16,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, ChevronUp } from "lucide-react";
 
 import bgVenue from "../assets/bg-venue.jpg";
 import homeBackground from "../assets/background.png";
@@ -156,6 +156,13 @@ function RootComponent() {
     window.scrollTo(0, 0);
   }, [pathname]);
 
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
@@ -166,6 +173,15 @@ function RootComponent() {
               <Outlet />
             </main>
             {!isDashboard && <Footer />}
+
+            {/* Golden Scroll to Top Button - Positioned over the chat widget */}
+            <button
+              onClick={scrollToTop}
+              className="fixed bottom-24 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
+              title="Return to Command Center"
+            >
+              <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
+            </button>
           </div>
         </div>
       </AuthProvider>
