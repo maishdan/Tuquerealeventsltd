@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "./database.types";
 
 // Royal Touch Events Supabase project.
 // The URL and anon (publishable) key are safe to ship to the browser —
@@ -13,7 +12,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || FALLBACK_ANON_
 
 const isBrowser = typeof window !== "undefined";
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: isBrowser,
     autoRefreshToken: isBrowser,
