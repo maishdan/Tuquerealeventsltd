@@ -174,10 +174,10 @@ function RootComponent() {
             </main>
             {!isDashboard && <Footer />}
 
-            {/* Golden Scroll to Top Button - Positioned over the chat widget */}
+            {/* Golden Scroll to Top Button - Positioned further up to clear the chat widget */}
             <button
               onClick={scrollToTop}
-              className="fixed bottom-24 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
+              className="fixed bottom-40 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
               title="Return to Command Center"
             >
               <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
