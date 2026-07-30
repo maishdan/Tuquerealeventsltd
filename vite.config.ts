@@ -1,21 +1,7 @@
-import tailwindcss from '@tailwindcss/vite';
-import { tanstackStart } from '@tanstack/react-start/plugin/vite';
-import viteReact from '@vitejs/plugin-react';
-import { nitro } from 'nitro/vite';
-import { defineConfig } from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from '@lovable.dev/vite-tanstack-config';
 
 export default defineConfig({
-  css: {
-    transformer: 'lightningcss',
+  tanstackStart: {
+    server: { entry: 'server' },
   },
-  plugins: [
-    tailwindcss(),
-    tsconfigPaths({ projects: ['./tsconfig.json'] }),
-    tanstackStart(),
-    nitro({
-      preset: 'vercel',
-    }),
-    viteReact(),
-  ],
 });
