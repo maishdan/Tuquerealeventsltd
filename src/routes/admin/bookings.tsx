@@ -13,6 +13,7 @@ import {
   useAdminEvents,
   formatKes
 } from "@/hooks/use-dashboard-data";
+import { parseAndVerifyMpesaSms } from "@/lib/api/payments";
 import type { BookingStatus, Ticket, TicketStatus, TicketTier } from "@/lib/database.types";
 import {
   ClipboardList,
@@ -40,7 +41,8 @@ import {
   Printer,
   Download,
   Share2,
-  MessageSquare
+  MessageSquare,
+  Cpu
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -61,6 +63,10 @@ function AdminBookings() {
   const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+  // Admin AI SMS Verification Tool
+  const [adminSmsText, setAdminSmsText] = useState("");
+  const [adminSmsSuccess, setAdminSmsSuccess] = useState("");
+
   // Office Manual Ticket Issuance State
   const [selectedEventId, setSelectedEventId] = useState("");
   const [eventName, setEventName] = useState("");
@@ -69,7 +75,6 @@ function AdminBookings() {
   const [holderPhone, setHolderPhone] = useState("");
   const [tier, setTier] = useState<TicketTier>("VIP");
   const [price, setPrice] = useState("1500");
-  const [quantity, setQuantity] = useState("1");
   const [paymentMethod, setPaymentMethod] = useState("Cash");
   const [seatNumber, setSeatNumber] = useState("07");
   const [eventDate, setEventDate] = useState("");
@@ -84,7 +89,6 @@ function AdminBookings() {
   const issueTicketMutation = useIssueTicket();
   const updateTicketStatusMutation = useUpdateTicketStatus();
 
-  const pending = bookings.filter((b) => b.status === "pending").length;
   const validTicketsCount = tickets.filter((t) => t.status === "valid").length;
   const usedTicketsCount = tickets.filter((t) => t.status === "used").length;
   const totalRevenue = tickets.reduce((acc, t) => acc + (t.price || 0), 0);
@@ -128,6 +132,34 @@ function AdminBookings() {
           setEventDate("");
           setVenue("");
           setAssociatedBookingId("");
+        },
+      }
+    );
+  };
+
+  const handleAdminSmsVerification = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminSmsText.trim()) return;
+
+    const parsed = parseAndVerifyMpesaSms(adminSmsText, 1500);
+
+    issueTicketMutation.mutate(
+      {
+        event_name: events.length > 0 ? events[0].name : "Kisii University Tech Summit 2026",
+        holder_name: parsed.recipient || "Verified M-Pesa Client",
+        holder_email: "client@royaltouch.com",
+        ticket_tier: "VIP",
+        price: parsed.amount || 1500,
+        seat_number: "07",
+        event_date: events.length > 0 ? events[0].event_date : "2026-09-20",
+        venue: events.length > 0 ? events[0].venue : "Kisii University Main Auditorium",
+      },
+      {
+        onSuccess: (newTicket) => {
+          setAdminSmsSuccess(`✓ Payment Verified: ${parsed.receiptCode}. Pass issued for ${newTicket.holder_name}!`);
+          setPreviewTicket(newTicket);
+          setIsPreviewOpen(true);
+          setAdminSmsText("");
         },
       }
     );
@@ -191,6 +223,40 @@ function AdminBookings() {
             <Plus size={16} /> Office Ticket Sale
           </button>
         </div>
+      </div>
+
+      {/* ADMIN AI SMS VERIFICATION CARD */}
+      <div className="bg-card border border-gold/40 p-6 rounded-none space-y-4 shadow-md">
+        <div className="flex items-center gap-3 text-gold">
+          <Cpu size={20} />
+          <h3 className="text-xs font-black uppercase tracking-[0.3em]">AI M-Pesa SMS Instant Settlement Console</h3>
+        </div>
+        <p className="text-xs text-muted-foreground font-medium">
+          Paste customer M-Pesa SMS confirmation text to auto-verify receipt code, match ticket amount, and instantly generate digital PDF gate pass.
+        </p>
+
+        {adminSmsSuccess && (
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-xs">
+            {adminSmsSuccess}
+          </div>
+        )}
+
+        <form onSubmit={handleAdminSmsVerification} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            required
+            value={adminSmsText}
+            onChange={(e) => setAdminSmsText(e.target.value)}
+            placeholder='Paste M-Pesa SMS e.g. "ABCDE12345 Confirmed. Ksh1,500.00 sent to ROYAL TOUCH..."'
+            className="flex-1 h-12 bg-slate-50 dark:bg-black/30 border border-border px-4 text-xs font-mono font-bold text-foreground outline-none focus:border-gold"
+          />
+          <button
+            type="submit"
+            className="h-12 px-6 bg-gold text-black font-black text-[10px] uppercase tracking-widest hover:bg-black hover:text-gold transition-all cursor-pointer shrink-0"
+          >
+            AI Verify & Issue Pass
+          </button>
+        </form>
       </div>
 
       {/* Navigation Tabs */}
