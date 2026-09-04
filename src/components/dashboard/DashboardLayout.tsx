@@ -1,5 +1,6 @@
 import { Link, Outlet, useNavigate, useRouter, useRouterState } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useState, useEffect, type ReactNode } from "react";
 import { BackToDashboard } from "./BackToDashboard";
 import { adminSections, customerSections, type DashboardNavSection } from "@/lib/dashboard-nav";
@@ -82,7 +83,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [theme, setTheme] = useState<Theme>("dark");
+  const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();

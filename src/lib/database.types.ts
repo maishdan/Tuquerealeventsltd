@@ -1,7 +1,13 @@
 export type UserRole = "admin" | "customer";
 export type BookingStatus = "pending" | "confirmed" | "planning" | "inquiry" | "cancelled";
+export type BookingPaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
+export type BookingState = "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "COMPLETED";
 export type EventStatus = "in-progress" | "upcoming" | "completed" | "delayed" | "confirmed" | "planning" | "inquiry";
+export type EventLifecycleState = "DRAFT" | "PUBLISHED" | "COMPLETED" | "CANCELLED";
 export type ContactStatus = "new" | "read" | "replied" | "archived";
+export type TicketTier = "VVIP" | "VIP" | "General Access" | "Regular" | "Early Bird" | "Staff / Press";
+export type TicketStatus = "valid" | "used" | "cancelled";
+export type SeatStatus = "available" | "selected" | "occupied" | "reserved";
 
 export type Profile = {
   id: string;
@@ -28,7 +34,43 @@ export type Booking = {
   services: string[];
   notes: string | null;
   status: BookingStatus;
+  seat_number?: string | null;
+  payment_status?: BookingPaymentStatus;
+  booking_state?: BookingState;
   created_at: string;
+};
+
+export type Seat = {
+  id: string;
+  event_id: string | null;
+  seat_number: string;
+  seat_type: string;
+  status: SeatStatus;
+  price: number;
+  locked_by?: string | null;
+  locked_until?: string | null;
+};
+
+export type PaymentRecord = {
+  id: string;
+  booking_id: string;
+  phone_number: string;
+  amount: number;
+  mpesa_receipt: string;
+  provider: "M-PESA" | "CASH" | "CARD" | "OTHER";
+  status: BookingPaymentStatus;
+  paid_at: string;
+};
+
+export type TicketClass = {
+  id: string;
+  event_id?: string | null;
+  name: string;
+  description: string;
+  price: number;
+  quantity_available: number;
+  quantity_sold: number;
+  benefits: string[];
 };
 
 export type ContactInquiry = {
@@ -50,6 +92,15 @@ export type EventRecord = {
   venue: string | null;
   budget: number | null;
   status: EventStatus;
+  lifecycle_state?: EventLifecycleState;
+  description?: string | null;
+  poster_url?: string | null;
+  organizer_name?: string | null;
+  organizer_email?: string | null;
+  organizer_phone?: string | null;
+  start_time?: string | null;
+  end_time?: string | null;
+  ticket_classes?: TicketClass[];
   team_count: number;
   vendor_count: number;
   created_at: string;
@@ -97,6 +148,31 @@ export type Order = {
   created_at: string;
 };
 
+export type Ticket = {
+  id: string;
+  user_id: string | null;
+  booking_id: string | null;
+  event_id: string | null;
+  event_name: string;
+  holder_name: string;
+  holder_email: string;
+  holder_phone?: string | null;
+  ticket_tier: TicketTier;
+  price: number;
+  quantity?: number;
+  status: TicketStatus;
+  ticket_code: string;
+  ticket_number?: string;
+  ticket_token?: string;
+  seat_number?: string | null;
+  payment_status?: BookingPaymentStatus;
+  payment_method?: "M-Pesa" | "Cash" | "Card" | "Bank Transfer" | "Other";
+  event_date: string | null;
+  venue: string | null;
+  created_at: string;
+  used_at?: string | null;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -108,6 +184,9 @@ export type Database = {
       financial_records: { Row: FinancialRecord; Insert: Omit<FinancialRecord, "id" | "created_at">; Update: Partial<FinancialRecord> };
       team_members: { Row: TeamMember; Insert: Omit<TeamMember, "id" | "created_at">; Update: Partial<TeamMember> };
       orders: { Row: Order; Insert: Partial<Order> & { item_name: string }; Update: Partial<Order> };
+      tickets: { Row: Ticket; Insert: Omit<Ticket, "id" | "created_at" | "ticket_code" | "status"> & { ticket_code?: string; status?: TicketStatus }; Update: Partial<Ticket> };
+      seats: { Row: Seat; Insert: Omit<Seat, "id">; Update: Partial<Seat> };
+      payments: { Row: PaymentRecord; Insert: Omit<PaymentRecord, "id">; Update: Partial<PaymentRecord> };
     };
   };
 };

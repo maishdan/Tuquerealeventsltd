@@ -30,6 +30,8 @@ import {
   servicesJsonLd,
 } from "../lib/seo";
 import { AuthProvider } from "../contexts/AuthContext";
+import { ThemeProvider } from "../contexts/ThemeContext";
+import { FavoritesProvider } from "../contexts/FavoritesContext";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
 import { cn } from "@/lib/utils";
@@ -165,26 +167,30 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
-          <div className="relative flex flex-col min-h-screen">
-            {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
-            <main className={cn("flex-1", !isDashboard && "pt-20")}>
-              <Outlet />
-            </main>
-            {!isDashboard && <Footer />}
+      <ThemeProvider>
+        <FavoritesProvider>
+          <AuthProvider>
+            <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
+              <div className="relative flex flex-col min-h-screen">
+                {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
+                <main className={cn("flex-1", !isDashboard && "pt-20")}>
+                  <Outlet />
+                </main>
+                {!isDashboard && <Footer />}
 
-            {/* Golden Scroll to Top Button - Positioned further up to clear the chat widget */}
-            <button
-              onClick={scrollToTop}
-              className="fixed bottom-40 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
-              title="Return to Command Center"
-            >
-              <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </AuthProvider>
+                {/* Golden Scroll to Top Button */}
+                <button
+                  onClick={scrollToTop}
+                  className="fixed bottom-40 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
+                  title="Return to Command Center"
+                >
+                  <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
+                </button>
+              </div>
+            </div>
+          </AuthProvider>
+        </FavoritesProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

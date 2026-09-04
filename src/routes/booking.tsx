@@ -12,20 +12,41 @@ import {
   MessageSquare,
   Clock,
   Sparkles,
-  ChevronDown
+  ChevronDown,
+  Armchair,
+  Smartphone,
+  Ticket as TicketIcon,
+  QrCode,
+  MapPin,
+  CheckCircle2,
+  Tag,
+  Download,
+  Mail,
+  Printer,
+  ChevronLeft,
+  Minus,
+  Plus
 } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { createBooking } from "@/lib/api/bookings";
+import { fetchAllEvents } from "@/lib/api/events";
+import { SeatPicker } from "@/components/booking/SeatPicker";
+import { MpesaPaymentModal } from "@/components/booking/MpesaPaymentModal";
+import { TicketPassModal } from "@/components/dashboard/TicketPassModal";
 import { useAuth } from "@/contexts/AuthContext";
+import type { InitiateMpesaInput } from "@/lib/api/payments";
+import type { Ticket, TicketClass, EventRecord } from "@/lib/database.types";
+import { formatKes } from "@/lib/dashboard-mock-data";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/booking")({
   head: () =>
     createPageSeo({
-      title: "Secure Your Date | Royal Touch Events Nairobi",
+      title: "Guest Checkout & Gate Passes | Royal Touch Events Nairobi",
       description:
-        "Initiate your project strategy with Nairobi's premier event production agency. Request a custom quote and consultation within 24 hours.",
+        "5-Screen guest ticket checkout. Select event, choose Regular/VIP/VVIP ticket class, pay via M-Pesa STK, and receive your digital PDF ticket instantly.",
       path: "/booking",
-      keywords: "book event Nairobi, wedding booking Kenya, corporate event quote, event inquiry form",
+      keywords: "book event Nairobi, M-Pesa event tickets Kenya, guest ticket checkout, QR ticket PDF",
     }),
   component: Booking,
 });
@@ -41,298 +62,545 @@ const heroImages = [
   "/back/e9.jpg",
 ];
 
-const schema = z.object({
-  name: z.string().trim().min(2, "Please enter your name").max(100),
-  email: z.string().trim().email("Enter a valid email").max(255),
-  phone: z.string().trim().min(7, "Phone too short").max(30),
-  eventType: z.string().min(1, "Select an event type"),
-  date: z.string().min(1, "Pick a date"),
-  guests: z.string().max(10).optional(),
-  budget: z.string().min(1, "Select a budget"),
-  services: z.array(z.string()).default([]),
-  notes: z.string().max(1000).optional(),
-});
-
-const eventTypes = ["Corporate Gala", "Luxury Wedding", "Product Launch", "Concert Production", "Milestone Birthday", "VIP Private Event"];
-const budgets = ["KSh 500,000 - 1M", "KSh 1M - 5M", "KSh 5M - 15M", "KSh 15M - 50M", "KSh 50M+"];
-const serviceOptions = ["Full Production", "Strategic Planning", "Technical AV", "Floral Architecture", "VIP Concierge", "Cinematography"];
-
-function Booking() {
-  const { user } = useAuth();
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [selServices, setSelServices] = useState<string[]>([]);
+export function Booking() {
+  const { user, profile } = useAuth();
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
+  // Events Registry
+  const [events, setEvents] = useState<EventRecord[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
+
+  // 5-Screen Guest Checkout Flow State
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null);
+  const [selectedTicketClass, setSelectedTicketClass] = useState<TicketClass | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedSeat, setSelectedSeat] = useState<string | null>("07");
+
+  // Customer Contact Info (Screen 3)
+  const [fullName, setFullName] = useState(profile?.full_name || "");
+  const [email, setEmail] = useState(profile?.email || "");
+  const [phone, setPhone] = useState(profile?.phone || "0712345678");
+
+  // Payment & Pass Output State (Screen 4 & 5)
+  const [isMpesaModalOpen, setIsMpesaModalOpen] = useState(false);
+  const [mpesaPayload, setMpesaPayload] = useState<InitiateMpesaInput | null>(null);
+  const [generatedTicket, setGeneratedTicket] = useState<Ticket | null>(null);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+
   useEffect(() => {
+    async function load() {
+      try {
+        const data = await fetchAllEvents();
+        setEvents(data);
+        if (data.length > 0) {
+          setSelectedEvent(data[0]);
+          if (data[0].ticket_classes && data[0].ticket_classes.length > 0) {
+            setSelectedTicketClass(data[0].ticket_classes[0]);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingEvents(false);
+      }
+    }
+    load();
+
     const timer = setInterval(() => {
       setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
-    }, 60000); // Switch every 1 minute
+    }, 60000);
     return () => clearInterval(timer);
   }, []);
 
-  const toggle = (s: string) =>
-    setSelServices((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
-
-  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setSubmitError("");
-    const fd = new FormData(e.currentTarget);
-    const data = {
-      name: String(fd.get("name") || ""),
-      email: String(fd.get("email") || ""),
-      phone: String(fd.get("phone") || ""),
-      eventType: String(fd.get("eventType") || ""),
-      date: String(fd.get("date") || ""),
-      guests: String(fd.get("guests") || ""),
-      budget: String(fd.get("budget") || ""),
-      services: selServices,
-      notes: String(fd.get("notes") || ""),
-    };
-    const res = schema.safeParse(data);
-    if (!res.success) {
-      const errs: Record<string, string> = {};
-      res.error.issues.forEach((i) => { errs[String(i.path[0])] = i.message; });
-      setErrors(errs);
-      return;
-    }
-    setErrors({});
-    setSubmitting(true);
-    try {
-      await createBooking({
-        name: res.data.name,
-        email: res.data.email,
-        phone: res.data.phone,
-        event_type: res.data.eventType,
-        event_date: res.data.date,
-        guests: res.data.guests,
-        budget: res.data.budget,
-        services: res.data.services,
-        notes: res.data.notes,
-        user_id: user?.id ?? null,
+  const handleSelectEvent = (evt: EventRecord) => {
+    setSelectedEvent(evt);
+    if (evt.ticket_classes && evt.ticket_classes.length > 0) {
+      setSelectedTicketClass(evt.ticket_classes[0]);
+    } else {
+      setSelectedTicketClass({
+        id: `tc-${evt.id}`,
+        name: "Regular",
+        description: "General Admission",
+        price: 500,
+        quantity_available: 500,
+        quantity_sold: 0,
+        benefits: ["General Entrance"],
       });
-      setSubmitted(true);
-    } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Could not submit booking. Please try again.");
-    } finally {
-      setSubmitting(false);
     }
-  }
+    setCurrentStep(2);
+  };
 
-  if (submitted) {
-    return (
-      <div className="bg-[#0b0e14] min-h-screen flex flex-col items-center justify-center text-white px-4">
-        <div className="max-w-xl w-full glass-strong p-12 rounded-[40px] border border-gold/30 text-center space-y-8 animate-in fade-in zoom-in duration-700">
-          <div className="mx-auto h-20 w-20 rounded-full bg-emerald-500/20 text-emerald-500 flex items-center justify-center border border-emerald-500/30">
-            <Check size={40} />
-          </div>
-          <div className="space-y-4">
-            <h1 className="font-display text-5xl md:text-7xl uppercase font-black tracking-tighter">Strategic Brief Received.</h1>
-            <p className="text-gray-400 text-lg">A senior producer has been assigned to your inquiry. We will contact you within 12-24 business hours to discuss your blueprint.</p>
-          </div>
-          <Link to="/" className="inline-flex items-center gap-2 text-gold font-black uppercase tracking-widest text-xs hover:text-white transition-colors">
-            Return to Dashboard <ArrowRight size={14} />
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const calculateTotal = () => {
+    return (selectedTicketClass?.price || 500) * quantity;
+  };
+
+  const handleProceedToPayment = () => {
+    if (!selectedEvent || !selectedTicketClass) return;
+
+    const payload: InitiateMpesaInput = {
+      booking_id: `bk-guest-${Date.now()}`,
+      phone_number: phone,
+      amount: calculateTotal(),
+      event_name: selectedEvent.name,
+      holder_name: fullName || "Guest Attendee",
+      holder_email: email || "guest@royaltouch.com",
+      seat_number: selectedSeat || "07",
+      ticket_tier: selectedTicketClass.name as any,
+      event_date: selectedEvent.event_date,
+      venue: selectedEvent.venue,
+      user_id: user?.id ?? null,
+    };
+
+    setMpesaPayload(payload);
+    setIsMpesaModalOpen(true);
+  };
+
+  const handlePaymentConfirmed = (ticket: Ticket) => {
+    setGeneratedTicket(ticket);
+    setIsMpesaModalOpen(false);
+    setCurrentStep(5);
+  };
 
   return (
-    <div className="bg-[#0b0e14] text-white font-sans min-w-0">
-      {/* 1. HERO SECTION (MATCHES HOME PAGE) */}
-      <section className="relative min-h-[70vh] flex flex-col items-center justify-start overflow-hidden pt-20">
+    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans overflow-x-hidden transition-colors duration-300">
+      {/* 1. HERO HEADER */}
+      <section className="relative min-h-[50vh] flex flex-col items-center justify-start overflow-hidden pt-12 pb-16 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b0e14]">
         <div className="absolute inset-0 z-0">
           {heroImages.map((src, idx) => (
             <img
               key={src}
               src={src}
               alt={`Royal Booking Hero ${idx}`}
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out ${
-                idx === currentImgIndex ? "opacity-100 scale-105" : "opacity-0 scale-100"
+              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-[2500ms] ease-in-out scale-105 ${
+                idx === currentImgIndex ? "opacity-15 dark:opacity-25" : "opacity-0"
               }`}
             />
           ))}
-          <div className="absolute inset-0 bg-[#0b0e14]/40" />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-transparent to-[#0b0e14]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-slate-50/95 to-[#f8fafc] dark:from-[#0b0e14]/90 dark:via-[#0b0e14]/95 dark:to-[#0b0e14]" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
-          <div className="max-w-4xl mx-auto bg-[#0b0e14]/60 backdrop-blur-md border border-white/10 p-6 md:p-12 rounded-[24px] md:rounded-[32px] space-y-6 md:space-y-8 animate-in fade-in zoom-in duration-1000">
-            <div className="space-y-3 md:space-y-4">
-              <div className="flex justify-center">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-gold text-[10px] font-black uppercase tracking-widest">
-                  <ShieldCheck size={12} /> Priority Project Request
-                </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-16 space-y-8">
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="flex justify-center">
+              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
+                <ShieldCheck size={14} className="text-gold" /> 5-Screen Guest Checkout · Instant M-Pesa PDF Pass
               </div>
-              <h1 className="text-3xl sm:text-6xl lg:text-[100px] font-black tracking-tighter text-white uppercase leading-tight md:leading-[0.85]">
-                Secure Your <br />
-                <span className="text-gold">Date.</span>
-              </h1>
-              <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-xl text-gray-200 font-medium leading-relaxed">
-                Initiate your project strategy with Nairobi's premier event production agency. Provide your requirements below for a comprehensive technical and creative proposal.
-              </p>
             </div>
+
+            <h1 className="text-4xl sm:text-7xl lg:text-[90px] font-black tracking-tighter uppercase leading-[0.88] text-[#0b0e14] dark:text-white">
+              Instant Ticket <br />
+              <span className="text-gold font-display font-normal">Checkout.</span>
+            </h1>
+
+            <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
+              No account creation required. Select your event, pick your pass tier, complete M-Pesa payment, and receive your PDF gate ticket automatically.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* 2. FORM SECTION */}
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 mt-12 relative z-20 pb-32">
-        <div className="grid lg:grid-cols-12 gap-12 items-start">
-           {/* Form Side */}
-           <div className="lg:col-span-8">
-              <form onSubmit={onSubmit} className="bg-[#121212] border border-white/10 p-8 md:p-16 rounded-[40px] shadow-2xl space-y-12" noValidate>
-                {submitError && (
-                  <div className="p-6 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-4">
-                    <Zap size={20} />
-                    <p>{submitError}</p>
-                  </div>
+      {/* 2. 5-STEP CHECKOUT PROGRESS BAR */}
+      <section className="py-6 bg-slate-100 dark:bg-[#121722] border-b border-slate-200 dark:border-white/10 sticky top-20 z-30 shadow-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="grid grid-cols-5 gap-2 sm:gap-4 text-center">
+            {[
+              { step: 1, label: "01. Event" },
+              { step: 2, label: "02. Ticket Class" },
+              { step: 3, label: "03. Details" },
+              { step: 4, label: "04. Summary" },
+              { step: 5, label: "05. Pass Ready" },
+            ].map((s) => (
+              <button
+                key={s.step}
+                onClick={() => {
+                  if (s.step < currentStep) setCurrentStep(s.step as any);
+                }}
+                className={cn(
+                  "py-3 px-2 rounded-none text-[9px] sm:text-[10px] font-black uppercase tracking-widest border transition-all truncate cursor-pointer",
+                  currentStep === s.step
+                    ? "bg-gold text-black border-gold shadow-md"
+                    : currentStep > s.step
+                    ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                    : "bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 text-muted-foreground"
                 )}
-
-                <div className="space-y-8">
-                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold border-b border-white/5 pb-4">01. Contact Intelligence</h2>
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <Field label="Full Legal Name" name="name" id="booking-name" error={errors.name} />
-                      <Field label="Professional Email" name="email" id="booking-email" type="email" error={errors.email} />
-                      <Field label="Mobile / WhatsApp" name="phone" id="booking-phone" error={errors.phone} />
-                      <Field label="Target Event Date" name="date" id="booking-date" type="date" error={errors.date} />
-                   </div>
-                </div>
-
-                <div className="space-y-8">
-                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold border-b border-white/5 pb-4">02. Project Scope</h2>
-                   <div className="grid md:grid-cols-2 gap-6">
-                      <Select label="Discipline" name="eventType" id="booking-event-type" options={eventTypes} error={errors.eventType} />
-                      <Select label="Investment Range" name="budget" id="booking-budget" options={budgets} error={errors.budget} />
-                      <Field label="Scale (Est. Guest Count)" name="guests" id="booking-guests" placeholder="Ex: 500+" />
-                   </div>
-                </div>
-
-                <div className="space-y-8">
-                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold border-b border-white/5 pb-4">03. Integrated Services</h2>
-                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {serviceOptions.map((s) => {
-                        const id = `booking-service-${s.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`;
-                        const checked = selServices.includes(s);
-                        return (
-                          <label
-                            key={s}
-                            htmlFor={id}
-                            className={`cursor-pointer group flex flex-col gap-4 p-6 rounded-2xl border transition-all duration-300 ${
-                              checked ? "bg-gold/10 border-gold shadow-lg" : "bg-white/[0.02] border-white/5 hover:border-gold/30"
-                            }`}
-                          >
-                            <input
-                              id={id}
-                              type="checkbox"
-                              className="sr-only"
-                              checked={checked}
-                              onChange={() => toggle(s)}
-                            />
-                            <div className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all ${checked ? "bg-gold text-[#0b0e14]" : "bg-white/5 text-gray-500"}`}>
-                               <Check size={16} className={checked ? "opacity-100" : "opacity-0"} />
-                            </div>
-                            <span className={`text-[10px] font-black uppercase tracking-widest ${checked ? "text-white" : "text-gray-500"}`}>{s}</span>
-                          </label>
-                        );
-                      })}
-                   </div>
-                </div>
-
-                <div className="space-y-4 pt-8">
-                   <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold border-b border-white/5 pb-4">04. Strategic Vision</h2>
-                   <textarea
-                    id="booking-notes"
-                    name="notes"
-                    rows={6}
-                    maxLength={1000}
-                    placeholder="Briefly describe your objectives, venue preferences, and any technical requirements..."
-                    className="w-full bg-[#1a1a1a] border border-white/10 rounded-[32px] px-8 py-6 text-sm text-white focus:border-gold outline-none transition-all"
-                   />
-                </div>
-
-                <button type="submit" disabled={submitting} className="w-full h-20 rounded-full bg-gold text-[#0b0e14] font-black text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:scale-[1.02] transition-all shadow-[0_0_50px_rgba(212,175,55,0.2)] disabled:opacity-50">
-                  {submitting ? <Loader2 size={24} className="animate-spin" /> : <>Submit Strategic Brief <ArrowRight size={20} /></>}
-                </button>
-              </form>
-           </div>
-
-           {/* Sidebar Info */}
-           <div className="lg:col-span-4 space-y-8">
-              <div className="bg-[#121212] border border-white/10 p-10 rounded-[40px] space-y-8">
-                 <div className="flex items-center gap-4 text-gold">
-                    <Clock size={24} />
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em]">Response Time</h3>
-                 </div>
-                 <p className="text-3xl font-black text-white">Under 24 Hours</p>
-                 <p className="text-gray-500 text-sm leading-relaxed">Our executive coordination team reviews every brief within one business day to ensure alignment with our production standards.</p>
-              </div>
-
-              <div className="bg-[#1a2b4b]/20 border border-blue-500/20 p-10 rounded-[40px] space-y-8 relative overflow-hidden">
-                 <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <Sparkles size={120} />
-                 </div>
-                 <div className="relative z-10 space-y-6">
-                    <div className="flex items-center gap-4 text-blue-400">
-                       <ShieldCheck size={24} />
-                       <h3 className="text-[10px] font-black uppercase tracking-[0.4em]">Privacy Shield</h3>
-                    </div>
-                    <p className="text-white font-bold leading-relaxed">Your data and event details are managed with 100% executive discretion.</p>
-                    <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-widest">
-                       <div className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
-                       Encryption Active
-                    </div>
-                 </div>
-              </div>
-
-              <div className="p-10 space-y-6">
-                 <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500">Need Immediate Support?</h4>
-                 <div className="space-y-4">
-                    <a href="tel:+254795365334" className="flex items-center gap-4 text-white hover:text-gold transition-colors">
-                       <div className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center"><MessageSquare size={16} /></div>
-                       <span className="text-xs font-bold">+254 795 365 334</span>
-                    </a>
-                 </div>
-              </div>
-           </div>
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
-    </div>
-  );
-}
 
-function Field({ label, name, id, type = "text", placeholder, error }: { label: string; name: string; id: string; type?: string; placeholder?: string; error?: string }) {
-  return (
-    <div className="space-y-3">
-      <label htmlFor={id} className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">{label}</label>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        maxLength={255}
-        className="w-full h-16 bg-[#1a1a1a] border border-white/5 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none transition-all placeholder:text-gray-700"
+      {/* 3. CHECKOUT WIZARD BODY (SCREENS 1 TO 5) */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 py-20 relative z-20">
+        <div className="max-w-4xl mx-auto">
+          {/* SCREEN 1: BROWSE & CHOOSE EVENT */}
+          {currentStep === 1 && (
+            <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
+              <div className="space-y-2 border-b border-slate-200 dark:border-white/10 pb-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 01 Of 05</p>
+                <h2 className="text-3xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
+                  Select Available Engagement
+                </h2>
+              </div>
+
+              {loadingEvents ? (
+                <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                  <Loader2 size={40} className="text-gold animate-spin" />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Registry...</p>
+                </div>
+              ) : (
+                <div className="grid gap-6">
+                  {events.map((evt) => (
+                    <div
+                      key={evt.id}
+                      className="group p-6 sm:p-8 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 hover:border-gold transition-all rounded-none space-y-4 shadow-sm"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="space-y-2 flex-1">
+                          <span className="px-3 py-1 bg-gold/10 text-gold font-black text-[9px] uppercase tracking-widest border border-gold/30">
+                            {evt.event_type}
+                          </span>
+                          <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground group-hover:text-gold transition-colors">
+                            {evt.name}
+                          </h3>
+                          <p className="text-xs text-slate-600 dark:text-gray-400 font-medium leading-relaxed">
+                            {evt.description || "Executive production by Royal Touch Events."}
+                          </p>
+                          <div className="flex flex-wrap gap-4 text-xs font-bold text-muted-foreground pt-1">
+                            <span className="flex items-center gap-1.5"><Calendar size={13} className="text-gold" /> {evt.event_date || "Date Confirmed"}</span>
+                            <span className="flex items-center gap-1.5"><MapPin size={13} className="text-gold" /> {evt.venue || "Nairobi Venue"}</span>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => handleSelectEvent(evt)}
+                          className="h-12 px-8 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md shrink-0 cursor-pointer"
+                        >
+                          Book Event <ArrowRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* SCREEN 2: CHOOSE TICKET CLASS & QUANTITY */}
+          {currentStep === 2 && selectedEvent && (
+            <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 02 Of 05</p>
+                  <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
+                    Choose Pass Class & Quantity
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="text-xs font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                >
+                  <ChevronLeft size={16} /> Back
+                </button>
+              </div>
+
+              <div className="p-4 bg-gold/10 border border-gold/30 text-gold text-xs font-black uppercase tracking-widest">
+                Selected: {selectedEvent.name} ({selectedEvent.event_date})
+              </div>
+
+              {/* Ticket Classes Options */}
+              <div className="grid gap-4">
+                {(selectedEvent.ticket_classes || [
+                  { id: "c1", name: "Regular", description: "General admission", price: 500, quantity_available: 500, quantity_sold: 0, benefits: ["General Entrance"] },
+                  { id: "c2", name: "VIP", description: "Priority VIP admission", price: 1500, quantity_available: 100, quantity_sold: 0, benefits: ["Priority Fast-Track Entrance", "VIP Reserved Seating"] },
+                  { id: "c3", name: "VVIP", description: "Front-row seating & VVIP lounge", price: 3000, quantity_available: 30, quantity_sold: 0, benefits: ["Front-Row Recliner Seating", "Private VVIP Lounge", "Refreshments & Swag"] },
+                ]).map((tc) => {
+                  const isSelected = selectedTicketClass?.id === tc.id || selectedTicketClass?.name === tc.name;
+                  return (
+                    <div
+                      key={tc.id}
+                      onClick={() => setSelectedTicketClass(tc)}
+                      className={cn(
+                        "p-6 border rounded-none space-y-4 cursor-pointer transition-all",
+                        isSelected
+                          ? "bg-gold/10 border-gold ring-1 ring-gold shadow-md"
+                          : "bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 hover:border-gold"
+                      )}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-black text-lg uppercase tracking-wider text-foreground">{tc.name}</span>
+                        <span className="font-mono text-xl font-black text-gold">{formatKes(tc.price)}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{tc.description}</p>
+                      <ul className="grid sm:grid-cols-2 gap-2 text-xs font-bold text-slate-600 dark:text-gray-300">
+                        {tc.benefits.map((b, bIdx) => (
+                          <li key={bIdx} className="flex items-center gap-2">
+                            <CheckCircle2 size={12} className="text-gold shrink-0" /> {b}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Quantity Selector */}
+              <div className="flex items-center justify-between p-6 bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Select Quantity</p>
+                  <p className="text-lg font-black text-foreground">{quantity} Ticket Pass(es)</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    className="h-10 w-10 bg-white dark:bg-black/50 border border-slate-300 dark:border-white/10 flex items-center justify-center font-black cursor-pointer hover:border-gold"
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="font-mono text-lg font-black w-8 text-center">{quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+                    className="h-10 w-10 bg-white dark:bg-black/50 border border-slate-300 dark:border-white/10 flex items-center justify-center font-black cursor-pointer hover:border-gold"
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCurrentStep(3)}
+                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl cursor-pointer"
+              >
+                Continue To Details ({formatKes(calculateTotal())}) <ArrowRight size={18} />
+              </button>
+            </div>
+          )}
+
+          {/* SCREEN 3: CUSTOMER DETAILS (GUEST CHECKOUT - NO forced registration!) */}
+          {currentStep === 3 && (
+            <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 03 Of 05</p>
+                  <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
+                    Attendee Credentials
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setCurrentStep(2)}
+                  className="text-xs font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                >
+                  <ChevronLeft size={16} /> Back
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                    Full Legal Name *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Daniel Maina"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="w-full h-14 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-5 text-xs font-bold text-foreground outline-none focus:border-gold"
+                  />
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                      Email Address (For PDF Delivery) *
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Ex: daniel@example.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full h-14 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-5 text-xs font-bold text-foreground outline-none focus:border-gold"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                      M-Pesa Mobile Number *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ex: 0712345678"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full h-14 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-5 text-xs font-bold text-foreground outline-none focus:border-gold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                disabled={!fullName || !email || !phone}
+                onClick={() => setCurrentStep(4)}
+                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl cursor-pointer disabled:opacity-50"
+              >
+                Proceed To Order Summary <ArrowRight size={18} />
+              </button>
+            </div>
+          )}
+
+          {/* SCREEN 4: ORDER SUMMARY & PAY NOW (STICKY PESAPAL & M-PESA STK) */}
+          {currentStep === 4 && selectedEvent && selectedTicketClass && (
+            <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
+              <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
+                <div className="space-y-1">
+                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 04 Of 05</p>
+                  <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
+                    Order Summary & Sticky Payment
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setCurrentStep(3)}
+                  className="text-xs font-bold text-muted-foreground hover:text-foreground flex items-center gap-1 cursor-pointer"
+                >
+                  <ChevronLeft size={16} /> Back
+                </button>
+              </div>
+
+              <div className="p-8 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 space-y-4">
+                <div className="flex justify-between items-start border-b border-slate-200 dark:border-white/10 pb-4">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gold">{selectedEvent.event_type}</p>
+                    <h3 className="text-xl font-black uppercase text-foreground">{selectedEvent.name}</h3>
+                    <p className="text-xs text-muted-foreground">{selectedEvent.event_date} · {selectedEvent.venue}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 text-xs font-bold">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Attendee Name:</span>
+                    <span className="text-foreground">{fullName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Delivery Email:</span>
+                    <span className="text-foreground">{email}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">M-Pesa Phone:</span>
+                    <span className="text-foreground">{phone}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Pass Class:</span>
+                    <span className="text-gold font-black">{selectedTicketClass.name} × {quantity}</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex justify-between items-center text-lg font-black">
+                  <span className="uppercase tracking-widest text-foreground">Total Checkout Amount:</span>
+                  <span className="font-mono text-2xl text-gold">{formatKes(calculateTotal())}</span>
+                </div>
+              </div>
+
+              {/* STICKY PESAPAL EMBED FRAME */}
+              <div className="p-6 bg-slate-50 dark:bg-black/30 border border-gold/40 rounded-none flex flex-col items-center text-center space-y-3">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Official PesaPal Gateway Embed</p>
+                <div className="w-full flex justify-center py-1">
+                  <iframe
+                    width="200"
+                    height="40"
+                    src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/royaltouchevents"
+                    frameBorder="0"
+                    allowFullScreen
+                    title="PesaPal Store"
+                    className="border-0 overflow-hidden"
+                  />
+                </div>
+                <p className="text-[9px] text-muted-foreground font-medium">
+                  Select payment method above without leaving this page. Details & amount are pre-filled automatically.
+                </p>
+              </div>
+
+              <button
+                onClick={handleProceedToPayment}
+                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
+              >
+                <Smartphone size={20} /> Pay {formatKes(calculateTotal())} Via M-Pesa STK Prompt
+              </button>
+            </div>
+          )}
+
+          {/* SCREEN 5: SUCCESS PAGE - AUTO PDF GENERATION & ONE-CLICK DOWNLOAD */}
+          {currentStep === 5 && generatedTicket && (
+            <div className="bg-white dark:bg-[#121722] border border-gold/40 p-8 sm:p-14 rounded-none shadow-2xl space-y-8 text-center animate-in zoom-in-95 duration-500">
+              <div className="h-20 w-20 bg-emerald-500 text-black flex items-center justify-center mx-auto shadow-2xl">
+                <CheckCircle2 size={44} />
+              </div>
+
+              <div className="space-y-3">
+                <span className="px-4 py-1 bg-gold/10 text-gold font-black text-[10px] uppercase tracking-widest border border-gold/30">
+                  Step 05 Of 05 · Ticket Issued
+                </span>
+                <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
+                  Payment Confirmed!
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 font-medium max-w-md mx-auto leading-relaxed">
+                  Your ticket <span className="font-mono text-gold font-bold">{generatedTicket.ticket_code}</span> has been generated and sent to <span className="text-foreground font-bold">{email}</span>.
+                </p>
+              </div>
+
+              {/* Digital Pass Preview & Actions */}
+              <div className="p-6 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 space-y-4 max-w-md mx-auto text-left">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-black uppercase text-gold">Gate Pass Summary</span>
+                  <span className="text-[9px] font-mono text-emerald-400 font-bold">STATUS: VALID PASS</span>
+                </div>
+                <div className="text-xs space-y-1">
+                  <p className="font-bold text-foreground">{generatedTicket.event_name}</p>
+                  <p className="text-muted-foreground">{generatedTicket.holder_name} · {generatedTicket.ticket_tier} Pass</p>
+                  <p className="text-muted-foreground font-mono">Seat Assignment: Seat {generatedTicket.seat_number || "GA"}</p>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+                <button
+                  onClick={() => setIsPassModalOpen(true)}
+                  className="h-14 px-8 bg-gold text-black font-black text-xs uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-xl cursor-pointer w-full sm:w-auto"
+                >
+                  <Download size={16} /> Download / Print PDF Ticket
+                </button>
+
+                <Link
+                  to="/"
+                  className="h-14 px-8 border border-slate-300 dark:border-white/10 text-foreground font-black text-xs uppercase tracking-widest rounded-none flex items-center justify-center hover:border-gold transition-all w-full sm:w-auto"
+                >
+                  Return To Command
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* M-PESA PAYMENT MODAL */}
+      <MpesaPaymentModal
+        isOpen={isMpesaModalOpen}
+        onClose={() => setIsMpesaModalOpen(false)}
+        bookingData={mpesaPayload}
+        onPaymentSuccess={handlePaymentConfirmed}
       />
-      {error && <p className="mt-2 text-[10px] font-bold text-destructive uppercase tracking-widest ml-4">{error}</p>}
-    </div>
-  );
-}
 
-function Select({ label, name, id, options, error }: { label: string; name: string; id: string; options: string[]; error?: string }) {
-  return (
-    <div className="space-y-3">
-      <label htmlFor={id} className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">{label}</label>
-      <div className="relative">
-        <select id={id} name={name} defaultValue="" aria-label={label} className="w-full h-16 bg-[#1a1a1a] border border-white/5 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none appearance-none cursor-pointer">
-          <option value="" disabled>Select...</option>
-          {options.map((o) => <option key={o} value={o}>{o}</option>)}
-        </select>
-        <ChevronDown className="absolute right-6 top-1/2 -translate-y-1/2 text-gold pointer-events-none" size={18} />
-      </div>
-      {error && <p className="mt-2 text-[10px] font-bold text-destructive uppercase tracking-widest ml-4">{error}</p>}
+      {/* TICKET PASS MODAL (PDF / PRINT VIEW) */}
+      <TicketPassModal
+        ticket={generatedTicket}
+        isOpen={isPassModalOpen}
+        onClose={() => setIsPassModalOpen(false)}
+      />
     </div>
   );
 }

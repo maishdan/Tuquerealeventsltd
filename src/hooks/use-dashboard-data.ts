@@ -2,13 +2,22 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAllBookings, fetchUserBookings, updateBookingStatus } from "@/lib/api/bookings";
 import { fetchContactInquiries, updateContactStatus } from "@/lib/api/contact";
 import type { ContactStatus } from "@/lib/database.types";
-import { fetchAllEvents, fetchUserEvents } from "@/lib/api/events";
+import { fetchAllEvents, fetchUserEvents, createEvent } from "@/lib/api/events";
 import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchTeamMembers } from "@/lib/api/team";
 import { fetchAllProfiles } from "@/lib/api/profiles";
 import { fetchUserOrders } from "@/lib/api/orders";
 import { fetchUserFinancials } from "@/lib/api/financials";
-import type { BookingStatus } from "@/lib/database.types";
+import {
+  fetchAllTickets,
+  fetchUserTickets,
+  issueTicket,
+  updateTicketStatus as updateTicketStatusApi,
+  verifyAndScanTicket,
+  type CreateTicketInput
+} from "@/lib/api/tickets";
+import { fetchSeats, lockSeat, releaseSeat } from "@/lib/api/seats";
+import type { BookingStatus, TicketStatus, EventRecord } from "@/lib/database.types";
 import { formatKes } from "@/lib/dashboard-mock-data";
 
 export function useAdminBookings() {
@@ -23,12 +32,65 @@ export function useAdminEvents() {
   return useQuery({ queryKey: ["admin", "events"], queryFn: fetchAllEvents });
 }
 
+export function useCreateEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (eventInput: Partial<EventRecord>) => createEvent(eventInput),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "events"] });
+    },
+  });
+}
+
 export function useAdminTeam() {
   return useQuery({ queryKey: ["admin", "team"], queryFn: fetchTeamMembers });
 }
 
 export function useAdminClients() {
   return useQuery({ queryKey: ["admin", "clients"], queryFn: fetchAllProfiles });
+}
+
+export function useAdminTickets() {
+  return useQuery({ queryKey: ["admin", "tickets"], queryFn: fetchAllTickets });
+}
+
+export function useSeats(eventId?: string) {
+  return useQuery({
+    queryKey: ["seats", eventId || "default"],
+    queryFn: () => fetchSeats(eventId),
+    refetchInterval: 5000,
+  });
+}
+
+export function useLockSeat() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ seatId, userId }: { seatId: string; userId?: string }) => lockSeat(seatId, userId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["seats"] });
+    },
+  });
+}
+
+export function useReleaseSeat() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (seatId: string) => releaseSeat(seatId),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["seats"] });
+    },
+  });
+}
+
+export function useVerifyAndScanTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (tokenOrCode: string) => verifyAndScanTicket(tokenOrCode),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["customer", "tickets"] });
+    },
+  });
 }
 
 export function useCustomerBookings(userId?: string, email?: string) {
@@ -68,6 +130,35 @@ export function useCustomerMessages(userId?: string) {
     queryKey: ["customer", "messages", userId],
     queryFn: () => fetchUserMessages(userId!),
     enabled: !!userId,
+  });
+}
+
+export function useCustomerTickets(userId?: string, email?: string) {
+  return useQuery({
+    queryKey: ["customer", "tickets", userId, email],
+    queryFn: () => fetchUserTickets(userId, email),
+  });
+}
+
+export function useIssueTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateTicketInput) => issueTicket(input),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["customer", "tickets"] });
+    },
+  });
+}
+
+export function useUpdateTicketStatus() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: TicketStatus }) => updateTicketStatusApi(id, status),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["customer", "tickets"] });
+    },
   });
 }
 
