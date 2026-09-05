@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 
 export type DashboardNavItem = {
+  key?: string;
   to: string;
   label: string;
   icon: LucideIcon;
