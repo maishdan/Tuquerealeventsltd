@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, User } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/sign-in")({
   },
   head: () => ({
     ...createPageSeo({
-      title: "Sign In | Royal Touch Events",
+      title: "Sign In | Royal Touch Events Nairobi",
       description: "Access your Royal Touch Events account. Secure login for clients and administrators.",
       path: "/sign-in",
       noindex: true,
@@ -45,7 +45,7 @@ const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(128),
 });
 
-function SignIn() {
+export function SignIn() {
   const navigate = useNavigate();
   const auth = useAuth();
   const search = Route.useSearch();
@@ -103,7 +103,8 @@ function SignIn() {
   }
 
   return (
-    <div className="bg-[#0b0e14] text-white font-sans min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-4">
+    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 overflow-x-hidden">
+      {/* Hero Background Images */}
       <div className="absolute inset-0 z-0">
         {heroImages.map((src, idx) => (
           <img
@@ -111,39 +112,50 @@ function SignIn() {
             src={src}
             alt=""
             className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[3000ms] ease-in-out",
-              idx === currentImgIndex ? "opacity-40 scale-105" : "opacity-0 scale-100"
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[2500ms] ease-in-out scale-105",
+              idx === currentImgIndex ? "opacity-15 dark:opacity-25" : "opacity-0"
             )}
           />
         ))}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0b0e14]/80 via-[#0b0e14]/40 to-[#0b0e14]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-slate-50/95 to-[#f8fafc] dark:from-[#0b0e14]/90 dark:via-[#0b0e14]/95 dark:to-[#0b0e14]" />
       </div>
 
-      <div className="relative z-10 w-full max-w-xl">
-        <div className="text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-700">
-           <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-white uppercase leading-none">Sign <span className="text-gold">In.</span></h1>
-           <p className="text-gray-400 font-bold uppercase tracking-widest text-[10px]">Access your executive portal</p>
+      <div className="relative z-10 w-full max-w-xl py-12">
+        <div className="text-center mb-8 space-y-4">
+          <div className="flex justify-center">
+            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
+              <ShieldCheck size={14} className="text-gold" /> Executive Authorization Gateway
+            </div>
+          </div>
+
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tighter uppercase leading-none text-[#0b0e14] dark:text-white">
+            Sign <span className="text-gold font-display font-normal">In.</span>
+          </h1>
+          <p className="text-slate-600 dark:text-gray-300 font-bold uppercase tracking-widest text-[10px]">
+            Access your Royal Touch executive portal & ticket registry
+          </p>
         </div>
 
-        <div className="bg-[#121212]/90 backdrop-blur-2xl border border-white/10 p-8 md:p-12 rounded-[40px] shadow-2xl space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-2xl space-y-8">
           {authError && (
-            <div className="p-5 rounded-2xl bg-destructive/10 border border-destructive/20 text-destructive text-xs flex items-center gap-3">
-              <AlertCircle size={16} />
+            <div className="p-4 rounded-none bg-rose-500/10 border border-rose-500/30 text-rose-500 text-xs font-bold flex items-center gap-3">
+              <AlertCircle size={18} />
               <p>{authError}</p>
             </div>
           )}
 
           <form onSubmit={onSubmit} className="space-y-6" noValidate>
             <div className="space-y-5">
-               <AuthField
+              <AuthField
                 label="Email Address"
                 name="email"
                 id="signin-email"
                 type="email"
                 error={errors.email}
                 defaultValue={search.email}
-               />
-               <div className="relative">
+              />
+
+              <div className="space-y-2 relative">
                 <AuthField
                   label="Password"
                   name="password"
@@ -155,27 +167,30 @@ function SignIn() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-[48px] text-gray-500 hover:text-gold transition-colors"
+                  className="absolute right-4 top-[38px] text-muted-foreground hover:text-gold transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
-               </div>
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full h-16 rounded-full bg-gold text-[#0b0e14] font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-[0_0_40px_rgba(212,175,55,0.2)] disabled:opacity-50"
+              className="w-full h-16 rounded-none bg-gold text-black font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 disabled:opacity-50 cursor-pointer"
             >
-              {submitting ? <Loader2 size={20} className="animate-spin" /> : <>Sign In <ArrowRight size={18} /></>}
+              {submitting ? <Loader2 size={20} className="animate-spin" /> : <>Sign In To Command <ArrowRight size={18} /></>}
             </button>
           </form>
 
-          <div className="pt-6 border-t border-white/5 flex flex-col items-center gap-4">
-             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">New to the Firm?</p>
-             <Link to="/sign-up" className="text-gold font-black uppercase tracking-[0.2em] text-xs hover:text-white transition-colors">
-               Sign Up
-             </Link>
+          <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col items-center gap-3 text-center">
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to Royal Touch Events?</p>
+            <Link
+              to="/sign-up"
+              className="h-12 px-8 border border-slate-300 dark:border-white/10 text-foreground hover:border-gold font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center transition-all cursor-pointer w-full"
+            >
+              Create Account
+            </Link>
           </div>
         </div>
       </div>
@@ -183,10 +198,26 @@ function SignIn() {
   );
 }
 
-function AuthField({ label, name, id, type = "text", error, defaultValue }: { label: string; name: string; id: string; type?: string; error?: string; defaultValue?: string }) {
+function AuthField({
+  label,
+  name,
+  id,
+  type = "text",
+  error,
+  defaultValue
+}: {
+  label: string;
+  name: string;
+  id: string;
+  type?: string;
+  error?: string;
+  defaultValue?: string;
+}) {
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="text-[9px] font-black uppercase tracking-[0.3em] text-gray-500 ml-4">{label}</label>
+      <label htmlFor={id} className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground block">
+        {label}
+      </label>
       <input
         id={id}
         name={name}
@@ -194,9 +225,9 @@ function AuthField({ label, name, id, type = "text", error, defaultValue }: { la
         maxLength={255}
         defaultValue={defaultValue}
         placeholder={`Enter ${label.toLowerCase()}`}
-        className="w-full h-14 bg-[#1a1a1a] border border-white/5 rounded-2xl px-6 text-sm text-white focus:border-gold outline-none transition-all placeholder:text-gray-700"
+        className="w-full h-14 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-5 text-xs font-bold text-foreground focus:border-gold outline-none transition-all placeholder:text-muted-foreground/40"
       />
-      {error && <p className="mt-1 text-[9px] font-bold text-rose-500 uppercase tracking-widest ml-4">{error}</p>}
+      {error && <p className="text-[9px] font-bold text-rose-500 uppercase tracking-widest">{error}</p>}
     </div>
   );
 }
