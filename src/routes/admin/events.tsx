@@ -544,8 +544,39 @@ export function AdminEvents() {
 
                 <div className="space-y-3">
                   <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                    Choose Event Poster Preset Or Enter Custom Image URL
+                    Upload Event Image From Your Device
                   </label>
+
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="h-24 w-24 border border-border overflow-hidden bg-black/20 flex items-center justify-center shrink-0">
+                      {posterUrl ? (
+                        <img src={posterUrl} alt="Event poster preview" className="h-full w-full object-cover" />
+                      ) : (
+                        <ImageIcon size={22} className="text-muted-foreground" />
+                      )}
+                    </div>
+
+                    <label className="h-12 px-6 border border-gold/50 text-gold font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 cursor-pointer hover:bg-gold hover:text-black transition-all">
+                      {uploadingPoster ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
+                      {uploadingPoster ? "Uploading..." : "Upload Image"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingPoster}
+                        onChange={handlePosterFile}
+                      />
+                    </label>
+
+                    {posterError && (
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{posterError}</p>
+                    )}
+                  </div>
+
+                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block pt-2">
+                    Or Choose Event Poster Preset / Custom Image URL
+                  </label>
+
 
                   <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                     {defaultPosterPresets.map((imgSrc) => (
