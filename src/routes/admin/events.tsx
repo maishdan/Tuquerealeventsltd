@@ -34,6 +34,7 @@ import {
   Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadEventPoster } from "@/lib/api/events";
 import type { EventRecord, TicketClass, EventLifecycleState } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/events")({
