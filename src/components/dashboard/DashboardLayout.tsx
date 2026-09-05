@@ -95,7 +95,6 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove("light", "dark", "classic-dark");
-
     root.classList.add(theme);
   }, [theme]);
 
@@ -105,8 +104,12 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
     navigate({ to: "/" });
   }
 
-  function toggleMenu() {
-    setMobileOpen((prev) => !prev);
+  function handleMenuToggle() {
+    if (isMobile) {
+      setMobileOpen((prev) => !prev);
+    } else {
+      setCollapsed((prev) => !prev);
+    }
   }
 
   const userLabel = profile?.full_name || profile?.email || "User";
@@ -143,7 +146,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                   Are you sure you want to exit?
                 </h3>
                 <p className="text-xs text-slate-600 dark:text-gray-300 font-medium leading-relaxed">
-                  You are about to terminate your active session. All unsaved administrative drafts will remain preserved.
+                  You are about to terminate your active administrative session.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3 pt-2">
@@ -168,10 +171,10 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
       )}
 
       <div className="flex flex-1">
-        {/* Desktop Persistent Sidebar (xl screens) */}
+        {/* Desktop Collapsible Sidebar (xl screens) */}
         <aside
           className={cn(
-            "hidden xl:flex flex-col fixed inset-y-0 left-0 top-0 z-40 transition-all duration-300 ease-in-out border-r border-slate-200 dark:border-white/10 shadow-2xl overflow-hidden",
+            "hidden xl:flex flex-col fixed inset-y-0 left-0 top-0 z-40 transition-all duration-300 ease-in-out border-r border-slate-200 dark:border-white/10 shadow-xl overflow-hidden",
             "bg-white dark:bg-[#0b0e14]",
             collapsed ? "w-20" : "w-72",
           )}
@@ -179,7 +182,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
           <DashboardSidebar {...sidebarProps} theme={theme} />
         </aside>
 
-        {/* The Slider Side Menu Sheet - Opened by the 3-Line Menu Button */}
+        {/* Mobile Sliding Side Menu Sheet */}
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent
             side="left"
@@ -192,41 +195,44 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         {/* Main Content Area */}
         <div
           className={cn(
-            "flex-1 flex flex-col min-w-0 transition-all duration-300 relative z-10",
-            "xl:pl-72",
-            collapsed && "xl:pl-20"
+            "flex-1 flex flex-col min-w-0 transition-all duration-300 relative z-10 pb-16",
+            collapsed ? "xl:pl-20" : "xl:pl-72"
           )}
         >
-          <header className="sticky top-0 z-30 h-16 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 bg-white/80 dark:bg-[#0b0e14]/80 flex items-center justify-between px-4 sm:px-6">
+          {/* PERMANENTLY FIXED HEADER */}
+          <header className="sticky top-0 z-50 h-16 backdrop-blur-xl border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#0b0e14]/95 flex items-center justify-between px-4 sm:px-6 shadow-sm">
             <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
-              {/* THREE-LINE MENU BUTTON FOR SIDEBAR */}
+              {/* MENU TOGGLE BUTTON */}
               <button
-                onClick={toggleMenu}
+                onClick={handleMenuToggle}
                 className="p-2.5 rounded-none bg-gold/10 border border-gold/40 text-gold hover:bg-gold hover:text-black transition-all shrink-0 flex items-center gap-2 cursor-pointer shadow-sm"
-                title="Toggle Side Menu"
+                title="Toggle Sidebar Menu"
               >
                 <Menu size={20} />
-                <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest">Menu</span>
+                <span className="hidden sm:inline text-[9px] font-black uppercase tracking-widest">
+                  {collapsed ? "Expand" : "Menu"}
+                </span>
               </button>
 
               <div className="h-6 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden xs:block" />
 
               <div className="flex items-center gap-3 min-w-0">
                 <h1 className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.4em] text-muted-foreground truncate">
-                  <span>{role === "admin" ? "Admin Control" : "Portal"} / </span>
+                  <span>{role === "admin" ? "SaaS Admin" : "Portal"} / </span>
                   <span className="text-foreground">{title}</span>
                 </h1>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-4 shrink-0">
-              {/* Direct "Back to Main Overview" link for inner routes */}
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* ALWAYS VISIBLE "BACK TO OVERVIEW" BUTTON ON INNER PAGES */}
               {!isDashboardRoot && (
                 <Link
                   to={role === "admin" ? "/admin" : "/dashboard"}
-                  className="hidden md:flex items-center gap-2 h-10 px-4 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all"
+                  className="flex items-center gap-2 h-10 px-3 sm:px-4 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all shadow-sm cursor-pointer shrink-0"
                 >
-                  <ArrowLeft size={14} /> Back to Overview
+                  <ArrowLeft size={14} />
+                  <span className="hidden xs:inline">Back to Overview</span>
                 </Link>
               )}
 
@@ -278,33 +284,85 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 
               <div className="h-8 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
 
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-3 group px-1 outline-none cursor-pointer">
+                    <div className="h-10 w-10 rounded-none overflow-hidden border border-slate-200 dark:border-white/10 ring-2 ring-transparent group-data-[state=open]:ring-gold transition-all bg-muted flex items-center justify-center">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Profile" className="h-full w-full object-cover" />
+                      ) : (
+                        <UserIcon size={20} className="text-muted-foreground" />
+                      )}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64 bg-popover border-border text-popover-foreground rounded-none p-2 shadow-2xl overflow-hidden">
+                  <DropdownMenuLabel className="px-4 py-3">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1">Authenticated as</p>
+                    <p className="text-xs font-bold truncate text-foreground">{user?.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-border" />
+
+                  <DropdownMenuItem asChild>
+                    <Link to={role === 'admin' ? '/admin/settings' : '/dashboard/profile'} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted focus:bg-muted transition-colors rounded-none group outline-none">
+                      <UserIcon size={16} className="text-muted-foreground group-hover:text-gold" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Account</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to={role === 'admin' ? '/admin/settings' : '/dashboard/settings'} className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-muted focus:bg-muted transition-colors rounded-none group border-b border-border mb-1 outline-none">
+                      <Settings size={16} className="text-muted-foreground group-hover:text-gold" />
+                      <span className="text-xs font-bold uppercase tracking-widest">Settings</span>
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="bg-border" />
+                  <DropdownMenuItem
+                    onClick={() => setShowLogoutConfirm(true)}
+                    className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-rose-500/10 focus:bg-rose-500/10 transition-colors rounded-none group outline-none text-rose-500 font-bold"
+                  >
+                    <Power size={16} className="text-rose-500 group-hover:scale-110 transition-transform" />
+                    <span className="text-xs font-bold uppercase tracking-widest">Logout / Exit</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="h-8 w-px bg-slate-200 dark:bg-white/10 mx-1 hidden sm:block" />
+
+              {/* ALWAYS VISIBLE PROMINENT LOGOUT / EXIT BUTTON */}
               <button
                 type="button"
                 onClick={() => setShowLogoutConfirm(true)}
                 className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-none bg-rose-500/10 border border-rose-500/30 text-rose-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all group shrink-0 cursor-pointer"
+                title="Logout / Exit Session"
               >
                 <Power size={14} className="group-hover:rotate-90 transition-transform duration-300" />
-                <span className="hidden xs:inline">Exit Session</span>
+                <span className="hidden xs:inline">Logout</span>
               </button>
             </div>
           </header>
 
-          <main className="flex-1 p-4 sm:p-6 md:p-10 max-w-[1600px] mx-auto w-full flex flex-col justify-between">
+          <main className="flex-1 p-4 sm:p-6 md:p-10 max-w-[1600px] mx-auto w-full">
             <div>
               {!isDashboardRoot && <BackToDashboard role={role} />}
               {children ?? <Outlet />}
             </div>
-
-            {/* DASHBOARD FOOTER */}
-            <footer className="mt-16 pt-8 border-t border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-[10px] text-muted-foreground font-black uppercase tracking-widest">
-              <div>© 2026 ROYAL TOUCH EVENTS EXECUTIVE OPERATIONS</div>
-              <div className="flex flex-wrap items-center gap-4">
-                <span>TEL: +254 795 365 334</span>
-                <span>EMAIL: eventsroyaltouch7@gmail.com</span>
-                <span>WEB: www.royaltouchevents.co.ke</span>
-              </div>
-            </footer>
           </main>
+
+          {/* PERMANENTLY FIXED FOOTER */}
+          <footer
+            className={cn(
+              "fixed bottom-0 right-0 z-40 h-12 bg-white/95 dark:bg-[#0b0e14]/95 backdrop-blur-md border-t border-slate-200 dark:border-white/10 px-6 flex items-center justify-between text-[9px] sm:text-[10px] text-muted-foreground font-black uppercase tracking-widest shadow-lg transition-all duration-300",
+              collapsed ? "left-0 xl:left-20" : "left-0 xl:left-72"
+            )}
+          >
+            <div>© 2026 ROYAL TOUCH EVENTS EXECUTIVE OPERATIONS</div>
+            <div className="hidden md:flex items-center gap-6">
+              <span>TEL: +254 795 365 334</span>
+              <span>EMAIL: eventsroyaltouch7@gmail.com</span>
+              <span>WEB: www.royaltouchevents.co.ke</span>
+            </div>
+          </footer>
         </div>
       </div>
     </div>
@@ -463,7 +521,7 @@ function DashboardSidebar({
           )}
         >
           <Power size={18} className="shrink-0" />
-          {!collapsed && <span>Exit Session</span>}
+          {!collapsed && <span>Logout / Exit</span>}
         </button>
       </div>
     </div>

@@ -47,6 +47,7 @@ import {
   useAdminEvents,
   useAdminContacts,
   useAdminTickets,
+  useAdminClients,
   useCreateEvent,
   formatKes
 } from "@/hooks/use-dashboard-data";
@@ -64,6 +65,7 @@ export function AdminOverview() {
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
   const { data: bookings = [], isLoading: bookingsLoading } = useAdminBookings();
   const { data: tickets = [], isLoading: ticketsLoading } = useAdminTickets();
+  const { data: profiles = [], isLoading: profilesLoading } = useAdminClients();
   const createEventMutation = useCreateEvent();
 
   // Modal & Preview State
@@ -90,7 +92,7 @@ export function AdminOverview() {
       description: "General admission entry pass",
       price: 500,
       quantity_available: 500,
-      quantity_sold: 140,
+      quantity_sold: 0,
       benefits: ["General Entrance", "Main Auditorium Seating"],
     },
     {
@@ -99,7 +101,7 @@ export function AdminOverview() {
       description: "VIP fast-track entrance & VIP seating",
       price: 1500,
       quantity_available: 100,
-      quantity_sold: 45,
+      quantity_sold: 0,
       benefits: ["Priority Fast-Track Entry", "VIP Reserved Seating", "Swag Bag"],
     },
     {
@@ -108,7 +110,7 @@ export function AdminOverview() {
       description: "Front-row seating & private lounge",
       price: 3000,
       quantity_available: 30,
-      quantity_sold: 18,
+      quantity_sold: 0,
       benefits: ["Front-Row Recliners", "VVIP Executive Lounge", "Meals & Certificate"],
     },
   ]);
@@ -180,8 +182,14 @@ export function AdminOverview() {
     );
   };
 
+  // 100% REAL COMPUTED DATABASE METRICS
   const totalRevenue = tickets.reduce((acc, t) => acc + (t.price || 0), 0);
   const validTicketsCount = tickets.filter((t) => t.status === "valid").length;
+  const registeredClientsCount = profiles.filter((p) => p.role === "customer" || !p.role).length;
+
+  const regularTicketsCount = tickets.filter((t) => t.ticket_tier === "Regular" || t.ticket_tier === "General Access").length;
+  const vipTicketsCount = tickets.filter((t) => t.ticket_tier === "VIP").length;
+  const vvipTicketsCount = tickets.filter((t) => t.ticket_tier === "VVIP").length;
 
   return (
     <div className="space-y-8 pb-20 font-sans text-foreground">
@@ -194,13 +202,13 @@ export function AdminOverview() {
           <div className="space-y-1">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[9px] font-black uppercase tracking-[0.2em]">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              SaaS Operational Dashboard · Online
+              SaaS Live Database Online
             </div>
             <h1 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
               Welcome, {profile?.full_name?.split(" ")[0] || "Administrator"}
             </h1>
             <p className="text-xs text-slate-600 dark:text-gray-300 font-medium leading-relaxed">
-              Real-time analytics for event capacity, multi-tier ticket sales, customer invoices, and gate scanner logs.
+              Real-time database analytics for public events, multi-tier ticket sales, customer invoices, and gate scanner logs.
             </p>
           </div>
         </div>
@@ -221,51 +229,60 @@ export function AdminOverview() {
         </div>
       </div>
 
-      {/* 2. TOP SAAS KPI STAT CARDS ROW */}
+      {/* 2. TOP SAAS KPI STAT CARDS ROW (100% REAL DATABASE DATA) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-6 rounded-none shadow-sm space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Total Revenue</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Total Ticket Revenue</span>
             <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-black text-[8px] uppercase">
-              +18.4%
+              Live DB
             </span>
           </div>
-          <p className="text-3xl font-black text-gold font-mono">{formatKes(totalRevenue || 4820000)}</p>
-          <p className="text-[10px] text-muted-foreground font-bold uppercase">M-Pesa Verified Settlement</p>
+          <p className="text-3xl font-black text-gold font-mono">{formatKes(totalRevenue)}</p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase">M-Pesa Verified Value</p>
         </div>
 
-        <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-6 rounded-none shadow-sm space-y-3">
+        <Link
+          to="/admin/events"
+          className="group bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 hover:border-gold p-6 rounded-none transition-all shadow-sm space-y-3"
+        >
           <div className="flex justify-between items-center">
             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Active Events</span>
             <span className="px-2 py-0.5 bg-gold/10 text-gold font-black text-[8px] uppercase">
               {events.length} Live
             </span>
           </div>
-          <p className="text-3xl font-black text-foreground font-mono">{events.length || 3}</p>
-          <p className="text-[10px] text-muted-foreground font-bold uppercase">100% Capacity Allocation</p>
-        </div>
+          <p className="text-3xl font-black text-foreground font-mono">{events.length}</p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase">Configure Prices & Classes →</p>
+        </Link>
 
-        <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-6 rounded-none shadow-sm space-y-3">
+        <Link
+          to="/admin/bookings"
+          className="group bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 hover:border-gold p-6 rounded-none transition-all shadow-sm space-y-3"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Booked Tickets</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Issued Gate Tickets</span>
             <span className="px-2 py-0.5 bg-blue-500/10 text-blue-500 font-black text-[8px] uppercase">
-              99.2% Valid
+              {validTicketsCount} Valid
             </span>
           </div>
-          <p className="text-3xl font-black text-blue-500 font-mono">{tickets.length || 240}</p>
-          <p className="text-[10px] text-muted-foreground font-bold uppercase">{validTicketsCount} Gate Passes Ready</p>
-        </div>
+          <p className="text-3xl font-black text-blue-500 font-mono">{tickets.length}</p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase">View All Digital Passes →</p>
+        </Link>
 
-        <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-6 rounded-none shadow-sm space-y-3">
+        <Link
+          to="/admin/users"
+          className="group bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 hover:border-gold p-6 rounded-none transition-all shadow-sm space-y-3"
+        >
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Active Clients</span>
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">Registered Clients</span>
             <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 font-black text-[8px] uppercase">
-              Registered
+              Database
             </span>
           </div>
-          <p className="text-3xl font-black text-purple-500 font-mono">{bookings.length + 480}</p>
-          <p className="text-[10px] text-muted-foreground font-bold uppercase">High Conversion Rate</p>
-        </div>
+          <p className="text-3xl font-black text-purple-500 font-mono">{registeredClientsCount}</p>
+          <p className="text-[10px] text-muted-foreground font-bold uppercase">View Client Directory →</p>
+        </Link>
       </div>
 
       {/* 3. DATA VISUALIZATION & CAPACITY GAUGES GRID */}
@@ -276,39 +293,43 @@ export function AdminOverview() {
             <div className="flex justify-between items-center border-b border-border pb-4">
               <div>
                 <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">SaaS Ticket Class Performance</p>
-                <h2 className="text-xl font-black uppercase text-foreground">Capacity & Revenue Breakdown</h2>
+                <h2 className="text-xl font-black uppercase text-foreground">Real Ticket Class Distribution</h2>
               </div>
               <BarChart3 size={20} className="text-gold" />
             </div>
 
             <div className="space-y-6">
               {[
-                { class: "Regular Class Passes", price: "KSh 500", sold: 450, total: 500, percent: 90, color: "bg-emerald-500" },
-                { class: "VIP Reserved Seats", price: "KSh 1,500", sold: 82, total: 100, percent: 82, color: "bg-blue-500" },
-                { class: "VVIP Executive Boxes", price: "KSh 3,000", sold: 26, total: 30, percent: 86, color: "bg-gold" },
-              ].map((item, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-center text-xs font-bold">
-                    <span className="text-foreground uppercase">{item.class} ({item.price})</span>
-                    <span className="font-mono text-muted-foreground">{item.sold} / {item.total} Sold ({item.percent}%)</span>
+                { class: "Regular Class Passes", count: regularTicketsCount, total: Math.max(1, tickets.length), color: "bg-emerald-500" },
+                { class: "VIP Reserved Seats", count: vipTicketsCount, total: Math.max(1, tickets.length), color: "bg-blue-500" },
+                { class: "VVIP Executive Boxes", count: vvipTicketsCount, total: Math.max(1, tickets.length), color: "bg-gold" },
+              ].map((item, i) => {
+                const percent = Math.min(100, Math.round((item.count / item.total) * 100));
+                return (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-foreground uppercase">{item.class}</span>
+                      <span className="font-mono text-muted-foreground">{item.count} Issued ({percent}%)</span>
+                    </div>
+                    <div className="w-full h-3 bg-muted border border-border rounded-none overflow-hidden">
+                      <div className={cn("h-full transition-all duration-500", item.color)} style={{ width: `${percent}%` }} />
+                    </div>
                   </div>
-                  <div className="w-full h-3 bg-muted border border-border rounded-none overflow-hidden">
-                    <div className={cn("h-full transition-all duration-500", item.color)} style={{ width: `${item.percent}%` }} />
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
           {/* Booked Tickets Recent Intake Table */}
           <GlassPanel title="Recent Booked Tickets & Inquiries" subtitle="Customer orders with payment verification and seat assignments">
             {bookingsLoading ? (
-              <div className="py-16 text-center text-xs text-muted-foreground uppercase tracking-widest">
-                Loading Booked Tickets...
+              <div className="py-20 flex flex-col items-center justify-center space-y-4">
+                <Loader2 size={36} className="text-gold animate-spin" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Accessing Database...</p>
               </div>
             ) : bookings.length === 0 ? (
               <div className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest">
-                No active bookings in queue.
+                No active bookings in database.
               </div>
             ) : (
               <div className="overflow-x-auto -mx-6 px-6">
@@ -392,7 +413,7 @@ export function AdminOverview() {
           </div>
         ) : tickets.length === 0 ? (
           <div className="py-12 text-center text-muted-foreground text-xs uppercase tracking-widest">
-            No digital passes issued yet.
+            No digital passes issued yet in database.
           </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
