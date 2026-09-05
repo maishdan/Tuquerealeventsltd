@@ -73,6 +73,32 @@ export function AdminEvents() {
   const [endTime, setEndTime] = useState("06:00 PM");
   const [venue, setVenue] = useState("Kisii University Main Auditorium");
   const [posterUrl, setPosterUrl] = useState("/back/e1.jfif");
+  const [uploadingPoster, setUploadingPoster] = useState(false);
+  const [posterError, setPosterError] = useState("");
+
+  const handlePosterFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setPosterError("Please choose an image file.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setPosterError("Image must be under 5MB.");
+      return;
+    }
+    setPosterError("");
+    setUploadingPoster(true);
+    try {
+      const url = await uploadEventPoster(file);
+      setPosterUrl(url);
+    } catch (err) {
+      setPosterError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploadingPoster(false);
+    }
+  };
   const [lifecycleState, setLifecycleState] = useState<EventLifecycleState>("PUBLISHED");
 
   // Ticket Classes Builder State
