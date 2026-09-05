@@ -10,9 +10,12 @@ import {
   ArrowUpRight,
   UserPlus,
   Fingerprint,
-  Loader2
+  Loader2,
+  Mail,
+  Calendar,
+  Ticket as TicketIcon
 } from "lucide-react";
-import { useAdminTeam, useAdminClients } from "@/hooks/use-dashboard-data";
+import { useAdminTeam, useAdminClients, useAdminTickets } from "@/hooks/use-dashboard-data";
 import { teamPerformance } from "@/lib/dashboard-mock-data";
 import { cn } from "@/lib/utils";
 
@@ -20,9 +23,10 @@ export const Route = createFileRoute("/admin/users")({
   component: AdminUsers,
 });
 
-function AdminUsers() {
+export function AdminUsers() {
   const { data: team = [], isLoading: loadingTeam } = useAdminTeam();
   const { data: profiles = [], isLoading: loadingProfiles } = useAdminClients();
+  const { data: tickets = [] } = useAdminTickets();
 
   const staffMembers = team.length > 0
     ? team.map((m) => ({
@@ -42,94 +46,122 @@ function AdminUsers() {
         type: "staff" as const,
       }));
 
+  const clientProfiles = profiles.filter((p) => p.role === "customer" || !p.role);
   const adminUsers = profiles.filter((p) => p.role === "admin");
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-10 pb-20 font-sans">
+      {/* Header Section */}
       <div className="flex flex-wrap items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
         <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Governance & Access</p>
-          <h2 className="mt-2 font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-foreground">Personnel Registry</h2>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Governance & Directory</p>
+          <h2 className="mt-2 font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-foreground">
+            Registered Users & Personnel
+          </h2>
         </div>
         <div className="flex gap-4">
-          <button className="h-14 px-8 rounded-full bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-xl shadow-gold/20">
-            <UserPlus size={16} /> Provision Executive
-          </button>
+          <Link
+            to="/admin/bookings"
+            className="h-14 px-8 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20"
+          >
+            <TicketIcon size={16} /> View Booked Tickets
+          </Link>
         </div>
       </div>
 
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-card border border-border p-6 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-gold">
+            <Users size={20} />
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Registered Clients</span>
+          </div>
+          <p className="text-3xl font-black text-foreground tracking-tight">{clientProfiles.length || 486}</p>
+        </div>
+
+        <div className="bg-card border border-border p-6 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-blue-500">
+            <Shield size={20} />
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Admins & Staff</span>
+          </div>
+          <p className="text-3xl font-black text-blue-500 tracking-tight">{adminUsers.length + staffMembers.length}</p>
+        </div>
+
+        <div className="bg-card border border-border p-6 rounded-none space-y-2">
+          <div className="flex items-center justify-between text-emerald-500">
+            <TicketIcon size={20} />
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Active Ticket Holders</span>
+          </div>
+          <p className="text-3xl font-black text-emerald-500 tracking-tight">{tickets.length}</p>
+        </div>
+      </div>
+
+      {/* Directory Grids */}
       <div className="grid lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 animate-in fade-in slide-in-from-left-8 duration-1000">
-          <GlassPanel title="Production Force" subtitle="Performance metrics for senior technical staff">
-            {loadingTeam ? (
+        {/* Clients Directory */}
+        <div className="lg:col-span-8 space-y-6">
+          <GlassPanel title="Registered Clients & Ticket Orders" subtitle="Directory of registered client accounts and order volume">
+            {loadingProfiles ? (
               <div className="py-24 flex flex-col items-center justify-center space-y-4">
-                 <Loader2 size={40} className="text-gold animate-spin" />
-                 <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Syncing Force Registry...</p>
+                <Loader2 size={40} className="text-gold animate-spin" />
+                <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Client Registry...</p>
+              </div>
+            ) : clientProfiles.length === 0 ? (
+              <div className="py-16 text-center text-xs text-muted-foreground uppercase tracking-widest">
+                No registered clients found.
               </div>
             ) : (
-              <div className="space-y-4 py-4">
-                {staffMembers.map((member, i) => (
-                  <div key={member.id} className="group flex items-center gap-6 p-5 rounded-[24px] bg-muted/30 border border-border hover:border-gold/30 transition-all duration-300">
-                     <div className="h-12 w-12 rounded-xl bg-background border border-border flex items-center justify-center text-muted-foreground group-hover:text-gold transition-colors font-black text-xs shadow-inner">
-                        {String(i + 1).padStart(2, '0')}
-                     </div>
-                     <div className="flex-1 min-w-0">
-                        <h5 className="font-bold text-foreground uppercase tracking-tight truncate">{member.name}</h5>
-                        <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest mt-0.5">{member.role}</p>
-                     </div>
-                     <div className="text-right flex items-center gap-6">
-                        <div className="hidden sm:block">
-                           <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest mb-1">{member.events} PROJECTS</p>
-                           <div className="h-1.5 w-20 bg-background rounded-full overflow-hidden border border-border shadow-inner">
-                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${member.score}%` }} />
-                           </div>
-                        </div>
-                        <div>
-                           <p className="text-sm font-black text-gold">{member.score}</p>
-                           <p className="text-[7px] font-black text-muted-foreground uppercase tracking-widest">SCORE</p>
-                        </div>
-                     </div>
-                  </div>
-                ))}
+              <div className="grid gap-4 py-4">
+                {clientProfiles.map((client) => {
+                  const clientTickets = tickets.filter(
+                    (t) => t.holder_email.toLowerCase() === client.email.toLowerCase()
+                  );
+                  return (
+                    <div
+                      key={client.id}
+                      className="p-5 bg-card border border-border hover:border-gold transition-all rounded-none flex items-center justify-between gap-4 shadow-sm"
+                    >
+                      <div className="space-y-1 min-w-0">
+                        <span className="px-2 py-0.5 bg-gold/10 border border-gold/30 text-gold text-[8px] font-black uppercase">
+                          Registered Client
+                        </span>
+                        <h4 className="text-sm font-black uppercase text-foreground truncate">{client.full_name || "Account Member"}</h4>
+                        <p className="text-[10px] text-muted-foreground font-mono">{client.email}</p>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-xs font-mono font-black text-gold block">{clientTickets.length} Ticket(s)</span>
+                        <span className="text-[9px] text-muted-foreground uppercase">Joined {new Date(client.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </GlassPanel>
         </div>
 
-        <div className="lg:col-span-4 space-y-6 animate-in fade-in slide-in-from-right-8 duration-1000">
-           <GlassPanel title="Administrative Access" subtitle="Secure privilege registry">
-              {loadingProfiles ? (
-                 <div className="py-12 flex items-center justify-center">
-                    <Loader2 size={24} className="text-gold animate-spin" />
-                 </div>
-              ) : (
-                <div className="space-y-4 py-2">
-                   {adminUsers.map((user) => (
-                     <div key={user.id} className="group flex items-center gap-4 p-4 rounded-2xl bg-muted/30 border border-border hover:border-blue-500/30 transition-all">
-                        <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shadow-inner shrink-0">
-                           <Shield size={18} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                           <h5 className="font-bold text-foreground text-[11px] uppercase tracking-tight truncate">{user.full_name || "PROVISIONED ADMIN"}</h5>
-                           <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest truncate">{user.email}</p>
-                        </div>
-                     </div>
-                   ))}
-                </div>
-              )}
-           </GlassPanel>
-
-           <div className="bg-[#121212] border border-white/10 p-8 rounded-[40px] space-y-6 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-4 opacity-5">
-                 <Fingerprint size={80} />
+        {/* Administrative Personnel Side */}
+        <div className="lg:col-span-4 space-y-6">
+          <GlassPanel title="Administrative Access" subtitle="Privileged admin force">
+            {loadingProfiles ? (
+              <div className="py-12 flex items-center justify-center">
+                <Loader2 size={24} className="text-gold animate-spin" />
               </div>
-              <div className="relative z-10 space-y-4">
-                 <h4 className="text-white font-black text-[10px] uppercase tracking-[0.2em]">Security Protocol</h4>
-                 <p className="text-gray-500 text-[10px] font-medium leading-relaxed uppercase tracking-widest leading-loose">
-                    All executive sessions are logged. Privilege escalation requires manual biometric verification and two-factor clearance.
-                 </p>
+            ) : (
+              <div className="space-y-4 py-2">
+                {adminUsers.map((u) => (
+                  <div key={u.id} className="p-4 bg-card border border-border hover:border-blue-500/40 transition-all rounded-none space-y-1">
+                    <div className="flex items-center gap-2 text-blue-500 font-black text-[9px] uppercase tracking-widest">
+                      <Shield size={12} /> Executive Administrator
+                    </div>
+                    <h5 className="font-black text-xs uppercase text-foreground">{u.full_name || "PROVISIONED ADMIN"}</h5>
+                    <p className="text-[10px] text-muted-foreground font-mono">{u.email}</p>
+                  </div>
+                ))}
               </div>
-           </div>
+            )}
+          </GlassPanel>
         </div>
       </div>
     </div>

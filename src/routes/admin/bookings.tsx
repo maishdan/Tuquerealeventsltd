@@ -4,6 +4,7 @@ import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
 import { TicketPassModal } from "@/components/dashboard/TicketPassModal";
 import { TicketScannerModal } from "@/components/dashboard/TicketScannerModal";
+import { InvoiceModal } from "@/components/dashboard/InvoiceModal";
 import {
   useAdminBookings,
   useUpdateBookingStatus,
@@ -14,7 +15,7 @@ import {
   formatKes
 } from "@/hooks/use-dashboard-data";
 import { parseAndVerifyMpesaSms } from "@/lib/api/payments";
-import type { BookingStatus, Ticket, TicketStatus, TicketTier } from "@/lib/database.types";
+import type { BookingStatus, Ticket, TicketStatus, TicketTier, Booking } from "@/lib/database.types";
 import {
   ClipboardList,
   Calendar,
@@ -42,7 +43,8 @@ import {
   Download,
   Share2,
   MessageSquare,
-  Cpu
+  Cpu,
+  Mail
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +64,10 @@ function AdminBookings() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [previewTicket, setPreviewTicket] = useState<Ticket | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Invoice Modal State for Pending Orders
+  const [invoiceBooking, setInvoiceBooking] = useState<Booking | null>(null);
+  const [isInvoiceOpen, setIsInvoiceOpen] = useState(false);
 
   // Admin AI SMS Verification Tool
   const [adminSmsText, setAdminSmsText] = useState("");
@@ -191,6 +197,11 @@ function AdminBookings() {
     }
   };
 
+  const openInvoiceForBooking = (b: Booking) => {
+    setInvoiceBooking(b);
+    setIsInvoiceOpen(true);
+  };
+
   const getWhatsAppLink = (ticket: Ticket) => {
     const text = encodeURIComponent(
       `Hello ${ticket.holder_name},\nYour digital ticket pass for *${ticket.event_name}* is ready!\n\nTicket Code: ${ticket.ticket_code}\nTier: ${ticket.ticket_tier}\nSeat: ${ticket.seat_number || "GA"}\n\nPlease present your QR code at entrance.`
@@ -270,7 +281,7 @@ function AdminBookings() {
               : "bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted"
           )}
         >
-          <ClipboardList size={16} /> Inbound Briefs
+          <ClipboardList size={16} /> Inbound Briefs & Invoices
           <span
             className={cn(
               "px-2 py-0.5 rounded-none text-[9px]",
@@ -306,7 +317,7 @@ function AdminBookings() {
       {activeTab === "briefs" ? (
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 animate-in fade-in slide-in-from-left-8 duration-700">
-            <GlassPanel title="Inbound Briefs" subtitle="Registry of all strategic project requests">
+            <GlassPanel title="Inbound Briefs & Unpaid Pending Orders" subtitle="Registry of all strategic project requests and pending customer invoices">
               {bookingsLoading ? (
                 <div className="py-24 flex flex-col items-center justify-center space-y-4">
                   <Loader2 size={40} className="text-gold animate-spin" />
@@ -377,7 +388,7 @@ function AdminBookings() {
                         </div>
                       </div>
 
-                      <div className="mt-6 flex items-center justify-between">
+                      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
                         <div className="flex items-center gap-4 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
                           <span className="flex items-center gap-1.5">
                             <Clock size={12} /> Received {new Date(b.created_at).toLocaleDateString()}
@@ -385,16 +396,28 @@ function AdminBookings() {
                           <span className="opacity-30">|</span>
                           <span>{b.email}</span>
                         </div>
-                        <button
-                          onClick={() => {
-                            autofillFromBooking(b.id);
-                            setActiveTab("tickets");
-                            setIsIssueModalOpen(true);
-                          }}
-                          className="h-10 px-5 rounded-none bg-foreground text-background text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gold hover:text-black transition-all cursor-pointer"
-                        >
-                          Issue Gate Pass <ArrowRight size={14} />
-                        </button>
+
+                        <div className="flex items-center gap-3">
+                          {b.status === "pending" && (
+                            <button
+                              onClick={() => openInvoiceForBooking(b)}
+                              className="h-10 px-4 rounded-none bg-amber-500/10 border border-amber-500/30 text-amber-500 text-[9px] font-black uppercase tracking-widest hover:bg-amber-500 hover:text-black transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Mail size={12} /> Send Official Invoice
+                            </button>
+                          )}
+
+                          <button
+                            onClick={() => {
+                              autofillFromBooking(b.id);
+                              setActiveTab("tickets");
+                              setIsIssueModalOpen(true);
+                            }}
+                            className="h-10 px-5 rounded-none bg-foreground text-background text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-gold hover:text-black transition-all cursor-pointer"
+                          >
+                            Issue Gate Pass <ArrowRight size={14} />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -599,7 +622,7 @@ function AdminBookings() {
                               }}
                               className="h-8 px-3 rounded-none bg-gold/10 border border-gold/20 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all cursor-pointer"
                             >
-                              PDF Pass
+                              Download PDF Pass
                             </button>
                           </div>
                         </td>
@@ -764,6 +787,16 @@ function AdminBookings() {
         onClose={() => {
           setIsPreviewOpen(false);
           setPreviewTicket(null);
+        }}
+      />
+
+      {/* OFFICIAL INVOICE MODAL FOR UNPAID PENDING ORDERS */}
+      <InvoiceModal
+        booking={invoiceBooking}
+        isOpen={isInvoiceOpen}
+        onClose={() => {
+          setIsInvoiceOpen(false);
+          setInvoiceBooking(null);
         }}
       />
     </div>
