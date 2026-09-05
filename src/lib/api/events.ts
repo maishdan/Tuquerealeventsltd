@@ -172,19 +172,38 @@ export async function createEvent(eventInput: Partial<EventRecord>): Promise<Eve
   inMemoryEvents = [newEvt, ...inMemoryEvents];
 
   try {
+    const { id: _omitId, created_at: _omitCreated, ...insertPayload } = newEvt;
     const { data, error } = await supabase
       .from("events")
-      .insert([newEvt])
+      .insert([insertPayload])
       .select()
       .single();
 
     if (error || !data) {
+      if (error) console.warn("[events] insert failed, kept locally:", error.message);
       return newEvt;
     }
+    inMemoryEvents = inMemoryEvents.filter((e) => e.id !== newEvt.id);
     return data as EventRecord;
   } catch {
     return newEvt;
   }
+}
+
+const POSTER_BUCKET = "event-posters";
+
+export async function uploadEventPoster(file: File): Promise<string> {
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const path = `events/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+  const { error } = await supabase.storage
+    .from(POSTER_BUCKET)
+    .upload(path, file, { cacheControl: "3600", upsert: false, contentType: file.type });
+
+  if (error) throw new Error(error.message);
+
+  const { data } = supabase.storage.from(POSTER_BUCKET).getPublicUrl(path);
+  return data.publicUrl;
 }
 
 export async function updateEvent(eventId: string, updates: Partial<EventRecord>): Promise<EventRecord> {
