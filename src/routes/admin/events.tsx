@@ -2,7 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
-import { useAdminEvents, useCreateEvent, formatKes } from "@/hooks/use-dashboard-data";
+import {
+  useAdminEvents,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
+  formatKes
+} from "@/hooks/use-dashboard-data";
 import {
   PartyPopper,
   Calendar,
@@ -22,7 +28,10 @@ import {
   ShieldCheck,
   Trash2,
   Tag,
-  Loader2
+  Loader2,
+  Edit,
+  Image as ImageIcon,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EventRecord, TicketClass, EventLifecycleState } from "@/lib/database.types";
@@ -31,14 +40,28 @@ export const Route = createFileRoute("/admin/events")({
   component: AdminEvents,
 });
 
+const defaultPosterPresets = [
+  "/back/e1.jfif",
+  "/back/e2.jfif",
+  "/back/e3.jfif",
+  "/back/e4.jfif",
+  "/back/e5.jfif",
+  "/back/e7.jpg",
+  "/back/e8.jpg",
+  "/back/e9.jpg",
+];
+
 export function AdminEvents() {
   const { data: events = [], isLoading } = useAdminEvents();
   const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
+  const deleteEventMutation = useDeleteEvent();
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventRecord | null>(null);
   const [filterState, setFilterState] = useState<string>("ALL");
 
-  // Wizard Form State
+  // Form State (Used for both Create and Edit)
   const [name, setName] = useState("");
   const [eventType, setEventType] = useState("Technology");
   const [description, setDescription] = useState("");
@@ -49,6 +72,7 @@ export function AdminEvents() {
   const [startTime, setStartTime] = useState("08:00 AM");
   const [endTime, setEndTime] = useState("06:00 PM");
   const [venue, setVenue] = useState("Kisii University Main Auditorium");
+  const [posterUrl, setPosterUrl] = useState("/back/e1.jfif");
   const [lifecycleState, setLifecycleState] = useState<EventLifecycleState>("PUBLISHED");
 
   // Ticket Classes Builder State
@@ -82,12 +106,77 @@ export function AdminEvents() {
     },
   ]);
 
+  const openCreateModal = () => {
+    setEditingEvent(null);
+    setName("");
+    setEventType("Technology");
+    setDescription("");
+    setOrganizerName("Royal Touch Events");
+    setEventDate("2026-09-20");
+    setStartTime("08:00 AM");
+    setEndTime("06:00 PM");
+    setVenue("Kisii University Main Auditorium");
+    setPosterUrl("/back/e1.jfif");
+    setLifecycleState("PUBLISHED");
+    setTicketClasses([
+      {
+        id: "tc-1",
+        name: "Regular",
+        description: "General admission ticket",
+        price: 500,
+        quantity_available: 500,
+        quantity_sold: 0,
+        benefits: ["General Entrance"],
+      },
+      {
+        id: "tc-2",
+        name: "VIP",
+        description: "VIP fast-track entrance & seating",
+        price: 1500,
+        quantity_available: 100,
+        quantity_sold: 0,
+        benefits: ["Priority Entrance", "VIP Seating"],
+      },
+    ]);
+    setIsCreateModalOpen(true);
+  };
+
+  const openEditModal = (evt: EventRecord) => {
+    setEditingEvent(evt);
+    setName(evt.name);
+    setEventType(evt.event_type || "General");
+    setDescription(evt.description || "");
+    setOrganizerName(evt.organizer_name || "Royal Touch Events");
+    setEventDate(evt.event_date || "2026-09-20");
+    setStartTime(evt.start_time || "08:00 AM");
+    setEndTime(evt.end_time || "06:00 PM");
+    setVenue(evt.venue || "Nairobi Venue");
+    setPosterUrl(evt.poster_url || "/back/e1.jfif");
+    setLifecycleState(evt.lifecycle_state || "PUBLISHED");
+    setTicketClasses(
+      evt.ticket_classes && evt.ticket_classes.length > 0
+        ? evt.ticket_classes
+        : [
+            {
+              id: "tc-1",
+              name: "Regular",
+              description: "General admission",
+              price: 500,
+              quantity_available: 500,
+              quantity_sold: 0,
+              benefits: ["General Entrance"],
+            },
+          ]
+    );
+    setIsCreateModalOpen(true);
+  };
+
   const addTicketClass = () => {
     setTicketClasses((prev) => [
       ...prev,
       {
         id: `tc-${Date.now()}`,
-        name: "New Ticket Class",
+        name: "New Class",
         description: "Custom pass description",
         price: 1000,
         quantity_available: 100,
@@ -115,35 +204,51 @@ export function AdminEvents() {
     );
   };
 
-  const handleCreateEventSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    createEventMutation.mutate(
-      {
-        name,
-        event_type: eventType,
-        description,
-        organizer_name: organizerName,
-        organizer_email: organizerEmail,
-        organizer_phone: organizerPhone,
-        event_date: eventDate,
-        start_time: startTime,
-        end_time: endTime,
-        venue,
-        lifecycle_state: lifecycleState,
-        ticket_classes: ticketClasses,
-        status: "upcoming",
-        budget: ticketClasses.reduce((acc, tc) => acc + tc.price * tc.quantity_available, 0),
-      },
-      {
+    const payload: Partial<EventRecord> = {
+      name,
+      event_type: eventType,
+      description,
+      organizer_name: organizerName,
+      organizer_email: organizerEmail,
+      organizer_phone: organizerPhone,
+      event_date: eventDate,
+      start_time: startTime,
+      end_time: endTime,
+      venue,
+      poster_url: posterUrl,
+      lifecycle_state: lifecycleState,
+      ticket_classes: ticketClasses,
+      status: "upcoming",
+      budget: ticketClasses.reduce((acc, tc) => acc + tc.price * tc.quantity_available, 0),
+    };
+
+    if (editingEvent) {
+      updateEventMutation.mutate(
+        { id: editingEvent.id, updates: payload },
+        {
+          onSuccess: () => {
+            setIsCreateModalOpen(false);
+            setEditingEvent(null);
+          },
+        }
+      );
+    } else {
+      createEventMutation.mutate(payload, {
         onSuccess: () => {
           setIsCreateModalOpen(false);
-          setName("");
-          setDescription("");
         },
-      }
-    );
+      });
+    }
+  };
+
+  const handleDeleteEvent = (evt: EventRecord) => {
+    if (confirm(`Are you sure you want to delete the event "${evt.name}"? This action cannot be undone.`)) {
+      deleteEventMutation.mutate(evt.id);
+    }
   };
 
   const filteredEvents = events.filter((e) => {
@@ -163,10 +268,10 @@ export function AdminEvents() {
         </div>
         <div className="flex flex-wrap items-center gap-4">
           <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="h-14 px-8 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] transition-all shadow-xl shadow-gold/20 cursor-pointer"
+            onClick={openCreateModal}
+            className="h-14 px-8 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
           >
-            <Plus size={16} /> Create Event & Classes
+            <Plus size={16} /> Add Event & Set Ticket Prices
           </button>
         </div>
       </div>
@@ -184,11 +289,11 @@ export function AdminEvents() {
         </div>
 
         <div className="bg-card border border-border p-6 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-emerald-400">
+          <div className="flex items-center justify-between text-emerald-500">
             <TicketIcon size={20} />
             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Ticket Classes</span>
           </div>
-          <p className="text-3xl font-black text-emerald-400 tracking-tight">
+          <p className="text-3xl font-black text-emerald-500 tracking-tight">
             {events.reduce((acc, e) => acc + (e.ticket_classes?.length || 0), 0)}
           </p>
         </div>
@@ -196,7 +301,7 @@ export function AdminEvents() {
         <div className="bg-card border border-border p-6 rounded-none space-y-2">
           <div className="flex items-center justify-between text-gold">
             <Wallet size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Est. Total Capacity</span>
+            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Total Capacity</span>
           </div>
           <p className="text-3xl font-black text-gold tracking-tight">
             {events.reduce(
@@ -210,7 +315,7 @@ export function AdminEvents() {
       </div>
 
       {/* Active Events List */}
-      <GlassPanel title="Event Registry & Ticket Pricing" subtitle="Configured event pages, ticket classes, and sales availability">
+      <GlassPanel title="Event Registry & Ticket Pricing" subtitle="Configured event pages, posters, ticket classes, and edit/delete controls">
         {/* Lifecycle Filter Bar */}
         <div className="flex items-center gap-2 py-4 border-b border-border overflow-x-auto">
           {["ALL", "PUBLISHED", "DRAFT", "COMPLETED"].map((st) => (
@@ -244,10 +349,23 @@ export function AdminEvents() {
             {filteredEvents.map((evt) => (
               <div
                 key={evt.id}
-                className="group relative overflow-hidden bg-card border border-border hover:border-gold p-8 rounded-none transition-all duration-300 space-y-6 shadow-md"
+                className="group relative overflow-hidden bg-card border border-border hover:border-gold p-6 sm:p-8 rounded-none transition-all duration-300 space-y-6 shadow-md"
               >
-                <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-                  <div className="space-y-3 flex-1">
+                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                  {/* Event Poster Image Preview */}
+                  <div className="w-full lg:w-48 h-48 bg-black/40 border border-border overflow-hidden shrink-0 relative">
+                    <img
+                      src={evt.poster_url || "/back/e1.jfif"}
+                      alt={evt.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                    />
+                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/80 text-gold text-[8px] font-black uppercase">
+                      {evt.event_type}
+                    </div>
+                  </div>
+
+                  {/* Main Event Details */}
+                  <div className="space-y-3 flex-1 min-w-0">
                     <div className="flex items-center gap-3">
                       <span className="px-3 py-1 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest">
                         {evt.event_type}
@@ -272,7 +390,7 @@ export function AdminEvents() {
                       {evt.description || "Executive production by Royal Touch Events."}
                     </p>
 
-                    <div className="flex flex-wrap gap-6 text-xs font-bold text-muted-foreground pt-2">
+                    <div className="flex flex-wrap gap-6 text-xs font-bold text-muted-foreground pt-1">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} className="text-gold" />
                         <span>{evt.event_date || "Date Confirmed"}</span>
@@ -288,12 +406,32 @@ export function AdminEvents() {
                     </div>
                   </div>
 
-                  <Link
-                    to="/booking"
-                    className="h-12 px-6 bg-gold text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md shrink-0 cursor-pointer"
-                  >
-                    View Public Page <ArrowRight size={14} />
-                  </Link>
+                  {/* Action Buttons: Edit, Delete, View */}
+                  <div className="flex flex-row lg:flex-col gap-3 shrink-0 justify-end">
+                    <button
+                      type="button"
+                      onClick={() => openEditModal(evt)}
+                      className="h-11 px-5 bg-gold text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer"
+                    >
+                      <Edit size={14} /> Edit Event & Prices
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteEvent(evt)}
+                      className="h-11 px-5 bg-rose-500/10 border border-rose-500/30 text-rose-500 font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
+                    >
+                      <Trash2 size={14} /> Delete Event
+                    </button>
+
+                    <Link
+                      to="/booking"
+                      search={{ eventId: evt.id }}
+                      className="h-11 px-5 border border-border text-foreground font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:border-gold transition-all cursor-pointer"
+                    >
+                      Public Booking <ArrowRight size={14} />
+                    </Link>
+                  </div>
                 </div>
 
                 {/* Configured Ticket Classes Table */}
@@ -321,7 +459,7 @@ export function AdminEvents() {
         )}
       </GlassPanel>
 
-      {/* CREATE EVENT & TICKET CLASSES WIZARD MODAL */}
+      {/* CREATE / EDIT EVENT & TICKET CLASSES MODAL */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-3xl bg-white dark:bg-[#0d121c] border border-gold/40 rounded-none p-8 space-y-8 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -332,7 +470,9 @@ export function AdminEvents() {
                 </div>
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Admin Creator</p>
-                  <h3 className="text-lg font-black uppercase tracking-tight text-foreground">Create Event & Ticket Classes</h3>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-foreground">
+                    {editingEvent ? "Edit Event & Ticket Prices" : "Create Event & Set Prices"}
+                  </h3>
                 </div>
               </div>
               <button
@@ -343,7 +483,7 @@ export function AdminEvents() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateEventSubmit} className="space-y-8">
+            <form onSubmit={handleFormSubmit} className="space-y-8">
               {/* SECTION A: BASIC INFO */}
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
@@ -396,10 +536,57 @@ export function AdminEvents() {
                 </div>
               </div>
 
-              {/* SECTION B: DATE, TIME & VENUE */}
+              {/* SECTION B: POSTER IMAGE SELECTOR / UPLOADER */}
               <div className="space-y-4">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
-                  SECTION B: DATE, TIME & VENUE COORDINATES
+                  SECTION B: EVENT POSTER & IMAGE BRANDING
+                </p>
+
+                <div className="space-y-3">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                    Choose Event Poster Preset Or Enter Custom Image URL
+                  </label>
+
+                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                    {defaultPosterPresets.map((imgSrc) => (
+                      <button
+                        key={imgSrc}
+                        type="button"
+                        onClick={() => setPosterUrl(imgSrc)}
+                        className={cn(
+                          "aspect-square border overflow-hidden relative cursor-pointer group",
+                          posterUrl === imgSrc ? "border-gold ring-2 ring-gold" : "border-border opacity-70 hover:opacity-100"
+                        )}
+                      >
+                        <img src={imgSrc} alt="Preset" className="w-full h-full object-cover" />
+                        {posterUrl === imgSrc && (
+                          <div className="absolute inset-0 bg-gold/30 flex items-center justify-center text-black font-black">
+                            <Check size={16} />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-2 pt-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
+                      Custom Image / Poster URL
+                    </label>
+                    <input
+                      type="text"
+                      value={posterUrl}
+                      onChange={(e) => setPosterUrl(e.target.value)}
+                      placeholder="Ex: /back/e1.jfif or https://images.unsplash.com/..."
+                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-mono font-bold text-foreground outline-none focus:border-gold"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION C: DATE, TIME & VENUE */}
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
+                  SECTION C: DATE, TIME & VENUE COORDINATES
                 </p>
 
                 <div className="grid sm:grid-cols-3 gap-4">
@@ -445,11 +632,11 @@ export function AdminEvents() {
                 </div>
               </div>
 
-              {/* SECTION C: TICKET CLASSES BUILDER */}
+              {/* SECTION D: TICKET CLASSES & PRICING BUILDER */}
               <div className="space-y-4">
                 <div className="flex justify-between items-center border-b border-border pb-2">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
-                    SECTION C: TICKET CLASSES & PRICING
+                    SECTION D: SET TICKET PRICES FOR DIFFERENT CLASSES
                   </p>
                   <button
                     type="button"
@@ -488,7 +675,7 @@ export function AdminEvents() {
                         </div>
 
                         <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Price (KES)</label>
+                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Ticket Price (KES)</label>
                           <input
                             type="number"
                             value={tc.price}
@@ -522,7 +709,7 @@ export function AdminEvents() {
                 </div>
               </div>
 
-              {/* SECTION D: PUBLISH CONTROLS */}
+              {/* SECTION E: PUBLISH CONTROLS */}
               <div className="p-6 bg-gold/10 border border-gold/40 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                   <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block mb-1">Event Status</label>
@@ -538,10 +725,16 @@ export function AdminEvents() {
 
                 <button
                   type="submit"
-                  disabled={createEventMutation.isPending}
+                  disabled={createEventMutation.isPending || updateEventMutation.isPending}
                   className="h-12 px-8 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer disabled:opacity-50"
                 >
-                  {createEventMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : "Publish Event & Ticket Classes"}
+                  {createEventMutation.isPending || updateEventMutation.isPending ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : editingEvent ? (
+                    "Save Event Changes & Ticket Prices"
+                  ) : (
+                    "Publish Event & Set Ticket Prices"
+                  )}
                 </button>
               </div>
             </form>

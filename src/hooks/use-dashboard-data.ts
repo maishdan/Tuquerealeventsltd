@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchAllBookings, fetchUserBookings, updateBookingStatus } from "@/lib/api/bookings";
 import { fetchContactInquiries, updateContactStatus } from "@/lib/api/contact";
 import type { ContactStatus } from "@/lib/database.types";
-import { fetchAllEvents, fetchUserEvents, createEvent } from "@/lib/api/events";
+import { fetchAllEvents, fetchUserEvents, createEvent, updateEvent, deleteEvent } from "@/lib/api/events";
 import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchTeamMembers } from "@/lib/api/team";
 import { fetchAllProfiles } from "@/lib/api/profiles";
@@ -36,6 +36,26 @@ export function useCreateEvent() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (eventInput: Partial<EventRecord>) => createEvent(eventInput),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "events"] });
+    },
+  });
+}
+
+export function useUpdateEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, updates }: { id: string; updates: Partial<EventRecord> }) => updateEvent(id, updates),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "events"] });
+    },
+  });
+}
+
+export function useDeleteEvent() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteEvent(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "events"] });
     },

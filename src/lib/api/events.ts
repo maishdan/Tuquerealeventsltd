@@ -158,7 +158,7 @@ export async function createEvent(eventInput: Partial<EventRecord>): Promise<Eve
     organizer_email: eventInput.organizer_email || "eventsroyaltouch7@gmail.com",
     organizer_phone: eventInput.organizer_phone || "+254795365334",
     start_time: eventInput.start_time || "08:00 AM",
-    end_time: eventInput.end_time || "05:00 PM",
+    end_time: eventInput.end_time || "06:00 PM",
     poster_url: eventInput.poster_url || "/back/e3.jfif",
     ticket_classes: eventInput.ticket_classes || [
       { id: `tc-${Date.now()}-1`, name: "Regular", description: "General admission", price: 500, quantity_available: 200, quantity_sold: 0, benefits: ["General Entry"] },
@@ -169,6 +169,8 @@ export async function createEvent(eventInput: Partial<EventRecord>): Promise<Eve
     created_at: new Date().toISOString(),
   };
 
+  inMemoryEvents = [newEvt, ...inMemoryEvents];
+
   try {
     const { data, error } = await supabase
       .from("events")
@@ -177,12 +179,51 @@ export async function createEvent(eventInput: Partial<EventRecord>): Promise<Eve
       .single();
 
     if (error || !data) {
-      inMemoryEvents = [newEvt, ...inMemoryEvents];
       return newEvt;
     }
     return data as EventRecord;
   } catch {
-    inMemoryEvents = [newEvt, ...inMemoryEvents];
     return newEvt;
+  }
+}
+
+export async function updateEvent(eventId: string, updates: Partial<EventRecord>): Promise<EventRecord> {
+  inMemoryEvents = inMemoryEvents.map((evt) => {
+    if (evt.id === eventId) {
+      return { ...evt, ...updates };
+    }
+    return evt;
+  });
+
+  try {
+    const { data, error } = await supabase
+      .from("events")
+      .update(updates)
+      .eq("id", eventId)
+      .select()
+      .single();
+
+    if (error || !data) {
+      return inMemoryEvents.find((e) => e.id === eventId)!;
+    }
+    return data as EventRecord;
+  } catch {
+    return inMemoryEvents.find((e) => e.id === eventId)!;
+  }
+}
+
+export async function deleteEvent(eventId: string): Promise<boolean> {
+  inMemoryEvents = inMemoryEvents.filter((evt) => evt.id !== eventId);
+
+  try {
+    const { error } = await supabase
+      .from("events")
+      .delete()
+      .eq("id", eventId);
+
+    if (error) return true;
+    return true;
+  } catch {
+    return true;
   }
 }
