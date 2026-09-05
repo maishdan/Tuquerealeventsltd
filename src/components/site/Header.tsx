@@ -51,12 +51,12 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
   // Check if current active path is inside Explore
   const isExploreActive = exploreNav.some(
-    (item) => pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`))
+    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`)
   );
 
   // Check if current active path is inside Booking & Events
   const isBookingEventsActive = bookingEventsNav.some(
-    (item) => pathname === item.to || (item.to !== "/" && pathname.startsWith(`${item.to}/`))
+    (item) => pathname === item.to || pathname.startsWith(`${item.to}/`)
   );
 
   // Click outside handlers

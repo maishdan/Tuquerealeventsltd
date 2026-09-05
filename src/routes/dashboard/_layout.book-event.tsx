@@ -120,8 +120,11 @@ function BookEvent() {
     setErrors({});
     setSubmitting(true);
     try {
+      const { eventType: bookedType, date: bookedDate, ...restBooking } = res.data;
       await createBooking({
-        ...res.data,
+        ...restBooking,
+        event_type: bookedType,
+        event_date: bookedDate,
         user_id: user?.id ?? null,
       });
       setSubmitted(true);
