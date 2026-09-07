@@ -59,6 +59,20 @@ export const adminSections: DashboardNavSection[] = [
       { key: "bookings", label: "Project Intake", icon: ClipboardList, to: "/admin/bookings" },
       { key: "orders", label: "Logistics Orders", icon: ShoppingCart, to: "/admin/orders" },
       { key: "contacts", label: "Comms Registry", icon: MessageSquare, to: "/admin/contacts" },
+      { key: "calendar", label: "Calendar", icon: Sparkles, to: "/admin/calendar" },
+      { key: "categories", label: "Categories", icon: Boxes, to: "/admin/categories" },
+      { key: "reminders", label: "Admin Reminders", icon: BellRing, to: "/admin/reminders" },
+      { key: "operations", label: "Operations", icon: Zap, to: "/admin/operations" },
+      { key: "command", label: "Command Center", icon: Command, to: "/admin/command" },
+      { key: "ai", label: "AI Studio", icon: Sparkles, to: "/admin/ai" },
+    ],
+  },
+  {
+    section: "People",
+    items: [
+      { key: "customers", label: "Customers", icon: UsersRound, to: "/admin/customers" },
+      { key: "team", label: "Internal Team", icon: Users, to: "/admin/team" },
+      { key: "users", label: "Users & Roles", icon: Fingerprint, to: "/admin/users" },
     ],
   },
   {
