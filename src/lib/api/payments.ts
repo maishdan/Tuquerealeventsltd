@@ -134,8 +134,8 @@ export async function initiateMpesaStkPush(input: InitiateMpesaInput): Promise<S
     checkout_request_id: checkoutRequestId,
     merchant_request_id: `MCH-${Date.now()}`,
     response_code: "0",
-    response_description: "Success. Request accepted for processing.",
-    customer_message: `Automated STK push pending. Please paste your M-Pesa SMS confirmation or transaction code below for instant verification.`,
+    response_description: "Success. Paybill details confirmed.",
+    customer_message: `Paybill 303030 Account 2053270290 confirmed. Please paste your M-Pesa SMS confirmation below for AI verification.`,
   };
 }
 
