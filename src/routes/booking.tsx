@@ -219,7 +219,7 @@ export function Booking() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
-                <ShieldCheck size={14} className="text-gold" /> 5-Screen Guest Checkout · Instant Free & Paid Gate Passes
+                <ShieldCheck size={14} className="text-gold" /> 5-Screen Guest Checkout · Instant M-Pesa PDF Pass
               </div>
             </div>
 
@@ -229,7 +229,7 @@ export function Booking() {
             </h1>
 
             <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
-              Select your event, pick your pass tier, complete payment or claim your free pass, and receive your PDF gate ticket automatically.
+              No account creation required. Select your event, pick your pass tier, complete M-Pesa payment, and receive your PDF gate ticket automatically.
             </p>
           </div>
         </div>
@@ -270,7 +270,7 @@ export function Booking() {
       {/* 3. CHECKOUT WIZARD BODY (SCREENS 1 TO 5) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-20 relative z-20">
         <div className="max-w-5xl mx-auto">
-          {/* SCREEN 1: BROWSE & CHOOSE EVENT */}
+          {/* SCREEN 1: BROWSE & CHOOSE EVENT (HORIZONTALLY ARRANGED ACROSS IN GRID WITH POSTER IMAGES) */}
           {currentStep === 1 && (
             <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
               <div className="space-y-2 border-b border-slate-200 dark:border-white/10 pb-4">
@@ -531,14 +531,14 @@ export function Booking() {
             </div>
           )}
 
-          {/* SCREEN 4: ORDER SUMMARY & PAY NOW (HANDLES FREE ENTRY VS PAID STK) */}
+          {/* SCREEN 4: ORDER SUMMARY & PAY NOW (LIPA NA M-PESA PAYBILL 303030 / ACC 2053270290) */}
           {currentStep === 4 && selectedEvent && selectedTicketClass && (
             <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 04 Of 05</p>
                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-                    Order Summary & Confirmation
+                    Order Summary & M-Pesa Payment
                   </h2>
                 </div>
                 <button
@@ -590,27 +590,36 @@ export function Booking() {
                   {issuingFreePass ? <Loader2 size={18} className="animate-spin" /> : <>Claim Free Ticket Pass <Gift size={18} /></>}
                 </button>
               ) : (
-                <>
-                  <div className="p-6 bg-slate-50 dark:bg-black/30 border border-gold/40 rounded-none flex flex-col items-center text-center space-y-3">
-                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Official PesaPal Gateway Embed</p>
-                    <div className="w-full flex justify-center py-1">
-                      <iframe
-                        width="200"
-                        height="40"
-                        src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/royaltouchevents"
-                        frameBorder="0"
-                        allowFullScreen
-                        title="PesaPal Store"
-                        className="border-0 overflow-hidden"
-                      />
+                /* OFFICIAL LIPA NA M-PESA PAYBILL CARD */
+                <div className="space-y-6">
+                  <div className="p-6 bg-emerald-500/10 border-2 border-emerald-500/40 rounded-none space-y-4">
+                    <div className="flex items-center justify-between border-b border-emerald-500/30 pb-2">
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-black text-xs uppercase tracking-widest">
+                        <Smartphone size={16} /> Lipa Na M-Pesa Paybill
+                      </div>
+                      <span className="px-2.5 py-0.5 bg-emerald-500 text-black font-black text-[9px] uppercase tracking-widest">
+                        Official Payment
+                      </span>
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="bg-white dark:bg-black/40 border border-emerald-500/30 p-3.5 flex flex-col justify-between">
+                        <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Paybill Number</span>
+                        <span className="font-mono text-2xl font-black text-emerald-500 mt-1">303030</span>
+                      </div>
+
+                      <div className="bg-white dark:bg-black/40 border border-emerald-500/30 p-3.5 flex flex-col justify-between">
+                        <span className="text-[8px] font-black uppercase text-muted-foreground tracking-widest">Account Number</span>
+                        <span className="font-mono text-2xl font-black text-gold mt-1">2053270290</span>
+                      </div>
                     </div>
                   </div>
 
                   <button
                     onClick={handleProceedToPayment}
-                    className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
+                    className="w-full h-16 bg-emerald-500 text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-emerald-400 transition-all shadow-xl cursor-pointer"
                   >
-                    <Smartphone size={20} /> Pay {formatKes(calculateTotal())} Via M-Pesa STK Prompt
+                    <Smartphone size={20} /> Proceed To Verify M-Pesa Payment ({formatKes(calculateTotal())})
                   </button>
                 </>
               )}
