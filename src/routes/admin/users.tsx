@@ -177,9 +177,14 @@ export function AdminUsers() {
                         <p className="text-[10px] text-slate-600 font-mono">{client.email}</p>
                       </div>
 
-                      <div className="text-right shrink-0">
+                      <div className="text-right shrink-0 space-y-2">
                         <span className="text-xs font-mono font-black text-amber-700 block">{clientTickets.length} Ticket(s)</span>
-                        <span className="text-[9px] text-slate-500 font-bold uppercase">Joined {new Date(client.created_at).toLocaleDateString()}</span>
+                        <span className="text-[9px] text-slate-500 font-bold uppercase block">Joined {new Date(client.created_at).toLocaleDateString()}</span>
+                        <RoleSwitch
+                          profile={client}
+                          pending={pendingId === client.id}
+                          onChange={(role) => changeRole(client, role)}
+                        />
                       </div>
                     </div>
                   );
@@ -205,6 +210,17 @@ export function AdminUsers() {
                     </div>
                     <h5 className="font-black text-xs uppercase text-slate-900">{u.full_name || "PROVISIONED ADMIN"}</h5>
                     <p className="text-[10px] text-slate-600 font-mono">{u.email}</p>
+                    <div className="pt-2">
+                      <RoleSwitch
+                        profile={u}
+                        disabled={u.id === user?.id}
+                        pending={pendingId === u.id}
+                        onChange={(role) => changeRole(u, role)}
+                      />
+                    </div>
+                    {u.id === user?.id && (
+                      <p className="text-[8px] font-bold uppercase tracking-widest text-slate-400">You cannot change your own access</p>
+                    )}
                   </div>
                 ))}
               </div>
