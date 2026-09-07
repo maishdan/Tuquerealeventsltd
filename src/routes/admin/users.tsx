@@ -117,6 +117,12 @@ export function AdminUsers() {
         </div>
       </div>
 
+      {roleError && (
+        <div className="p-4 bg-rose-50 border border-rose-300 text-rose-700 text-[10px] font-black uppercase tracking-widest">
+          {roleError}
+        </div>
+      )}
+
       {/* KPI Cards (Clean White SaaS Design) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-white border border-slate-200 p-6 rounded-none shadow-sm space-y-2">
