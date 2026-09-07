@@ -1,5 +1,5 @@
 import { supabase } from "../supabase";
-import type { Profile } from "../database.types";
+import type { Profile, UserRole } from "../database.types";
 
 export async function fetchProfile(userId: string) {
   const { data, error } = await supabase
@@ -16,6 +16,18 @@ export async function updateProfile(userId: string, updates: Partial<Pick<Profil
   const { data, error } = await supabase
     .from("profiles")
     .update(updates)
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data as Profile;
+}
+
+export async function updateUserRole(userId: string, role: UserRole) {
+  const { data, error } = await supabase
+    .from("profiles")
+    .update({ role })
     .eq("id", userId)
     .select()
     .single();

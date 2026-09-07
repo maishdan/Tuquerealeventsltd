@@ -5,7 +5,7 @@ import type { ContactStatus } from "@/lib/database.types";
 import { fetchAllEvents, fetchUserEvents, createEvent, updateEvent, deleteEvent } from "@/lib/api/events";
 import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchTeamMembers } from "@/lib/api/team";
-import { fetchAllProfiles } from "@/lib/api/profiles";
+import { fetchAllProfiles, updateUserRole } from "@/lib/api/profiles";
 import { fetchUserOrders } from "@/lib/api/orders";
 import { fetchUserFinancials } from "@/lib/api/financials";
 import {
@@ -68,6 +68,17 @@ export function useAdminTeam() {
 
 export function useAdminClients() {
   return useQuery({ queryKey: ["admin", "clients"], queryFn: fetchAllProfiles });
+}
+
+export function useUpdateUserRole() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: "admin" | "customer" }) =>
+      updateUserRole(userId, role),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "clients"] });
+    },
+  });
 }
 
 export function useAdminTickets() {
