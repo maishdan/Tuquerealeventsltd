@@ -15,8 +15,48 @@ import {
   Calendar,
   Ticket as TicketIcon
 } from "lucide-react";
-import { useAdminTeam, useAdminClients, useAdminTickets } from "@/hooks/use-dashboard-data";
+import { useAdminTeam, useAdminClients, useAdminTickets, useUpdateUserRole } from "@/hooks/use-dashboard-data";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import type { Profile, UserRole } from "@/lib/database.types";
+
+function RoleSwitch({
+  profile,
+  disabled,
+  pending,
+  onChange,
+}: {
+  profile: Profile;
+  disabled?: boolean;
+  pending?: boolean;
+  onChange: (role: UserRole) => void;
+}) {
+  const current: UserRole = profile.role === "admin" ? "admin" : "customer";
+  return (
+    <div className="flex items-center gap-2">
+      {pending && <Loader2 size={14} className="animate-spin text-amber-600" />}
+      {(["customer", "admin"] as UserRole[]).map((r) => (
+        <button
+          key={r}
+          type="button"
+          disabled={disabled || pending || current === r}
+          onClick={() => onChange(r)}
+          className={cn(
+            "px-3 py-1.5 border text-[9px] font-black uppercase tracking-widest rounded-none transition-all cursor-pointer disabled:cursor-not-allowed",
+            current === r
+              ? r === "admin"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-slate-900 text-white border-slate-900"
+              : "bg-white text-slate-600 border-slate-300 hover:border-gold hover:text-amber-700",
+            disabled && "opacity-40"
+          )}
+        >
+          {r === "admin" ? "Admin" : "Customer"}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 export const Route = createFileRoute("/admin/users")({
   component: AdminUsers,
