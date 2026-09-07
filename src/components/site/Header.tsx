@@ -257,7 +257,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
             {user ? (
               <Link
                 to={portalTo}
-                className="flex items-center gap-2 h-10 px-5 rounded-none border border-gold/50 bg-gold/10 text-gold hover:bg-gold hover:text-black transition-all duration-300 shadow-md shadow-gold/10"
+                className="flex items-center gap-2 h-10 px-5 rounded-none border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all duration-300 shadow-md shadow-emerald-500/10 font-black"
               >
                 <LayoutDashboard size={14} />
                 <span className="text-[10px] font-black uppercase tracking-widest">Portal</span>
@@ -265,7 +265,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
             ) : (
               <Link
                 to="/sign-in"
-                className="group flex items-center gap-2 h-10 px-5 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-300 shadow-md shadow-gold/10"
+                className="group flex items-center gap-2 h-10 px-5 rounded-none bg-emerald-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all duration-300 shadow-md shadow-emerald-500/20"
               >
                 <span>Get Started</span>
                 <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
