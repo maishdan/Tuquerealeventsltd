@@ -7,9 +7,9 @@ import {
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
-  uploadEventPoster,
   formatKes
 } from "@/hooks/use-dashboard-data";
+import { uploadEventPoster } from "@/lib/api/events";
 import {
   PartyPopper,
   Calendar,
