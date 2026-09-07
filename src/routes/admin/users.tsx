@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { GlassPanel } from "@/components/dashboard/GlassPanel";
 import {
   Shield,
@@ -66,6 +67,23 @@ export function AdminUsers() {
   const { data: team = [], isLoading: loadingTeam } = useAdminTeam();
   const { data: profiles = [], isLoading: loadingProfiles } = useAdminClients();
   const { data: tickets = [] } = useAdminTickets();
+  const { user } = useAuth();
+  const roleMutation = useUpdateUserRole();
+  const [roleError, setRoleError] = useState("");
+  const [pendingId, setPendingId] = useState<string | null>(null);
+
+  const changeRole = (profile: Profile, role: UserRole) => {
+    setRoleError("");
+    setPendingId(profile.id);
+    roleMutation.mutate(
+      { userId: profile.id, role },
+      {
+        onError: (err) =>
+          setRoleError(err instanceof Error ? err.message : "Could not update this person's access."),
+        onSettled: () => setPendingId(null),
+      }
+    );
+  };
 
   const staffMembers = team.map((m) => ({
     id: m.id,
