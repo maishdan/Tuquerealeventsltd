@@ -7,6 +7,7 @@ import {
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
+  uploadEventPoster,
   formatKes
 } from "@/hooks/use-dashboard-data";
 import {
@@ -31,10 +32,10 @@ import {
   Loader2,
   Edit,
   Image as ImageIcon,
-  Check
+  Check,
+  Gift
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { uploadEventPoster } from "@/lib/api/events";
 import type { EventRecord, TicketClass, EventLifecycleState } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/events")({
@@ -94,8 +95,14 @@ export function AdminEvents() {
     try {
       const url = await uploadEventPoster(file);
       setPosterUrl(url);
-    } catch (err) {
-      setPosterError(err instanceof Error ? err.message : "Upload failed.");
+    } catch {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        if (evt.target?.result) {
+          setPosterUrl(String(evt.target.result));
+        }
+      };
+      reader.readAsDataURL(file);
     } finally {
       setUploadingPoster(false);
     }
@@ -124,12 +131,12 @@ export function AdminEvents() {
     },
     {
       id: "tc-3",
-      name: "VVIP",
-      description: "Front-row seating, lounge access & refreshments",
-      price: 3000,
-      quantity_available: 30,
+      name: "Free Student Pass",
+      description: "Free student & public entry",
+      price: 0,
+      quantity_available: 200,
       quantity_sold: 0,
-      benefits: ["Front-Row Recliners", "Private VVIP Lounge", "Refreshments & Swag"],
+      benefits: ["Free General Entry", "Exhibition Access"],
     },
   ]);
 
@@ -163,6 +170,15 @@ export function AdminEvents() {
         quantity_available: 100,
         quantity_sold: 0,
         benefits: ["Priority Entrance", "VIP Seating"],
+      },
+      {
+        id: "tc-3",
+        name: "Free Admission Pass",
+        description: "Complimentary admission pass",
+        price: 0,
+        quantity_available: 100,
+        quantity_sold: 0,
+        benefits: ["Free General Entry"],
       },
     ]);
     setIsCreateModalOpen(true);
@@ -203,12 +219,27 @@ export function AdminEvents() {
       ...prev,
       {
         id: `tc-${Date.now()}`,
-        name: "New Class",
+        name: "Custom Class",
         description: "Custom pass description",
         price: 1000,
         quantity_available: 100,
         quantity_sold: 0,
         benefits: ["General Entrance"],
+      },
+    ]);
+  };
+
+  const addFreeTicketClass = () => {
+    setTicketClasses((prev) => [
+      ...prev,
+      {
+        id: `tc-free-${Date.now()}`,
+        name: "Free Entry Pass",
+        description: "Complimentary & free admission pass",
+        price: 0,
+        quantity_available: 200,
+        quantity_sold: 0,
+        benefits: ["Free General Entry", "Exhibition Access"],
       },
     ]);
   };
@@ -461,23 +492,31 @@ export function AdminEvents() {
                   </div>
                 </div>
 
-                {/* Configured Ticket Classes Table */}
+                {/* Configured Ticket Classes Table with Seats Available */}
                 <div className="pt-4 border-t border-border space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gold">Configured Ticket Classes & Pricing</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gold">Configured Ticket Classes & Seat Capacities</p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {(evt.ticket_classes || []).map((tc) => (
-                      <div key={tc.id} className="p-4 bg-muted/40 border border-border rounded-none space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="font-black text-xs uppercase tracking-widest text-foreground">{tc.name}</span>
-                          <span className="font-mono text-sm font-black text-gold">{formatKes(tc.price)}</span>
+                    {(evt.ticket_classes || []).map((tc) => {
+                      const availableSeats = Math.max(0, tc.quantity_available - tc.quantity_sold);
+                      const isFree = tc.price === 0;
+                      return (
+                        <div key={tc.id} className="p-4 bg-muted/40 border border-border rounded-none space-y-2">
+                          <div className="flex justify-between items-center">
+                            <span className="font-black text-xs uppercase tracking-widest text-foreground">{tc.name}</span>
+                            <span className="font-mono text-sm font-black text-gold">
+                              {isFree ? "FREE ENTRY" : formatKes(tc.price)}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-muted-foreground">{tc.description}</p>
+                          <div className="text-[9px] text-muted-foreground font-mono flex justify-between pt-1 border-t border-border/50">
+                            <span>Available: {availableSeats} / {tc.quantity_available}</span>
+                            <span className={cn("font-bold", availableSeats === 0 ? "text-rose-500" : "text-emerald-500")}>
+                              {availableSeats === 0 ? "SOLD OUT" : "SEATS READY"}
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-muted-foreground">{tc.description}</p>
-                        <div className="text-[9px] text-muted-foreground font-mono flex justify-between pt-1 border-t border-border/50">
-                          <span>Capacity: {tc.quantity_available}</span>
-                          <span>Sold: {tc.quantity_sold}</span>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               </div>
@@ -604,7 +643,6 @@ export function AdminEvents() {
                     Or Choose Event Poster Preset / Custom Image URL
                   </label>
 
-
                   <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
                     {defaultPosterPresets.map((imgSrc) => (
                       <button
@@ -692,24 +730,40 @@ export function AdminEvents() {
 
               {/* SECTION D: TICKET CLASSES & PRICING BUILDER */}
               <div className="space-y-4">
-                <div className="flex justify-between items-center border-b border-border pb-2">
+                <div className="flex flex-wrap justify-between items-center gap-2 border-b border-border pb-2">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
-                    SECTION D: SET TICKET PRICES FOR DIFFERENT CLASSES
+                    SECTION D: SET TICKET PRICES & FREE ENTRY OPTIONS
                   </p>
-                  <button
-                    type="button"
-                    onClick={addTicketClass}
-                    className="px-3 py-1.5 bg-gold/10 border border-gold/40 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all cursor-pointer"
-                  >
-                    + Add Ticket Class
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={addFreeTicketClass}
+                      className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-500 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <Gift size={12} /> + Add Free Ticket Class
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addTicketClass}
+                      className="px-3 py-1.5 bg-gold/10 border border-gold/40 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all cursor-pointer"
+                    >
+                      + Add Paid Class
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-4">
                   {ticketClasses.map((tc, idx) => (
                     <div key={tc.id} className="p-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-none space-y-3 relative">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gold">Class #{idx + 1}</span>
+                        <span className="text-[9px] font-black uppercase tracking-widest text-gold flex items-center gap-2">
+                          Class #{idx + 1}
+                          {tc.price === 0 && (
+                            <span className="px-2 py-0.5 bg-emerald-500 text-black font-black text-[8px]">
+                              FREE ADMISSION
+                            </span>
+                          )}
+                        </span>
                         {ticketClasses.length > 1 && (
                           <button
                             type="button"
@@ -733,7 +787,7 @@ export function AdminEvents() {
                         </div>
 
                         <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Ticket Price (KES)</label>
+                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Price (KES) (Set 0 For Free)</label>
                           <input
                             type="number"
                             value={tc.price}
@@ -743,7 +797,7 @@ export function AdminEvents() {
                         </div>
 
                         <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Total Quantity</label>
+                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Total Quantity / Capacity</label>
                           <input
                             type="number"
                             value={tc.quantity_available}

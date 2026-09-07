@@ -15,7 +15,8 @@ import {
   Ticket as TicketIcon,
   CheckCircle2,
   Users,
-  Clock
+  Clock,
+  Tag
 } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { fetchAllEvents } from "@/lib/api/events";
@@ -164,7 +165,7 @@ export function EventsPage() {
         </div>
       </section>
 
-      {/* 3. EVENT REGISTRY CARDS WITH TICKET CLASSES */}
+      {/* 3. EVENT REGISTRY CARDS (ARRANGED HORIZONTALLY ACROSS IN A GRID ROW WITH EVENT IMAGES) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-20">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-4 border-b border-slate-200 dark:border-white/10 pb-6">
           <div>
@@ -186,7 +187,7 @@ export function EventsPage() {
             <p className="text-sm font-bold uppercase tracking-tight text-foreground">No matching events found in registry.</p>
           </div>
         ) : (
-          <div className="grid gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredEvents.map((e) => {
               const isFav = isFavorite(e.id);
               const classes: TicketClass[] = e.ticket_classes || [
@@ -197,88 +198,86 @@ export function EventsPage() {
               return (
                 <div
                   key={e.id}
-                  className="group relative overflow-hidden bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 hover:border-gold transition-all duration-300 p-8 sm:p-10 rounded-none shadow-md space-y-6"
+                  className="group relative bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 hover:border-gold transition-all duration-300 rounded-none overflow-hidden shadow-md flex flex-col justify-between"
                 >
-                  <div className="relative z-10 flex flex-col lg:flex-row lg:items-start justify-between gap-8">
-                    <div className="space-y-4 flex-1">
-                      <div className="flex items-center gap-3">
-                        <span className="px-3 py-1 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest">
-                          {e.event_type || "Public Event"}
-                        </span>
-                        {e.organizer_name && (
-                          <span className="text-[10px] text-muted-foreground font-mono">By {e.organizer_name}</span>
-                        )}
-                      </div>
+                  {/* Event Poster Image Frame */}
+                  <div className="relative aspect-[16/10] overflow-hidden bg-slate-200 dark:bg-black/40">
+                    <img
+                      src={e.poster_url || "/back/e1.jfif"}
+                      alt={e.name}
+                      className="h-full w-full object-cover group-hover:scale-110 transition-all duration-700"
+                    />
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-black/80 text-gold font-black text-[9px] uppercase tracking-widest border border-gold/40 shadow-md">
+                      {e.event_type || "Public Event"}
+                    </div>
 
-                      <h3 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white group-hover:text-gold transition-colors">
+                    {/* Bookmark Star Button */}
+                    <button
+                      onClick={() =>
+                        toggleFavorite({
+                          id: e.id,
+                          title: e.name,
+                          category: e.event_type || "Public Event",
+                          link: "/events",
+                          date: e.event_date || "TBD",
+                          image: e.poster_url || "/back/e1.jfif",
+                        })
+                      }
+                      className={cn(
+                        "absolute top-4 right-4 h-10 w-10 border rounded-none flex items-center justify-center transition-all duration-300 shadow-md cursor-pointer",
+                        isFav
+                          ? "bg-gold text-black border-gold"
+                          : "bg-black/70 border-white/20 text-white hover:border-gold hover:text-gold"
+                      )}
+                      title={isFav ? "Remove from Favorites" : "Add to Favorites"}
+                    >
+                      <Star size={16} className={cn(isFav && "fill-black")} />
+                    </button>
+                  </div>
+
+                  {/* Card Content Body */}
+                  <div className="p-6 sm:p-8 space-y-5 flex-1 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <h3 className="text-xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white group-hover:text-gold transition-colors leading-snug">
                         {e.name}
                       </h3>
 
-                      <p className="text-xs text-slate-600 dark:text-gray-300 font-medium leading-relaxed max-w-3xl">
+                      <p className="text-xs text-slate-600 dark:text-gray-300 font-medium leading-relaxed line-clamp-2">
                         {e.description || "High-profile engagement curated by Royal Touch Events."}
                       </p>
 
-                      <div className="flex flex-wrap gap-6 text-xs font-bold text-slate-600 dark:text-gray-400">
+                      <div className="space-y-1.5 pt-2 text-xs font-bold text-slate-600 dark:text-gray-400">
                         <div className="flex items-center gap-2">
-                          <Calendar size={14} className="text-gold" />
+                          <Calendar size={13} className="text-gold shrink-0" />
                           <span>{e.event_date || "Date Confirmed"}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Clock size={14} className="text-gold" />
-                          <span>{e.start_time || "08:00 AM"} - {e.end_time || "06:00 PM"}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin size={14} className="text-gold" />
-                          <span>{e.venue || "Nairobi Venue"}</span>
+                          <MapPin size={13} className="text-gold shrink-0" />
+                          <span className="truncate">{e.venue || "Nairobi Venue"}</span>
                         </div>
                       </div>
 
                       {/* Ticket Classes Options Summary */}
-                      <div className="pt-4 border-t border-slate-100 dark:border-white/5 space-y-2">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-gold">Available Ticket Classes</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-1.5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-gold">Available Pass Classes</p>
+                        <div className="flex flex-wrap gap-2">
                           {classes.map((tc) => (
-                            <div key={tc.id} className="p-3 bg-slate-50 dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-none space-y-1">
-                              <div className="flex justify-between items-center text-xs">
-                                <span className="font-black uppercase tracking-wider text-foreground">{tc.name}</span>
-                                <span className="font-mono font-black text-gold">{formatKes(tc.price)}</span>
-                              </div>
-                              <p className="text-[10px] text-muted-foreground line-clamp-1">{tc.description}</p>
-                            </div>
+                            <span key={tc.id} className="px-2.5 py-1 bg-slate-100 dark:bg-black/30 border border-slate-200 dark:border-white/10 text-[9px] font-bold text-foreground">
+                              {tc.name}: <span className="text-gold font-mono font-black">{formatKes(tc.price)}</span>
+                            </span>
                           ))}
                         </div>
                       </div>
                     </div>
 
-                    {/* Action Controls */}
-                    <div className="flex flex-col items-end gap-4 shrink-0">
-                      <button
-                        onClick={() =>
-                          toggleFavorite({
-                            id: e.id,
-                            title: e.name,
-                            category: e.event_type || "Public Event",
-                            link: "/events",
-                            date: e.event_date || "TBD",
-                          })
-                        }
-                        className={cn(
-                          "h-12 w-12 rounded-none border flex items-center justify-center transition-all duration-300 cursor-pointer self-end",
-                          isFav
-                            ? "bg-gold text-black border-gold shadow-md"
-                            : "border-slate-300 dark:border-white/10 text-muted-foreground hover:text-gold hover:border-gold"
-                        )}
-                        title={isFav ? "Remove from Favorites" : "Add to Favorites"}
-                      >
-                        <Star size={18} className={cn(isFav && "fill-black")} />
-                      </button>
-
+                    {/* Book Action Button */}
+                    <div className="pt-4">
                       <Link
                         to="/booking"
                         search={{ eventId: e.id }}
-                        className="h-14 px-8 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer"
+                        className="h-12 w-full bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer"
                       >
-                        Book Ticket Pass <ArrowRight size={16} />
+                        Book Ticket Pass <ArrowRight size={14} />
                       </Link>
                     </div>
                   </div>

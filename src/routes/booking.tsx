@@ -25,11 +25,15 @@ import {
   Printer,
   ChevronLeft,
   Minus,
-  Plus
+  Plus,
+  AlertCircle,
+  XCircle,
+  Gift
 } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { createBooking } from "@/lib/api/bookings";
 import { fetchAllEvents } from "@/lib/api/events";
+import { issueTicket } from "@/lib/api/tickets";
 import { SeatPicker } from "@/components/booking/SeatPicker";
 import { MpesaPaymentModal } from "@/components/booking/MpesaPaymentModal";
 import { TicketPassModal } from "@/components/dashboard/TicketPassModal";
@@ -44,7 +48,7 @@ export const Route = createFileRoute("/booking")({
     createPageSeo({
       title: "Guest Checkout & Gate Passes | Royal Touch Events Nairobi",
       description:
-        "5-Screen guest ticket checkout. Select event, choose Regular/VIP/VVIP ticket class, pay via M-Pesa STK, and receive your digital PDF ticket instantly.",
+        "5-Screen guest ticket checkout. Select event, choose Regular/VIP/VVIP or Free Ticket class, pay via M-Pesa STK, and receive your digital PDF ticket instantly.",
       path: "/booking",
       keywords: "book event Nairobi, M-Pesa event tickets Kenya, guest ticket checkout, QR ticket PDF",
     }),
@@ -87,6 +91,7 @@ export function Booking() {
   const [mpesaPayload, setMpesaPayload] = useState<InitiateMpesaInput | null>(null);
   const [generatedTicket, setGeneratedTicket] = useState<Ticket | null>(null);
   const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+  const [issuingFreePass, setIssuingFreePass] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -132,16 +137,46 @@ export function Booking() {
   };
 
   const calculateTotal = () => {
-    return (selectedTicketClass?.price || 500) * quantity;
+    return (selectedTicketClass?.price || 0) * quantity;
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (!selectedEvent || !selectedTicketClass) return;
 
+    const totalAmount = calculateTotal();
+
+    // IF TICKET CLASS IS FREE (Price = 0) -> GENERATE TICKET DIRECTLY WITHOUT PAYMENT PROMPT!
+    if (totalAmount === 0 || selectedTicketClass.price === 0) {
+      setIssuingFreePass(true);
+      try {
+        const freeTicket = await issueTicket({
+          user_id: user?.id ?? null,
+          booking_id: `bk-free-${Date.now()}`,
+          event_name: selectedEvent.name,
+          holder_name: fullName || "Guest Attendee",
+          holder_email: email || "guest@royaltouch.com",
+          ticket_tier: selectedTicketClass.name as any,
+          price: 0,
+          seat_number: selectedSeat || "GA",
+          event_date: selectedEvent.event_date,
+          venue: selectedEvent.venue,
+        });
+
+        setGeneratedTicket(freeTicket);
+        setCurrentStep(5);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIssuingFreePass(false);
+      }
+      return;
+    }
+
+    // Paid Ticket Flow via M-Pesa
     const payload: InitiateMpesaInput = {
       booking_id: `bk-guest-${Date.now()}`,
       phone_number: phone,
-      amount: calculateTotal(),
+      amount: totalAmount,
       event_name: selectedEvent.name,
       holder_name: fullName || "Guest Attendee",
       holder_email: email || "guest@royaltouch.com",
@@ -184,7 +219,7 @@ export function Booking() {
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="flex justify-center">
               <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
-                <ShieldCheck size={14} className="text-gold" /> 5-Screen Guest Checkout · Instant M-Pesa PDF Pass
+                <ShieldCheck size={14} className="text-gold" /> 5-Screen Guest Checkout · Instant Free & Paid Gate Passes
               </div>
             </div>
 
@@ -194,7 +229,7 @@ export function Booking() {
             </h1>
 
             <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
-              No account creation required. Select your event, pick your pass tier, complete M-Pesa payment, and receive your PDF gate ticket automatically.
+              Select your event, pick your pass tier, complete payment or claim your free pass, and receive your PDF gate ticket automatically.
             </p>
           </div>
         </div>
@@ -234,7 +269,7 @@ export function Booking() {
 
       {/* 3. CHECKOUT WIZARD BODY (SCREENS 1 TO 5) */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 py-20 relative z-20">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           {/* SCREEN 1: BROWSE & CHOOSE EVENT */}
           {currentStep === 1 && (
             <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
@@ -251,34 +286,44 @@ export function Booking() {
                   <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Loading Registry...</p>
                 </div>
               ) : (
-                <div className="grid gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                   {events.map((evt) => (
                     <div
                       key={evt.id}
-                      className="group p-6 sm:p-8 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 hover:border-gold transition-all rounded-none space-y-4 shadow-sm"
+                      className="group bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 hover:border-gold transition-all rounded-none overflow-hidden shadow-sm flex flex-col justify-between"
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-2 flex-1">
-                          <span className="px-3 py-1 bg-gold/10 text-gold font-black text-[9px] uppercase tracking-widest border border-gold/30">
-                            {evt.event_type}
-                          </span>
-                          <h3 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-foreground group-hover:text-gold transition-colors">
+                      {/* Event Poster Image */}
+                      <div className="relative aspect-[16/10] overflow-hidden bg-black/40">
+                        <img
+                          src={evt.poster_url || "/back/e1.jfif"}
+                          alt={evt.name}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                        />
+                        <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-black/80 text-gold font-black text-[8px] uppercase border border-gold/30">
+                          {evt.event_type}
+                        </div>
+                      </div>
+
+                      <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                        <div className="space-y-2">
+                          <h3 className="text-lg font-black uppercase tracking-tight text-foreground group-hover:text-gold transition-colors leading-snug">
                             {evt.name}
                           </h3>
-                          <p className="text-xs text-slate-600 dark:text-gray-400 font-medium leading-relaxed">
+                          <p className="text-xs text-slate-600 dark:text-gray-400 font-medium leading-relaxed line-clamp-2">
                             {evt.description || "Executive production by Royal Touch Events."}
                           </p>
-                          <div className="flex flex-wrap gap-4 text-xs font-bold text-muted-foreground pt-1">
-                            <span className="flex items-center gap-1.5"><Calendar size={13} className="text-gold" /> {evt.event_date || "Date Confirmed"}</span>
-                            <span className="flex items-center gap-1.5"><MapPin size={13} className="text-gold" /> {evt.venue || "Nairobi Venue"}</span>
+                          <div className="space-y-1 text-xs font-bold text-muted-foreground pt-1">
+                            <p className="flex items-center gap-1.5"><Calendar size={13} className="text-gold shrink-0" /> {evt.event_date || "Date Confirmed"}</p>
+                            <p className="flex items-center gap-1.5"><MapPin size={13} className="text-gold shrink-0" /> <span className="truncate">{evt.venue || "Nairobi Venue"}</span></p>
                           </div>
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => handleSelectEvent(evt)}
-                          className="h-12 px-8 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md shrink-0 cursor-pointer"
+                          className="h-12 w-full bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer"
                         >
-                          Book Event <ArrowRight size={14} />
+                          Book Event Pass <ArrowRight size={14} />
                         </button>
                       </div>
                     </div>
@@ -288,14 +333,14 @@ export function Booking() {
             </div>
           )}
 
-          {/* SCREEN 2: CHOOSE TICKET CLASS & QUANTITY */}
+          {/* SCREEN 2: CHOOSE TICKET CLASS & QUANTITY (SHOWS AVAILABLE SEATS / SOLD OUT / FREE ENTRY) */}
           {currentStep === 2 && selectedEvent && (
             <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 02 Of 05</p>
                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-                    Choose Pass Class & Quantity
+                    Choose Pass Class & Seat Availability
                   </h2>
                 </div>
                 <button
@@ -310,30 +355,60 @@ export function Booking() {
                 Selected: {selectedEvent.name} ({selectedEvent.event_date})
               </div>
 
-              {/* Ticket Classes Options */}
+              {/* Ticket Classes Options with Seats Available & Free Admission */}
               <div className="grid gap-4">
                 {(selectedEvent.ticket_classes || [
-                  { id: "c1", name: "Regular", description: "General admission", price: 500, quantity_available: 500, quantity_sold: 0, benefits: ["General Entrance"] },
-                  { id: "c2", name: "VIP", description: "Priority VIP admission", price: 1500, quantity_available: 100, quantity_sold: 0, benefits: ["Priority Fast-Track Entrance", "VIP Reserved Seating"] },
-                  { id: "c3", name: "VVIP", description: "Front-row seating & VVIP lounge", price: 3000, quantity_available: 30, quantity_sold: 0, benefits: ["Front-Row Recliner Seating", "Private VVIP Lounge", "Refreshments & Swag"] },
+                  { id: "c1", name: "Regular", description: "General admission", price: 500, quantity_available: 500, quantity_sold: 140, benefits: ["General Entrance"] },
+                  { id: "c2", name: "VIP", description: "Priority VIP admission", price: 1500, quantity_available: 100, quantity_sold: 45, benefits: ["Priority Fast-Track Entrance", "VIP Reserved Seating"] },
+                  { id: "c3", name: "Free Admission Pass", description: "Free student & public entry", price: 0, quantity_available: 200, quantity_sold: 50, benefits: ["Free General Entry", "Exhibition Floor"] },
                 ]).map((tc) => {
                   const isSelected = selectedTicketClass?.id === tc.id || selectedTicketClass?.name === tc.name;
+                  const availableSeats = Math.max(0, tc.quantity_available - tc.quantity_sold);
+                  const isSoldOut = availableSeats <= 0;
+                  const isFree = tc.price === 0;
+
                   return (
                     <div
                       key={tc.id}
-                      onClick={() => setSelectedTicketClass(tc)}
+                      onClick={() => {
+                        if (!isSoldOut) setSelectedTicketClass(tc);
+                      }}
                       className={cn(
-                        "p-6 border rounded-none space-y-4 cursor-pointer transition-all",
-                        isSelected
-                          ? "bg-gold/10 border-gold ring-1 ring-gold shadow-md"
-                          : "bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 hover:border-gold"
+                        "p-6 border rounded-none space-y-4 transition-all relative",
+                        isSoldOut
+                          ? "bg-slate-100 dark:bg-white/5 border-slate-300 dark:border-white/10 opacity-60 cursor-not-allowed"
+                          : isSelected
+                          ? "bg-gold/10 border-gold ring-1 ring-gold shadow-md cursor-pointer"
+                          : "bg-slate-50 dark:bg-black/20 border-slate-200 dark:border-white/10 hover:border-gold cursor-pointer"
                       )}
                     >
-                      <div className="flex justify-between items-center">
-                        <span className="font-black text-lg uppercase tracking-wider text-foreground">{tc.name}</span>
-                        <span className="font-mono text-xl font-black text-gold">{formatKes(tc.price)}</span>
+                      <div className="flex flex-wrap justify-between items-center gap-2">
+                        <div className="flex items-center gap-3">
+                          <span className="font-black text-lg uppercase tracking-wider text-foreground">{tc.name}</span>
+                          {isFree && (
+                            <span className="px-2.5 py-0.5 bg-emerald-500 text-black font-black text-[9px] uppercase tracking-widest">
+                              FREE ENTRY
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="text-right">
+                          <span className="font-mono text-xl font-black text-gold block">
+                            {isFree ? "FREE" : formatKes(tc.price)}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-[9px] font-black uppercase tracking-widest font-mono block",
+                              isSoldOut ? "text-rose-500" : availableSeats < 10 ? "text-amber-500" : "text-emerald-500"
+                            )}
+                          >
+                            {isSoldOut ? "● ALL SEATS OCCUPIED / SOLD OUT" : `● ${availableSeats} Available Seats`}
+                          </span>
+                        </div>
                       </div>
+
                       <p className="text-xs text-muted-foreground">{tc.description}</p>
+
                       <ul className="grid sm:grid-cols-2 gap-2 text-xs font-bold text-slate-600 dark:text-gray-300">
                         {tc.benefits.map((b, bIdx) => (
                           <li key={bIdx} className="flex items-center gap-2">
@@ -374,9 +449,10 @@ export function Booking() {
 
               <button
                 onClick={() => setCurrentStep(3)}
-                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl cursor-pointer"
+                disabled={!selectedTicketClass || (selectedTicketClass.quantity_available - selectedTicketClass.quantity_sold <= 0)}
+                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl cursor-pointer disabled:opacity-50"
               >
-                Continue To Details ({formatKes(calculateTotal())}) <ArrowRight size={18} />
+                Continue To Details ({selectedTicketClass?.price === 0 ? "FREE ENTRY" : formatKes(calculateTotal())}) <ArrowRight size={18} />
               </button>
             </div>
           )}
@@ -455,14 +531,14 @@ export function Booking() {
             </div>
           )}
 
-          {/* SCREEN 4: ORDER SUMMARY & PAY NOW (STICKY PESAPAL & M-PESA STK) */}
+          {/* SCREEN 4: ORDER SUMMARY & PAY NOW (HANDLES FREE ENTRY VS PAID STK) */}
           {currentStep === 4 && selectedEvent && selectedTicketClass && (
             <div className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-12 rounded-none shadow-xl space-y-8 animate-in fade-in duration-300">
               <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
                 <div className="space-y-1">
                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Step 04 Of 05</p>
                   <h2 className="text-2xl sm:text-4xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-                    Order Summary & Sticky Payment
+                    Order Summary & Confirmation
                   </h2>
                 </div>
                 <button
@@ -492,10 +568,6 @@ export function Booking() {
                     <span className="text-foreground">{email}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">M-Pesa Phone:</span>
-                    <span className="text-foreground">{phone}</span>
-                  </div>
-                  <div className="flex justify-between">
                     <span className="text-muted-foreground">Pass Class:</span>
                     <span className="text-gold font-black">{selectedTicketClass.name} × {quantity}</span>
                   </div>
@@ -503,35 +575,45 @@ export function Booking() {
 
                 <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex justify-between items-center text-lg font-black">
                   <span className="uppercase tracking-widest text-foreground">Total Checkout Amount:</span>
-                  <span className="font-mono text-2xl text-gold">{formatKes(calculateTotal())}</span>
+                  <span className="font-mono text-2xl text-gold">
+                    {selectedTicketClass.price === 0 ? "FREE ENTRY / KSh 0" : formatKes(calculateTotal())}
+                  </span>
                 </div>
               </div>
 
-              {/* STICKY PESAPAL EMBED FRAME */}
-              <div className="p-6 bg-slate-50 dark:bg-black/30 border border-gold/40 rounded-none flex flex-col items-center text-center space-y-3">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Official PesaPal Gateway Embed</p>
-                <div className="w-full flex justify-center py-1">
-                  <iframe
-                    width="200"
-                    height="40"
-                    src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/royaltouchevents"
-                    frameBorder="0"
-                    allowFullScreen
-                    title="PesaPal Store"
-                    className="border-0 overflow-hidden"
-                  />
-                </div>
-                <p className="text-[9px] text-muted-foreground font-medium">
-                  Select payment method above without leaving this page. Details & amount are pre-filled automatically.
-                </p>
-              </div>
+              {selectedTicketClass.price === 0 ? (
+                <button
+                  onClick={handleProceedToPayment}
+                  disabled={issuingFreePass}
+                  className="w-full h-16 bg-emerald-500 text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-emerald-400 transition-all shadow-xl cursor-pointer disabled:opacity-50"
+                >
+                  {issuingFreePass ? <Loader2 size={18} className="animate-spin" /> : <>Claim Free Ticket Pass <Gift size={18} /></>}
+                </button>
+              ) : (
+                <>
+                  <div className="p-6 bg-slate-50 dark:bg-black/30 border border-gold/40 rounded-none flex flex-col items-center text-center space-y-3">
+                    <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Official PesaPal Gateway Embed</p>
+                    <div className="w-full flex justify-center py-1">
+                      <iframe
+                        width="200"
+                        height="40"
+                        src="https://store.pesapal.com/embed-code?pageUrl=https://store.pesapal.com/royaltouchevents"
+                        frameBorder="0"
+                        allowFullScreen
+                        title="PesaPal Store"
+                        className="border-0 overflow-hidden"
+                      />
+                    </div>
+                  </div>
 
-              <button
-                onClick={handleProceedToPayment}
-                className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
-              >
-                <Smartphone size={20} /> Pay {formatKes(calculateTotal())} Via M-Pesa STK Prompt
-              </button>
+                  <button
+                    onClick={handleProceedToPayment}
+                    className="w-full h-16 bg-gold text-black font-black text-xs uppercase tracking-[0.2em] rounded-none flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
+                  >
+                    <Smartphone size={20} /> Pay {formatKes(calculateTotal())} Via M-Pesa STK Prompt
+                  </button>
+                </>
+              )}
             </div>
           )}
 
@@ -547,7 +629,7 @@ export function Booking() {
                   Step 05 Of 05 · Ticket Issued
                 </span>
                 <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-                  Payment Confirmed!
+                  {generatedTicket.price === 0 ? "Free Pass Confirmed!" : "Payment Confirmed!"}
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600 dark:text-gray-300 font-medium max-w-md mx-auto leading-relaxed">
                   Your ticket <span className="font-mono text-gold font-bold">{generatedTicket.ticket_code}</span> has been generated and sent to <span className="text-foreground font-bold">{email}</span>.
