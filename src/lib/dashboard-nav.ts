@@ -98,7 +98,6 @@ export const adminSections: DashboardNavSection[] = [
         label: "System Control",
         icon: ShieldCheck,
         children: [
-          { key: "users", label: "Executive Force", icon: Fingerprint, to: "/admin/users" },
           { key: "settings", label: "System Config", icon: Settings2, to: "/admin/settings" },
         ],
       },
