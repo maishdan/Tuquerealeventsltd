@@ -22,11 +22,16 @@ import {
   LogOut,
   Plus,
   Send,
-  Receipt
+  Receipt,
+  Crown,
+  CheckCircle2,
+  Filter
 } from "lucide-react";
 import { useAdminTeam, useAdminClients, useAdminTickets, formatKes } from "@/hooks/use-dashboard-data";
+import { updateUserRole } from "@/lib/api/profiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import type { UserRole } from "@/lib/database.types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,6 +44,7 @@ import {
 export const Route = createFileRoute("/admin/users")({
   validateSearch: (search: Record<string, unknown>) => ({
     action: search.action as string | undefined,
+    role: search.role as string | undefined,
   }),
   component: AdminUsers,
 });
@@ -49,13 +55,17 @@ function AdminUsers() {
   const navigate = useNavigate();
 
   const { data: team = [] } = useAdminTeam();
-  const { data: profiles = [], isLoading: loadingProfiles } = useAdminClients();
+  const { data: profiles = [], isLoading: loadingProfiles, refetch: refetchProfiles } = useAdminClients();
   const { data: tickets = [] } = useAdminTickets();
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"ALL" | "CLIENTS" | "ADMINS">(
+    searchParams.role === "admin" ? "ADMINS" : searchParams.role === "customer" ? "CLIENTS" : "ALL"
+  );
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
 
   const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(searchParams.action === "new");
   const [newClientName, setNewClientName] = useState("");
@@ -69,28 +79,53 @@ function AdminUsers() {
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2200);
+    setTimeout(() => setToastMsg(null), 2500);
   };
 
-  const staffMembers = team.map((m) => ({
-    id: m.id,
-    name: m.full_name,
-    role: m.role,
-    score: m.performance_score,
-    events: m.events_managed,
-    type: "staff" as const,
-  }));
+  const isSuperAdminAccount = (email: string) => {
+    if (!email) return false;
+    const lower = email.toLowerCase();
+    return lower === "eventsroyaltouch7@gmail.com" || lower.includes("superadmin") || lower.includes("ceo");
+  };
+
+  const handleRoleChange = async (userId: string, targetEmail: string, newRole: UserRole) => {
+    if (isSuperAdminAccount(targetEmail)) {
+      showToast("❌ Super Admin account is immutable and cannot be changed.");
+      return;
+    }
+
+    setUpdatingRoleId(userId);
+    try {
+      await updateUserRole(userId, newRole);
+      showToast(`✓ Role updated to ${newRole === "admin" ? "EXECUTIVE ADMIN" : "REGISTERED CLIENT"}`);
+      refetchProfiles();
+    } catch (err) {
+      showToast("Failed to update user role in database.");
+      console.error(err);
+    } finally {
+      setUpdatingRoleId(null);
+    }
+  };
 
   const clientProfiles = profiles.filter((p) => p.role === "customer" || !p.role);
   const adminUsers = profiles.filter((p) => p.role === "admin");
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
-  // Filtered Clients based on search input
-  const filteredClients = clientProfiles.filter(
-    (c) =>
-      (c.full_name && c.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      c.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Filtered Users based on search query AND role filter
+  const filteredUsers = profiles.filter((p) => {
+    const matchesSearch =
+      (p.full_name && p.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.role && p.role.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (roleFilter === "CLIENTS") {
+      return matchesSearch && (p.role === "customer" || !p.role);
+    }
+    if (roleFilter === "ADMINS") {
+      return matchesSearch && p.role === "admin";
+    }
+    return matchesSearch;
+  });
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
@@ -394,106 +429,189 @@ function AdminUsers() {
               </div>
             </div>
 
-            {/* 4 KPI STAT CARDS ROW */}
+            {/* 4 KPI STAT CARDS ROW (INTERACTIVE FILTER BUTTONS) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleFilter("CLIENTS");
+                  showToast("Filtering Registered Clients");
+                }}
+                className={cn(
+                  "p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border rounded-xl shadow-lg space-y-2 transition-all cursor-pointer text-left group",
+                  roleFilter === "CLIENTS" ? "border-[#f4cf69] ring-1 ring-[#f4cf69]" : "border-[#263645] hover:border-[#f4cf69]"
+                )}
+              >
                 <div className="flex items-center justify-between text-xs text-[#bdc8d4]">
                   <span className="font-semibold uppercase tracking-wider">Registered Clients</span>
-                  <Users size={18} className="text-[#f4cf69]" />
+                  <Users size={18} className="text-[#f4cf69] group-hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-2xl font-black text-white font-mono">{clientProfiles.length}</p>
-                <p className="text-[10px] text-[#20e39b] font-medium">↑ Verified DB Accounts</p>
-              </div>
+                <p className="text-2xl font-black text-white font-mono group-hover:text-[#f4cf69] transition-colors">{clientProfiles.length}</p>
+                <p className="text-[10px] text-[#20e39b] font-medium">↑ Click to Filter Clients ({clientProfiles.length})</p>
+              </button>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setRoleFilter("ADMINS");
+                  showToast("Filtering Executive Admins");
+                }}
+                className={cn(
+                  "p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border rounded-xl shadow-lg space-y-2 transition-all cursor-pointer text-left group",
+                  roleFilter === "ADMINS" ? "border-blue-400 ring-1 ring-blue-400" : "border-[#263645] hover:border-blue-400"
+                )}
+              >
                 <div className="flex items-center justify-between text-xs text-[#bdc8d4]">
                   <span className="font-semibold uppercase tracking-wider">Executive Admins</span>
-                  <Shield size={18} className="text-blue-400" />
+                  <Shield size={18} className="text-blue-400 group-hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-2xl font-black text-blue-400 font-mono">{adminUsers.length}</p>
-                <p className="text-[10px] text-blue-400 font-medium">● Privileged Force</p>
-              </div>
+                <p className="text-2xl font-black text-blue-400 font-mono group-hover:text-white transition-colors">{adminUsers.length}</p>
+                <p className="text-[10px] text-blue-400 font-medium">● Click to Filter Admins ({adminUsers.length})</p>
+              </button>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-2">
+              <Link to="/admin/admin-booking" className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] hover:border-[#20e39b] rounded-xl shadow-lg space-y-2 transition-all cursor-pointer group">
                 <div className="flex items-center justify-between text-xs text-[#bdc8d4]">
                   <span className="font-semibold uppercase tracking-wider">Active Ticket Holders</span>
-                  <TicketIcon size={18} className="text-[#20e39b]" />
+                  <TicketIcon size={18} className="text-[#20e39b] group-hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-2xl font-black text-[#20e39b] font-mono">{tickets.length}</p>
+                <p className="text-2xl font-black text-[#20e39b] font-mono group-hover:text-white transition-colors">{tickets.length}</p>
                 <p className="text-[10px] text-[#20e39b] font-medium">↑ Gate Passes Issued</p>
-              </div>
+              </Link>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-2">
+              <Link to="/admin/payments" className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] hover:border-[#f4cf69] rounded-xl shadow-lg space-y-2 transition-all cursor-pointer group">
                 <div className="flex items-center justify-between text-xs text-[#bdc8d4]">
                   <span className="font-semibold uppercase tracking-wider">Total Client Revenue</span>
-                  <Star size={18} className="text-[#f4cf69]" />
+                  <Star size={18} className="text-[#f4cf69] group-hover:scale-110 transition-transform" />
                 </div>
-                <p className="text-2xl font-black text-[#f4cf69] font-mono">
+                <p className="text-2xl font-black text-[#f4cf69] font-mono group-hover:text-white transition-colors">
                   {formatKes(tickets.reduce((acc, t) => acc + (t.price || 0), 0))}
                 </p>
                 <p className="text-[10px] text-[#20e39b] font-medium">↑ M-Pesa Settled Value</p>
-              </div>
+              </Link>
             </div>
 
-            {/* CLIENT DIRECTORY DATA TABLE */}
+            {/* CLIENT DIRECTORY DATA TABLE WITH FILTER PILLS */}
             <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#172533] pb-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#172533] pb-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Client Registry</p>
-                  <h3 className="text-xl font-black uppercase text-white">Registered Accounts & Ticket Volume</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">User & Role Directory</p>
+                  <h3 className="text-xl font-black uppercase text-white">
+                    {roleFilter === "CLIENTS"
+                      ? `Active Registered Clients (${clientProfiles.length})`
+                      : roleFilter === "ADMINS"
+                      ? `Active Executive Admins (${adminUsers.length})`
+                      : `All Registered Users & Accounts (${profiles.length})`}
+                  </h3>
                 </div>
 
-                <div className="relative w-full sm:w-80">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8d9bad]" />
-                  <input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by name or email..."
-                    className="w-full h-10 bg-[#09141f] border border-[#243343] rounded-lg pl-9 pr-4 text-xs text-white placeholder:text-[#8291a2] outline-none focus:border-[#f4cf69]"
-                  />
+                <div className="flex flex-wrap items-center gap-2">
+                  {/* Role Filter Pills */}
+                  <div className="flex items-center gap-1.5 p-1 bg-[#09141f] border border-[#243343] rounded-lg">
+                    <button
+                      type="button"
+                      onClick={() => setRoleFilter("ALL")}
+                      className={cn(
+                        "px-3 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer",
+                        roleFilter === "ALL" ? "bg-[#f4cf69] text-black font-black shadow-md" : "text-[#8d9bad] hover:text-white"
+                      )}
+                    >
+                      All Users ({profiles.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRoleFilter("CLIENTS")}
+                      className={cn(
+                        "px-3 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer",
+                        roleFilter === "CLIENTS" ? "bg-[#f4cf69] text-black font-black shadow-md" : "text-[#8d9bad] hover:text-white"
+                      )}
+                    >
+                      Clients ({clientProfiles.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRoleFilter("ADMINS")}
+                      className={cn(
+                        "px-3 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer",
+                        roleFilter === "ADMINS" ? "bg-blue-500 text-white font-black shadow-md" : "text-[#8d9bad] hover:text-white"
+                      )}
+                    >
+                      Admins ({adminUsers.length})
+                    </button>
+                  </div>
+
+                  <div className="relative w-full sm:w-64">
+                    <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8d9bad]" />
+                    <input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search name, email, or role..."
+                      className="w-full h-9 bg-[#09141f] border border-[#243343] rounded-lg pl-9 pr-4 text-xs text-white placeholder:text-[#8291a2] outline-none focus:border-[#f4cf69]"
+                    />
+                  </div>
                 </div>
               </div>
 
               {loadingProfiles ? (
                 <div className="py-20 flex flex-col items-center justify-center space-y-4">
                   <Loader2 size={36} className="text-[#f4cf69] animate-spin" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-[#8d9bad]">Loading Client Directory...</p>
+                  <p className="text-xs font-bold uppercase tracking-widest text-[#8d9bad]">Loading User Directory...</p>
                 </div>
-              ) : filteredClients.length === 0 ? (
+              ) : filteredUsers.length === 0 ? (
                 <div className="py-16 text-center text-xs text-[#8d9bad] font-bold uppercase tracking-widest">
-                  No matching client accounts found in database.
+                  No matching active user accounts found in database for this filter.
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="text-[#8d9baa] bg-[#0d1823] border-b border-[#172530]">
-                        <th className="p-3">Client Profile</th>
+                        <th className="p-3">User Profile</th>
                         <th className="p-3">Email Credentials</th>
-                        <th className="p-3">Account Role</th>
+                        <th className="p-3">Account Role / Privilege</th>
                         <th className="p-3">Joined Date</th>
                         <th className="p-3 text-right">Holdings</th>
-                        <th className="p-3 text-right">Actions</th>
+                        <th className="p-3 text-right">Role Management</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
-                      {filteredClients.map((client) => {
+                      {filteredUsers.map((client) => {
                         const clientTickets = tickets.filter(
                           (t) => t.holder_email.toLowerCase() === client.email.toLowerCase()
                         );
+                        const isSuperAdmin = isSuperAdminAccount(client.email);
+                        const isAdmin = client.role === "admin";
+                        const isUpdating = updatingRoleId === client.id;
+
                         return (
                           <tr key={client.id} className="hover:bg-[#0d1823] transition-colors">
                             <td className="p-3 font-bold text-white uppercase flex items-center gap-3">
                               <div className="h-8 w-8 rounded-full bg-[#f2e8cd] text-[#25200f] font-black text-xs flex items-center justify-center shrink-0">
-                                {client.full_name ? client.full_name[0].toUpperCase() : "C"}
+                                {client.full_name ? client.full_name[0].toUpperCase() : "U"}
                               </div>
-                              <span>{client.full_name || "Account Member"}</span>
+                              <div className="min-w-0">
+                                <span className="block truncate">{client.full_name || "Account Member"}</span>
+                                {isSuperAdmin && (
+                                  <span className="text-[8px] text-[#f4cf69] font-mono flex items-center gap-1 font-black">
+                                    <Crown size={10} /> SUPER ADMIN
+                                  </span>
+                                )}
+                              </div>
                             </td>
                             <td className="p-3 font-mono text-[#9ca8b6]">{client.email}</td>
                             <td className="p-3">
-                              <span className="px-2.5 py-1 rounded bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[9px] font-black uppercase">
-                                REGISTERED CLIENT
-                              </span>
+                              {isSuperAdmin ? (
+                                <span className="px-2.5 py-1 rounded bg-[#f4cf69]/20 border border-[#f4cf69]/50 text-[#f4cf69] text-[9px] font-black uppercase flex items-center gap-1 w-fit shadow-xs">
+                                  <Crown size={11} /> SUPER ADMIN (IMMUTABLE)
+                                </span>
+                              ) : isAdmin ? (
+                                <span className="px-2.5 py-1 rounded bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 w-fit">
+                                  <Shield size={11} /> EXECUTIVE ADMIN
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[9px] font-black uppercase w-fit block">
+                                  REGISTERED CLIENT
+                                </span>
+                              )}
                             </td>
                             <td className="p-3 font-mono text-[#8d9baa]">
                               {new Date(client.created_at).toLocaleDateString()}
@@ -502,12 +620,20 @@ function AdminUsers() {
                               {clientTickets.length} Ticket(s)
                             </td>
                             <td className="p-3 text-right">
-                              <Link
-                                to="/admin/bookings"
-                                className="px-3 py-1.5 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg transition-all inline-flex items-center gap-1"
-                              >
-                                View Tickets →
-                              </Link>
+                              {isSuperAdmin ? (
+                                <span className="text-[9px] text-[#8d9baa] font-mono italic">Protected Role</span>
+                              ) : isUpdating ? (
+                                <Loader2 size={14} className="text-[#f4cf69] animate-spin inline-block" />
+                              ) : (
+                                <select
+                                  value={client.role || "customer"}
+                                  onChange={(e) => handleRoleChange(client.id, client.email, e.target.value as UserRole)}
+                                  className="h-8 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg px-2 outline-none cursor-pointer transition-colors"
+                                >
+                                  <option value="customer">REGISTERED CLIENT</option>
+                                  <option value="admin">EXECUTIVE ADMIN</option>
+                                </select>
+                              )}
                             </td>
                           </tr>
                         );
