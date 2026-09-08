@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminOverview,
@@ -330,7 +330,18 @@ function AdminOverview() {
               )}
             </div>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-3">
+              {/* Home Icon Button (Takes user to public Website Homepage) */}
+              <Link
+                to="/"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
               {/* Notifications Dropdown Popover */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -1009,7 +1020,7 @@ function AdminOverview() {
               </div>
 
               <Link
-                to="/contact"
+                to="/admin/help"
                 className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
               >
                 <HelpCircle size={13} /> Help & Support

@@ -41,7 +41,8 @@ import {
   ChevronUp,
   QrCode,
   User,
-  HelpCircle
+  HelpCircle,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EventRecord, TicketClass, EventLifecycleState, Ticket } from "@/lib/database.types";
@@ -516,7 +517,18 @@ function AdminEvents() {
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-3">
+              {/* Home Icon Button (Takes user to public Website Homepage) */}
+              <Link
+                to="/"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
               <button
                 type="button"
                 onClick={() => showToast("3 Active Notifications")}
@@ -932,7 +944,7 @@ function AdminEvents() {
               </div>
 
               <Link
-                to="/contact"
+                to="/admin/help"
                 className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
               >
                 <HelpCircle size={13} /> Help & Support

@@ -31,7 +31,8 @@ import {
   Loader2,
   Trash2,
   Phone,
-  Building
+  Building,
+  Home
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -265,7 +266,18 @@ function ProfilePage() {
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-3">
+              {/* Home Icon Button (Takes user to public Website Homepage) */}
+              <Link
+                to="/"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
               {/* Notifications Dropdown Popover */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -772,6 +784,29 @@ function ProfilePage() {
                 )}
               </div>
             </div>
+
+            {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
+            <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
+              <div className="flex flex-wrap items-center gap-2">
+                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span className="hidden sm:inline">•</span>
+                <a
+                  href="https://myworldafric.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline italic text-[#f4cf69] font-serif"
+                >
+                  Powered by My World Africa
+                </a>
+              </div>
+
+              <Link
+                to="/contact"
+                className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
+              >
+                <HelpCircle size={13} /> Help & Support
+              </Link>
+            </footer>
           </section>
         </main>
       </div>

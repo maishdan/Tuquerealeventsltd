@@ -126,35 +126,18 @@ export function Footer() {
              © {new Date().getFullYear()} Royal Touch Events Group. All Rights Reserved.
            </div>
 
-           <nav className="md:col-span-4 flex justify-center gap-10">
+           <nav className="md:col-span-4 flex flex-wrap justify-center gap-6 sm:gap-10">
              <Link to="/terms" className="hover:text-gold transition-colors">Terms</Link>
              <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
-             <Link to="/copyright" className="hover:text-gold transition-colors">Copyright</Link>
+             <Link to="/contact" className="hover:text-gold transition-colors">Help & Support</Link>
            </nav>
 
-           <div className="md:col-span-4 flex flex-wrap justify-center md:justify-end items-center gap-3">
-              <div className="flex items-center gap-2">
-                <img
-                  src={daniwestIcon}
-                  alt="Daniwest Tech"
-                  className="h-4 w-4 grayscale opacity-40"
-                />
-                <span className="opacity-60">Engineered by</span>
-                <a
-                  href="https://daniwesttechnologies.vercel.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-gold hover:text-white transition-colors"
-                >
-                  Daniwest Tech Ltd
-                </a>
-              </div>
-              <span className="opacity-40">•</span>
+           <div className="md:col-span-4 flex justify-center md:justify-end items-center">
               <a
                 href="https://myworldafric.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:underline italic text-gold font-serif normal-case font-medium text-xs"
+                className="hover:underline italic text-gold font-serif normal-case text-xs font-medium"
               >
                 Powered by My World Africa
               </a>
