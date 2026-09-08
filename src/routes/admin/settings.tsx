@@ -835,6 +835,29 @@ function AdminSettings() {
                 </div>
               </div>
             )}
+
+            {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
+            <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
+              <div className="flex flex-wrap items-center gap-2">
+                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span className="hidden sm:inline">•</span>
+                <a
+                  href="https://myworldafric.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline italic text-[#f4cf69] font-serif"
+                >
+                  Powered by My World Africa
+                </a>
+              </div>
+
+              <Link
+                to="/contact"
+                className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
+              >
+                <HelpCircle size={13} /> Help & Support
+              </Link>
+            </footer>
           </section>
         </main>
       </div>

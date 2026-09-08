@@ -132,20 +132,31 @@ export function Footer() {
              <Link to="/copyright" className="hover:text-gold transition-colors">Copyright</Link>
            </nav>
 
-           <div className="md:col-span-4 flex justify-center md:justify-end items-center gap-3">
-              <img
-                src={daniwestIcon}
-                alt="Daniwest Tech"
-                className="h-4 w-4 grayscale opacity-40"
-              />
-              <span className="opacity-60">Engineered by</span>
+           <div className="md:col-span-4 flex flex-wrap justify-center md:justify-end items-center gap-3">
+              <div className="flex items-center gap-2">
+                <img
+                  src={daniwestIcon}
+                  alt="Daniwest Tech"
+                  className="h-4 w-4 grayscale opacity-40"
+                />
+                <span className="opacity-60">Engineered by</span>
+                <a
+                  href="https://daniwesttechnologies.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gold hover:text-white transition-colors"
+                >
+                  Daniwest Tech Ltd
+                </a>
+              </div>
+              <span className="opacity-40">•</span>
               <a
-                href="https://daniwesttechnologies.vercel.app"
+                href="https://myworldafric.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gold hover:text-white transition-colors"
+                className="hover:underline italic text-gold font-serif normal-case font-medium text-xs"
               >
-                Daniwest Tech Ltd
+                Powered by My World Africa
               </a>
            </div>
         </div>

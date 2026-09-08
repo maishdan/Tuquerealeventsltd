@@ -26,11 +26,15 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminReportsRouteImport } from './routes/admin/reports'
 import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
+import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
+import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminAdminBookingRouteImport } from './routes/admin/admin-booking'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
@@ -131,9 +135,19 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/admin/settings',
   path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProposalsRoute = AdminProposalsRouteImport.update({
@@ -151,9 +165,19 @@ const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   path: '/admin/payments',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/admin/marketing',
+  path: '/admin/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/admin/events',
   path: '/admin/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminContactsRoute = AdminContactsRouteImport.update({
+  id: '/admin/contacts',
+  path: '/admin/contacts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminBookingsRoute = AdminBookingsRouteImport.update({
@@ -248,11 +272,15 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -286,11 +314,15 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminIndexRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/book-event': typeof DashboardLayoutBookEventRoute
   '/dashboard/bookings': typeof DashboardLayoutBookingsRoute
@@ -323,11 +355,15 @@ export interface FileRoutesById {
   '/admin/_layout': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
   '/admin/bookings': typeof AdminBookingsRoute
+  '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -363,11 +399,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/admin-booking'
     | '/admin/bookings'
+    | '/admin/contacts'
     | '/admin/events'
+    | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/reports'
     | '/admin/settings'
+    | '/admin/team'
     | '/admin/users'
     | '/dashboard'
     | '/admin/'
@@ -401,11 +441,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/admin-booking'
     | '/admin/bookings'
+    | '/admin/contacts'
     | '/admin/events'
+    | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/reports'
     | '/admin/settings'
+    | '/admin/team'
     | '/admin/users'
     | '/dashboard/book-event'
     | '/dashboard/bookings'
@@ -437,11 +481,15 @@ export interface FileRouteTypes {
     | '/admin/_layout'
     | '/admin/admin-booking'
     | '/admin/bookings'
+    | '/admin/contacts'
     | '/admin/events'
+    | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/reports'
     | '/admin/settings'
+    | '/admin/team'
     | '/admin/users'
     | '/dashboard/_layout'
     | '/admin/'
@@ -476,11 +524,15 @@ export interface RootRouteChildren {
   AdminLayoutRoute: typeof AdminLayoutRoute
   AdminAdminBookingRoute: typeof AdminAdminBookingRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
+  AdminContactsRoute: typeof AdminContactsRoute
   AdminEventsRoute: typeof AdminEventsRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProfileRoute: typeof AdminProfileRoute
   AdminProposalsRoute: typeof AdminProposalsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
   AdminUsersRoute: typeof AdminUsersRoute
   DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
@@ -607,11 +659,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/admin/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/proposals': {
@@ -635,11 +701,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPaymentsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/admin/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/events': {
       id: '/admin/events'
       path: '/admin/events'
       fullPath: '/admin/events'
       preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/contacts': {
+      id: '/admin/contacts'
+      path: '/admin/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof AdminContactsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/bookings': {
@@ -793,11 +873,15 @@ const rootRouteChildren: RootRouteChildren = {
   AdminLayoutRoute: AdminLayoutRoute,
   AdminAdminBookingRoute: AdminAdminBookingRoute,
   AdminBookingsRoute: AdminBookingsRoute,
+  AdminContactsRoute: AdminContactsRoute,
   AdminEventsRoute: AdminEventsRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProfileRoute: AdminProfileRoute,
   AdminProposalsRoute: AdminProposalsRoute,
+  AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminTeamRoute: AdminTeamRoute,
   AdminUsersRoute: AdminUsersRoute,
   DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,

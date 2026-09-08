@@ -177,7 +177,7 @@ function ProfilePage() {
         <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
           {/* Brand Header */}
           <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
-            <div className="text-2xl font-serif">♕</div>
+            <div className="text-2xl font-serif"></div>
             {!isMenuCollapsed && (
               <>
                 <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
@@ -224,7 +224,7 @@ function ProfilePage() {
               onClick={() => setShowLogoutConfirmModal(true)}
               className="w-full flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer my-2 text-left"
             >
-              <span className="text-base w-5 text-center shrink-0 text-rose-400 font-bold">🚪</span>
+              <span className="text-base w-5 text-center shrink-0 text-rose-400 font-bold"></span>
               {!isMenuCollapsed && <span>Sign Out</span>}
             </button>
           </nav>
@@ -440,7 +440,7 @@ function ProfilePage() {
                       userInitials
                     )}
                     <label className="absolute inset-0 bg-black/60 opacity-0 group-hover/avatar:opacity-100 flex flex-col items-center justify-center text-white text-[9px] font-black uppercase cursor-pointer transition-opacity">
-                      {uploadingPoster ? <Loader2 size={16} className="animate-spin" /> : <Camera size={18} />}
+                      {uploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <Camera size={18} />}
                       <span>Change</span>
                       <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                     </label>
@@ -462,8 +462,8 @@ function ProfilePage() {
 
                     <div className="flex flex-wrap gap-4 text-xs text-[#98a7b7] font-medium font-mono pt-1">
                       <span>✉ {profile?.email || user?.email || "eventsroyaltouch7@gmail.com"}</span>
-                      <span>📱 {phone}</span>
-                      <span>📍 {city}, Kenya</span>
+                      <span> {phone}</span>
+                      <span>{city}, Kenya</span>
                     </div>
                   </div>
                 </div>
@@ -526,6 +526,29 @@ function ProfilePage() {
                     <div className="border-b border-[#172533] pb-3">
                       <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Profile Identity</p>
                       <h3 className="text-xl font-black uppercase text-white">Personal & Contact Information</h3>
+                    </div>
+
+                    {/* Profile Photo Uploader */}
+                    <div className="p-4 bg-[#09141f] border border-[#243343] rounded-lg space-y-3">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-[#f4cf69] block">
+                        Upload Profile Photo / Avatar
+                      </label>
+
+                      <div className="flex flex-wrap items-center gap-4">
+                        <div className="h-16 w-16 rounded-full bg-[#f2e8cd] text-[#25200f] font-black text-xl flex items-center justify-center border border-[#f4cf69] shadow-md overflow-hidden shrink-0">
+                          {avatarUrl || profile?.avatar_url ? (
+                            <img src={avatarUrl || profile?.avatar_url || ""} alt="Avatar" className="h-full w-full object-cover" />
+                          ) : (
+                            userInitials
+                          )}
+                        </div>
+
+                        <label className="h-11 px-5 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-white font-bold text-xs uppercase tracking-wider rounded-lg flex items-center gap-2 cursor-pointer transition-all">
+                          {uploadingAvatar ? <Loader2 size={14} className="animate-spin text-[#f4cf69]" /> : <Camera size={15} className="text-[#f4cf69]" />}
+                          <span>{uploadingAvatar ? "Uploading..." : "Choose Image File"}</span>
+                          <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+                        </label>
+                      </div>
                     </div>
 
                     <div className="grid sm:grid-cols-2 gap-4 text-xs font-sans">
