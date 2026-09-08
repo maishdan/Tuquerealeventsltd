@@ -621,7 +621,8 @@ export function Booking() {
                   >
                     <Smartphone size={20} /> Proceed To Verify M-Pesa Payment ({formatKes(calculateTotal())})
                   </button>
-                </>
+                </div>
+
               )}
             </div>
           )}
