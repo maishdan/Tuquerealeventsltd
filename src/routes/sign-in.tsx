@@ -45,7 +45,7 @@ const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(128),
 });
 
-export function SignIn() {
+function SignIn() {
   const navigate = useNavigate();
   const auth = useAuth();
   const search = Route.useSearch();

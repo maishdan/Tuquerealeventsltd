@@ -44,7 +44,7 @@ const heroImages = [
   "/back/e5.jfif",
 ];
 
-export function EventsPage() {
+function EventsPage() {
   const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);

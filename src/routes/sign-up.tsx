@@ -41,7 +41,7 @@ const schema = z
     path: ["confirmPassword"],
   });
 
-export function SignUp() {
+function SignUp() {
   const navigate = useNavigate();
   const auth = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});

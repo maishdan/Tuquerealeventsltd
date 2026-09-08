@@ -66,7 +66,7 @@ const heroImages = [
   "/back/e9.jpg",
 ];
 
-export function Booking() {
+function Booking() {
   const { user, profile } = useAuth();
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 

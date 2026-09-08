@@ -7,8 +7,8 @@ import { createPageSeo } from "@/lib/seo";
 export const Route = createFileRoute("/admin/_layout")({
   head: () =>
     createPageSeo({
-      title: "Admin Dashboard",
-      description: "Royal Touch Events executive dashboard — revenue, operations, events and AI insights.",
+      title: "Royal Touch Events — CEO Admin Dashboard",
+      description: "Executive CEO Dashboard for Royal Touch Events — Sales, CRM, Events, Finance and Operations.",
       path: "/admin",
       noindex: true,
     }),
@@ -19,8 +19,8 @@ function AdminLayout() {
   return (
     <DashboardGuard requiredRole="admin">
       <DashboardLayout
-        title="Empire Operations"
-        subtitle="Executive Dashboard"
+        title="CEO Dashboard"
+        subtitle="Royal Touch Executive Operations"
         nav={adminNav}
         role="admin"
       >
