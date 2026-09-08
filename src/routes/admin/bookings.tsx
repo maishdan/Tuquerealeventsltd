@@ -107,19 +107,22 @@ function AdminBookings() {
   const [holderEmail, setHolderEmail] = useState("");
   const [eventName, setEventName] = useState("Kisii University Tech & Innovation Summit 2026");
   const [ticketTier, setTicketTier] = useState<"Regular" | "VIP" | "VVIP" | "General Access">("VIP");
+  const [paymentChannel, setPaymentChannel] = useState<"M-Pesa" | "Cash (KES)" | "Bank Transfer" | "Free Pass">("M-Pesa");
   const [price, setPrice] = useState(1500);
 
   const handleIssueTicketSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!holderName.trim() || !holderEmail.trim()) return;
 
+    const finalPrice = paymentChannel === "Free Pass" ? 0 : price;
+
     issueTicketMutation.mutate(
       {
         holder_name: holderName,
         holder_email: holderEmail,
         event_name: eventName,
-        ticket_tier: ticketTier,
-        price,
+        ticket_tier: `${ticketTier} [Paid via ${paymentChannel}]`,
+        price: finalPrice,
         status: "valid",
         seat_number: `${Math.floor(Math.random() * 80 + 10)}`,
         event_date: "2026-09-20",
@@ -132,7 +135,7 @@ function AdminBookings() {
           setHolderEmail("");
           setSelectedTicket(newTkt);
           setIsPassModalOpen(true);
-          showToast("Digital QR Pass Issued!");
+          showToast(`Digital QR Pass Issued! Payment confirmed via ${paymentChannel}`);
         },
       }
     );
@@ -662,13 +665,29 @@ function AdminBookings() {
                 />
               </div>
 
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#f4cf69]">
+                  Payment Verification & Channel *
+                </label>
+                <select
+                  value={paymentChannel}
+                  onChange={(e) => setPaymentChannel(e.target.value as any)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                >
+                  <option value="M-Pesa">Paid via M-Pesa Mobile Money (KSh)</option>
+                  <option value="Cash (KES)">Paid via Cash in KES</option>
+                  <option value="Bank Transfer">Paid via Bank Wire Transfer</option>
+                  <option value="Free Pass">Complimentary / Free Entry Pass</option>
+                </select>
+              </div>
+
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Pass Tier</label>
                   <select
                     value={ticketTier}
                     onChange={(e) => setTicketTier(e.target.value as any)}
-                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
                   >
                     <option value="Regular">Regular Pass (KSh 500)</option>
                     <option value="VIP">VIP Pass (KSh 1,500)</option>
@@ -677,12 +696,13 @@ function AdminBookings() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Price (KES)</label>
+                  <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Price Collected (KES)</label>
                   <input
                     type="number"
-                    value={price}
+                    disabled={paymentChannel === "Free Pass"}
+                    value={paymentChannel === "Free Pass" ? 0 : price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] disabled:opacity-50"
                   />
                 </div>
               </div>

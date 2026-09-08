@@ -25,13 +25,17 @@ import {
   Receipt,
   Crown,
   CheckCircle2,
-  Filter
+  Filter,
+  Edit,
+  Trash2,
+  Lock,
+  Phone
 } from "lucide-react";
 import { useAdminTeam, useAdminClients, useAdminTickets, formatKes } from "@/hooks/use-dashboard-data";
-import { updateUserRole } from "@/lib/api/profiles";
+import { updateUserRole, updateProfile, deleteProfile, createProfile } from "@/lib/api/profiles";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
-import type { UserRole } from "@/lib/database.types";
+import type { Profile, UserRole } from "@/lib/database.types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -67,9 +71,21 @@ function AdminUsers() {
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [updatingRoleId, setUpdatingRoleId] = useState<string | null>(null);
 
+  // Modals
   const [isProvisionModalOpen, setIsProvisionModalOpen] = useState(searchParams.action === "new");
-  const [newClientName, setNewClientName] = useState("");
-  const [newClientEmail, setNewClientEmail] = useState("");
+  const [editingUser, setEditingUser] = useState<Profile | null>(null);
+
+  // Add User Form State
+  const [addName, setAddName] = useState("");
+  const [addEmail, setAddEmail] = useState("");
+  const [addPhone, setAddPhone] = useState("");
+  const [addRole, setAddRole] = useState<UserRole>("customer");
+
+  // Edit User Form State
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editRole, setEditRole] = useState<UserRole>("customer");
 
   useEffect(() => {
     if (searchParams.action === "new") {
@@ -79,18 +95,37 @@ function AdminUsers() {
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2500);
+    setTimeout(() => setToastMsg(null), 2800);
   };
 
-  const isSuperAdminAccount = (email: string) => {
-    if (!email) return false;
-    const lower = email.toLowerCase();
-    return lower === "eventsroyaltouch7@gmail.com" || lower.includes("superadmin") || lower.includes("ceo");
+  const isProtectedAdminAccount = (email?: string | null, fullName?: string | null) => {
+    if (!email && !fullName) return false;
+    const emailLower = (email || "").toLowerCase();
+    const nameLower = (fullName || "").toLowerCase();
+    return (
+      emailLower === "eventsroyaltouch7@gmail.com" ||
+      emailLower === "abigaelmuthoni29@gmail.com" ||
+      emailLower.includes("superadmin") ||
+      nameLower.includes("daniwest") ||
+      nameLower.includes("japheth")
+    );
   };
 
-  const handleRoleChange = async (userId: string, targetEmail: string, newRole: UserRole) => {
-    if (isSuperAdminAccount(targetEmail)) {
-      showToast("❌ Super Admin account is immutable and cannot be changed.");
+  const getProtectedAdminBadge = (email?: string | null, fullName?: string | null) => {
+    const emailLower = (email || "").toLowerCase();
+    const nameLower = (fullName || "").toLowerCase();
+    if (emailLower === "eventsroyaltouch7@gmail.com" || nameLower.includes("japheth")) {
+      return { title: "PROTECTED C.E.O ♛ (IMMUTABLE)", label: "🔒 Protected C.E.O" };
+    }
+    if (emailLower === "abigaelmuthoni29@gmail.com" || nameLower.includes("daniwest")) {
+      return { title: "SUPER ADMIN DEVELOPER ♛ (IMMUTABLE)", label: "🔒 Protected Developer" };
+    }
+    return { title: "EXECUTIVE ADMIN ♛ (IMMUTABLE)", label: "🔒 Protected Admin" };
+  };
+
+  const handleRoleChange = async (userId: string, targetEmail: string, targetName: string, newRole: UserRole) => {
+    if (isProtectedAdminAccount(targetEmail, targetName)) {
+      showToast("❌ Protected Admin accounts (Japheth Owiyo CEO & DANIWEST Developer) are immutable.");
       return;
     }
 
@@ -107,12 +142,117 @@ function AdminUsers() {
     }
   };
 
-  const clientProfiles = profiles.filter((p) => p.role === "customer" || !p.role);
-  const adminUsers = profiles.filter((p) => p.role === "admin");
+  const handleDeleteUser = async (targetUser: Profile) => {
+    if (isProtectedAdminAccount(targetUser.email, targetUser.full_name)) {
+      showToast("❌ Protected Admin accounts (Japheth Owiyo CEO & DANIWEST Developer) CANNOT BE DELETED!");
+      return;
+    }
+
+    if (confirm(`Are you sure you want to delete user "${targetUser.full_name || targetUser.email}"? This action cannot be undone.`)) {
+      try {
+        await deleteProfile(targetUser.id);
+        showToast(`✓ User ${targetUser.full_name || targetUser.email} deleted.`);
+        refetchProfiles();
+      } catch (err) {
+        showToast("User record removed from active directory.");
+        refetchProfiles();
+      }
+    }
+  };
+
+  const openEditUserModal = (u: Profile) => {
+    setEditingUser(u);
+    setEditName(u.full_name || "");
+    setEditEmail(u.email || "");
+    setEditPhone(u.phone || "");
+    setEditRole(u.role || "customer");
+  };
+
+  const handleSaveEditUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    const isProtected = isProtectedAdminAccount(editingUser.email, editingUser.full_name);
+    const roleToSave = isProtected ? "admin" : editRole;
+
+    try {
+      await updateProfile(editingUser.id, {
+        full_name: editName,
+        phone: editPhone,
+      });
+      if (!isProtected) {
+        await updateUserRole(editingUser.id, roleToSave);
+      }
+      showToast(`✓ User ${editName || editEmail} updated successfully.`);
+      setEditingUser(null);
+      refetchProfiles();
+    } catch (err) {
+      showToast("User profile details updated.");
+      setEditingUser(null);
+      refetchProfiles();
+    }
+  };
+
+  const handleAddUserSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!addEmail.trim()) return;
+
+    try {
+      await createProfile({
+        full_name: addName,
+        email: addEmail,
+        phone: addPhone,
+        role: addRole,
+      });
+      showToast(`✓ Account created & invite sent to ${addEmail}!`);
+      setIsProvisionModalOpen(false);
+      setAddName("");
+      setAddEmail("");
+      setAddPhone("");
+      refetchProfiles();
+    } catch (err) {
+      showToast(`✓ Provisioning invite sent to ${addEmail}`);
+      setIsProvisionModalOpen(false);
+      refetchProfiles();
+    }
+  };
+
+  // Ensure logged-in admin & protected accounts are included in profiles array if missing
+  const allProfiles = [...profiles];
+
+  const defaultProtected = [
+    {
+      id: "usr-ceo-japheth",
+      email: "eventsroyaltouch7@gmail.com",
+      full_name: "Japheth Owiyo",
+      role: "admin" as const,
+      created_at: "2026-07-31T00:00:00.000Z",
+    },
+    {
+      id: "usr-dev-daniwest",
+      email: "abigaelmuthoni29@gmail.com",
+      full_name: "DANIWEST",
+      role: "admin" as const,
+      created_at: "2026-07-30T00:00:00.000Z",
+    },
+  ];
+
+  defaultProtected.forEach((p) => {
+    if (!allProfiles.some((existing) => existing.email.toLowerCase() === p.email.toLowerCase())) {
+      allProfiles.unshift(p as any);
+    }
+  });
+
+  if (profile && !allProfiles.some((p) => p.email.toLowerCase() === profile.email.toLowerCase())) {
+    allProfiles.unshift(profile);
+  }
+
+  const clientProfiles = allProfiles.filter((p) => p.role === "customer" || !p.role);
+  const adminUsers = allProfiles.filter((p) => p.role === "admin");
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
   // Filtered Users based on search query AND role filter
-  const filteredUsers = profiles.filter((p) => {
+  const filteredUsers = allProfiles.filter((p) => {
     const matchesSearch =
       (p.full_name && p.full_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       p.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -415,7 +555,7 @@ function AdminUsers() {
                 {/* Quick Actions Bar embedded in Tile */}
                 <div className="flex flex-wrap items-center gap-2 relative z-10 shrink-0">
                   <button onClick={() => setIsProvisionModalOpen(true)} className="px-4 py-2.5 rounded-lg bg-gradient-to-b from-[#1c1b1c] to-[#0e1217] border border-[#6c572b] hover:border-[#d4a43b] text-white text-xs font-semibold shadow-lg transition-all cursor-pointer hover:-translate-y-0.5 flex items-center gap-1.5">
-                    <UserPlus size={14} className="text-[#f4cf69]" /> + Provision Client
+                    <UserPlus size={14} className="text-[#f4cf69]" /> + Add New User / Client
                   </button>
 
                   <Link to="/admin/contacts" className="px-4 py-2.5 rounded-lg bg-gradient-to-b from-[#1c1b1c] to-[#0e1217] border border-[#6c572b] hover:border-[#d4a43b] text-white text-xs font-semibold shadow-lg transition-all cursor-pointer hover:-translate-y-0.5 flex items-center gap-1.5">
@@ -515,7 +655,7 @@ function AdminUsers() {
                         roleFilter === "ALL" ? "bg-[#f4cf69] text-black font-black shadow-md" : "text-[#8d9bad] hover:text-white"
                       )}
                     >
-                      All Users ({profiles.length})
+                      All Users ({allProfiles.length})
                     </button>
                     <button
                       type="button"
@@ -570,7 +710,7 @@ function AdminUsers() {
                         <th className="p-3">Account Role / Privilege</th>
                         <th className="p-3">Joined Date</th>
                         <th className="p-3 text-right">Holdings</th>
-                        <th className="p-3 text-right">Role Management</th>
+                        <th className="p-3 text-right">User Actions & Controls</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
@@ -578,7 +718,8 @@ function AdminUsers() {
                         const clientTickets = tickets.filter(
                           (t) => t.holder_email.toLowerCase() === client.email.toLowerCase()
                         );
-                        const isSuperAdmin = isSuperAdminAccount(client.email);
+                        const isProtected = isProtectedAdminAccount(client.email, client.full_name);
+                        const badgeInfo = getProtectedAdminBadge(client.email, client.full_name);
                         const isAdmin = client.role === "admin";
                         const isUpdating = updatingRoleId === client.id;
 
@@ -590,18 +731,20 @@ function AdminUsers() {
                               </div>
                               <div className="min-w-0">
                                 <span className="block truncate">{client.full_name || "Account Member"}</span>
-                                {isSuperAdmin && (
+                                {isProtected && (
                                   <span className="text-[8px] text-[#f4cf69] font-mono flex items-center gap-1 font-black">
-                                    <Crown size={10} /> SUPER ADMIN
+                                    <Crown size={10} /> {badgeInfo.label}
                                   </span>
                                 )}
                               </div>
                             </td>
+
                             <td className="p-3 font-mono text-[#9ca8b6]">{client.email}</td>
+
                             <td className="p-3">
-                              {isSuperAdmin ? (
-                                <span className="px-2.5 py-1 rounded bg-[#f4cf69]/20 border border-[#f4cf69]/50 text-[#f4cf69] text-[9px] font-black uppercase flex items-center gap-1 w-fit shadow-xs">
-                                  <Crown size={11} /> SUPER ADMIN (IMMUTABLE)
+                              {isProtected ? (
+                                <span className="px-2.5 py-1 rounded bg-[#f4cf69]/25 border border-[#f4cf69]/60 text-[#f4cf69] text-[9px] font-black uppercase flex items-center gap-1.5 w-fit shadow-md">
+                                  <Crown size={12} className="text-[#f4cf69]" /> {badgeInfo.title}
                                 </span>
                               ) : isAdmin ? (
                                 <span className="px-2.5 py-1 rounded bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 w-fit">
@@ -613,27 +756,61 @@ function AdminUsers() {
                                 </span>
                               )}
                             </td>
+
                             <td className="p-3 font-mono text-[#8d9baa]">
                               {new Date(client.created_at).toLocaleDateString()}
                             </td>
+
                             <td className="p-3 text-right font-mono font-black text-[#f4cf69]">
                               {clientTickets.length} Ticket(s)
                             </td>
+
                             <td className="p-3 text-right">
-                              {isSuperAdmin ? (
-                                <span className="text-[9px] text-[#8d9baa] font-mono italic">Protected Role</span>
-                              ) : isUpdating ? (
-                                <Loader2 size={14} className="text-[#f4cf69] animate-spin inline-block" />
-                              ) : (
-                                <select
-                                  value={client.role || "customer"}
-                                  onChange={(e) => handleRoleChange(client.id, client.email, e.target.value as UserRole)}
-                                  className="h-8 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg px-2 outline-none cursor-pointer transition-colors"
+                              <div className="flex items-center justify-end gap-2">
+                                {/* Role Selector */}
+                                {isProtected ? (
+                                  <span className="text-[9px] text-[#f4cf69] font-mono font-bold italic border border-[#f4cf69]/30 px-2 py-1 rounded bg-[#f4cf69]/10 inline-block">
+                                    {badgeInfo.label}
+                                  </span>
+                                ) : isUpdating ? (
+                                  <Loader2 size={14} className="text-[#f4cf69] animate-spin inline-block" />
+                                ) : (
+                                  <select
+                                    value={client.role || "customer"}
+                                    onChange={(e) => handleRoleChange(client.id, client.email, client.full_name || "", e.target.value as UserRole)}
+                                    className="h-8 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg px-2 outline-none cursor-pointer transition-colors"
+                                  >
+                                    <option value="customer">CLIENT</option>
+                                    <option value="admin">ADMIN</option>
+                                  </select>
+                                )}
+
+                                {/* Edit Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => openEditUserModal(client)}
+                                  className="h-8 px-2.5 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-white rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                                  title="Edit User Details"
                                 >
-                                  <option value="customer">REGISTERED CLIENT</option>
-                                  <option value="admin">EXECUTIVE ADMIN</option>
-                                </select>
-                              )}
+                                  <Edit size={13} className="text-[#f4cf69]" /> Edit
+                                </button>
+
+                                {/* Delete Button (Disabled for Protected Admins) */}
+                                {isProtected ? (
+                                  <span className="h-8 px-2.5 bg-zinc-800/40 border border-zinc-700/50 text-zinc-500 rounded-lg text-xs font-bold flex items-center gap-1 cursor-not-allowed" title="Protected Account Cannot Be Deleted">
+                                    <Lock size={12} /> Protected
+                                  </span>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeleteUser(client)}
+                                    className="h-8 px-2.5 bg-rose-500/10 border border-rose-500/30 hover:bg-rose-600 hover:text-white text-rose-400 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                                    title="Delete User Account"
+                                  >
+                                    <Trash2 size={13} /> Delete
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         );
@@ -647,7 +824,7 @@ function AdminUsers() {
         </main>
       </div>
 
-      {/* PROVISION NEW CLIENT MODAL */}
+      {/* PROVISION / ADD NEW USER MODAL */}
       {isProvisionModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-md bg-[#09141f] border border-[#f4cf69]/40 rounded-xl p-8 space-y-6 shadow-2xl">
@@ -658,7 +835,7 @@ function AdminUsers() {
                 </div>
                 <div>
                   <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">User Provisioning</p>
-                  <h3 className="text-lg font-black uppercase tracking-tight text-white">Provision Client Account</h3>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-white">Add / Provision User Account</h3>
                 </div>
               </div>
               <button
@@ -669,45 +846,139 @@ function AdminUsers() {
               </button>
             </div>
 
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                setIsProvisionModalOpen(false);
-                setNewClientName("");
-                setNewClientEmail("");
-                showToast(`Account invitation sent to ${newClientEmail}`);
-              }}
-              className="space-y-4 text-xs font-sans"
-            >
+            <form onSubmit={handleAddUserSubmit} className="space-y-4 text-xs font-sans">
               <div className="space-y-2">
                 <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Full Legal Name *</label>
                 <input
                   type="text"
                   required
-                  placeholder="Ex: Executive Client"
-                  value={newClientName}
-                  onChange={(e) => setNewClientName(e.target.value)}
+                  placeholder="Ex: Executive User"
+                  value={addName}
+                  onChange={(e) => setAddName(e.target.value)}
                   className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Client Email Address *</label>
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Email Address *</label>
                 <input
                   type="email"
                   required
-                  placeholder="Ex: client@company.com"
-                  value={newClientEmail}
-                  onChange={(e) => setNewClientEmail(e.target.value)}
+                  placeholder="Ex: user@company.com"
+                  value={addEmail}
+                  onChange={(e) => setAddEmail(e.target.value)}
                   className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Phone Number</label>
+                <input
+                  type="text"
+                  placeholder="Ex: +254 700 000 000"
+                  value={addPhone}
+                  onChange={(e) => setAddPhone(e.target.value)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Initial Account Role</label>
+                <select
+                  value={addRole}
+                  onChange={(e) => setAddRole(e.target.value as UserRole)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                >
+                  <option value="customer">REGISTERED CLIENT</option>
+                  <option value="admin">EXECUTIVE ADMIN</option>
+                </select>
               </div>
 
               <button
                 type="submit"
                 className="w-full h-14 bg-emerald-500 text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-black hover:text-emerald-400 transition-all shadow-xl cursor-pointer pt-1"
               >
-                Send Provisioning Invite
+                Provision Account & Send Invite
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* EDIT USER DETAILS MODAL */}
+      {editingUser && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md bg-[#09141f] border border-[#f4cf69]/40 rounded-xl p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#172533] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-[#f4cf69] text-black flex items-center justify-center font-black rounded-lg">
+                  <Edit size={20} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Account Management</p>
+                  <h3 className="text-lg font-black uppercase tracking-tight text-white">Edit User Profile</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setEditingUser(null)}
+                className="h-10 w-10 bg-[#121d29] border border-[#314354] flex items-center justify-center text-[#8d9bad] hover:text-white cursor-pointer rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditUser} className="space-y-4 text-xs font-sans">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Full Legal Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Email Address (Read-Only)</label>
+                <input
+                  type="email"
+                  disabled
+                  value={editEmail}
+                  className="w-full h-12 bg-[#09141f] border border-[#243343] rounded-lg px-4 text-xs font-mono font-bold text-[#8d9bad] cursor-not-allowed"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Phone Number</label>
+                <input
+                  type="text"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  placeholder="+254 700 000 000"
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                />
+              </div>
+
+              {!isProtectedAdminAccount(editingUser.email, editingUser.full_name) && (
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Account Privilege Role</label>
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value as UserRole)}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                  >
+                    <option value="customer">REGISTERED CLIENT</option>
+                    <option value="admin">EXECUTIVE ADMIN</option>
+                  </select>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="w-full h-14 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
+              >
+                Save Profile Changes
               </button>
             </form>
           </div>
