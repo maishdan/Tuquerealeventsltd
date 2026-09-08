@@ -56,11 +56,19 @@ function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    if (auth?.loading) return;
     if (auth?.user) {
-      const to = auth.profile?.role === "admin" ? "/admin" : "/dashboard";
+      const email = auth.user.email?.toLowerCase();
+      const isAdmin =
+        auth.profile?.role === "admin" ||
+        auth.user.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+        email === "eventsroyaltouch7@gmail.com" ||
+        email === "abigaelmuthoni29@gmail.com";
+
+      const to = isAdmin ? "/admin" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -90,7 +98,12 @@ function SignIn() {
     try {
       if (!auth) throw new Error("Auth system unavailable");
       const role = await auth.signIn(res.data.email, res.data.password);
-      if (role === "admin") {
+      const isTargetAdmin =
+        role === "admin" ||
+        res.data.email.toLowerCase() === "eventsroyaltouch7@gmail.com" ||
+        res.data.email.toLowerCase() === "abigaelmuthoni29@gmail.com";
+
+      if (isTargetAdmin) {
         navigate({ to: "/admin" });
       } else {
         navigate({ to: "/dashboard" });
