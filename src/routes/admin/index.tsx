@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User } from "lucide-react";
 
 export const Route = createFileRoute("/admin/")({
   component: AdminOverview,
@@ -438,26 +438,20 @@ function AdminOverview() {
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/events" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                    <Link to="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                       <Settings size={15} className="text-[#f4cf69]" /> Settings
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
+                    <Link to="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                      <User size={15} className="text-[#f4cf69]" /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
                     <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <Mail size={15} className="text-[#f4cf69]" /> Contact Us
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/terms" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <FileText size={15} className="text-[#f4cf69]" /> Terms & Data
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/about" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <HelpCircle size={15} className="text-[#f4cf69]" /> Learn More
+                      <HelpCircle size={15} className="text-[#f4cf69]" /> Help & Support
                     </Link>
                   </DropdownMenuItem>
 

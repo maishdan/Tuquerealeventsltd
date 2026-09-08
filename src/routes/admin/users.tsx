@@ -29,7 +29,8 @@ import {
   Edit,
   Trash2,
   Lock,
-  Phone
+  Phone,
+  User
 } from "lucide-react";
 import { useAdminTeam, useAdminClients, useAdminTickets, formatKes } from "@/hooks/use-dashboard-data";
 import { updateUserRole, updateProfile, deleteProfile, createProfile } from "@/lib/api/profiles";
@@ -460,20 +461,20 @@ function AdminUsers() {
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/events" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                    <Link to="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                       <Settings size={15} className="text-[#f4cf69]" /> Settings
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <Mail size={15} className="text-[#f4cf69]" /> Contact Us
+                    <Link to="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                      <User size={15} className="text-[#f4cf69]" /> Profile
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link to="/terms" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <FileText size={15} className="text-[#f4cf69]" /> Terms & Data
+                    <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                      <HelpCircle size={15} className="text-[#f4cf69]" /> Help & Support
                     </Link>
                   </DropdownMenuItem>
 

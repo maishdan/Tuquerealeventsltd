@@ -26,6 +26,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
@@ -127,6 +128,11 @@ const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
 const AdminUsersRoute = AdminUsersRouteImport.update({
   id: '/admin/users',
   path: '/admin/users',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminProposalsRoute = AdminProposalsRouteImport.update({
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/book-event': typeof DashboardLayoutBookEventRoute
   '/dashboard/bookings': typeof DashboardLayoutBookingsRoute
@@ -310,6 +318,7 @@ export interface FileRoutesById {
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
   '/dashboard/_layout': typeof DashboardLayoutRouteWithChildren
   '/admin/': typeof AdminIndexRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/payments'
     | '/admin/proposals'
+    | '/admin/settings'
     | '/admin/users'
     | '/dashboard'
     | '/admin/'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/payments'
     | '/admin/proposals'
+    | '/admin/settings'
     | '/admin/users'
     | '/dashboard/book-event'
     | '/dashboard/bookings'
@@ -418,6 +429,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/payments'
     | '/admin/proposals'
+    | '/admin/settings'
     | '/admin/users'
     | '/dashboard/_layout'
     | '/admin/'
@@ -455,6 +467,7 @@ export interface RootRouteChildren {
   AdminEventsRoute: typeof AdminEventsRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProposalsRoute: typeof AdminProposalsRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
   DashboardLayoutRoute: typeof DashboardLayoutRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
@@ -579,6 +592,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/users'
       fullPath: '/admin/users'
       preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/proposals': {
@@ -756,6 +776,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminEventsRoute: AdminEventsRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProposalsRoute: AdminProposalsRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
   DashboardLayoutRoute: DashboardLayoutRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,

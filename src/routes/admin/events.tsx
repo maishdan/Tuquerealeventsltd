@@ -5,6 +5,8 @@ import {
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
+  useAdminTickets,
+  useIssueTicket,
   formatKes
 } from "@/hooks/use-dashboard-data";
 import { uploadEventPoster } from "@/lib/api/events";
@@ -35,10 +37,14 @@ import {
   Mail,
   FileText,
   LogOut,
-  Power
+  Power,
+  ChevronUp,
+  QrCode,
+  User,
+  HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventRecord, TicketClass, EventLifecycleState } from "@/lib/database.types";
+import type { EventRecord, TicketClass, EventLifecycleState, Ticket } from "@/lib/database.types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +53,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { TicketPassModal } from "@/components/dashboard/TicketPassModal";
 
 export const Route = createFileRoute("/admin/events")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -72,9 +79,12 @@ function AdminEvents() {
   const navigate = useNavigate();
 
   const { data: events = [], isLoading } = useAdminEvents();
+  const { data: tickets = [] } = useAdminTickets();
+
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
+  const issueTicketMutation = useIssueTicket();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -85,6 +95,21 @@ function AdminEvents() {
   const [editingEvent, setEditingEvent] = useState<EventRecord | null>(null);
   const [filterState, setFilterState] = useState<string>("ALL");
 
+  // Expanded Issued Tickets view for an event
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
+
+  // Issue Ticket Modal for an Event
+  const [issueForEvent, setIssueForEvent] = useState<EventRecord | null>(null);
+  const [issueHolderName, setIssueHolderName] = useState("");
+  const [issueHolderEmail, setIssueHolderEmail] = useState("");
+  const [issueTier, setIssueTier] = useState("Regular");
+  const [issuePrice, setIssuePrice] = useState(500);
+  const [issuePaymentChannel, setIssuePaymentChannel] = useState("M-Pesa");
+
+  // PDF Ticket Modal
+  const [selectedTicketForPdf, setSelectedTicketForPdf] = useState<Ticket | null>(null);
+  const [isPassModalOpen, setIsPassModalOpen] = useState(false);
+
   useEffect(() => {
     if (searchParams.action === "create") {
       openCreateModal();
@@ -93,7 +118,7 @@ function AdminEvents() {
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2200);
+    setTimeout(() => setToastMsg(null), 2500);
   };
 
   // Form State
@@ -115,8 +140,8 @@ function AdminEvents() {
   const [ticketClasses, setTicketClasses] = useState<TicketClass[]>([
     {
       id: "tc-1",
-      name: "Regular",
-      description: "General admission ticket",
+      name: "Regular Pass",
+      description: "Standard event admission",
       price: 500,
       quantity_available: 500,
       quantity_sold: 0,
@@ -124,21 +149,21 @@ function AdminEvents() {
     },
     {
       id: "tc-2",
-      name: "VIP",
-      description: "VIP fast-track entrance & VIP seating",
+      name: "VIP Pass",
+      description: "VIP reserved seating & fast-track entrance",
       price: 1500,
       quantity_available: 100,
       quantity_sold: 0,
-      benefits: ["Priority Entrance", "VIP Reserved Seating", "Conference Materials"],
+      benefits: ["Priority Entrance", "VIP Seating", "Refreshments"],
     },
     {
       id: "tc-3",
-      name: "Free Student Pass",
-      description: "Free student & public entry",
+      name: "Free Admission Pass",
+      description: "Complimentary & free public admission",
       price: 0,
       quantity_available: 200,
       quantity_sold: 0,
-      benefits: ["Free General Entry", "Exhibition Access"],
+      benefits: ["Free General Entry"],
     },
   ]);
 
@@ -157,7 +182,7 @@ function AdminEvents() {
     setTicketClasses([
       {
         id: "tc-1",
-        name: "Regular",
+        name: "Regular Pass",
         description: "General admission ticket",
         price: 500,
         quantity_available: 500,
@@ -166,7 +191,7 @@ function AdminEvents() {
       },
       {
         id: "tc-2",
-        name: "VIP",
+        name: "VIP Pass",
         description: "VIP fast-track entrance & seating",
         price: 1500,
         quantity_available: 100,
@@ -175,12 +200,12 @@ function AdminEvents() {
       },
       {
         id: "tc-3",
-        name: "Free Admission Pass",
-        description: "Complimentary admission pass",
+        name: "Free Entry Pass",
+        description: "Complimentary & free entry",
         price: 0,
-        quantity_available: 100,
+        quantity_available: 200,
         quantity_sold: 0,
-        benefits: ["Free General Entry"],
+        benefits: ["Free Public Entry"],
       },
     ]);
     setIsCreateModalOpen(true);
@@ -204,7 +229,7 @@ function AdminEvents() {
         : [
             {
               id: "tc-1",
-              name: "Regular",
+              name: "Regular Pass",
               description: "General admission",
               price: 500,
               quantity_available: 500,
@@ -251,8 +276,8 @@ function AdminEvents() {
       ...prev,
       {
         id: `tc-${Date.now()}`,
-        name: "Custom Class",
-        description: "Custom pass description",
+        name: "Custom Tier",
+        description: "Custom ticket class description",
         price: 1000,
         quantity_available: 100,
         quantity_sold: 0,
@@ -267,11 +292,11 @@ function AdminEvents() {
       {
         id: `tc-free-${Date.now()}`,
         name: "Free Entry Pass",
-        description: "Complimentary & free admission pass",
+        description: "Complimentary & free public admission pass",
         price: 0,
         quantity_available: 200,
         quantity_sold: 0,
-        benefits: ["Free General Entry", "Exhibition Access"],
+        benefits: ["Free Public Admission"],
       },
     ]);
   };
@@ -323,7 +348,7 @@ function AdminEvents() {
           onSuccess: () => {
             setIsCreateModalOpen(false);
             setEditingEvent(null);
-            showToast("Event updated successfully!");
+            showToast("✓ Event & Ticket Prices updated successfully!");
           },
         }
       );
@@ -331,17 +356,48 @@ function AdminEvents() {
       createEventMutation.mutate(payload, {
         onSuccess: () => {
           setIsCreateModalOpen(false);
-          showToast("New Event created & published!");
+          showToast("✓ New Event created & prices set!");
         },
       });
     }
   };
 
   const handleDeleteEvent = (evt: EventRecord) => {
-    if (confirm(`Are you sure you want to delete "${evt.name}"?`)) {
+    if (confirm(`Are you sure you want to delete "${evt.name}"? This action cannot be undone.`)) {
       deleteEventMutation.mutate(evt.id);
-      showToast("Event deleted.");
+      showToast("✓ Event deleted successfully.");
     }
+  };
+
+  const handleIssueTicketForEvent = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!issueForEvent || !issueHolderName.trim() || !issueHolderEmail.trim()) return;
+
+    const finalPrice = issuePaymentChannel === "Free Pass" ? 0 : issuePrice;
+
+    issueTicketMutation.mutate(
+      {
+        holder_name: issueHolderName,
+        holder_email: issueHolderEmail,
+        event_name: issueForEvent.name,
+        ticket_tier: `${issueTier} [Paid via ${issuePaymentChannel}]`,
+        price: finalPrice,
+        status: "valid",
+        seat_number: `A-${Math.floor(Math.random() * 80 + 10)}`,
+        event_date: issueForEvent.event_date || "2026-09-20",
+        venue: issueForEvent.venue || "Main Auditorium",
+      },
+      {
+        onSuccess: (newTkt) => {
+          setIssueForEvent(null);
+          setIssueHolderName("");
+          setIssueHolderEmail("");
+          setSelectedTicketForPdf(newTkt);
+          setIsPassModalOpen(true);
+          showToast(`✓ Ticket issued for ${issueForEvent.name}!`);
+        },
+      }
+    );
   };
 
   const filteredEvents = events.filter((e) => {
@@ -507,14 +563,20 @@ function AdminEvents() {
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/events" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                    <Link to="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                       <Settings size={15} className="text-[#f4cf69]" /> Settings
                     </Link>
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
+                    <Link to="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                      <User size={15} className="text-[#f4cf69]" /> Profile
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild>
                     <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <Mail size={15} className="text-[#f4cf69]" /> Contact Us
+                      <HelpCircle size={15} className="text-[#f4cf69]" /> Help & Support
                     </Link>
                   </DropdownMenuItem>
 
@@ -681,87 +743,175 @@ function AdminEvents() {
                 </div>
               ) : (
                 <div className="grid gap-6">
-                  {filteredEvents.map((evt) => (
-                    <div
-                      key={evt.id}
-                      className="p-6 bg-[#09141f] border border-[#243343] hover:border-[#f4cf69] rounded-xl transition-all space-y-4 shadow-md"
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-                        <div className="w-full lg:w-48 h-40 bg-[#03070d] border border-[#243343] rounded-lg overflow-hidden shrink-0 relative">
-                          <img
-                            src={evt.poster_url || "/back/e1.jfif"}
-                            alt={evt.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/80 text-[#f4cf69] text-[8px] font-black uppercase rounded">
-                            {evt.event_type}
-                          </div>
-                        </div>
+                  {filteredEvents.map((evt) => {
+                    const eventIssuedTickets = tickets.filter(
+                      (t) => t.event_name.toLowerCase().includes(evt.name.toLowerCase())
+                    );
+                    const isExpanded = expandedEventId === evt.id;
 
-                        <div className="space-y-2.5 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="px-2.5 py-0.5 bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[8px] font-black uppercase">
+                    return (
+                      <div
+                        key={evt.id}
+                        className="p-6 bg-[#09141f] border border-[#243343] hover:border-[#f4cf69] rounded-xl transition-all space-y-4 shadow-md"
+                      >
+                        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                          <div className="w-full lg:w-48 h-40 bg-[#03070d] border border-[#243343] rounded-lg overflow-hidden shrink-0 relative">
+                            <img
+                              src={evt.poster_url || "/back/e1.jfif"}
+                              alt={evt.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/80 text-[#f4cf69] text-[8px] font-black uppercase rounded">
                               {evt.event_type}
-                            </span>
-                            <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[8px] uppercase rounded">
-                              {evt.lifecycle_state || "PUBLISHED"}
-                            </span>
+                            </div>
                           </div>
 
-                          <h4 className="text-xl font-black uppercase text-white">{evt.name}</h4>
-                          <p className="text-xs text-[#9ca8b6]">{evt.description || "Executive production by Royal Touch Events."}</p>
+                          <div className="space-y-2.5 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="px-2.5 py-0.5 bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[8px] font-black uppercase">
+                                {evt.event_type}
+                              </span>
+                              <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold text-[8px] uppercase rounded">
+                                {evt.lifecycle_state || "PUBLISHED"}
+                              </span>
+                            </div>
 
-                          <div className="flex flex-wrap gap-4 text-xs font-bold text-[#8d9baa] pt-1">
-                            <span>📅 {evt.event_date || "Date Confirmed"}</span>
-                            <span>⏰ {evt.start_time || "08:00 AM"} - {evt.end_time || "06:00 PM"}</span>
-                            <span>📍 {evt.venue || "Nairobi Venue"}</span>
+                            <h4 className="text-xl font-black uppercase text-white">{evt.name}</h4>
+                            <p className="text-xs text-[#9ca8b6]">{evt.description || "Executive production by Royal Touch Events."}</p>
+
+                            <div className="flex flex-wrap gap-4 text-xs font-bold text-[#8d9baa] pt-1">
+                              <span>📅 {evt.event_date || "Date Confirmed"}</span>
+                              <span>⏰ {evt.start_time || "08:00 AM"} - {evt.end_time || "06:00 PM"}</span>
+                              <span>📍 {evt.venue || "Nairobi Venue"}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex lg:flex-col gap-2 shrink-0">
+                            <button
+                              onClick={() => {
+                                setIssueForEvent(evt);
+                                setIssueHolderName("");
+                                setIssueHolderEmail("");
+                              }}
+                              className="px-4 py-2 bg-emerald-500 text-black font-black text-[10px] uppercase rounded-lg hover:bg-black hover:text-emerald-400 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Plus size={14} /> + Issue Ticket
+                            </button>
+
+                            <button
+                              onClick={() => setExpandedEventId(isExpanded ? null : evt.id)}
+                              className="px-4 py-2 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-white font-bold text-[10px] uppercase rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <TicketIcon size={14} className="text-[#f4cf69]" />
+                              {isExpanded ? "Hide Issued Passes" : `Issued Passes (${eventIssuedTickets.length})`}
+                            </button>
+
+                            <button
+                              onClick={() => openEditModal(evt)}
+                              className="px-4 py-2 bg-[#f4cf69] text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Edit size={14} /> Edit Event & Prices
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteEvent(evt)}
+                              className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold text-[10px] uppercase rounded-lg hover:bg-rose-500 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Trash2 size={14} /> Delete
+                            </button>
                           </div>
                         </div>
 
-                        <div className="flex lg:flex-col gap-2 shrink-0">
-                          <button
-                            onClick={() => openEditModal(evt)}
-                            className="px-4 py-2 bg-[#f4cf69] text-black font-black text-[10px] uppercase rounded-lg hover:bg-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <Edit size={14} /> Edit Event & Prices
-                          </button>
-                          <button
-                            onClick={() => handleDeleteEvent(evt)}
-                            className="px-4 py-2 bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold text-[10px] uppercase rounded-lg hover:bg-rose-500 hover:text-white transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                          >
-                            <Trash2 size={14} /> Delete
-                          </button>
+                        {/* Ticket Classes Options */}
+                        <div className="pt-3 border-t border-[#172533] space-y-2">
+                          <p className="text-[9px] font-black uppercase tracking-widest text-[#f4cf69]">Configured Ticket Classes & Prices</p>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {(evt.ticket_classes || []).map((tc) => {
+                              const availableSeats = Math.max(0, tc.quantity_available - tc.quantity_sold);
+                              const isFree = tc.price === 0;
+                              return (
+                                <div key={tc.id} className="p-3 bg-[#111a25] border border-[#233240] rounded-lg space-y-1">
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span className="font-bold uppercase text-white">{tc.name}</span>
+                                    <span className="font-mono font-black text-[#f4cf69]">
+                                      {isFree ? "FREE ENTRY" : formatKes(tc.price)}
+                                    </span>
+                                  </div>
+                                  <div className="text-[9px] text-[#8d9baa] font-mono flex justify-between pt-1 border-t border-[#172533]">
+                                    <span>Seats: {availableSeats} / {tc.quantity_available}</span>
+                                    <span className={cn("font-bold", availableSeats === 0 ? "text-rose-500" : "text-emerald-400")}>
+                                      {availableSeats === 0 ? "SOLD OUT" : "READY"}
+                                    </span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
 
-                      {/* Ticket Classes Options */}
-                      <div className="pt-3 border-t border-[#172533] space-y-2">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-[#f4cf69]">Ticket Classes & Seat Capacities</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          {(evt.ticket_classes || []).map((tc) => {
-                            const availableSeats = Math.max(0, tc.quantity_available - tc.quantity_sold);
-                            const isFree = tc.price === 0;
-                            return (
-                              <div key={tc.id} className="p-3 bg-[#111a25] border border-[#233240] rounded-lg space-y-1">
-                                <div className="flex justify-between items-center text-xs">
-                                  <span className="font-bold uppercase text-white">{tc.name}</span>
-                                  <span className="font-mono font-black text-[#f4cf69]">
-                                    {isFree ? "FREE ENTRY" : formatKes(tc.price)}
-                                  </span>
-                                </div>
-                                <div className="text-[9px] text-[#8d9baa] font-mono flex justify-between pt-1 border-t border-[#172533]">
-                                  <span>Seats: {availableSeats} / {tc.quantity_available}</span>
-                                  <span className={cn("font-bold", availableSeats === 0 ? "text-rose-500" : "text-emerald-400")}>
-                                    {availableSeats === 0 ? "SOLD OUT" : "READY"}
-                                  </span>
-                                </div>
+                        {/* EXPANDED ISSUED TICKETS TABLE FOR THIS EVENT */}
+                        {isExpanded && (
+                          <div className="pt-4 border-t border-[#f4cf69]/30 space-y-3 animate-in fade-in duration-300">
+                            <div className="flex justify-between items-center">
+                              <p className="text-xs font-black uppercase tracking-wider text-[#f4cf69]">
+                                🎫 Issued Digital QR Passes for {evt.name} ({eventIssuedTickets.length})
+                              </p>
+                              <button
+                                onClick={() => setExpandedEventId(null)}
+                                className="text-[10px] text-[#8d9baa] hover:underline"
+                              >
+                                Close List
+                              </button>
+                            </div>
+
+                            {eventIssuedTickets.length === 0 ? (
+                              <p className="text-xs text-[#8d9baa] py-4 text-center font-mono">
+                                No issued passes found for this event in database.
+                              </p>
+                            ) : (
+                              <div className="overflow-x-auto border border-[#243343] rounded-lg">
+                                <table className="w-full text-left border-collapse text-xs">
+                                  <thead className="bg-[#0d1823] text-[#8d9baa]">
+                                    <tr>
+                                      <th className="p-2.5">Pass Code</th>
+                                      <th className="p-2.5">Holder Name</th>
+                                      <th className="p-2.5">Email</th>
+                                      <th className="p-2.5">Pass Tier</th>
+                                      <th className="p-2.5 text-right">Price Paid</th>
+                                      <th className="p-2.5 text-center">Status</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-[#172530] text-white">
+                                    {eventIssuedTickets.map((tkt) => (
+                                      <tr key={tkt.id} className="hover:bg-[#111a25]">
+                                        <td className="p-2.5 font-mono font-bold text-[#f4cf69]">{tkt.ticket_code}</td>
+                                        <td className="p-2.5 font-bold">{tkt.holder_name}</td>
+                                        <td className="p-2.5 font-mono text-[#9ca8b6]">{tkt.holder_email}</td>
+                                        <td className="p-2.5">{tkt.ticket_tier}</td>
+                                        <td className="p-2.5 text-right font-mono font-bold text-[#f4cf69]">
+                                          {tkt.price > 0 ? formatKes(tkt.price) : "FREE PASS"}
+                                        </td>
+                                        <td className="p-2.5 text-center">
+                                          <span
+                                            className={cn(
+                                              "px-2 py-0.5 rounded text-[8px] font-black uppercase",
+                                              tkt.status === "used" ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/20 text-emerald-400"
+                                            )}
+                                          >
+                                            {tkt.status === "used" ? "Checked In" : "Valid Pass"}
+                                          </span>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
                               </div>
-                            );
-                          })}
-                        </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -769,7 +919,7 @@ function AdminEvents() {
         </main>
       </div>
 
-      {/* CREATE / EDIT EVENT MODAL */}
+      {/* CREATE / EDIT EVENT MODAL WITH PRICE & FREE ENTRY OPTIONS */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
           <div className="relative w-full max-w-2xl bg-[#09141f] border border-[#f4cf69]/40 rounded-xl p-8 space-y-6 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -878,6 +1028,84 @@ function AdminEvents() {
                 </div>
               </div>
 
+              {/* TICKET CLASSES & FREE ENTRY BUILDER */}
+              <div className="space-y-4 p-4 bg-[#111a25] border border-[#233240] rounded-lg">
+                <div className="flex justify-between items-center border-b border-[#172533] pb-2">
+                  <p className="text-[10px] font-black uppercase tracking-widest text-[#f4cf69]">
+                    Ticket Classes & Price Options
+                  </p>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={addFreeTicketClass}
+                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-bold uppercase rounded hover:bg-emerald-500 hover:text-black transition-all cursor-pointer"
+                    >
+                      + Add Free Entry Pass
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addTicketClass}
+                      className="px-3 py-1 bg-[#f4cf69]/20 text-[#f4cf69] border border-[#f4cf69]/40 text-[9px] font-bold uppercase rounded hover:bg-[#f4cf69] hover:text-black transition-all cursor-pointer"
+                    >
+                      + Add Paid Tier
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {ticketClasses.map((tc, idx) => (
+                    <div key={tc.id} className="p-3 bg-[#09141f] border border-[#243343] rounded-lg space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] font-bold text-white uppercase">
+                          Tier #{idx + 1}: {tc.name} {tc.price === 0 && "(FREE ENTRY)"}
+                        </span>
+                        {ticketClasses.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTicketClass(tc.id)}
+                            className="text-rose-400 hover:text-rose-300 text-[10px] font-bold"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid sm:grid-cols-3 gap-2">
+                        <div>
+                          <label className="text-[8px] text-[#8d9bad] uppercase block mb-1">Class Name</label>
+                          <input
+                            type="text"
+                            value={tc.name}
+                            onChange={(e) => updateTicketClass(tc.id, "name", e.target.value)}
+                            className="w-full h-9 bg-[#121d29] border border-[#314354] rounded px-2 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[8px] text-[#8d9bad] uppercase block mb-1">Price (Set 0 for Free Pass)</label>
+                          <input
+                            type="number"
+                            value={tc.price}
+                            onChange={(e) => updateTicketClass(tc.id, "price", Number(e.target.value))}
+                            className="w-full h-9 bg-[#121d29] border border-[#314354] rounded px-2 text-xs font-mono font-bold text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="text-[8px] text-[#8d9bad] uppercase block mb-1">Seat Capacity</label>
+                          <input
+                            type="number"
+                            value={tc.quantity_available}
+                            onChange={(e) => updateTicketClass(tc.id, "quantity_available", Number(e.target.value))}
+                            className="w-full h-9 bg-[#121d29] border border-[#314354] rounded px-2 text-xs font-mono text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={createEventMutation.isPending || updateEventMutation.isPending}
@@ -886,15 +1114,130 @@ function AdminEvents() {
                 {createEventMutation.isPending || updateEventMutation.isPending ? (
                   <Loader2 size={16} className="animate-spin" />
                 ) : editingEvent ? (
-                  "Save Event Changes"
+                  "Save Event Changes & Price Tiers"
                 ) : (
-                  "Publish Event & Ticket Prices"
+                  "Publish Event & Set Ticket Prices"
                 )}
               </button>
             </form>
           </div>
         </div>
       )}
+
+      {/* ISSUE TICKET MODAL FOR SPECIFIC EVENT */}
+      {issueForEvent && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="relative w-full max-w-md bg-[#09141f] border border-[#f4cf69]/40 rounded-xl p-8 space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-[#172533] pb-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-[#f4cf69] text-black flex items-center justify-center font-black rounded-lg">
+                  <TicketIcon size={20} />
+                </div>
+                <div>
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Office Sales</p>
+                  <h3 className="text-sm font-black uppercase tracking-tight text-white truncate max-w-[220px]">
+                    Issue Ticket for {issueForEvent.name}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setIssueForEvent(null)}
+                className="h-10 w-10 bg-[#121d29] border border-[#314354] flex items-center justify-center text-[#8d9bad] hover:text-white cursor-pointer rounded-lg"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleIssueTicketForEvent} className="space-y-4 text-xs font-sans">
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Attendee Legal Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ex: Daniel Maina"
+                  value={issueHolderName}
+                  onChange={(e) => setIssueHolderName(e.target.value)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Attendee Email *</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="Ex: daniel@royaltouch.com"
+                  value={issueHolderEmail}
+                  onChange={(e) => setIssueHolderEmail(e.target.value)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[9px] font-black uppercase tracking-widest text-[#f4cf69]">
+                  Payment Verification & Channel *
+                </label>
+                <select
+                  value={issuePaymentChannel}
+                  onChange={(e) => setIssuePaymentChannel(e.target.value)}
+                  className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                >
+                  <option value="M-Pesa">Paid via M-Pesa Mobile Money (KSh)</option>
+                  <option value="Cash (KES)">Paid via Cash in KES</option>
+                  <option value="Bank Transfer">Paid via Bank Wire Transfer</option>
+                  <option value="Free Pass">Complimentary / Free Entry Pass</option>
+                </select>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Pass Tier</label>
+                  <select
+                    value={issueTier}
+                    onChange={(e) => setIssueTier(e.target.value)}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                  >
+                    {(issueForEvent.ticket_classes || []).map((tc) => (
+                      <option key={tc.id} value={tc.name}>
+                        {tc.name} ({tc.price > 0 ? formatKes(tc.price) : "FREE"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Price Collected (KES)</label>
+                  <input
+                    type="number"
+                    disabled={issuePaymentChannel === "Free Pass"}
+                    value={issuePaymentChannel === "Free Pass" ? 0 : issuePrice}
+                    onChange={(e) => setIssuePrice(Number(e.target.value))}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={issueTicketMutation.isPending}
+                className="w-full h-14 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
+              >
+                {issueTicketMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : "Issue Pass & Generate QR Code"}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* PDF GATE PASS MODAL */}
+      <TicketPassModal
+        ticket={selectedTicketForPdf}
+        isOpen={isPassModalOpen}
+        onClose={() => {
+          setIsPassModalOpen(false);
+          setSelectedTicketForPdf(null);
+        }}
+      />
     </div>
   );
 }
