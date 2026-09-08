@@ -90,9 +90,9 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
       {/* LOGOUT CONFIRMATION POPUP */}
       {showLogoutConfirm && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md px-4 font-sans">
-          <div className="bg-[#09141f] border border-gold/40 p-8 sm:p-10 rounded-xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="bg-[#09141f] border border-gold/40 p-8 sm:p-10 rounded-none max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="text-center space-y-6">
-              <div className="mx-auto h-20 w-20 bg-rose-500/10 border border-rose-500/30 text-rose-500 flex items-center justify-center rounded-full">
+              <div className="mx-auto h-20 w-20 bg-rose-500/10 border border-rose-500/30 text-rose-500 flex items-center justify-center rounded-none">
                 <Power size={36} />
               </div>
               <div className="space-y-2">
@@ -107,14 +107,14 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
                 <button
                   type="button"
                   onClick={() => setShowLogoutConfirm(false)}
-                  className="h-12 rounded-lg bg-[#121d29] border border-[#314354] text-white font-bold text-xs uppercase tracking-widest hover:border-gold transition-all cursor-pointer"
+                  className="h-12 rounded-none bg-[#121d29] border border-[#314354] text-white font-bold text-xs uppercase tracking-widest hover:border-gold transition-all cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="h-12 rounded-lg bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-md cursor-pointer"
+                  className="h-12 rounded-none bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-md cursor-pointer"
                 >
                   Confirm Exit
                 </button>
@@ -152,7 +152,7 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-3 h-10 px-3 rounded-lg text-xs font-semibold transition-all cursor-pointer",
+                    "flex items-center gap-3 h-10 px-3 rounded-none text-xs font-semibold transition-all cursor-pointer",
                     active
                       ? "text-white bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] shadow-lg shadow-[#b48224]/20 font-black"
                       : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
@@ -163,13 +163,22 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
                   </span>
                   {!collapsed && <span>{item.label}</span>}
                   {item.badge ? (
-                    <span className="ml-auto px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-mono font-bold">
+                    <span className="ml-auto px-1.5 py-0.5 rounded-none bg-rose-500 text-white text-[9px] font-mono font-bold">
                       {item.badge}
                     </span>
                   ) : null}
                 </Link>
               );
             })}
+
+            <button
+              type="button"
+              onClick={() => setShowLogoutConfirm(true)}
+              className="w-full flex items-center gap-3 h-10 px-3 rounded-none text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer my-2 text-left"
+            >
+              <span className="text-base w-5 text-center shrink-0 text-rose-400 font-bold">🚪</span>
+              {!collapsed && <span>Sign Out</span>}
+            </button>
           </nav>
 
           {/* Bottom Photo Card */}
@@ -195,13 +204,13 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
             <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={() => setCollapsed(!collapsed)}
-                className="p-2 rounded-lg bg-[#121d29] border border-[#314354] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black transition-all cursor-pointer"
+                className="p-2 rounded-none bg-[#121d29] border border-[#314354] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black transition-all cursor-pointer"
                 title="Toggle Sidebar"
               >
                 <Menu size={18} />
               </button>
 
-              <div className="relative hidden sm:flex items-center w-[240px] lg:w-[320px] h-9 border border-[#314354] rounded-lg bg-[#121d29] px-3">
+              <div className="relative hidden sm:flex items-center w-[240px] lg:w-[320px] h-9 border border-[#314354] rounded-none bg-[#121d29] px-3">
                 <Search size={15} className="text-[#8d9bad] mr-2 shrink-0" />
                 <input
                   placeholder="Search my bookings, events, invoices..."
@@ -215,21 +224,21 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
               {/* Green Action Buttons */}
               <Link
                 to="/dashboard/host-event"
-                className="h-9 px-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-md transition-all cursor-pointer shrink-0"
+                className="h-9 px-3.5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-[10px] uppercase tracking-wider rounded-none flex items-center gap-1.5 shadow-md transition-all cursor-pointer shrink-0"
               >
                 <Globe size={14} /> <span className="hidden sm:inline">Host Event</span>
               </Link>
 
               <Link
                 to="/dashboard/book-event"
-                className="h-9 px-3.5 bg-[#f4cf69] hover:bg-white text-black font-black text-[10px] uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-md transition-all cursor-pointer shrink-0"
+                className="h-9 px-3.5 bg-[#f4cf69] hover:bg-white text-black font-black text-[10px] uppercase tracking-wider rounded-none flex items-center gap-1.5 shadow-md transition-all cursor-pointer shrink-0"
               >
                 <Sparkles size={14} /> <span className="hidden sm:inline">Book Event</span>
               </Link>
 
               <Link
                 to="/"
-                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hidden md:flex"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-none flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hidden md:flex"
                 title="Go to Public Website Home"
               >
                 <Home size={15} /> <span>Website Home</span>
@@ -239,12 +248,12 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
 
               <Link
                 to="/dashboard/messages"
-                className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] hover:text-[#f4cf69] transition-colors cursor-pointer bg-[#121d29] border border-[#314354] rounded-lg"
+                className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] hover:text-[#f4cf69] transition-colors cursor-pointer bg-[#121d29] border border-[#314354] rounded-none"
                 title="Concierge Messages"
               >
                 <Bell size={18} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12]">
+                  <span className="absolute -top-1 -right-1 h-4 w-4 rounded-none bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12]">
                     {unreadCount}
                   </span>
                 )}
@@ -256,7 +265,7 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="flex items-center gap-2.5 group cursor-pointer outline-none">
-                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden">
+                    <div className="h-9 w-9 rounded-none bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden">
                       {profile?.avatar_url ? (
                         <img src={profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
                       ) : (
