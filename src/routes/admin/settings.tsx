@@ -340,7 +340,7 @@ function AdminSettings() {
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/users" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                    <Link to="/admin/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                       <User size={15} className="text-[#f4cf69]" /> Profile
                     </Link>
                   </DropdownMenuItem>

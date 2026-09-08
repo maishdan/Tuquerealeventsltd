@@ -28,6 +28,7 @@ import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
+import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
@@ -140,6 +141,11 @@ const AdminProposalsRoute = AdminProposalsRouteImport.update({
   path: '/admin/proposals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProfileRoute = AdminProfileRouteImport.update({
+  id: '/admin/profile',
+  path: '/admin/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
   id: '/admin/payments',
   path: '/admin/payments',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -281,6 +288,7 @@ export interface FileRoutesByTo {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -317,6 +325,7 @@ export interface FileRoutesById {
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/payments': typeof AdminPaymentsRoute
+  '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/users': typeof AdminUsersRoute
@@ -356,6 +365,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/events'
     | '/admin/payments'
+    | '/admin/profile'
     | '/admin/proposals'
     | '/admin/settings'
     | '/admin/users'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/events'
     | '/admin/payments'
+    | '/admin/profile'
     | '/admin/proposals'
     | '/admin/settings'
     | '/admin/users'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/admin/bookings'
     | '/admin/events'
     | '/admin/payments'
+    | '/admin/profile'
     | '/admin/proposals'
     | '/admin/settings'
     | '/admin/users'
@@ -466,6 +478,7 @@ export interface RootRouteChildren {
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
+  AdminProfileRoute: typeof AdminProfileRoute
   AdminProposalsRoute: typeof AdminProposalsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminUsersRoute: typeof AdminUsersRoute
@@ -606,6 +619,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/proposals'
       fullPath: '/admin/proposals'
       preLoaderRoute: typeof AdminProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/profile': {
+      id: '/admin/profile'
+      path: '/admin/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/payments': {
@@ -775,6 +795,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminBookingsRoute: AdminBookingsRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
+  AdminProfileRoute: AdminProfileRoute,
   AdminProposalsRoute: AdminProposalsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminUsersRoute: AdminUsersRoute,
