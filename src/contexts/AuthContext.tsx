@@ -23,12 +23,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (userId: string) => {
+  const metaRole = (u: User | null | undefined): UserRole | null =>
+    u?.app_metadata?.role === "admin" ? "admin" : null;
+
+  const loadProfile = async (u: User) => {
     try {
-      const p = await fetchProfile(userId);
-      setProfile(p);
+      const p = await fetchProfile(u.id);
+      // Prefer the profiles table; fall back to the role set in auth metadata.
+      setProfile({ ...p, role: p.role ?? metaRole(u) ?? "customer" });
     } catch {
-      setProfile(null);
+      const r = metaRole(u);
+      if (r) {
+        setProfile({ id: u.id, email: u.email ?? "", role: r } as Profile);
+      } else {
+        setProfile(null);
+      }
     }
   };
 
