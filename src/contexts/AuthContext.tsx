@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signOut,
         refreshProfile: async () => {
-          if (session?.user) await loadProfile(session.user.id);
+          if (session?.user) await loadProfile(session.user);
         },
       }}
     >
