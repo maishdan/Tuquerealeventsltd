@@ -23,12 +23,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadProfile = async (userId: string) => {
+  const metaRole = (u: User | null | undefined): UserRole | null =>
+    u?.app_metadata?.role === "admin" ? "admin" : null;
+
+  const loadProfile = async (u: User) => {
     try {
-      const p = await fetchProfile(userId);
-      setProfile(p);
+      const p = await fetchProfile(u.id);
+      // Prefer the profiles table; fall back to the role set in auth metadata.
+      setProfile({ ...p, role: p.role ?? metaRole(u) ?? "customer" });
     } catch {
-      setProfile(null);
+      const r = metaRole(u);
+      if (r) {
+        setProfile({ id: u.id, email: u.email ?? "", role: r } as Profile);
+      } else {
+        setProfile(null);
+      }
     }
   };
 
@@ -36,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       if (data.session?.user) {
-        loadProfile(data.session.user.id).finally(() => setLoading(false));
+        loadProfile(data.session.user).finally(() => setLoading(false));
       } else {
         setLoading(false);
       }
@@ -45,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       setSession(nextSession);
       if (nextSession?.user) {
-        loadProfile(nextSession.user.id);
+        loadProfile(nextSession.user);
       } else {
         setProfile(null);
       }
@@ -58,8 +67,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     const p = await fetchProfile(data.user.id);
-    setProfile(p);
-    return p.role;
+    const role: UserRole = p.role ?? metaRole(data.user) ?? "customer";
+    setProfile({ ...p, role });
+    return role;
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
@@ -93,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signOut,
         refreshProfile: async () => {
-          if (session?.user) await loadProfile(session.user.id);
+          if (session?.user) await loadProfile(session.user);
         },
       }}
     >
