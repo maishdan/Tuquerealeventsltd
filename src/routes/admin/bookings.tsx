@@ -256,7 +256,7 @@ function AdminBookings() {
         {/* MAIN CONTENT AREA */}
         <main className="min-w-0 pb-8">
           {/* TOPBAR (FIXED STICKY HEADER) */}
-          <header className="sticky top-0 z-50 h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl">
+          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
             <button
               type="button"
               onClick={() => {

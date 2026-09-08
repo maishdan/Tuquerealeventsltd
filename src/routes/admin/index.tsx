@@ -187,7 +187,7 @@ function AdminOverview() {
         {/* MAIN CONTENT AREA */}
         <main className="min-w-0 pb-8">
           {/* TOPBAR (FIXED STICKY HEADER) */}
-          <header className="sticky top-0 z-50 h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl">
+          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
             <button
               type="button"
               onClick={() => {
@@ -999,6 +999,22 @@ function AdminOverview() {
                 </div>
               </div>
             </div>
+
+            {/* COMPACT SMALL ADMIN FOOTER */}
+            <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
+              <div className="flex flex-wrap items-center gap-2">
+                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span className="hidden sm:inline">•</span>
+                <span className="italic text-[#f4cf69] font-serif">Powered by My World Africa</span>
+              </div>
+
+              <Link
+                to="/contact"
+                className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
+              >
+                <HelpCircle size={13} /> Help & Support
+              </Link>
+            </footer>
           </section>
         </main>
       </div>
