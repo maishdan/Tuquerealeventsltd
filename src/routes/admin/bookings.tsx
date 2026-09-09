@@ -218,6 +218,8 @@ function AdminBookings() {
             {[
               { to: "/admin", label: "Dashboard", icon: "▣" },
               { to: "/admin/users", label: "Clients", icon: "♟" },
+              { to: "/admin/prospects", label: "Prospects", icon: "✦" },
+              { to: "/admin/customers", label: "Customers", icon: "♟" },
               { to: "/admin/events", label: "Events", icon: "▦" },
               { to: "/admin/bookings", label: "Sales & CRM", icon: "▤", active: true },
               { to: "/admin/proposals", label: "Proposals", icon: "▤" },

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { createPageSeo } from "@/lib/seo";
 import {
   Sparkles,
   Search,
@@ -14,7 +15,14 @@ import {
   Globe,
   Flame,
   TrendingUp,
-  BarChart3
+  BarChart3,
+  Home,
+  PlusCircle,
+  Send,
+  DollarSign,
+  Target,
+  Share2,
+  CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -27,12 +35,29 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/admin/marketing")({
+  head: () =>
+    createPageSeo({
+      title: "Marketing Intelligence & Ad Campaigns | Royal Touch Admin",
+      description: "Official Marketing Intelligence Center, lead attribution analytics, and ad campaign ROI ledger.",
+      path: "/admin/marketing",
+      noindex: true,
+    }),
   component: AdminMarketing,
 });
 
 export function AdminMarketing() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+
+  // New Campaign Form State
+  const [campaignName, setCampaignName] = useState("");
+  const [campaignChannel, setCampaignCategory] = useState("LinkedIn Ads");
+  const [budget, setBudget] = useState(150000);
 
   const emailLower = (user?.email || profile?.email || "").toLowerCase();
   const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
@@ -48,17 +73,60 @@ export function AdminMarketing() {
     return { fullName: fallback, badge: "EXECUTIVE ADMIN" };
   })();
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
-  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
-
   const showToast = (msg: string) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(null), 2500);
   };
 
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
+
+  const handleLaunchCampaign = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!campaignName.trim()) return;
+
+    showToast(`✓ Marketing Campaign "${campaignName}" launched successfully! Budget: KSh ${budget.toLocaleString()}`);
+    setCampaignName("");
+  };
+
+  // Mock Marketing Campaigns ROI Ledger Data
+  const campaigns = [
+    {
+      name: "Q3 Corporate Gala Summit Campaign",
+      channel: "LinkedIn Ads",
+      spend: 250000,
+      leads: 34,
+      cpa: 7352,
+      roi: "340%",
+      status: "ACTIVE",
+    },
+    {
+      name: "Luxury Wedding & Hospitality Expo",
+      channel: "Instagram & Meta",
+      spend: 180000,
+      leads: 28,
+      cpa: 6428,
+      roi: "280%",
+      status: "ACTIVE",
+    },
+    {
+      name: "VIP Concierge WhatsApp Direct Outreach",
+      channel: "WhatsApp Concierge",
+      spend: 50000,
+      leads: 42,
+      cpa: 1190,
+      roi: "520%",
+      status: "ACTIVE",
+    },
+    {
+      name: "Eldoret & Rift Valley Expansion Ads",
+      channel: "Google Search",
+      spend: 120000,
+      leads: 18,
+      cpa: 6666,
+      roi: "210%",
+      status: "COMPLETED",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
@@ -144,7 +212,7 @@ export function AdminMarketing() {
         {/* MAIN CONTENT AREA */}
         <main className="min-w-0 pb-8">
           {/* TOPBAR (FIXED STICKY HEADER) */}
-          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
+          <header className="sticky top-0 z-[1000] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
             <button
               type="button"
               onClick={() => {
@@ -167,7 +235,17 @@ export function AdminMarketing() {
               />
             </div>
 
-            <div className="ml-auto flex items-center gap-4">
+            <div className="ml-auto flex items-center gap-3">
+              <Link
+                to="/"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
               <button
                 type="button"
                 onClick={() => showToast("3 Active Notifications")}
@@ -286,7 +364,7 @@ export function AdminMarketing() {
           )}
 
           {/* MARKETING DASHBOARD CONTENT BODY */}
-          <section className="p-4 sm:p-6 space-y-4 max-w-[1700px] mx-auto">
+          <section className="p-4 sm:p-6 space-y-6 max-w-[1700px] mx-auto">
             {/* Executive 3D Tile Banner */}
             <div className="relative group">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#d5a637]/30 via-[#f4cf69]/20 to-[#896019]/30 blur-md opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
@@ -308,26 +386,149 @@ export function AdminMarketing() {
               </div>
             </div>
 
-            {/* MARKETING CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-1">
-                <span className="text-[10px] text-[#8d9baa] uppercase font-bold block">Website Visitors</span>
-                <p className="text-2xl font-black text-white font-mono">8,432 <span className="text-[#20e39b] text-xs">↑ 22%</span></p>
+            {/* EXACT MARKETING INTELLIGENCE CARD MATCHING USER SCREENSHOT */}
+            <div className="p-6 bg-[#08121e] border border-[#1f2d3d] rounded-2xl shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[#1f2d3d] pb-3">
+                <div className="flex items-center gap-2 font-bold text-sm text-white">
+                  <span className="text-[#f1c045] text-lg font-serif">♛</span> Marketing Intelligence
+                </div>
+                <span className="text-xs text-[#d8b45a] font-bold font-mono">Live Campaign Metrics</span>
               </div>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-1">
-                <span className="text-[10px] text-[#8d9baa] uppercase font-bold block">LinkedIn Inbound Leads</span>
-                <p className="text-2xl font-black text-[#f4cf69] font-mono">34 <span className="text-[#20e39b] text-xs">↑ 26%</span></p>
+              <div className="grid sm:grid-cols-2 gap-6 items-center pt-2">
+                {/* Left Side: Website Visitors & LinkedIn Leads */}
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-[#a8b4c0] text-xs font-bold block">Website Visitors</span>
+                    <p className="text-2xl font-black text-white font-mono flex items-center gap-2 mt-1">
+                      8,432 <span className="text-[#20e39b] text-xs font-bold flex items-center gap-0.5">↑ 22%</span>
+                    </p>
+                  </div>
+
+                  <div className="pt-2">
+                    <span className="text-[#a8b4c0] text-xs font-bold block">LinkedIn Leads</span>
+                    <p className="text-2xl font-black text-white font-mono flex items-center gap-2 mt-1">
+                      34 <span className="text-[#20e39b] text-xs font-bold flex items-center gap-0.5">↑ 26%</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right Side: Lead Sources Channel Distribution */}
+                <div className="border-t sm:border-t-0 sm:border-l border-[#1f2d3d] pt-4 sm:pt-0 sm:pl-6 space-y-2">
+                  <span className="text-[#8d9bad] text-xs font-bold uppercase tracking-wider block mb-2">Lead Sources</span>
+                  <div className="space-y-2 text-xs font-bold font-mono">
+                    <p className="flex items-center justify-between text-[#c7d0da]">
+                      <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#2d9af5] inline-block" /> LinkedIn</span>
+                      <b className="text-white">28%</b>
+                    </p>
+                    <p className="flex items-center justify-between text-[#c7d0da]">
+                      <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#16c6b5] inline-block" /> WhatsApp</span>
+                      <b className="text-white">22%</b>
+                    </p>
+                    <p className="flex items-center justify-between text-[#c7d0da]">
+                      <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#f6c444] inline-block" /> Instagram</span>
+                      <b className="text-white">18%</b>
+                    </p>
+                    <p className="flex items-center justify-between text-[#c7d0da]">
+                      <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#e84393] inline-block" /> Facebook</span>
+                      <b className="text-white">15%</b>
+                    </p>
+                    <p className="flex items-center justify-between text-[#c7d0da]">
+                      <span className="flex items-center gap-2"><i className="h-3 w-3 rounded-full bg-[#a29bfe] inline-block" /> Website Direct</span>
+                      <b className="text-white">12%</b>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* LAUNCH NEW CAMPAIGN FORM */}
+            <form onSubmit={handleLaunchCampaign} className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-4">
+              <div className="border-b border-[#172533] pb-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Campaign Dispatch</p>
+                <h3 className="text-lg font-black uppercase text-white flex items-center gap-2">
+                  <PlusCircle size={18} className="text-[#f4cf69]" /> Launch New Ad Campaign
+                </h3>
               </div>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-1">
-                <span className="text-[10px] text-[#8d9baa] uppercase font-bold block">Cost Per Lead</span>
-                <p className="text-2xl font-black text-emerald-400 font-mono">KSh 320 <span className="text-[#20e39b] text-xs">↓ 18%</span></p>
+              <div className="grid sm:grid-cols-3 gap-4 text-xs font-sans">
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-[#8d9bad]">Campaign Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ex: Q4 Corporate Tech Gala Campaign"
+                    value={campaignName}
+                    onChange={(e) => setCampaignName(e.target.value)}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-[#8d9bad]">Channel Category *</label>
+                  <select
+                    value={campaignChannel}
+                    onChange={(e) => setCampaignCategory(e.target.value)}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                  >
+                    <option value="LinkedIn Ads">LinkedIn Ads (Corporate & Summits)</option>
+                    <option value="Instagram & Meta">Instagram & Meta (Weddings & Galas)</option>
+                    <option value="WhatsApp Concierge">WhatsApp Concierge Direct</option>
+                    <option value="Google Search">Google Search (Nairobi Event Planning)</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[9px] font-black uppercase text-[#8d9bad]">Budget Allocation (KES) *</label>
+                  <input
+                    type="number"
+                    value={budget}
+                    onChange={(e) => setBudget(Number(e.target.value))}
+                    className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                  />
+                </div>
               </div>
 
-              <div className="p-4 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-1">
-                <span className="text-[10px] text-[#8d9baa] uppercase font-bold block">WhatsApp Inquiries</span>
-                <p className="text-2xl font-black text-blue-400 font-mono">42 <span className="text-[#20e39b] text-xs">↑ 18%</span></p>
+              <button
+                type="submit"
+                className="w-full h-12 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
+              >
+                <Send size={16} /> Launch Campaign
+              </button>
+            </form>
+
+            {/* ACTIVE CAMPAIGNS ROI LEDGER TABLE */}
+            <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4">
+              <div className="border-b border-[#172533] pb-3">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Ad Performance Ledger</p>
+                <h3 className="text-xl font-black uppercase text-white">Active Ad Campaigns & ROI Performance</h3>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="text-[#8d9baa] bg-[#0d1823] border-b border-[#172530]">
+                      <th className="p-3">Campaign Name</th>
+                      <th className="p-3">Ad Channel</th>
+                      <th className="p-3 text-right">Ad Spend (KES)</th>
+                      <th className="p-3 text-center">Inbound Leads</th>
+                      <th className="p-3 text-right">Cost Per Lead</th>
+                      <th className="p-3 text-right">Calculated ROI</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
+                    {campaigns.map((c, idx) => (
+                      <tr key={idx} className="hover:bg-[#0d1823] transition-colors">
+                        <td className="p-3 font-bold text-white uppercase">{c.name}</td>
+                        <td className="p-3 text-[#9ca8b6] font-mono">{c.channel}</td>
+                        <td className="p-3 text-right font-mono font-bold text-white">KSh {c.spend.toLocaleString()}</td>
+                        <td className="p-3 text-center font-mono font-bold text-[#f4cf69]">{c.leads} Leads</td>
+                        <td className="p-3 text-right font-mono text-emerald-400">KSh {c.cpa.toLocaleString()}</td>
+                        <td className="p-3 text-right font-mono font-black text-[#20e39b]">{c.roi}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
 

@@ -29,6 +29,7 @@ import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminTeamRouteImport } from './routes/admin/team'
 import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
 import { Route as AdminReportsRouteImport } from './routes/admin/reports'
+import { Route as AdminProspectsRouteImport } from './routes/admin/prospects'
 import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
@@ -36,6 +37,7 @@ import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
 import { Route as AdminHelpRouteImport } from './routes/admin/help'
 import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
+import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
 import { Route as AdminAiRouteImport } from './routes/admin/ai'
@@ -153,6 +155,11 @@ const AdminReportsRoute = AdminReportsRouteImport.update({
   path: '/admin/reports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminProspectsRoute = AdminProspectsRouteImport.update({
+  id: '/admin/prospects',
+  path: '/admin/prospects',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminProposalsRoute = AdminProposalsRouteImport.update({
   id: '/admin/proposals',
   path: '/admin/proposals',
@@ -186,6 +193,11 @@ const AdminFinanceRoute = AdminFinanceRouteImport.update({
 const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/admin/events',
   path: '/admin/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/admin/customers',
+  path: '/admin/customers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminContactsRoute = AdminContactsRouteImport.update({
@@ -292,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
@@ -299,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/prospects': typeof AdminProspectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -337,6 +351,7 @@ export interface FileRoutesByTo {
   '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
@@ -344,6 +359,7 @@ export interface FileRoutesByTo {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/prospects': typeof AdminProspectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -381,6 +397,7 @@ export interface FileRoutesById {
   '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
+  '/admin/customers': typeof AdminCustomersRoute
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
@@ -388,6 +405,7 @@ export interface FileRoutesById {
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
   '/admin/proposals': typeof AdminProposalsRoute
+  '/admin/prospects': typeof AdminProspectsRoute
   '/admin/reports': typeof AdminReportsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -428,6 +446,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
+    | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
@@ -435,6 +454,7 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/prospects'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/team'
@@ -473,6 +493,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
+    | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
@@ -480,6 +501,7 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/prospects'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/team'
@@ -516,6 +538,7 @@ export interface FileRouteTypes {
     | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
+    | '/admin/customers'
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
@@ -523,6 +546,7 @@ export interface FileRouteTypes {
     | '/admin/payments'
     | '/admin/profile'
     | '/admin/proposals'
+    | '/admin/prospects'
     | '/admin/reports'
     | '/admin/settings'
     | '/admin/team'
@@ -562,6 +586,7 @@ export interface RootRouteChildren {
   AdminAiRoute: typeof AdminAiRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminContactsRoute: typeof AdminContactsRoute
+  AdminCustomersRoute: typeof AdminCustomersRoute
   AdminEventsRoute: typeof AdminEventsRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminHelpRoute: typeof AdminHelpRoute
@@ -569,6 +594,7 @@ export interface RootRouteChildren {
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProfileRoute: typeof AdminProfileRoute
   AdminProposalsRoute: typeof AdminProposalsRoute
+  AdminProspectsRoute: typeof AdminProspectsRoute
   AdminReportsRoute: typeof AdminReportsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -719,6 +745,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/prospects': {
+      id: '/admin/prospects'
+      path: '/admin/prospects'
+      fullPath: '/admin/prospects'
+      preLoaderRoute: typeof AdminProspectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/proposals': {
       id: '/admin/proposals'
       path: '/admin/proposals'
@@ -766,6 +799,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/events'
       fullPath: '/admin/events'
       preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/admin/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/contacts': {
@@ -935,6 +975,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminAiRoute: AdminAiRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminContactsRoute: AdminContactsRoute,
+  AdminCustomersRoute: AdminCustomersRoute,
   AdminEventsRoute: AdminEventsRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminHelpRoute: AdminHelpRoute,
@@ -942,6 +983,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProfileRoute: AdminProfileRoute,
   AdminProposalsRoute: AdminProposalsRoute,
+  AdminProspectsRoute: AdminProspectsRoute,
   AdminReportsRoute: AdminReportsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,

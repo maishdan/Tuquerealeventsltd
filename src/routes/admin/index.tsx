@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown } from "lucide-react";
 
 import { createPageSeo } from "@/lib/seo";
 
@@ -156,7 +156,7 @@ function AdminOverview() {
         <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
           {/* Brand Header */}
           <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
-            <div className="text-2xl font-serif">♕</div>
+            <Crown size={28} className="text-[#f4cf69]" />
             {!isMenuCollapsed && (
               <>
                 <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
@@ -168,21 +168,23 @@ function AdminOverview() {
           {/* Navigation Items */}
           <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
             {[
-              { to: "/admin", label: "Dashboard", icon: "▣", active: true },
-              { to: "/admin/users", label: "Clients", icon: "♟" },
-              { to: "/admin/events", label: "Events", icon: "▦" },
-              { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
-              { to: "/admin/proposals", label: "Proposals", icon: "▤" },
-              { to: "/admin/payments", label: "Payments", icon: "▣" },
-              { to: "/admin/finance", label: "Finance", icon: "✥" },
-              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
-              { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
-              { to: "/admin/contacts", label: "Notifications", icon: "♧" },
-              { to: "/admin/contacts", label: "Messages", icon: "✉" },
-              { to: "/admin/team", label: "Team", icon: "♟" },
-              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
-              { to: "/admin/reports", label: "Reports", icon: "▣" },
-              { to: "/admin/settings", label: "Settings", icon: "⚙" },
+              { to: "/admin", label: "Dashboard", active: true },
+              { to: "/admin/users", label: "Clients" },
+              { to: "/admin/prospects", label: "Prospects" },
+              { to: "/admin/customers", label: "Customers" },
+              { to: "/admin/events", label: "Events" },
+              { to: "/admin/bookings", label: "Sales & CRM" },
+              { to: "/admin/proposals", label: "Proposals" },
+              { to: "/admin/payments", label: "Payments" },
+              { to: "/admin/finance", label: "Finance" },
+              { to: "/admin/ai", label: "AI & Insights" },
+              { to: "/admin/admin-booking", label: "Booking" },
+              { to: "/admin/contacts", label: "Notifications" },
+              { to: "/admin/contacts", label: "Messages" },
+              { to: "/admin/team", label: "Team" },
+              { to: "/admin/marketing", label: "Marketing" },
+              { to: "/admin/reports", label: "Reports" },
+              { to: "/admin/settings", label: "Settings" },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -195,9 +197,6 @@ function AdminOverview() {
                     : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
                 )}
               >
-                <span className={cn("text-base w-5 text-center shrink-0", item.active ? "text-white" : "text-[#f1c35a]")}>
-                  {item.icon}
-                </span>
                 {!isMenuCollapsed && <span>{item.label}</span>}
               </Link>
             ))}
@@ -207,7 +206,7 @@ function AdminOverview() {
               onClick={() => setShowLogoutConfirmModal(true)}
               className="w-full flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer my-2 text-left"
             >
-              <span className="text-base w-5 text-center shrink-0 text-rose-400 font-bold">🚪</span>
+              <LogOut size={16} />
               {!isMenuCollapsed && <span>Sign Out</span>}
             </button>
           </nav>
@@ -568,11 +567,11 @@ function AdminOverview() {
               <div className="relative p-6 sm:p-8 bg-gradient-to-r from-[#0d1c28] via-[#09141f] to-[#050e17] border-2 border-[#d4a43b]/40 rounded-xl shadow-[0_12px_35px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
                 <div className="space-y-2.5 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e6b83f]/15 border border-[#e6b83f]/40 text-[#f4cf69] text-[9px] font-black uppercase tracking-[0.25em] rounded-md shadow-inner">
-                    <span className="text-[#f4cf69] font-serif text-sm">♛</span> Royal Touch Events Administrator
+                    <Crown size={14} className="text-[#f4cf69]" /> Royal Touch Events Administrator
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
-                    <span className="text-[#f4cf69]">{timeGreeting},</span> {adminInfo.fullName} <span className="text-[#f4cf69] font-serif text-2xl lg:text-3xl">♛</span>
+                    <span className="text-[#f4cf69]">{timeGreeting},</span> {adminInfo.fullName}
                   </h1>
 
                   <p className="text-xs sm:text-sm text-[#98a7b7] font-medium leading-relaxed font-sans">
@@ -1001,13 +1000,16 @@ function AdminOverview() {
                 </div>
               </div>
 
-              {/* Marketing Intelligence (3 Cols) */}
-              <div className="lg:col-span-3 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-4 shadow-xl space-y-3 min-h-[222px]">
+              {/* Marketing Intelligence Tile (3 Cols - Clickable Link to /admin/marketing) */}
+              <Link
+                to="/admin/marketing"
+                className="lg:col-span-3 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] hover:border-[#f4cf69]/50 rounded-xl p-4 shadow-xl space-y-3 min-h-[222px] group cursor-pointer transition-all block"
+              >
                 <div className="flex items-center justify-between border-b border-[#172533] pb-3">
-                  <div className="flex items-center gap-2 font-bold text-xs text-white">
+                  <div className="flex items-center gap-2 font-bold text-xs text-white group-hover:text-[#f4cf69] transition-colors">
                     <span className="text-[#f1c045] text-base">♛</span> Marketing Intelligence
                   </div>
-                  <Link to="/admin/marketing" className="text-[10px] text-[#d8b45a] font-medium hover:underline">View All →</Link>
+                  <span className="text-[10px] text-[#d8b45a] font-medium group-hover:underline">View All →</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-[10px]">
@@ -1025,28 +1027,62 @@ function AdminOverview() {
                     <p className="text-[9px] text-[#c7d0da]"><i className="h-2 w-2 rounded-full bg-[#f6c444] inline-block mr-1" /> Instagram 18%</p>
                   </div>
                 </div>
-              </div>
+              </Link>
 
-              {/* CEO Decision Center (3 Cols) */}
-              <div className="lg:col-span-3 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-4 shadow-xl space-y-2 min-h-[222px]">
+              {/* CEO Decision Center (2 Cols) */}
+              <div className="lg:col-span-2 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-4 shadow-xl space-y-2 min-h-[222px]">
                 <div className="flex items-center gap-2 font-bold text-xs text-white border-b border-[#172533] pb-2">
-                  <span className="text-[#f1c045] text-base">⚠</span> CEO Decision Center
+                  <span className="text-[#f1c045] text-base">⚠</span> Decision Center
                 </div>
 
                 <div className="p-2 bg-[#43191e] text-[#f7a0a4] rounded-lg text-[9px] leading-tight space-y-1">
-                  <b>● Requires Your Decision ({pendingBookings.length})</b>
-                  <p>{pendingBookings.length > 0 ? `${pendingBookings.length} pending ticket order(s) awaiting approval` : "No pending approvals"}</p>
+                  <b>● Requires Decision ({pendingBookings.length})</b>
+                  <p>{pendingBookings.length > 0 ? `${pendingBookings.length} pending orders` : "No pending approvals"}</p>
                 </div>
 
                 <div className="p-2 bg-[#45370d] text-[#e8ca62] rounded-lg text-[9px] leading-tight space-y-1">
                   <b>● Attention Needed</b>
-                  <p>Check venue setup & seating allocations</p>
+                  <p>Check venue setup</p>
                 </div>
 
                 <div className="p-2 bg-[#103a2f] text-[#63dfb1] rounded-lg text-[9px] leading-tight space-y-1">
-                  <b>● Live Database Status</b>
-                  <p>M-Pesa Verification Engine Online</p>
+                  <b>● Database Engine</b>
+                  <p>M-Pesa Engine Online</p>
                 </div>
+              </div>
+
+              {/* AI OPPORTUNITY INTELLIGENCE PREVIEW TILE (3 Cols - DIRECT LINK TO /admin/ai) */}
+              <div className="lg:col-span-3 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#f4cf69]/40 rounded-xl p-4 shadow-xl space-y-2.5 min-h-[222px]">
+                <div className="flex items-center justify-between border-b border-[#172533] pb-2">
+                  <div className="flex items-center gap-1.5 font-bold text-xs text-[#f4cf69]">
+                    <span className="text-base">✦</span> AI Lead Intelligence
+                  </div>
+                  <Link to="/admin/ai" className="text-[10px] text-[#f4cf69] hover:text-white font-bold hover:underline">
+                    Explore AI →
+                  </Link>
+                </div>
+
+                <div className="space-y-1.5 text-[9px]">
+                  <div className="p-2 bg-[#111d2a] border border-[#243343] rounded flex justify-between items-center">
+                    <span className="text-white font-bold truncate max-w-[130px]">ABC Leadership Conf.</span>
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono font-bold">🔥 92/100</span>
+                  </div>
+                  <div className="p-2 bg-[#111d2a] border border-[#243343] rounded flex justify-between items-center">
+                    <span className="text-white font-bold truncate max-w-[130px]">Safaricom Tech Expo</span>
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono font-bold">🔥 95/100</span>
+                  </div>
+                  <div className="p-2 bg-[#111d2a] border border-[#243343] rounded flex justify-between items-center">
+                    <span className="text-white font-bold truncate max-w-[130px]">KCB Group Gala Dinner</span>
+                    <span className="px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono font-bold">🔥 96/100</span>
+                  </div>
+                </div>
+
+                <Link
+                  to="/admin/ai"
+                  className="w-full py-2 bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-black font-black text-[9px] uppercase tracking-wider rounded-lg flex items-center justify-center gap-1 hover:bg-[#f4cf69] transition-all shadow cursor-pointer mt-1"
+                >
+                  Explore All 128 AI Leads & Tenders →
+                </Link>
               </div>
 
               {/* CEO Quote Card (2 Cols) */}
