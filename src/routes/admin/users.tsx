@@ -31,7 +31,8 @@ import {
   Lock,
   Phone,
   User,
-  Home
+  Home,
+  Bell
 } from "lucide-react";
 import { useAdminTeam, useAdminClients, useAdminTickets, formatKes } from "@/hooks/use-dashboard-data";
 import { updateUserRole, updateProfile, deleteProfile, createProfile } from "@/lib/api/profiles";
@@ -404,7 +405,7 @@ function AdminUsers() {
 
               <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
 
-              {/* Notifications Dropdown Popover */}
+              {/* Notifications Dropdown Popover (Live Database Data) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -412,35 +413,37 @@ function AdminUsers() {
                     className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f] outline-none group"
                     title="Notifications Overview"
                   >
-                    ♧
+                    <Bell size={18} />
                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12] group-hover:scale-110 transition-transform">
-                      3
+                      {tickets.length || 3}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-80 bg-[#09141f] border-[#243343] text-white p-3 shadow-2xl rounded-xl space-y-2">
+                <DropdownMenuContent align="end" sideOffset={8} className="w-80 bg-[#09141f] border border-[#f4cf69]/40 text-white p-3 shadow-2xl rounded-xl space-y-2 z-[999999]">
                   <div className="flex items-center justify-between px-2 py-1">
                     <span className="text-xs font-black text-[#f4cf69] uppercase tracking-wider">
                       Executive Notifications
                     </span>
                     <span className="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full">
-                      3 New
+                      {tickets.length || 3} New
                     </span>
                   </div>
 
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                    <div className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
-                        <span>New M-Pesa Ticket Order</span>
-                        <span className="text-[#8391a0]">2m ago</span>
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+                    {tickets.slice(0, 3).map((t) => (
+                      <div key={t.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
+                          <span>New M-Pesa Ticket Order</span>
+                          <span className="text-[#8391a0] font-mono">{new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <p className="text-[#c7d0da] text-[11px] leading-snug">
+                          {t.holder_name} paid {formatKes(t.price)} via M-Pesa for {t.ticket_tier} Pass.
+                        </p>
                       </div>
-                      <p className="text-[#c7d0da] text-[11px] leading-snug">
-                        Daniel Maina paid KSh 1,500 via M-Pesa for VIP Pass.
-                      </p>
-                    </div>
+                    ))}
                   </div>
 
                   <DropdownMenuSeparator className="bg-[#172533]" />

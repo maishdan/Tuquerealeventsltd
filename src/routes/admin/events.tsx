@@ -186,6 +186,21 @@ export function AdminEvents() {
   const [formBudget, setFormBudget] = useState(1500000);
   const [formPosterUrl, setFormPosterUrl] = useState("/back/e1.jfif");
 
+  // Handle Image File Upload via FileReader
+  const handleImageFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === "string") {
+          setFormPosterUrl(reader.result);
+          showToast(`✓ Uploaded Poster Image: ${file.name}`);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   // Ticket Classes
   const [ticketClasses, setTicketClasses] = useState<
     { name: string; price: number; quantity_available: number; description: string }[]
@@ -768,7 +783,7 @@ export function AdminEvents() {
                               onClick={() => openEditModal(evt)}
                               className="px-3 py-2 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-white text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5"
                             >
-                              <Edit size={14} className="text-[#f4cf69]" /> Edit Prices
+                              <Edit size={14} className="text-[#f4cf69]" /> Edit Event & Poster
                             </button>
                             <button
                               onClick={() => handleDeleteEvent(evt.id, evt.name)}
@@ -868,14 +883,69 @@ export function AdminEvents() {
                       </div>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase text-[#8d9bad]">Event Poster Image URL</label>
-                      <input
-                        type="text"
-                        value={formPosterUrl}
-                        onChange={(e) => setFormPosterUrl(e.target.value)}
-                        className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
-                      />
+                    {/* EVENT POSTER IMAGE UPLOADER, PRESETS & LIVE PREVIEW */}
+                    <div className="p-4 bg-[#0d1823] border border-[#243343] rounded-xl space-y-3">
+                      <label className="text-[9px] font-black uppercase text-[#8d9bad] block">
+                        Event Poster Image * (Upload File or Select Preset)
+                      </label>
+
+                      {/* Live Image Preview */}
+                      {formPosterUrl && (
+                        <div className="relative h-36 w-full rounded-lg overflow-hidden border border-[#f4cf69]/50 shadow-md">
+                          <img src={formPosterUrl} alt="Poster Preview" className="w-full h-full object-cover" />
+                          <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/80 text-[#f4cf69] font-mono text-[9px] font-bold uppercase rounded">
+                            Live Poster Preview
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="grid sm:grid-cols-2 gap-3 pt-1">
+                        {/* Option 1: File Upload */}
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-[#8d9bad] font-bold uppercase block">Upload Local Poster File:</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageFileUpload}
+                            className="w-full text-xs text-[#c7d0da] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#f4cf69] file:text-black hover:file:bg-white cursor-pointer"
+                          />
+                        </div>
+
+                        {/* Option 2: Image URL */}
+                        <div className="space-y-1">
+                          <span className="text-[9px] text-[#8d9bad] font-bold uppercase block">Or Custom Image URL:</span>
+                          <input
+                            type="text"
+                            value={formPosterUrl}
+                            onChange={(e) => setFormPosterUrl(e.target.value)}
+                            placeholder="https://..."
+                            className="w-full h-10 bg-[#121d29] border border-[#314354] rounded-lg px-3 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Option 3: Presets Grid */}
+                      <div className="pt-2">
+                        <span className="text-[9px] text-[#8d9bad] font-bold uppercase block mb-1.5">Or Choose From Presets:</span>
+                        <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+                          {defaultPosterPresets.map((preset, idx) => (
+                            <button
+                              type="button"
+                              key={idx}
+                              onClick={() => {
+                                setFormPosterUrl(preset);
+                                showToast(`✓ Selected Preset Poster #${idx + 1}`);
+                              }}
+                              className={cn(
+                                "h-12 rounded-lg overflow-hidden border-2 cursor-pointer transition-all hover:scale-105",
+                                formPosterUrl === preset ? "border-[#f4cf69] ring-2 ring-[#f4cf69]" : "border-[#243343] opacity-60 hover:opacity-100"
+                              )}
+                            >
+                              <img src={preset} alt={`Preset ${idx}`} className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     {/* TICKET CLASS PRICING TIERS CONFIGURATOR */}

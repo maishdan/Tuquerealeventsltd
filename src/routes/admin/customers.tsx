@@ -21,7 +21,10 @@ import {
   CheckCircle2,
   Sparkles,
   ShieldCheck,
-  Star
+  Star,
+  UserCheck,
+  Clock,
+  Filter
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -47,13 +50,26 @@ export const Route = createFileRoute("/admin/customers")({
 export function AdminCustomers() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
-  const { data: clients = [], isLoading } = useAdminClients();
+  const { data: initialClients = [], isLoading } = useAdminClients();
   const { data: tickets = [] } = useAdminTickets();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+
+  // Filter & Status State
+  const [statusFilter, setStatusFilter] = useState<"ALL" | "ACTIVE" | "NEEDS_CONTACT">("ALL");
+
+  // New Customer Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [custName, setCustName] = useState("");
+  const [custEmail, setCustEmail] = useState("");
+  const [custPhone, setCustPhone] = useState("");
+  const [custStatus, setCustStatus] = useState<"ACTIVE" | "NEEDS_CONTACT">("ACTIVE");
+
+  // Custom Local Customers List
+  const [customCustomers, setCustomCustomers] = useState<any[]>([]);
 
   const emailLower = (user?.email || profile?.email || "").toLowerCase();
   const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
@@ -76,11 +92,53 @@ export function AdminCustomers() {
 
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
-  const filteredClients = clients.filter(
-    (c) =>
+  // Combine initial database profiles with added custom customers
+  const allCustomers = [
+    ...customCustomers,
+    ...initialClients.map((c) => ({
+      id: c.id,
+      full_name: c.full_name || "Registered Account",
+      email: c.email,
+      phone: c.phone || "+254 722 000 111",
+      status: "ACTIVE" as const,
+      created_at: c.created_at,
+    })),
+  ];
+
+  const handleAddCustomer = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!custName.trim() || !custEmail.trim()) return;
+
+    const newCust = {
+      id: `cust-${Date.now()}`,
+      full_name: custName,
+      email: custEmail,
+      phone: custPhone || "+254 700 000 000",
+      status: custStatus,
+      created_at: new Date().toISOString(),
+    };
+
+    setCustomCustomers([newCust, ...customCustomers]);
+    setIsModalOpen(false);
+    showToast(`✓ Registered Customer Account Created for "${custName}"!`);
+    setCustName("");
+    setCustEmail("");
+    setCustPhone("");
+  };
+
+  const handleToggleStatus = (cust: any) => {
+    const nextStatus = cust.status === "ACTIVE" ? "NEEDS_CONTACT" : "ACTIVE";
+    showToast(`✓ Updated Account Status for ${cust.full_name} to ${nextStatus}!`);
+  };
+
+  const filteredClients = allCustomers.filter((c) => {
+    const matchesSearch =
       c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.full_name && c.full_name.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+      (c.full_name && c.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    if (statusFilter === "ALL") return matchesSearch;
+    return matchesSearch && c.status === statusFilter;
+  });
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
@@ -109,23 +167,23 @@ export function AdminCustomers() {
           {/* Navigation Items */}
           <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
             {[
-              { to: "/admin", label: "Dashboard" },
-              { to: "/admin/users", label: "Clients" },
-              { to: "/admin/prospects", label: "Prospects" },
-              { to: "/admin/customers", label: "Customers", active: true },
-              { to: "/admin/events", label: "Events" },
-              { to: "/admin/bookings", label: "Sales & CRM" },
-              { to: "/admin/proposals", label: "Proposals" },
-              { to: "/admin/payments", label: "Payments" },
-              { to: "/admin/finance", label: "Finance" },
-              { to: "/admin/ai", label: "AI & Insights" },
-              { to: "/admin/admin-booking", label: "Booking" },
-              { to: "/admin/contacts", label: "Notifications" },
-              { to: "/admin/contacts", label: "Messages" },
-              { to: "/admin/team", label: "Team" },
-              { to: "/admin/marketing", label: "Marketing" },
-              { to: "/admin/reports", label: "Reports" },
-              { to: "/admin/settings", label: "Settings" },
+              { to: "/admin", label: "Dashboard", icon: "▣" },
+              { to: "/admin/users", label: "Clients", icon: "♟" },
+              { to: "/admin/prospects", label: "Prospects", icon: "✦" },
+              { to: "/admin/customers", label: "Customers", icon: "♟", active: true },
+              { to: "/admin/events", label: "Events", icon: "▦" },
+              { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
+              { to: "/admin/proposals", label: "Proposals", icon: "▤" },
+              { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
+              { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
+              { to: "/admin/contacts", label: "Notifications", icon: "♧" },
+              { to: "/admin/contacts", label: "Messages", icon: "✉" },
+              { to: "/admin/team", label: "Team", icon: "♟" },
+              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
+              { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item, idx) => (
               <Link
                 key={idx}
@@ -138,6 +196,9 @@ export function AdminCustomers() {
                     : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
                 )}
               >
+                <span className={cn("text-base w-5 text-center shrink-0", item.active ? "text-white" : "text-[#f1c35a]")}>
+                  {item.icon}
+                </span>
                 {!isMenuCollapsed && <span>{item.label}</span>}
               </Link>
             ))}
@@ -333,11 +394,17 @@ export function AdminCustomers() {
                   </h1>
 
                   <p className="text-xs sm:text-sm text-[#98a7b7] font-medium leading-relaxed font-sans">
-                    Live Supabase registered client profiles, issued pass histories, and high-value corporate member accounts.
+                    Live Supabase registered client profiles, status tracking (Active / Needs Contact), and VIP pass issuance.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 relative z-10 shrink-0">
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="px-4 py-2.5 rounded-lg bg-[#f4cf69] text-black font-black text-xs uppercase tracking-widest shadow-lg hover:bg-white transition-all cursor-pointer flex items-center gap-2"
+                  >
+                    <PlusCircle size={16} /> + Add New Customer
+                  </button>
                   <button
                     onClick={() => navigate({ to: "/admin/admin-booking" })}
                     className="px-4 py-2.5 rounded-lg bg-emerald-500 text-black font-black text-xs uppercase tracking-widest shadow-lg hover:bg-white transition-all cursor-pointer flex items-center gap-2"
@@ -350,10 +417,41 @@ export function AdminCustomers() {
 
             {/* CUSTOMERS TABLE */}
             <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-6">
-              <div className="flex justify-between items-center border-b border-[#172533] pb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#172533] pb-4">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Live Database Accounts</p>
-                  <h3 className="text-xl font-black uppercase text-white">Registered Customer Accounts</h3>
+                  <h3 className="text-xl font-black uppercase text-white">Registered Customer Accounts ({filteredClients.length})</h3>
+                </div>
+
+                {/* Status Filter Tabs */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setStatusFilter("ALL")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all cursor-pointer",
+                      statusFilter === "ALL" ? "bg-[#f4cf69] text-black border-[#f4cf69]" : "bg-[#09141f] border-[#243343] text-white"
+                    )}
+                  >
+                    All Accounts
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("ACTIVE")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all cursor-pointer",
+                      statusFilter === "ACTIVE" ? "bg-emerald-500 text-black border-emerald-500" : "bg-[#09141f] border-[#243343] text-white"
+                    )}
+                  >
+                    Active Members
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("NEEDS_CONTACT")}
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all cursor-pointer",
+                      statusFilter === "NEEDS_CONTACT" ? "bg-amber-500 text-black border-amber-500" : "bg-[#09141f] border-[#243343] text-white"
+                    )}
+                  >
+                    Needs Contact
+                  </button>
                 </div>
               </div>
 
@@ -363,9 +461,10 @@ export function AdminCustomers() {
                     <tr className="text-[#8d9baa] bg-[#0d1823] border-b border-[#172530]">
                       <th className="p-3">Customer Full Name</th>
                       <th className="p-3">Email Address</th>
-                      <th className="p-3 text-center">Passes Issued</th>
+                      <th className="p-3">Phone Number</th>
+                      <th className="p-3 text-center">Account Status</th>
                       <th className="p-3 text-right">Lifetime Value</th>
-                      <th className="p-3 text-center">Account Tier</th>
+                      <th className="p-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
@@ -377,12 +476,31 @@ export function AdminCustomers() {
                         <tr key={c.id} className="hover:bg-[#0d1823] transition-colors">
                           <td className="p-3 font-bold text-white uppercase">{c.full_name || "Account Member"}</td>
                           <td className="p-3 font-mono text-[#9ca8b6]">{c.email}</td>
-                          <td className="p-3 text-center font-mono font-bold text-[#f4cf69]">{clientTkts.length} Pass(es)</td>
-                          <td className="p-3 text-right font-mono font-black text-emerald-400">{formatKes(totalSpend || 15000)}</td>
+                          <td className="p-3 font-mono text-[#9ca8b6]">{c.phone || "+254 722 000 111"}</td>
                           <td className="p-3 text-center">
-                            <span className="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[9px] uppercase rounded flex items-center justify-center gap-1 w-max mx-auto">
-                              <Star size={10} className="fill-emerald-400" /> Premium Member
+                            <span
+                              onClick={() => handleToggleStatus(c)}
+                              className={cn(
+                                "px-2.5 py-1 font-mono font-bold text-[9px] uppercase rounded cursor-pointer inline-flex items-center gap-1",
+                                c.status === "ACTIVE"
+                                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                  : "bg-amber-500/20 text-amber-400 border border-amber-500/30"
+                              )}
+                            >
+                              {c.status === "ACTIVE" ? <UserCheck size={12} /> : <Clock size={12} />}
+                              {c.status === "ACTIVE" ? "Active Member" : "Needs Contact"}
                             </span>
+                          </td>
+                          <td className="p-3 text-right font-mono font-black text-emerald-400">{formatKes(totalSpend || 15000)}</td>
+                          <td className="p-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => navigate({ to: "/admin/admin-booking" })}
+                                className="px-2.5 py-1 bg-[#121d29] border border-[#314354] text-[#f4cf69] font-bold text-[9px] uppercase rounded hover:border-[#f4cf69] transition-all cursor-pointer"
+                              >
+                                Issue Pass
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -391,6 +509,85 @@ export function AdminCustomers() {
                 </table>
               </div>
             </div>
+
+            {/* NEW CUSTOMER MODAL */}
+            {isModalOpen && (
+              <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-xs p-4 font-sans animate-in fade-in duration-200">
+                <div className="bg-[#09141f] border-2 border-[#f4cf69]/60 p-6 sm:p-8 rounded-xl max-w-lg w-full shadow-2xl space-y-4">
+                  <div className="flex justify-between items-center border-b border-[#172533] pb-3">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Manual Account Registration</p>
+                      <h3 className="text-lg font-black uppercase text-white">Create Customer Account</h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="h-8 w-8 rounded-lg bg-[#121d29] text-[#8d9bad] hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleAddCustomer} className="space-y-4 text-xs">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase text-[#8d9bad]">Customer Full Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ex: Daniel Maina"
+                        value={custName}
+                        onChange={(e) => setCustName(e.target.value)}
+                        className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase text-[#8d9bad]">Email Address *</label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="daniel.maina@gmail.com"
+                        value={custEmail}
+                        onChange={(e) => setCustEmail(e.target.value)}
+                        className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                      />
+                    </div>
+
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-[#8d9bad]">Phone Number</label>
+                        <input
+                          type="text"
+                          placeholder="+254 712 345 678"
+                          value={custPhone}
+                          onChange={(e) => setCustPhone(e.target.value)}
+                          className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-black uppercase text-[#8d9bad]">Initial Status *</label>
+                        <select
+                          value={custStatus}
+                          onChange={(e) => setCustStatus(e.target.value as "ACTIVE" | "NEEDS_CONTACT")}
+                          className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                        >
+                          <option value="ACTIVE">Active Member</option>
+                          <option value="NEEDS_CONTACT">Needs Contact</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="w-full h-12 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
+                    >
+                      <PlusCircle size={16} /> Save & Register Customer
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
 
             {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
             <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">

@@ -253,23 +253,23 @@ export function AdminProspects() {
           {/* Navigation Items */}
           <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
             {[
-              { to: "/admin", label: "Dashboard" },
-              { to: "/admin/users", label: "Clients" },
-              { to: "/admin/prospects", label: "Prospects", active: true },
-              { to: "/admin/customers", label: "Customers" },
-              { to: "/admin/events", label: "Events" },
-              { to: "/admin/bookings", label: "Sales & CRM" },
-              { to: "/admin/proposals", label: "Proposals" },
-              { to: "/admin/payments", label: "Payments" },
-              { to: "/admin/finance", label: "Finance" },
-              { to: "/admin/ai", label: "AI & Insights" },
-              { to: "/admin/admin-booking", label: "Booking" },
-              { to: "/admin/contacts", label: "Notifications" },
-              { to: "/admin/contacts", label: "Messages" },
-              { to: "/admin/team", label: "Team" },
-              { to: "/admin/marketing", label: "Marketing" },
-              { to: "/admin/reports", label: "Reports" },
-              { to: "/admin/settings", label: "Settings" },
+              { to: "/admin", label: "Dashboard", icon: "▣" },
+              { to: "/admin/users", label: "Clients", icon: "♟" },
+              { to: "/admin/prospects", label: "Prospects", icon: "✦", active: true },
+              { to: "/admin/customers", label: "Customers", icon: "♟" },
+              { to: "/admin/events", label: "Events", icon: "▦" },
+              { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
+              { to: "/admin/proposals", label: "Proposals", icon: "▤" },
+              { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
+              { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
+              { to: "/admin/contacts", label: "Notifications", icon: "♧" },
+              { to: "/admin/contacts", label: "Messages", icon: "✉" },
+              { to: "/admin/team", label: "Team", icon: "♟" },
+              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
+              { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item, idx) => (
               <Link
                 key={idx}
@@ -282,6 +282,9 @@ export function AdminProspects() {
                     : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
                 )}
               >
+                <span className={cn("text-base w-5 text-center shrink-0", item.active ? "text-white" : "text-[#f1c35a]")}>
+                  {item.icon}
+                </span>
                 {!isMenuCollapsed && <span>{item.label}</span>}
               </Link>
             ))}

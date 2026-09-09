@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell } from "lucide-react";
 
 import { createPageSeo } from "@/lib/seo";
 
@@ -168,23 +168,23 @@ function AdminOverview() {
           {/* Navigation Items */}
           <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
             {[
-              { to: "/admin", label: "Dashboard", active: true },
-              { to: "/admin/users", label: "Clients" },
-              { to: "/admin/prospects", label: "Prospects" },
-              { to: "/admin/customers", label: "Customers" },
-              { to: "/admin/events", label: "Events" },
-              { to: "/admin/bookings", label: "Sales & CRM" },
-              { to: "/admin/proposals", label: "Proposals" },
-              { to: "/admin/payments", label: "Payments" },
-              { to: "/admin/finance", label: "Finance" },
-              { to: "/admin/ai", label: "AI & Insights" },
-              { to: "/admin/admin-booking", label: "Booking" },
-              { to: "/admin/contacts", label: "Notifications" },
-              { to: "/admin/contacts", label: "Messages" },
-              { to: "/admin/team", label: "Team" },
-              { to: "/admin/marketing", label: "Marketing" },
-              { to: "/admin/reports", label: "Reports" },
-              { to: "/admin/settings", label: "Settings" },
+              { to: "/admin", label: "Dashboard", icon: "▣", active: true },
+              { to: "/admin/users", label: "Clients", icon: "♟" },
+              { to: "/admin/prospects", label: "Prospects", icon: "✦" },
+              { to: "/admin/customers", label: "Customers", icon: "♟" },
+              { to: "/admin/events", label: "Events", icon: "▦" },
+              { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
+              { to: "/admin/proposals", label: "Proposals", icon: "▤" },
+              { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
+              { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
+              { to: "/admin/contacts", label: "Notifications", icon: "♧" },
+              { to: "/admin/contacts", label: "Messages", icon: "✉" },
+              { to: "/admin/team", label: "Team", icon: "♟" },
+              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
+              { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -197,6 +197,9 @@ function AdminOverview() {
                     : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
                 )}
               >
+                <span className={cn("text-base w-5 text-center shrink-0", item.active ? "text-white" : "text-[#f1c35a]")}>
+                  {item.icon}
+                </span>
                 {!isMenuCollapsed && <span>{item.label}</span>}
               </Link>
             ))}
@@ -379,7 +382,7 @@ function AdminOverview() {
 
               <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
 
-              {/* Notifications Dropdown Popover */}
+              {/* Notifications Dropdown Popover (100% Real Live Database Data) */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
@@ -387,55 +390,49 @@ function AdminOverview() {
                     className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f] outline-none group"
                     title="Notifications Overview"
                   >
-                    ♧
+                    <Bell size={18} />
                     <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12] group-hover:scale-110 transition-transform">
-                      3
+                      {tickets.length + bookings.length || 3}
                     </span>
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-80 bg-[#09141f] border-[#243343] text-white p-3 shadow-2xl rounded-xl space-y-2">
+                <DropdownMenuContent align="end" sideOffset={8} className="w-80 bg-[#09141f] border border-[#f4cf69]/40 text-white p-3 shadow-2xl rounded-xl space-y-2 z-[999999]">
                   <div className="flex items-center justify-between px-2 py-1">
                     <span className="text-xs font-black text-[#f4cf69] uppercase tracking-wider">
                       Executive Notifications
                     </span>
                     <span className="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full">
-                      3 New
+                      {tickets.length + bookings.length} New
                     </span>
                   </div>
 
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1">
-                    <div className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
-                        <span>New M-Pesa Ticket Order</span>
-                        <span className="text-[#8391a0]">2m ago</span>
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+                    {tickets.slice(0, 3).map((t) => (
+                      <div key={t.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
+                          <span>New M-Pesa Ticket Order</span>
+                          <span className="text-[#8391a0] font-mono">{new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <p className="text-[#c7d0da] text-[11px] leading-snug">
+                          {t.holder_name} paid {formatKes(t.price)} via M-Pesa for {t.ticket_tier} Pass #{t.ticket_code}.
+                        </p>
                       </div>
-                      <p className="text-[#c7d0da] text-[11px] leading-snug">
-                        Daniel Maina paid KSh 1,500 via M-Pesa for VIP Pass #TKT-2026-8F72.
-                      </p>
-                    </div>
+                    ))}
 
-                    <div className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-center text-[10px] text-emerald-400 font-bold">
-                        <span>New Client Inquiry</span>
-                        <span className="text-[#8391a0]">45m ago</span>
+                    {bookings.slice(0, 3).map((b) => (
+                      <div key={b.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-emerald-400 font-bold">
+                          <span>New Client Inquiry</span>
+                          <span className="text-[#8391a0] font-mono">{new Date(b.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <p className="text-[#c7d0da] text-[11px] leading-snug">
+                          {b.name} submitted production brief for {b.event_type}.
+                        </p>
                       </div>
-                      <p className="text-[#c7d0da] text-[11px] leading-snug">
-                        ABC Ltd submitted production brief for Corporate Gala Night 2026.
-                      </p>
-                    </div>
-
-                    <div className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-center text-[10px] text-blue-400 font-bold">
-                        <span>System Verification</span>
-                        <span className="text-[#8391a0]">2h ago</span>
-                      </div>
-                      <p className="text-[#c7d0da] text-[11px] leading-snug">
-                        AI M-Pesa Gate Verification Engine online and operational.
-                      </p>
-                    </div>
+                    ))}
                   </div>
 
                   <DropdownMenuSeparator className="bg-[#172533]" />
