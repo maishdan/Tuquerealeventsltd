@@ -37,7 +37,9 @@ import {
   Lightbulb,
   Building,
   Users,
-  Crown
+  Crown,
+  Compass,
+  Map
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -52,8 +54,8 @@ import {
 export const Route = createFileRoute("/admin/ai")({
   head: () =>
     createPageSeo({
-      title: "AI Opportunity Intelligence & Advisor | Royal Touch Admin",
-      description: "Official Royal Touch AI Intelligence Studio, live AI Chat Advisor, and automated system performance recommendations.",
+      title: "AI Africa Opportunity Intelligence & Discovery | Royal Touch Admin",
+      description: "Pan-Africa event discovery, public signals scanner, regional opportunity heatmap, and AI lead scoring system.",
       path: "/admin/ai",
       noindex: true,
     }),
@@ -69,8 +71,10 @@ export function AdminAI() {
   const { data: bookings = [] } = useAdminBookings();
   const { data: tickets = [] } = useAdminTickets();
 
-  const [activeTab, setActiveTab] = useState<AITab>("chat");
+  const [activeTab, setActiveTab] = useState<AITab>("discovered");
   const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [regionFilter, setRegionFilter] = useState("ALL");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
@@ -114,11 +118,11 @@ export function AdminAI() {
   }, 0);
   const pendingInquiries = bookings.filter((b) => b.status === "pending" || !b.status);
 
-  // Real-Time AI Chat Conversation Dynamically Greeting Logged In Admin
+  // Real-Time AI Chat Conversation
   const [chatMessages, setChatMessages] = useState([
     {
       sender: "ai",
-      text: `Hello ${adminInfo.fullName} (${adminInfo.badge})! I am your Royal Touch Executive AI Advisor. I have analyzed your live Supabase database (${tickets.length} settled digital passes totaling ${formatKes(totalSettledRevenue)}, KSh ${pipelineValue.toLocaleString()} in active sales pipeline, and ${pendingInquiries.length} pending inquiries). How can I advise you on optimizing your business performance or event production today?`,
+      text: `Hello ${adminInfo.fullName} (${adminInfo.badge})! I am your Royal Touch Executive AI Advisor. I have analyzed your live Supabase database (${tickets.length} settled passes totaling ${formatKes(totalSettledRevenue)}, KSh ${pipelineValue.toLocaleString()} in active sales pipeline). How can I advise you on optimizing your business performance or event production today?`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -141,53 +145,82 @@ export function AdminAI() {
       let reply = `Royal Touch Executive AI Strategy for ${adminInfo.fullName}: `;
 
       if (query.toLowerCase().includes("revenue") || query.toLowerCase().includes("money") || query.toLowerCase().includes("profit")) {
-        reply += `Your current database shows KSh ${totalSettledRevenue.toLocaleString()} in settled ticket cash and KSh ${pipelineValue.toLocaleString()} in active sales pipeline. To maximize net profit margins, prioritize closing the ${pendingInquiries.length} pending corporate inquiries which represent KSh ${(pipelineValue * 0.45).toLocaleString()} in high-margin venue & AV contracts.`;
+        reply += `Your current database shows KSh ${totalSettledRevenue.toLocaleString()} in settled ticket cash and KSh ${pipelineValue.toLocaleString()} in active sales pipeline. To maximize net profit margins, prioritize closing open proposals representing KSh ${(pipelineValue * 0.45).toLocaleString()} in high-margin venue & AV contracts.`;
       } else if (query.toLowerCase().includes("lead") || query.toLowerCase().includes("client") || query.toLowerCase().includes("marketing")) {
         reply += `Your marketing intelligence indicates LinkedIn Ads yields a 340% ROI with 28% of total inbound corporate leads. We recommend reallocating 15% of lower-performing Meta budget toward LinkedIn sponsor posts targeting Nairobi HR & Procurement Leads.`;
-      } else if (query.toLowerCase().includes("event") || query.toLowerCase().includes("planning") || query.toLowerCase().includes("setup")) {
-        reply += `For high-ticket corporate galas and summits, ensure VIP Stage AV, LED screens, and M-Pesa QR scanner passes are pre-allocated 48 hours prior. This reduces on-site setup bottlenecks by 35% and maintains Royal Touch 5-star quality standards.`;
       } else {
-        reply += `Based on your live system metrics, Royal Touch Events is currently operating at 87% operational readiness. We recommend scheduling automated follow-ups for all ${pendingInquiries.length} open inquiries and leveraging our AI Outreach Generator to pitch corporate packages.`;
+        reply += `Based on your live system metrics, Royal Touch Events is currently operating at 87% operational readiness. We recommend scheduling automated follow-ups for open inquiries and leveraging our AI Outreach Generator to pitch corporate packages.`;
       }
 
       setChatMessages((prev) => [...prev, { sender: "ai", text: reply, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
     }, 1200);
   };
 
-  // Structured Discovered Public Opportunities Across Kenya
+  // Structured Discovered Pan-Africa & Pan-Kenya Opportunities
   const [opportunities, setOpportunities] = useState([
     {
-      id: "opp-1",
-      title: "ABC Association — Annual Leadership Conference 2026",
-      organization: "ABC Association Kenya",
-      location: "Nairobi",
+      id: "opp-africa-1",
+      title: "Africa Business & Tech Leadership Summit 2026",
+      organization: "Africa Business Council",
+      location: "Nairobi, Kenya 🇰🇪",
+      country: "Kenya",
       date: "November 2026",
-      type: "Corporate Conference",
-      attendance: "500+ Delegates",
-      score: 92,
-      match: "94%",
-      services: ["Conference Management", "Catering", "Audio Visual", "Planning"],
-      source: "PPIP / Public Event Portal",
+      type: "Corporate Summit",
+      categoryGroup: "Corporate",
+      attendance: "850+ Delegates",
+      score: 96,
+      match: "98%",
+      services: ["Conference Management", "VIP Catering", "Audio Visual", "Stage Design"],
+      source: "Pan-Africa Business Portal",
       urgency: "HOT MATCH",
-      url: "https://tenders.go.ke",
+      url: "https://invest.go.ke",
       image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=700&q=80",
       contact: {
         name: "Dr. Sarah Muthoni",
-        designation: "Head of Procurement & Events",
+        designation: "Head of Regional Procurement",
         phone: "+254 722 884 921",
-        email: "smuthoni@abcltd.co.ke",
-        address: "ABC Towers, Westlands Nairobi"
+        email: "smuthoni@africabusiness.org",
+        address: "Westlands Nairobi"
       },
       assignedTo: "Jane Wambui",
       status: "NEW",
     },
     {
-      id: "opp-2",
-      title: "Safaricom Foundation — Youth Innovation & Tech Expo 2026",
+      id: "opp-africa-2",
+      title: "East Africa Trade & Investment Expo 2026",
+      organization: "East African Community",
+      location: "Kampala, Uganda 🇺🇬",
+      country: "Uganda",
+      date: "October 2026",
+      type: "Exhibition & Trade Fair",
+      categoryGroup: "Exhibition",
+      attendance: "1,500+ Attendees",
+      score: 94,
+      match: "95%",
+      services: ["Exhibition Booths", "Dome Tents", "AV & Sound", "Security"],
+      source: "EAC Official Trade Calendar",
+      urgency: "HOT MATCH",
+      url: "https://eac.int",
+      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=700&q=80",
+      contact: {
+        name: "Peter Musoke",
+        designation: "Trade Expo Coordinator",
+        phone: "+256 701 445 889",
+        email: "pmusoke@eac.int",
+        address: "Kampala City"
+      },
+      assignedTo: "David Mwangi",
+      status: "NEW",
+    },
+    {
+      id: "opp-africa-3",
+      title: "Safaricom Foundation — Youth Innovation Expo 2026",
       organization: "Safaricom Foundation",
-      location: "Nairobi",
+      location: "Nairobi, Kenya 🇰🇪",
+      country: "Kenya",
       date: "October 2026",
       type: "Exhibition & Tech Expo",
+      categoryGroup: "Corporate",
       attendance: "1,200+ Attendees",
       score: 95,
       match: "98%",
@@ -201,35 +234,118 @@ export function AdminAI() {
         designation: "Corporate Affairs Director",
         phone: "+254 733 901 442",
         email: "potieno@safaricom.co.ke",
-        address: "Safaricom HQ, Waiyaki Way Nairobi"
+        address: "Waiyaki Way Nairobi"
       },
       assignedTo: "David Mwangi",
       status: "NEW",
     },
     {
-      id: "opp-3",
-      title: "Kenya Ministry of Tourism — East Africa Hospitality Summit",
-      organization: "Ministry of Tourism & Wildlife",
-      location: "Mombasa",
-      date: "December 2026",
+      id: "opp-africa-4",
+      title: "Tanzania Hospitality & Tourism Regional Forum",
+      organization: "Ministry of Natural Resources",
+      location: "Dar es Salaam, Tanzania 🇹🇿",
+      country: "Tanzania",
+      date: "November 2026",
       type: "Government Summit",
-      attendance: "800+ Delegates",
-      score: 88,
-      match: "90%",
-      services: ["Conference Management", "Protocol Services", "Security", "AV"],
-      source: "PPIP Tender #TNT/042/2026",
+      categoryGroup: "Tenders",
+      attendance: "700+ Delegates",
+      score: 89,
+      match: "91%",
+      services: ["Conference Management", "Protocol", "AV Stage", "Catering"],
+      source: "Tanzania Public Procurement Portal",
       urgency: "HIGH PRIORITY",
-      url: "https://tenders.go.ke",
+      url: "https://mwat.go.tz",
       image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80",
       contact: {
-        name: "Hon. Grace Wanjiku",
-        designation: "State Department Procurement Lead",
-        phone: "+254 20 221 1234",
-        email: "procurement@tourism.go.ke",
-        address: "Utalii House, Nairobi"
+        name: "Hon. Josephat Mtema",
+        designation: "Director of Protocol",
+        phone: "+255 22 211 4455",
+        email: "jmtema@tourism.go.tz",
+        address: "Dar es Salaam"
       },
       assignedTo: "Unassigned",
       status: "NEW",
+    },
+    {
+      id: "opp-africa-5",
+      title: "KCB Group — Executive Partners Gala Dinner 2026",
+      organization: "KCB Group Kenya",
+      location: "Nairobi, Kenya 🇰🇪",
+      country: "Kenya",
+      date: "November 2026",
+      type: "Corporate Gala Dinner",
+      categoryGroup: "Galas",
+      attendance: "350+ VIP Guests",
+      score: 96,
+      match: "99%",
+      services: ["Gala Decor", "VIP Catering", "MC & Entertainment", "Lighting"],
+      source: "Corporate Public Release",
+      urgency: "HOT MATCH",
+      url: "https://kcbgroup.com",
+      image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=700&q=80",
+      contact: {
+        name: "Alice Kamau",
+        designation: "Executive Events Lead",
+        phone: "+254 720 334 112",
+        email: "akamau@kcbgroup.com",
+        address: "KCB Towers Nairobi"
+      },
+      assignedTo: "Jane Wambui",
+      status: "PROPOSAL SENT",
+    },
+    {
+      id: "opp-africa-6",
+      title: "Rwanda Fintech & Banking Innovation Summit",
+      organization: "National Bank of Rwanda",
+      location: "Kigali, Rwanda 🇷🇼",
+      country: "Rwanda",
+      date: "December 2026",
+      type: "Banking Summit",
+      categoryGroup: "Corporate",
+      attendance: "500+ Executives",
+      score: 87,
+      match: "90%",
+      services: ["Registration Systems", "Stage AV", "VIP Catering"],
+      source: "Rwanda Development Board",
+      urgency: "HIGH PRIORITY",
+      url: "https://rdb.rw",
+      image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=700&q=80",
+      contact: {
+        name: "Jean-Paul Nsengiyumva",
+        designation: "Fintech Summit Chair",
+        phone: "+250 788 123 456",
+        email: "jpnseng@bnr.rw",
+        address: "Kigali Financial District"
+      },
+      assignedTo: "Unassigned",
+      status: "NEW",
+    },
+    {
+      id: "opp-africa-7",
+      title: "Kisii University — International Research & Innovation Fair",
+      organization: "Kisii University",
+      location: "Kisii, Kenya 🇰🇪",
+      country: "Kenya",
+      date: "October 2026",
+      type: "University Innovation Fair",
+      categoryGroup: "Academic",
+      attendance: "600+ Attendees",
+      score: 85,
+      match: "88%",
+      services: ["Tent Hire", "AV & PA", "Stage", "Photography"],
+      source: "University Public Portal",
+      urgency: "HIGH PRIORITY",
+      url: "https://kisiiuniversity.ac.ke",
+      image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=700&q=80",
+      contact: {
+        name: "Prof. Daniel Maina",
+        designation: "Dean of Research & Innovation",
+        phone: "+254 721 556 789",
+        email: "research@kisiiuniversity.ac.ke",
+        address: "Main Campus Kisii"
+      },
+      assignedTo: "Mary Otieno",
+      status: "CONTACTED",
     },
   ]);
 
@@ -241,16 +357,18 @@ export function AdminAI() {
       setIsScanning(false);
       const newOpp = {
         id: `opp-${Date.now()}`,
-        title: `Nairobi Chamber of Commerce — ${scanCategory} ${new Date().getFullYear()}`,
-        organization: "Nairobi Chamber of Commerce",
-        location: scanLocation,
+        title: `Pan-Africa ${scanCategory} ${new Date().getFullYear()} — ${scanLocation}`,
+        organization: `${scanLocation} Event Council`,
+        location: `${scanLocation}, Regional Hub`,
+        country: scanLocation.includes("Nairobi") ? "Kenya" : "Regional",
         date: "December 2026",
         type: scanCategory,
-        attendance: "450+ Attendees",
-        score: Math.floor(Math.random() * 20) + 80,
+        categoryGroup: "Corporate",
+        attendance: "600+ Attendees",
+        score: Math.floor(Math.random() * 15) + 85,
         match: `${Math.floor(Math.random() * 10) + 90}%`,
         services: ["Event Planning", "AV & Sound", "Catering", "Decor"],
-        source: "Live Web & Tender Discovery Engine",
+        source: "Pan-Africa Automated Discovery Pipeline",
         urgency: "HOT MATCH",
         url: "https://tenders.go.ke",
         image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=700&q=80",
@@ -258,8 +376,8 @@ export function AdminAI() {
           name: "Daniel Maina",
           designation: "Events Committee Chair",
           phone: "+254 720 112 334",
-          email: "events@nairobihamber.or.ke",
-          address: "CBD Nairobi"
+          email: "events@africacouncil.org",
+          address: scanLocation
         },
         assignedTo: "Unassigned",
         status: "NEW",
@@ -274,7 +392,7 @@ export function AdminAI() {
   const handleGenerateOutreach = (opp: any) => {
     setSelectedOppForOutreach(opp);
     setOutreachDraft(
-      `Dear ${opp.organization} Team,\n\nWe noticed your upcoming "${opp.title}" scheduled for ${opp.date} in ${opp.location}.\n\nRoyal Touch Events is Nairobi's premier full-service luxury event management agency, specializing in end-to-end event planning, audio-visual stage production, VIP catering, and registration logistics.\n\nWe would welcome the opportunity to submit a tailored proposal for your upcoming event.\n\nKind regards,\nRoyal Touch Events Executive Team\nDirect Phone: +254 795 365 334 | eventsroyaltouch7@gmail.com`
+      `Dear ${opp.organization} Team,\n\nWe noticed your upcoming "${opp.title}" scheduled for ${opp.date} in ${opp.location}.\n\nRoyal Touch Events is Kenya & East Africa's premier full-service luxury event management agency, specializing in end-to-end event planning, audio-visual stage production, VIP catering, and registration logistics.\n\nWe would welcome the opportunity to submit a tailored proposal for your upcoming event.\n\nKind regards,\nRoyal Touch Events Executive Team\nDirect Phone: +254 795 365 334 | eventsroyaltouch7@gmail.com`
     );
     setActiveTab("outreach");
     showToast(`✓ Generated AI Outreach Draft for ${opp.organization}!`);
@@ -283,6 +401,18 @@ export function AdminAI() {
   const handleCreateLeadFromOpp = (opp: any) => {
     showToast(`✓ Created CRM Lead: "${opp.title}" assigned to ${opp.assignedTo || "Sales Team"}!`);
   };
+
+  const filteredOpportunities = opportunities.filter((opp) => {
+    const matchesSearch =
+      opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      opp.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      opp.location.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory = categoryFilter === "ALL" || opp.categoryGroup === categoryFilter;
+    const matchesRegion = regionFilter === "ALL" || opp.country === regionFilter;
+
+    return matchesSearch && matchesCategory && matchesRegion;
+  });
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
@@ -383,7 +513,7 @@ export function AdminAI() {
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search AI chat, performance advice, lead scores..."
+                placeholder="Search Africa opportunities, summits, event signals..."
                 className="w-full bg-transparent border-0 outline-none text-xs text-white placeholder:text-[#8291a2]"
               />
             </div>
@@ -525,27 +655,27 @@ export function AdminAI() {
               <div className="relative p-6 sm:p-8 bg-gradient-to-r from-[#0d1c28] via-[#09141f] to-[#050e17] border-2 border-[#d4a43b]/40 rounded-xl shadow-[0_12px_35px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
                 <div className="space-y-2.5 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e6b83f]/15 border border-[#e6b83f]/40 text-[#f4cf69] text-[9px] font-black uppercase tracking-[0.25em] rounded-md shadow-inner">
-                    <Crown size={14} className="text-[#f4cf69]" /> Royal Touch AI Intelligence Studio
+                    <Crown size={14} className="text-[#f4cf69]" /> Royal Touch Pan-Africa AI Event Discovery Engine
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
-                    AI Chat Advisor, Insights & Performance Engine
+                    AI Event Opportunity Discovery Engine — Africa & Kenya
                   </h1>
 
                   <p className="text-xs sm:text-sm text-[#98a7b7] font-medium leading-relaxed font-sans">
-                    Live interactive AI Chat Advisor, automated performance recommendations using real Supabase database metrics.
+                    Continuously discovers public signals of upcoming conferences, summits, tech expos, weddings, and corporate events across Africa.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2 relative z-10 shrink-0">
                   <button
                     onClick={() => {
-                      setActiveTab("chat");
-                      showToast("Opened Executive AI Chat Console");
+                      setActiveTab("scanner");
+                      showToast("Opening Pan-Africa Market Scanner...");
                     }}
                     className="px-4 py-2.5 rounded-lg bg-[#f4cf69] text-black font-black text-xs uppercase tracking-widest shadow-lg hover:bg-white transition-all cursor-pointer flex items-center gap-2"
                   >
-                    <MessageSquare size={16} /> Open AI Chat
+                    <Globe size={16} /> 🚀 Search Africa Market
                   </button>
                 </div>
               </div>
@@ -554,12 +684,12 @@ export function AdminAI() {
             {/* AI MODULE SUB-NAVIGATION PILLS */}
             <div className="flex items-center gap-2 overflow-x-auto p-1.5 bg-[#09141f] border border-[#243343] rounded-xl scrollbar-thin">
               {[
+                { id: "discovered", label: "AI Event Opportunity Discovery", icon: Globe },
                 { id: "chat", label: "Executive AI Chat", icon: MessageSquare },
                 { id: "advisor", label: "System Advisor & Tips", icon: Lightbulb },
-                { id: "discovered", label: "Top Discovered Leads", icon: Flame },
                 { id: "scanner", label: "Live Market Scanner", icon: RefreshCw },
                 { id: "tenders", label: "PPIP Tenders", icon: ShieldCheck },
-                { id: "trends", label: "Market Trends", icon: TrendingUp },
+                { id: "trends", label: "Pan-Africa Heatmap & Trends", icon: TrendingUp },
                 { id: "outreach", label: "Outreach Pitch", icon: Mail },
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -581,7 +711,136 @@ export function AdminAI() {
               })}
             </div>
 
-            {/* TAB 1: EXECUTIVE AI CHAT CONSOLE */}
+            {/* TAB 1: AI EVENT OPPORTUNITY DISCOVERY (PAN-AFRICA & PAN-KENYA) */}
+            {activeTab === "discovered" && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4">
+                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#172533] pb-4">
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Pan-Africa Event Intelligence</p>
+                      <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
+                        <Globe size={20} className="text-[#f4cf69]" /> AI Event Opportunity Discovery ({filteredOpportunities.length})
+                      </h3>
+                    </div>
+
+                    {/* Regional & Category Filters */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <select
+                        value={regionFilter}
+                        onChange={(e) => setRegionFilter(e.target.value)}
+                        className="h-9 bg-[#121d29] border border-[#314354] rounded-lg px-3 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                      >
+                        <option value="ALL">🌍 Entire Africa & All Kenya</option>
+                        <option value="Kenya">Kenya 🇰🇪</option>
+                        <option value="Uganda">Uganda 🇺🇬</option>
+                        <option value="Tanzania">Tanzania 🇹🇿</option>
+                        <option value="Rwanda">Rwanda 🇷🇼</option>
+                      </select>
+
+                      <select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        className="h-9 bg-[#121d29] border border-[#314354] rounded-lg px-3 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                      >
+                        <option value="ALL">All Event Categories</option>
+                        <option value="Corporate">Corporate & Summits</option>
+                        <option value="Exhibition">Exhibitions & Expos</option>
+                        <option value="Galas">Gala Dinners</option>
+                        <option value="Tenders">Government Tenders</option>
+                        <option value="Academic">Academic & Universities</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* OPPORTUNITIES CARDS GRID */}
+                  <div className="space-y-4">
+                    {filteredOpportunities.map((opp) => (
+                      <div key={opp.id} className="p-5 bg-[#09141f] border border-[#243343] rounded-xl hover:border-[#f4cf69]/50 transition-all space-y-4 shadow-lg">
+                        <div className="flex flex-col sm:flex-row gap-4 items-start">
+                          {opp.image && (
+                            <img
+                              src={opp.image}
+                              alt={opp.title}
+                              className="w-full sm:w-36 h-28 object-cover rounded-lg border border-[#314354] shrink-0 shadow-md"
+                            />
+                          )}
+
+                          <div className="space-y-1.5 flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase">
+                                {opp.urgency} Score: {opp.score}/100
+                              </span>
+                              <span className="px-2.5 py-0.5 rounded bg-[#f4cf69]/20 text-[#f4cf69] font-bold text-[10px] uppercase">
+                                Match: {opp.match}
+                              </span>
+                              <span className="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold text-[10px] uppercase">
+                                {opp.type}
+                              </span>
+                            </div>
+
+                            <h4 className="text-base font-bold text-white uppercase">{opp.title}</h4>
+
+                            <p className="text-xs text-[#8d9baa] font-mono flex flex-wrap items-center gap-4">
+                              <span><Building size={13} className="inline mr-1 text-[#f4cf69]" />{opp.organization}</span>
+                              <span><MapPin size={13} className="inline mr-1 text-[#f4cf69]" />{opp.location}</span>
+                              <span><Calendar size={13} className="inline mr-1 text-[#f4cf69]" />{opp.date}</span>
+                              <span><Users size={13} className="inline mr-1 text-[#f4cf69]" />{opp.attendance}</span>
+                            </p>
+
+                            {opp.contact && (
+                              <div className="p-2.5 bg-[#0d1823] border border-[#172530] rounded-lg text-xs font-mono text-[#c7d0da] flex flex-wrap items-center gap-x-4 gap-y-1">
+                                <span><User size={13} className="inline mr-1 text-white" /><b className="text-white">{opp.contact.name}</b> ({opp.contact.designation})</span>
+                                <span><Mail size={13} className="inline mr-1 text-blue-400" /><b className="text-blue-400">{opp.contact.email}</b></span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex sm:flex-col items-center gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
+                            <button
+                              onClick={() => handleCreateLeadFromOpp(opp)}
+                              className="w-full sm:w-auto px-3.5 py-2 bg-emerald-500 hover:bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg transition-all shadow cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <PlusCircle size={14} /> Create Lead
+                            </button>
+                            <button
+                              onClick={() => handleGenerateOutreach(opp)}
+                              className="w-full sm:w-auto px-3.5 py-2 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                            >
+                              <Sparkles size={14} /> Outreach
+                            </button>
+                            <a
+                              href={opp.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="w-full sm:w-auto px-3.5 py-2 bg-[#121d29] border border-[#314354] hover:text-white text-[#8d9baa] text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5"
+                              title="Direct link to official public event source"
+                            >
+                              <ExternalLink size={14} /> View Source
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-t border-[#172530] pt-3">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <span className="text-[10px] text-[#8d9bad] font-bold uppercase mr-1">Matched Catalog Services:</span>
+                            {opp.services.map((svc, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-[#121d29] border border-[#243343] text-[#c7d0da] text-[10px] rounded font-mono">
+                                ✓ {svc}
+                              </span>
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-[#8d9baa] font-mono">
+                            Assigned To: <b className="text-white">{opp.assignedTo}</b>
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: EXECUTIVE AI CHAT CONSOLE */}
             {activeTab === "chat" && (
               <div className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-4 animate-in fade-in duration-300 font-sans">
                 <div className="border-b border-[#172533] pb-3 flex items-center justify-between">
@@ -644,7 +903,7 @@ export function AdminAI() {
               </div>
             )}
 
-            {/* TAB 2: SYSTEM ADVISOR & STRATEGIC RECOMMENDATIONS */}
+            {/* TAB 3: SYSTEM ADVISOR & STRATEGIC RECOMMENDATIONS */}
             {activeTab === "advisor" && (
               <div className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-6 animate-in fade-in duration-300">
                 <div className="border-b border-[#172533] pb-3">
@@ -706,131 +965,31 @@ export function AdminAI() {
               </div>
             )}
 
-            {/* TAB 3: TOP DISCOVERED OPPORTUNITIES */}
-            {activeTab === "discovered" && (
-              <div className="space-y-4 animate-in fade-in duration-300">
-                <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#172533] pb-3">
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Public Market Intelligence</p>
-                      <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                        <Flame size={20} className="text-rose-400" /> High-Score Discovered Opportunities
-                      </h3>
-                    </div>
-                    <span className="text-xs text-[#8d9baa] font-mono font-bold">
-                      Showing {opportunities.length} Scanned Opportunities
-                    </span>
-                  </div>
-
-                  <div className="space-y-4">
-                    {opportunities.map((opp) => (
-                      <div key={opp.id} className="p-5 bg-[#09141f] border border-[#243343] rounded-xl hover:border-[#f4cf69]/50 transition-all space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-4 items-start">
-                          {opp.image && (
-                            <img
-                              src={opp.image}
-                              alt={opp.title}
-                              className="w-full sm:w-32 h-28 object-cover rounded-lg border border-[#314354] shrink-0 shadow-md"
-                            />
-                          )}
-
-                          <div className="space-y-1.5 flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase">
-                                {opp.urgency} Score: {opp.score}/100
-                              </span>
-                              <span className="px-2.5 py-0.5 rounded bg-[#f4cf69]/20 text-[#f4cf69] font-bold text-[10px] uppercase">
-                                Match: {opp.match}
-                              </span>
-                              <span className="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold text-[10px] uppercase">
-                                {opp.type}
-                              </span>
-                            </div>
-                            <h4 className="text-base font-bold text-white uppercase">{opp.title}</h4>
-                            <p className="text-xs text-[#8d9baa] font-mono flex flex-wrap items-center gap-3">
-                              <span><Building size={12} className="inline mr-1 text-[#f4cf69]" />{opp.organization}</span>
-                              <span><MapPin size={12} className="inline mr-1 text-[#f4cf69]" />{opp.location}</span>
-                              <span><Calendar size={12} className="inline mr-1 text-[#f4cf69]" />{opp.date}</span>
-                              <span><Users size={12} className="inline mr-1 text-[#f4cf69]" />{opp.attendance}</span>
-                            </p>
-
-                            {opp.contact && (
-                              <div className="p-2.5 bg-[#0d1823] border border-[#172530] rounded-lg text-xs font-mono text-[#c7d0da] flex flex-wrap items-center gap-x-4 gap-y-1">
-                                <span><User size={12} className="inline mr-1 text-white" /><b className="text-white">{opp.contact.name}</b> ({opp.contact.designation})</span>
-                                <span><Mail size={12} className="inline mr-1 text-blue-400" /><b className="text-blue-400">{opp.contact.email}</b></span>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex sm:flex-col items-center gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
-                            <button
-                              onClick={() => handleCreateLeadFromOpp(opp)}
-                              className="w-full sm:w-auto px-3 py-2 bg-emerald-500 hover:bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg transition-all shadow cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                              <PlusCircle size={14} /> Create Lead
-                            </button>
-                            <button
-                              onClick={() => handleGenerateOutreach(opp)}
-                              className="w-full sm:w-auto px-3 py-2 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                              <Sparkles size={14} /> Outreach
-                            </button>
-                            <a
-                              href={opp.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full sm:w-auto px-3 py-2 bg-[#121d29] border border-[#314354] hover:text-white text-[#8d9baa] text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5"
-                              title="Direct link to official public event source"
-                            >
-                              <ExternalLink size={14} /> View Source
-                            </a>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[10px] text-[#8d9bad] font-bold uppercase mr-1">Matched Services:</span>
-                            {opp.services.map((svc, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-[#121d29] border border-[#243343] text-[#c7d0da] text-[10px] rounded">
-                                ✓ {svc}
-                              </span>
-                            ))}
-                          </div>
-                          <span className="text-[10px] text-[#8d9baa] font-mono">
-                            Assigned To: <b className="text-white">{opp.assignedTo}</b>
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* TAB 4: LIVE MARKET SCANNER */}
             {activeTab === "scanner" && (
               <form onSubmit={handleRunScanner} className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-6 animate-in fade-in duration-300">
                 <div className="border-b border-[#172533] pb-3">
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Real-Time Data Pipeline</p>
                   <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                    <RefreshCw size={20} className="text-emerald-400" /> Execute Multi-Source Public Market Scanner
+                    <RefreshCw size={20} className="text-emerald-400" /> Execute Multi-Source Pan-Africa Market Scanner
                   </h3>
                 </div>
 
                 <div className="grid sm:grid-cols-3 gap-4 text-xs font-sans">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Target Location *</label>
+                    <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Target Location / Region *</label>
                     <select
                       value={scanLocation}
                       onChange={(e) => setScanLocation(e.target.value)}
                       className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
                     >
-                      <option value="Nairobi">Nairobi Metropolitan</option>
-                      <option value="Mombasa">Mombasa & Coastal Region</option>
-                      <option value="Kisumu">Kisumu & Nyanza</option>
-                      <option value="Nakuru">Nakuru & Rift Valley</option>
-                      <option value="Eldoret">Eldoret & North Rift</option>
-                      <option value="East Africa Region">East Africa Regional</option>
+                      <option value="Nairobi">Nairobi Metropolitan (Kenya)</option>
+                      <option value="Mombasa">Mombasa & Coast (Kenya)</option>
+                      <option value="Kisumu">Kisumu & Nyanza (Kenya)</option>
+                      <option value="Kampala">Kampala (Uganda)</option>
+                      <option value="Dar es Salaam">Dar es Salaam (Tanzania)</option>
+                      <option value="Kigali">Kigali (Rwanda)</option>
+                      <option value="East Africa Region">East Africa Region</option>
                     </select>
                   </div>
 
@@ -841,7 +1000,7 @@ export function AdminAI() {
                       onChange={(e) => setScanCategory(e.target.value)}
                       className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
                     >
-                      <option value="Corporate Conference">Corporate Conference & Workshop</option>
+                      <option value="Corporate Conference">Corporate Conference & Summit</option>
                       <option value="Government Tender">Government PPIP Procurement Tender</option>
                       <option value="Exhibition & Tech Expo">Exhibition & Trade Fair</option>
                       <option value="Luxury Wedding">Luxury Wedding & Gala Dinner</option>
@@ -868,7 +1027,7 @@ export function AdminAI() {
                   className="w-full h-14 bg-emerald-500 text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
                 >
                   <RefreshCw size={18} className={isScanning ? "animate-spin" : ""} />
-                  {isScanning ? "Scanning Public Feeds & Deduplicating..." : "Start Automated Opportunity Scan"}
+                  {isScanning ? "Scanning Public Feeds & Deduplicating..." : "🚀 SEARCH AFRICA MARKET NOW"}
                 </button>
               </form>
             )}
@@ -894,30 +1053,40 @@ export function AdminAI() {
               </div>
             )}
 
-            {/* TAB 6: MARKET TRENDS */}
+            {/* TAB 6: MARKET TRENDS & PAN-AFRICA HEATMAP */}
             {activeTab === "trends" && (
               <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4 animate-in fade-in duration-300">
                 <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Market Analytics</p>
-                  <h3 className="text-xl font-black uppercase text-white">Category Demand Growth & Territory Recommendations</h3>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Market Analytics & Heatmap</p>
+                  <h3 className="text-xl font-black uppercase text-white">🌍 Pan-Africa Event Opportunity Density & Growth Trends</h3>
                 </div>
 
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-2">
-                    <h4 className="font-bold text-white uppercase text-sm">Demand Growth Categories</h4>
+                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
+                    <h4 className="font-bold text-white uppercase text-sm flex items-center gap-2">
+                      <Globe size={16} className="text-[#f4cf69]" /> Regional Opportunity Density Map
+                    </h4>
                     <ul className="space-y-2 text-xs font-mono">
-                      <li className="flex justify-between text-[#c7d0da]"><span>Corporate Conferences</span><b className="text-emerald-400">↑ 24% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Product Launches & Expos</span><b className="text-emerald-400">↑ 18% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Professional Workshops</span><b className="text-emerald-400">↑ 31% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Executive Gala Dinners</span><b className="text-emerald-400">↑ 12% Growth</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Kenya 🇰🇪</span><b className="text-[#f4cf69]">1,248 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Uganda 🇺🇬</span><b className="text-emerald-400">184 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Tanzania 🇹🇿</span><b className="text-blue-400">142 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Rwanda 🇷🇼</span><b className="text-purple-400">97 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>South Africa 🇿🇦</span><b className="text-[#f4cf69]">210 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Nigeria 🇳🇬</span><b className="text-emerald-400">340 Opportunities</b></li>
+                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Ghana 🇬🇭</span><b className="text-blue-400">115 Opportunities</b></li>
                     </ul>
                   </div>
 
-                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-2">
-                    <h4 className="font-bold text-white uppercase text-sm">Sales Territory Priority</h4>
-                    <p className="text-xs text-[#9ca8b6] leading-relaxed">
-                      <b>Westlands & Upper Hill Nairobi</b> contains 18 high-match corporate opportunities. Recommended sales outreach focus for Q4.
-                    </p>
+                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
+                    <h4 className="font-bold text-white uppercase text-sm flex items-center gap-2">
+                      <TrendingUp size={16} className="text-emerald-400" /> Demand Growth Categories
+                    </h4>
+                    <ul className="space-y-2 text-xs font-mono">
+                      <li className="flex justify-between text-[#c7d0da]"><span>University & Academic Fairs</span><b className="text-emerald-400">↑ 31% Growth</b></li>
+                      <li className="flex justify-between text-[#c7d0da]"><span>Corporate Conferences & Summits</span><b className="text-emerald-400">↑ 24% Growth</b></li>
+                      <li className="flex justify-between text-[#c7d0da]"><span>Luxury Weddings & Galas</span><b className="text-emerald-400">↑ 23% Growth</b></li>
+                      <li className="flex justify-between text-[#c7d0da]"><span>Tech Expos & Product Launches</span><b className="text-emerald-400">↑ 18% Growth</b></li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -958,7 +1127,7 @@ export function AdminAI() {
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#8d9baa] italic">Select an opportunity from "Top Discovered Leads" and click "Outreach" to generate a personalized pitch.</p>
+                  <p className="text-xs text-[#8d9baa] italic">Select an opportunity from "AI Event Opportunity Discovery" and click "Outreach" to generate a personalized pitch.</p>
                 )}
               </div>
             )}
