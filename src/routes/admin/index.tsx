@@ -19,14 +19,49 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home } from "lucide-react";
 
+import { createPageSeo } from "@/lib/seo";
+
 export const Route = createFileRoute("/admin/")({
+  head: () =>
+    createPageSeo({
+      title: "Executive CEO Command Center",
+      description: "Official Executive CEO Command Center for Royal Touch Events — Kenya's Top Event Management Agency.",
+      path: "/admin",
+      noindex: true,
+    }),
   component: AdminOverview,
 });
 
 function AdminOverview() {
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+
+  const emailLower = (user?.email || profile?.email || "").toLowerCase();
+  const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
+
+  const adminInfo = (() => {
+    if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
+      return {
+        fullName: "Japheth Owiyo",
+        firstName: "Japheth",
+        badge: "PROTECTED C.E.O",
+      };
+    }
+    if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
+      return {
+        fullName: "DANIWEST",
+        firstName: "DANIWEST",
+        badge: "SUPER ADMIN DEVELOPER",
+      };
+    }
+    const fallback = rawName || (emailLower ? emailLower.split("@")[0].toUpperCase() : "ADMINISTRATOR");
+    return {
+      fullName: fallback,
+      firstName: fallback.split(" ")[0] || fallback,
+      badge: "EXECUTIVE ADMIN",
+    };
+  })();
 
   // 100% REAL LIVE SUPABASE DATABASE HOOKS
   const { data: events = [], isLoading: eventsLoading } = useAdminEvents();
@@ -137,13 +172,16 @@ function AdminOverview() {
               { to: "/admin/users", label: "Clients", icon: "♟" },
               { to: "/admin/events", label: "Events", icon: "▦" },
               { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
-              { to: "/admin/bookings", label: "Finance", icon: "✥" },
-              { to: "/admin/events", label: "Operations", icon: "⚙" },
+              { to: "/admin/proposals", label: "Proposals", icon: "▤" },
+              { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
+              { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
               { to: "/admin/contacts", label: "Notifications", icon: "♧" },
               { to: "/admin/contacts", label: "Messages", icon: "✉" },
-              { to: "/admin/users", label: "Team", icon: "♟" },
-              { to: "/admin/events", label: "Marketing", icon: "✦" },
-              { to: "/admin/bookings", label: "Reports", icon: "▣" },
+              { to: "/admin/team", label: "Team", icon: "♟" },
+              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
               { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item) => (
               <Link
@@ -435,16 +473,16 @@ function AdminOverview() {
                     </div>
                     <div className="text-left hidden md:block">
                       <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
-                        {profile?.full_name || "Daniwest"}
+                        {adminInfo.fullName}
                       </strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">CEO / ADMINISTRATOR</small>
+                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
                     </div>
                     <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl space-y-1">
+                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
                   <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
-                    {profile?.full_name || "Daniwest"} (CEO)
+                    {adminInfo.fullName} ({adminInfo.badge})
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
@@ -534,7 +572,7 @@ function AdminOverview() {
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
-                    <span className="text-[#f4cf69]">{timeGreeting},</span> C.E.O {profile?.full_name?.split(" ")[0] || "Daniwest"} <span className="text-[#f4cf69] font-serif text-2xl lg:text-3xl">♛</span>
+                    <span className="text-[#f4cf69]">{timeGreeting},</span> {adminInfo.fullName} <span className="text-[#f4cf69] font-serif text-2xl lg:text-3xl">♛</span>
                   </h1>
 
                   <p className="text-xs sm:text-sm text-[#98a7b7] font-medium leading-relaxed font-sans">
@@ -822,7 +860,7 @@ function AdminOverview() {
                   <div className="flex items-center gap-2 font-bold text-xs text-white">
                     <span className="text-[#f1c045] text-base">▣</span> Financial Position
                   </div>
-                  <Link to="/admin/bookings" className="text-[10px] text-[#d8b45a] font-medium hover:underline">View Details →</Link>
+                  <Link to="/admin/finance" className="text-[10px] text-[#d8b45a] font-medium hover:underline">View Details →</Link>
                 </div>
 
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-[10px]">
@@ -863,7 +901,7 @@ function AdminOverview() {
                   <div className="flex items-center gap-2 font-bold text-xs text-white">
                     <span className="text-[#f1c045] text-base">▣</span> Operations
                   </div>
-                  <span className="text-[10px] text-[#d8b45a] font-medium hover:underline cursor-pointer">View All →</span>
+                  <Link to="/admin/events" className="text-[10px] text-[#d8b45a] font-medium hover:underline">View All →</Link>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -894,7 +932,7 @@ function AdminOverview() {
                     tickets.slice(0, 3).map((t) => (
                       <div key={t.id} className="flex items-center gap-2.5 pb-2 border-b border-[#172530] last:border-none">
                         <div className="h-7 w-7 rounded bg-[#17232e] text-[#f4cf69] flex items-center justify-center font-bold text-xs shrink-0 font-mono">
-                          {t.ticket_code.slice(0, 2)}
+                          {t.ticket_code ? t.ticket_code.slice(0, 2) : "TC"}
                         </div>
                         <div className="min-w-0">
                           <p className="text-white font-medium truncate">{t.holder_name} - {t.ticket_tier}</p>
@@ -902,8 +940,20 @@ function AdminOverview() {
                         </div>
                       </div>
                     ))
+                  ) : bookings.length > 0 ? (
+                    bookings.slice(0, 3).map((b) => (
+                      <div key={b.id} className="flex items-center gap-2.5 pb-2 border-b border-[#172530] last:border-none">
+                        <div className="h-7 w-7 rounded bg-[#17232e] text-[#f4cf69] flex items-center justify-center font-bold text-xs shrink-0 font-mono">
+                          IN
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white font-medium truncate">{b.name} - {b.event_type}</p>
+                          <small className="text-[#8391a0] font-mono">Inquiry Submitted · {new Date(b.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</small>
+                        </div>
+                      </div>
+                    ))
                   ) : (
-                    <p className="text-center py-4 text-[#8391a0]">No recent digital passes issued yet.</p>
+                    <p className="text-center py-4 text-[#8391a0]">No recent database activity found.</p>
                   )}
                 </div>
               </div>
@@ -957,7 +1007,7 @@ function AdminOverview() {
                   <div className="flex items-center gap-2 font-bold text-xs text-white">
                     <span className="text-[#f1c045] text-base">♛</span> Marketing Intelligence
                   </div>
-                  <span className="text-[10px] text-[#d8b45a] font-medium hover:underline cursor-pointer">View All →</span>
+                  <Link to="/admin/marketing" className="text-[10px] text-[#d8b45a] font-medium hover:underline">View All →</Link>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 text-[10px]">

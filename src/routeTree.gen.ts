@@ -34,9 +34,11 @@ import { Route as AdminProfileRouteImport } from './routes/admin/profile'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
 import { Route as AdminHelpRouteImport } from './routes/admin/help'
+import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
 import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
 import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminAiRouteImport } from './routes/admin/ai'
 import { Route as AdminAdminBookingRouteImport } from './routes/admin/admin-booking'
 import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout.index'
@@ -176,6 +178,11 @@ const AdminHelpRoute = AdminHelpRouteImport.update({
   path: '/admin/help',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/admin/finance',
+  path: '/admin/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminEventsRoute = AdminEventsRouteImport.update({
   id: '/admin/events',
   path: '/admin/events',
@@ -189,6 +196,11 @@ const AdminContactsRoute = AdminContactsRouteImport.update({
 const AdminBookingsRoute = AdminBookingsRouteImport.update({
   id: '/admin/bookings',
   path: '/admin/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/admin/ai',
+  path: '/admin/ai',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAdminBookingRoute = AdminAdminBookingRouteImport.update({
@@ -277,9 +289,11 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/admin': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -320,9 +334,11 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/admin': typeof AdminIndexRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -362,9 +378,11 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/admin/_layout': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
+  '/admin/ai': typeof AdminAiRoute
   '/admin/bookings': typeof AdminBookingsRoute
   '/admin/contacts': typeof AdminContactsRoute
   '/admin/events': typeof AdminEventsRoute
+  '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
@@ -407,9 +425,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/admin/admin-booking'
+    | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
     | '/admin/events'
+    | '/admin/finance'
     | '/admin/help'
     | '/admin/marketing'
     | '/admin/payments'
@@ -450,9 +470,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin'
     | '/admin/admin-booking'
+    | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
     | '/admin/events'
+    | '/admin/finance'
     | '/admin/help'
     | '/admin/marketing'
     | '/admin/payments'
@@ -491,9 +513,11 @@ export interface FileRouteTypes {
     | '/terms'
     | '/admin/_layout'
     | '/admin/admin-booking'
+    | '/admin/ai'
     | '/admin/bookings'
     | '/admin/contacts'
     | '/admin/events'
+    | '/admin/finance'
     | '/admin/help'
     | '/admin/marketing'
     | '/admin/payments'
@@ -535,9 +559,11 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   AdminLayoutRoute: typeof AdminLayoutRoute
   AdminAdminBookingRoute: typeof AdminAdminBookingRoute
+  AdminAiRoute: typeof AdminAiRoute
   AdminBookingsRoute: typeof AdminBookingsRoute
   AdminContactsRoute: typeof AdminContactsRoute
   AdminEventsRoute: typeof AdminEventsRoute
+  AdminFinanceRoute: typeof AdminFinanceRoute
   AdminHelpRoute: typeof AdminHelpRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
@@ -728,6 +754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHelpRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/admin/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/events': {
       id: '/admin/events'
       path: '/admin/events'
@@ -747,6 +780,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/bookings'
       fullPath: '/admin/bookings'
       preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/admin/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/admin-booking': {
@@ -892,9 +932,11 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   AdminLayoutRoute: AdminLayoutRoute,
   AdminAdminBookingRoute: AdminAdminBookingRoute,
+  AdminAiRoute: AdminAiRoute,
   AdminBookingsRoute: AdminBookingsRoute,
   AdminContactsRoute: AdminContactsRoute,
   AdminEventsRoute: AdminEventsRoute,
+  AdminFinanceRoute: AdminFinanceRoute,
   AdminHelpRoute: AdminHelpRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,

@@ -125,12 +125,14 @@ export function AdminTeam() {
               { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
               { to: "/admin/proposals", label: "Proposals", icon: "▤" },
               { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
               { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
               { to: "/admin/contacts", label: "Notifications", icon: "♧" },
               { to: "/admin/contacts", label: "Messages", icon: "✉" },
               { to: "/admin/team", label: "Team", icon: "♟", active: true },
               { to: "/admin/marketing", label: "Marketing", icon: "✦" },
-              { to: "/admin/bookings", label: "Reports", icon: "▣" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
               { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item, idx) => (
               <Link
@@ -237,7 +239,7 @@ export function AdminTeam() {
                     <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl space-y-1 z-[9999]">
+                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
                   <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
                     {profile?.full_name || "Daniwest"} (CEO)
                   </DropdownMenuLabel>

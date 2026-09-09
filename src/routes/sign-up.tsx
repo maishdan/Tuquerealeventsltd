@@ -52,11 +52,19 @@ function SignUp() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   useEffect(() => {
+    if (auth?.loading) return;
     if (auth?.user) {
-      const to = auth.profile?.role === "admin" ? "/admin" : "/dashboard";
+      const email = auth.user.email?.toLowerCase();
+      const isAdmin =
+        auth.profile?.role === "admin" ||
+        auth.user.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+        email === "eventsroyaltouch7@gmail.com" ||
+        email === "abigaelmuthoni29@gmail.com";
+
+      const to = isAdmin ? "/admin" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
 
   // Password Visibility
   const [showPassword, setShowPassword] = useState(false);

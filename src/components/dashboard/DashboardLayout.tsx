@@ -367,6 +367,8 @@ function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
     { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
     { to: "/admin/proposals", label: "Proposals", icon: "▤" },
     { to: "/admin/payments", label: "Payments", icon: "▣" },
+    { to: "/admin/finance", label: "Finance", icon: "✥" },
+    { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
     { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
     { to: "/admin/contacts", label: "Notifications", icon: "♧" },
     { to: "/admin/contacts", label: "Messages", icon: "✉" },

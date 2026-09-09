@@ -57,8 +57,22 @@ export const Route = createFileRoute("/admin/users")({
 
 function AdminUsers() {
   const searchParams = Route.useSearch();
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const emailLower = (user?.email || profile?.email || "").toLowerCase();
+  const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
+
+  const adminInfo = (() => {
+    if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
+      return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
+    }
+    if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
+      return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
+    }
+    const fallback = rawName || (emailLower ? emailLower.split("@")[0].toUpperCase() : "ADMINISTRATOR");
+    return { fullName: fallback, badge: "EXECUTIVE ADMIN" };
+  })();
 
   const { data: team = [] } = useAdminTeam();
   const { data: profiles = [], isLoading: loadingProfiles, refetch: refetchProfiles } = useAdminClients();
@@ -302,12 +316,14 @@ function AdminUsers() {
               { to: "/admin/bookings", label: "Sales & CRM", icon: "▤" },
               { to: "/admin/proposals", label: "Proposals", icon: "▤" },
               { to: "/admin/payments", label: "Payments", icon: "▣" },
+              { to: "/admin/finance", label: "Finance", icon: "✥" },
+              { to: "/admin/ai", label: "AI & Insights", icon: "✦" },
               { to: "/admin/admin-booking", label: "Booking", icon: "▣" },
               { to: "/admin/contacts", label: "Notifications", icon: "♧" },
               { to: "/admin/contacts", label: "Messages", icon: "✉" },
-              { to: "/admin/users", label: "Team", icon: "♟" },
-              { to: "/admin/events", label: "Marketing", icon: "✦" },
-              { to: "/admin/bookings", label: "Reports", icon: "▣" },
+              { to: "/admin/team", label: "Team", icon: "♟" },
+              { to: "/admin/marketing", label: "Marketing", icon: "✦" },
+              { to: "/admin/reports", label: "Reports", icon: "▣" },
               { to: "/admin/settings", label: "Settings", icon: "⚙" },
             ].map((item, idx) => (
               <Link
@@ -459,16 +475,16 @@ function AdminUsers() {
                     </div>
                     <div className="text-left hidden md:block">
                       <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
-                        {profile?.full_name || "Daniwest"}
+                        {adminInfo.fullName}
                       </strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">CEO / ADMINISTRATOR</small>
+                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
                     </div>
                     <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl space-y-1">
+                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
                   <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
-                    {profile?.full_name || "Daniwest"} (CEO)
+                    {adminInfo.fullName} ({adminInfo.badge})
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
