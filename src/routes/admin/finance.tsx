@@ -19,7 +19,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Receipt,
-  CheckCircle2
+  CheckCircle2,
+  Crown
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -347,7 +348,7 @@ export function AdminFinance() {
               <div className="relative p-6 sm:p-8 bg-gradient-to-r from-[#0d1c28] via-[#09141f] to-[#050e17] border-2 border-[#d4a43b]/40 rounded-xl shadow-[0_12px_35px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
                 <div className="space-y-2.5 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e6b83f]/15 border border-[#e6b83f]/40 text-[#f4cf69] text-[9px] font-black uppercase tracking-[0.25em] rounded-md shadow-inner">
-                    <span className="text-[#f4cf69] font-serif text-sm">♛</span> Royal Touch Financial Command Center
+                    <Crown size={14} className="text-[#f4cf69]" /> TOQUE REAL EVENTS LIMITED Financial Command Center
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
@@ -486,7 +487,7 @@ export function AdminFinance() {
             {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
             <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
               <div className="flex flex-wrap items-center gap-2">
-                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED Nairobi.</span>
                 <span className="hidden sm:inline">•</span>
                 <a
                   href="https://myworldafric.vercel.app"

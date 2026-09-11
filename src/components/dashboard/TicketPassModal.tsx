@@ -228,16 +228,16 @@ export function TicketPassModal({ ticket, isOpen, onClose }: TicketPassModalProp
         <body>
           <div class="ticket-pass" id="ticket-pass-content">
             <div class="top-bar">
-              <div>ROYAL TOUCH EVENTS · OFFICIAL PAID ENTRY PASS</div>
+              <div>TOQUE REAL EVENTS LIMITED · OFFICIAL PAID ENTRY PASS</div>
               <div>TIER: ${ticket.ticket_tier} PASS</div>
             </div>
 
             <!-- HEADER WITH LOGO & QR CODE AT TOP RIGHT -->
             <div class="header">
               <div class="brand">
-                <img src="${logoUrl}" alt="Royal Touch Logo" />
+                <img src="/new logo.png" alt="TOQUE REAL Logo" />
                 <div>
-                  <div class="brand-title">Royal Touch</div>
+                  <div class="brand-title">TOQUE REAL EVENTS LIMITED</div>
                   <div class="brand-sub">Luxury Production & Event Gate Registry</div>
                 </div>
               </div>
@@ -300,7 +300,7 @@ export function TicketPassModal({ ticket, isOpen, onClose }: TicketPassModalProp
             </div>
 
             <div class="footer">
-              <div>&copy; 2026 ROYAL TOUCH EXECUTIVE EVENTS · ALL RIGHTS RESERVED</div>
+              <div>&copy; 2026 TOQUE REAL EVENTS LIMITED · ALL RIGHTS RESERVED</div>
               <div>CRYPTOGRAPHIC GATE TOKEN REDIRECT ACTIVE</div>
             </div>
           </div>

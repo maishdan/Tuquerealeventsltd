@@ -71,9 +71,9 @@ const teamSpecialties = [
 
 function About() {
   return (
-    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans overflow-x-hidden transition-colors duration-300">
+    <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans overflow-x-hidden transition-colors duration-300">
       {/* 1. HERO / LEGACY HEADER */}
-      <section className="relative pt-24 pb-20 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b0e14]">
+      <section className="relative pt-24 pb-20 border-b border-white/10 bg-[#0b0e14]/85 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 text-center space-y-8">
           <div className="flex justify-center">
             <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">

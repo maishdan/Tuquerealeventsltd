@@ -115,9 +115,9 @@ export function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
           <div class="invoice-card" id="invoice-content">
             <div class="header">
               <div class="brand">
-                <img src="${logoUrl}" alt="Royal Touch Logo" />
+                <img src="/new logo.png" alt="TOQUE REAL Logo" />
                 <div>
-                  <div class="brand-title">Royal Touch Events</div>
+                  <div class="brand-title">TOQUE REAL EVENTS LIMITED</div>
                   <div style="font-size: 9px; font-weight: 800; color: #64748b; uppercase;">Official Executive Invoice</div>
                 </div>
               </div>
@@ -139,8 +139,8 @@ export function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
 
               <div class="bill-box">
                 <div class="label">Issued By Organization:</div>
-                <div class="val">Royal Touch Events Executive</div>
-                <div style="font-size: 11px; color: #475569; font-weight: 700;">Upper Hill, Nairobi, Kenya</div>
+                <div class="val">TOQUE REAL EVENTS LIMITED</div>
+                <div style="font-size: 11px; color: #475569; font-weight: 700;">TOQUE REAL Tower, Kilimani, Nairobi</div>
                 <div style="font-size: 11px; color: #475569; font-weight: 700;">eventsroyaltouch7@gmail.com</div>
               </div>
             </div>
@@ -176,7 +176,7 @@ export function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
             </div>
 
             <div class="footer">
-              <div>&copy; 2026 ROYAL TOUCH EVENTS · OFFICIAL BILLING DISPATCH</div>
+              <div>&copy; 2026 TOQUE REAL EVENTS LIMITED · OFFICIAL BILLING DISPATCH</div>
               <div>TEL: +254 795 365 334 | WWW.ROYALTOUCHEVENTS.CO.KE</div>
             </div>
           </div>

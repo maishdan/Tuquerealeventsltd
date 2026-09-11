@@ -808,7 +808,7 @@ export function AdminReports() {
             {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
             <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
               <div className="flex flex-wrap items-center gap-2">
-                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED Nairobi.</span>
                 <span className="hidden sm:inline">•</span>
                 <a
                   href="https://myworldafric.vercel.app"

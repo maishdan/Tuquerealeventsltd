@@ -16,7 +16,13 @@ import {
   Users,
   Award,
   Globe,
-  DollarSign
+  DollarSign,
+  Calendar,
+  MapPin,
+  Star,
+  Ticket as TicketIcon,
+  MessageSquare,
+  Check
 } from "lucide-react";
 import corporate from "../assets/gallery-corporate.jpg";
 import wedding from "../assets/gallery-wedding.jpg";
@@ -28,9 +34,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/")({
   head: () =>
     createPageSeo({
-      title: "TOQUE REAL EVENTS LIMITED | Premier Corporate & Luxury Event Production Nairobi",
+      title: "TOQUE REAL EVENTS LIMITED | Premier Event Planning & Production Nairobi",
       description:
-        "TOQUE REAL EVENTS LIMITED is Nairobi's premier event planning agency for corporate summits, luxury weddings, and stadium concerts. Accessible production for all levels and standards.",
+        "TOQUE REAL EVENTS LIMITED is Kenya's premier event planning agency for community celebrations, weddings, corporate summits, and concerts. Simple, reliable, and accessible for everyone.",
       path: "/",
       keywords: SERVICE_KEYWORDS,
     }),
@@ -51,82 +57,146 @@ const heroImages = [
 const trustPillars = [
   {
     icon: ShieldCheck,
-    title: "100% Technical Uptime",
-    desc: "Redundant high-spec power & audio-visual systems for zero-failure event execution.",
+    title: "100% Technical Reliability",
+    desc: "Backup generators and professional sound systems so your event never stops.",
   },
   {
     icon: Smartphone,
-    title: "Instant M-Pesa Ticketing",
-    desc: "Automated gate ticket generation with encrypted QR code verification scanner.",
+    title: "Instant M-Pesa Gate Tickets",
+    desc: "Fast digital pass generation sent straight to phone with verified QR code scanning.",
   },
   {
     icon: BarChart3,
-    title: "Strategic Brand ROI",
-    desc: "Events engineered to maximize engagement, media reach, and stakeholder value.",
+    title: "Transparent Fair Pricing",
+    desc: "Clear upfront quotes for all budgets — from small family parties to massive summits.",
   },
   {
     icon: History,
-    title: "15 Years Legacy",
-    desc: "Over 480+ high-profile events executed across Nairobi and East Africa.",
+    title: "15 Years Experience",
+    desc: "Over 1,200+ successful events organized across Nairobi and East Africa.",
+  },
+];
+
+const upcomingEventsList = [
+  {
+    id: "evt-1",
+    title: "East Africa Business & Tech Leadership Summit 2026",
+    category: "Corporate Conference",
+    date: "20 Nov 2026",
+    location: "KICC Nairobi, Kenya",
+    price: 5000,
+    tier: "VIP Pass",
+    image: "/back/e1.jfif",
+  },
+  {
+    id: "evt-2",
+    title: "Safaricom Youth Innovation & Tech Expo 2026",
+    category: "Exhibition & Expo",
+    date: "15 Oct 2026",
+    location: "Westlands, Nairobi",
+    price: 1500,
+    tier: "Regular Pass",
+    image: "/back/e2.jfif",
+  },
+  {
+    id: "evt-3",
+    title: "TOQUE REAL Grand Luxury Gala & Cultural Night",
+    category: "Luxury Gala",
+    date: "12 Dec 2026",
+    location: "Villa Rosa Kempinski Nairobi",
+    price: 15000,
+    tier: "VVIP All Access",
+    image: "/back/e3.jfif",
+  },
+  {
+    id: "evt-4",
+    title: "Nairobi Music & Cultural Festival 2026",
+    category: "Concert & Festival",
+    date: "20 Dec 2026",
+    location: "Nyayo Stadium, Nairobi",
+    price: 0,
+    tier: "Free Public Pass",
+    image: "/back/e4.jfif",
   },
 ];
 
 const serviceSectors = [
   {
     id: "sec-community",
-    title: "Community & Private",
-    subtitle: "Birthdays, Graduations & Family",
+    title: "Community & Private Gatherings",
+    subtitle: "Birthdays, Graduations, Family Events",
     icon: Users,
     img: wedding,
     badge: "Budget Friendly",
     features: [
-      "Intimate Sound & Stage Setup",
-      "Custom Decor & Lighting",
-      "Flexible Pricing for All",
+      "PA Sound System & Microphones",
+      "Decor, Tables & Chairs Setup",
+      "Fair Pricing for Everyday Clients",
     ],
     startingFrom: 15000,
   },
   {
     id: "sec-corp",
-    title: "Corporate Command",
-    subtitle: "AGMs, Summits & Launches",
+    title: "Corporate Conferences & AGMs",
+    subtitle: "Company Summits & Product Launches",
     icon: Building2,
     img: corporate,
     badge: "Enterprise Standard",
     features: [
-      "AGM & Stakeholder Governance",
-      "Experiential Product Reveals",
-      "Multi-Track AV Orchestration",
+      "HD LED Screens & Stage Rigging",
+      "Delegate Registration & Gate Pass",
+      "VIP Catering & Protocol Staff",
     ],
     startingFrom: 150000,
   },
   {
     id: "sec-luxury",
-    title: "Luxury Weddings",
-    subtitle: "Bespoke & Private Celebrations",
+    title: "Luxury Weddings & Galas",
+    subtitle: "Bespoke Weddings & Evening Galas",
     icon: Heart,
     img: wedding,
-    badge: "Exclusive Access",
+    badge: "VIP Exclusive",
     features: [
-      "Floral Architecture & Styling",
-      "Discreet VIP Security",
-      "Bespoke Sound & Lighting Blueprint",
+      "Custom Floral Architecture & Lighting",
+      "VIP Security & Protocol Leads",
+      "Gourmet Catering & Bar Service",
     ],
     startingFrom: 300000,
   },
   {
     id: "sec-concert",
-    title: "Stadium Concerts",
-    subtitle: "Festivals & Large Scale",
+    title: "Stadium Concerts & Festivals",
+    subtitle: "Public Concerts & Festivals",
     icon: Music,
     img: concert,
-    badge: "Massive Production",
+    badge: "Large Production",
     features: [
-      "Stadium Grade Rigging & Audio",
-      "Live 4K Streaming & Media Hub",
-      "Gate QR Ticket Verification",
+      "Stadium Grade Audio & Stage Rigging",
+      "Live 4K Media Broadcast & Screens",
+      "Encrypted M-Pesa QR Gate Scanning",
     ],
     startingFrom: 500000,
+  },
+];
+
+const clientReviews = [
+  {
+    name: "Dr. Sarah Muthoni",
+    role: "Corporate HR Director, Nairobi",
+    comment: "TOQUE REAL EVENTS LIMITED managed our 800-delegate summit in Westlands. Flawless 4K AV, zero technical delays, and M-Pesa QR check-in made the event effortless.",
+    rating: 5,
+  },
+  {
+    name: "Daniel & Mary Kamau",
+    role: "Wedding Couple, Kilimani",
+    comment: "They handled our wedding with 300 guests with incredible decor and VIP catering. Very honest pricing and great communication from start to finish!",
+    rating: 5,
+  },
+  {
+    name: "Peter Otieno",
+    role: "Concert Promoter, Mombasa",
+    comment: "Stadium sound, stage lighting, and digital QR ticket verification were 100% reliable. Best production team in Kenya!",
+    rating: 5,
   },
 ];
 
@@ -144,7 +214,7 @@ export function Home() {
 
   // Quick Estimator State
   const [estGuests, setEstGuests] = useState<number>(100);
-  const [estCategory, setEstCategory] = useState<string>("Community & Private");
+  const [estCategory, setEstCategory] = useState<string>("Community & Private Gatherings");
   const [selectedCurrency, setSelectedCurrency] = useState<string>("KES");
   const [includeAv, setIncludeAv] = useState<boolean>(true);
   const [includeTicketing, setIncludeTicketing] = useState<boolean>(false);
@@ -158,16 +228,16 @@ export function Home() {
 
   const calculateEstimateInKes = () => {
     let base =
-      estCategory === "Community & Private"
+      estCategory === "Community & Private Gatherings"
         ? 15000
-        : estCategory === "Corporate Summit"
+        : estCategory === "Corporate Conferences & AGMs"
         ? 150000
-        : estCategory === "Luxury Wedding"
+        : estCategory === "Luxury Weddings & Galas"
         ? 300000
         : 500000;
 
-    let perGuest = estGuests * (estCategory === "Community & Private" ? 150 : 350);
-    let avCost = includeAv ? (estCategory === "Community & Private" ? 10000 : 80000) : 0;
+    let perGuest = estGuests * (estCategory === "Community & Private Gatherings" ? 150 : 350);
+    let avCost = includeAv ? (estCategory === "Community & Private Gatherings" ? 10000 : 80000) : 0;
     let ticketCost = includeTicketing ? 15000 : 0;
 
     return base + perGuest + avCost + ticketCost;
@@ -198,48 +268,49 @@ export function Home() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 py-20 text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/10 border border-gold/30 text-gold text-xs font-black uppercase tracking-[0.25em] shadow-inner">
-            <Sparkles size={14} className="text-gold" /> TOQUE REAL EVENTS LIMITED
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/40 text-[#f4cf69] text-xs font-black uppercase tracking-[0.25em] shadow-inner">
+            <Sparkles size={14} className="text-[#f4cf69]" /> TOQUE REAL EVENTS LIMITED
           </div>
 
           <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tighter text-white leading-[0.9] drop-shadow-2xl">
-            Architecting <br />
-            <span className="text-gold font-display font-normal normal-case">Unforgettable</span> Events.
+            We Plan Your Event. <br />
+            <span className="text-[#f4cf69] font-display font-normal normal-case">You Celebrate.</span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-300 font-medium leading-relaxed">
-            Nairobi's premier event planning & production agency. Accessible excellence for community celebrations, luxury weddings, corporate summits, and concerts.
+          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-200 font-medium leading-relaxed">
+            Kenya's premier event planning agency. We organize stress-free events for everyone — family celebrations, birthdays, weddings, corporate summits, and public concerts.
           </p>
 
+          {/* VIBRANT GREEN CTA BUTTONS */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
             <Link
               to="/booking"
-              className="h-14 px-8 rounded-lg bg-gold text-[#0b0e14] font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl shadow-gold/20 w-full sm:w-auto"
+              className="h-14 px-8 rounded-none bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-2xl shadow-emerald-500/30 w-full sm:w-auto cursor-pointer"
             >
               Plan Your Event <ArrowRight size={16} />
             </Link>
             <Link
               to="/services"
-              className="h-14 px-8 rounded-lg border border-white/20 bg-black/40 backdrop-blur-md text-white font-black text-xs uppercase tracking-widest flex items-center justify-center hover:border-gold hover:text-gold transition-all w-full sm:w-auto"
+              className="h-14 px-8 rounded-none border border-white/20 bg-black/60 backdrop-blur-md text-white font-black text-xs uppercase tracking-widest flex items-center justify-center hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all w-full sm:w-auto"
             >
-              Explore Solutions
+              View All Services
             </Link>
           </div>
         </div>
       </section>
 
       {/* 2. TRUST PILLARS BAR */}
-      <section className="py-12 bg-[#0b0e14]/80 backdrop-blur-md border-y border-slate-200 dark:border-white/10">
+      <section className="py-12 bg-[#0b0e14]/85 backdrop-blur-md border-y border-[#172533]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {trustPillars.map((p, i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-[#121722]/85 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
-                <div className="h-10 w-10 rounded-lg bg-gold/10 border border-gold/30 text-gold flex items-center justify-center shrink-0">
+              <div key={i} className="flex items-start gap-4 p-5 rounded-none bg-[#121722]/90 backdrop-blur-md border border-[#243343] hover:border-[#f4cf69]/60 shadow-xl transition-all">
+                <div className="h-10 w-10 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] flex items-center justify-center shrink-0">
                   <p.icon size={20} />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-foreground">{p.title}</h4>
-                  <p className="text-[11px] text-muted-foreground leading-snug">{p.desc}</p>
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-white">{p.title}</h4>
+                  <p className="text-[11px] text-[#8d9bad] leading-snug font-medium">{p.desc}</p>
                 </div>
               </div>
             ))}
@@ -247,62 +318,70 @@ export function Home() {
         </div>
       </section>
 
-      {/* 3. ACCESSIBLE SERVICE SECTORS FOR ALL LEVELS */}
-      <section className="py-24 bg-[#0b0e14]/80 backdrop-blur-md">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
-          <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <p className="text-xs font-black uppercase tracking-[0.3em] text-gold">Tailored Solutions</p>
-            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-              Accessible Production For All Standards
-            </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              From intimate family celebrations to multinational corporate summits, TOQUE REAL EVENTS LIMITED delivers uncompromising quality at every budget level.
-            </p>
+      {/* 3. UPCOMING EVENTS & GATE TICKETS SECTION */}
+      <section className="py-20 bg-[#0b0e14]/90 backdrop-blur-md border-b border-[#172533]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#172533] pb-6">
+            <div className="space-y-2">
+              <span className="px-3 py-1 bg-[#f4cf69]/10 text-[#f4cf69] border border-[#f4cf69]/30 text-[10px] font-black uppercase tracking-widest rounded-none">
+                <Calendar size={12} className="inline mr-1" /> Live Gate Passes
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+                Upcoming Featured Events
+              </h2>
+              <p className="text-xs sm:text-sm text-[#8d9bad] max-w-xl font-medium">
+                Reserve your seat or gate pass online with instant M-Pesa payment and encrypted QR code ticket delivery.
+              </p>
+            </div>
+
+            <Link
+              to="/events"
+              className="h-12 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-none flex items-center justify-center gap-2 shadow-xl transition-all shrink-0 cursor-pointer"
+            >
+              Browse All Events →
+            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {serviceSectors.map((sector) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {upcomingEventsList.map((evt) => (
               <div
-                key={sector.id}
-                className="bg-[#121722]/85 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col group hover:border-gold transition-all duration-300"
+                key={evt.id}
+                className="bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
               >
-                <div className="relative h-48 overflow-hidden">
-                  <img src={sector.img} alt={sector.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <span className="absolute top-3 right-3 px-3 py-1 bg-black/80 text-gold text-[9px] font-black uppercase rounded-full border border-gold/30">
-                    {sector.badge}
+                <div className="relative h-44 overflow-hidden">
+                  <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/40">
+                    {evt.tier}
                   </span>
                 </div>
 
-                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-3">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gold">{sector.subtitle}</p>
-                      <h3 className="text-xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white group-hover:text-gold transition-colors">
-                        {sector.title}
-                      </h3>
-                    </div>
-
-                    <ul className="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
-                      {sector.features.map((feat, fIdx) => (
-                        <li key={fIdx} className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                          <CheckCircle2 size={13} className="text-gold shrink-0" />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
+                <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{evt.category}</span>
+                    <h3 className="text-sm font-bold text-white uppercase leading-snug group-hover:text-[#f4cf69] transition-colors">
+                      {evt.title}
+                    </h3>
+                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                      <MapPin size={12} className="text-[#f4cf69]" /> {evt.location}
+                    </p>
+                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                      <Calendar size={12} className="text-[#f4cf69]" /> {evt.date}
+                    </p>
                   </div>
 
-                  <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between gap-2">
+                  <div className="pt-3 border-t border-[#172533] flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Starting From</p>
-                      <p className="text-sm font-black text-gold font-mono">{formatKes(sector.startingFrom)}</p>
+                      <span className="text-[8px] uppercase tracking-widest text-[#8d9bad] block">Pass Price</span>
+                      <strong className="text-sm font-mono text-[#f4cf69]">
+                        {evt.price === 0 ? "FREE PASS" : formatKes(evt.price)}
+                      </strong>
                     </div>
 
                     <Link
-                      to="/booking"
-                      className="h-10 px-4 rounded-lg bg-gold text-black font-black text-[9px] uppercase tracking-widest flex items-center gap-1 hover:bg-white transition-all shadow-sm"
+                      to="/events"
+                      className="h-9 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center gap-1 shadow-md transition-all cursor-pointer"
                     >
-                      Inquire <ArrowRight size={12} />
+                      Reserve Gate Ticket →
                     </Link>
                   </div>
                 </div>
@@ -312,24 +391,89 @@ export function Home() {
         </div>
       </section>
 
-      {/* 4. INTERACTIVE ACCESSIBLE COST ESTIMATOR & CURRENCY CONVERTER */}
-      <section className="py-24 bg-white dark:bg-[#0b0e14] border-y border-slate-200 dark:border-white/10">
+      {/* 4. ACCESSIBLE SERVICE SECTORS FOR ALL LEVELS */}
+      <section className="py-24 bg-[#0b0e14]/85 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-[#f4cf69]">Tailored Solutions</p>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              Accessible Event Packages For Everyone
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8d9bad] font-medium">
+              From small family gatherings to multinational corporate summits, TOQUE REAL EVENTS LIMITED delivers transparent quality at every budget level.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {serviceSectors.map((sector) => (
+              <div
+                key={sector.id}
+                className="bg-[#121722]/90 backdrop-blur-md border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img src={sector.img} alt={sector.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <span className="absolute top-3 right-3 px-3 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/30">
+                    {sector.badge}
+                  </span>
+                </div>
+
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#f4cf69]">{sector.subtitle}</p>
+                      <h3 className="text-lg font-black uppercase tracking-tight text-white group-hover:text-[#f4cf69] transition-colors">
+                        {sector.title}
+                      </h3>
+                    </div>
+
+                    <ul className="space-y-2 pt-2 border-t border-[#172533]">
+                      {sector.features.map((feat, fIdx) => (
+                        <li key={fIdx} className="flex items-center gap-2 text-xs font-medium text-[#c7d0da]">
+                          <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#172533] flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[8px] font-black uppercase tracking-widest text-[#8d9bad]">Starting From</p>
+                      <p className="text-sm font-black text-[#f4cf69] font-mono">{formatKes(sector.startingFrom)}</p>
+                    </div>
+
+                    <Link
+                      to="/booking"
+                      className="h-10 px-4 rounded-none bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest flex items-center gap-1 shadow-md transition-all cursor-pointer"
+                    >
+                      Inquire Quote <ArrowRight size={12} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INTERACTIVE COST ESTIMATOR & CURRENCY CONVERTER */}
+      <section className="py-24 bg-[#0b0e14]/90 border-y border-[#172533]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/10 border border-gold/30 text-gold text-[10px] font-black uppercase tracking-widest">
-                <Calculator size={14} /> Instant Cost Calculator
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[10px] font-black uppercase tracking-widest">
+                <Calculator size={14} /> Instant Cost Estimator
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white leading-tight">
-                Estimate Your Event Investment
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
+                Estimate Your Event Budget
               </h2>
-              <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed font-medium">
-                Transparent production estimates adapted for all social levels—from budget family celebrations to multi-currency corporate summits.
+              <p className="text-sm text-[#8d9bad] leading-relaxed font-medium">
+                Simple, transparent cost estimates for everyone—from small family celebrations to multi-currency corporate conferences.
               </p>
 
               {/* Currency Selector Box */}
-              <div className="p-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-gold flex items-center gap-1.5">
+              <div className="p-4 bg-[#121722]/90 border border-[#243343] rounded-none space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#f4cf69] flex items-center gap-1.5">
                   <DollarSign size={14} /> Select Preferred Currency *
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -339,10 +483,10 @@ export function Home() {
                       type="button"
                       onClick={() => setSelectedCurrency(curr.code)}
                       className={cn(
-                        "py-2 px-2.5 rounded-lg text-xs font-mono font-bold border transition-all cursor-pointer text-center",
+                        "py-2 px-2.5 rounded-none text-xs font-mono font-bold border transition-all cursor-pointer text-center",
                         selectedCurrency === curr.code
-                          ? "bg-gold text-black border-gold shadow-md"
-                          : "bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 text-foreground hover:border-gold"
+                          ? "bg-[#f4cf69] text-black border-[#f4cf69] shadow-md font-black"
+                          : "bg-[#0b0e14] border-[#243343] text-[#c7d0da] hover:border-[#f4cf69]"
                       )}
                     >
                       {curr.code} ({curr.symbol})
@@ -351,37 +495,37 @@ export function Home() {
                 </div>
               </div>
 
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl space-y-3">
-                <div className="flex items-center gap-3 text-gold">
+              <div className="p-6 bg-[#121722]/90 border border-[#243343] rounded-none space-y-3">
+                <div className="flex items-center gap-3 text-[#f4cf69]">
                   <Clock size={18} />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Guaranteed 24H Proposal Turnaround</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white">Fast Proposal Turnaround</p>
                 </div>
-                <p className="text-xs text-slate-600 dark:text-gray-400">
-                  Submitting your brief triggers a dedicated senior producer review within 12 business hours.
+                <p className="text-xs text-[#8d9bad]">
+                  Submitting your details triggers a dedicated producer review within 12 business hours.
                 </p>
               </div>
             </div>
 
-            <div className="lg:col-span-7 bg-slate-50 dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-10 rounded-2xl space-y-8 shadow-xl">
+            <div className="lg:col-span-7 bg-[#121722]/90 border border-[#243343] p-8 sm:p-10 rounded-none space-y-8 shadow-2xl">
               <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#8d9bad] block mb-2">
                     Event Category & Level *
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {["Community & Private", "Corporate Summit", "Luxury Wedding", "Stadium Concert"].map((cat) => (
+                    {["Community & Private Gatherings", "Corporate Conferences & AGMs", "Luxury Weddings & Galas", "Stadium Concerts & Festivals"].map((cat) => (
                       <button
                         key={cat}
                         type="button"
                         onClick={() => setEstCategory(cat)}
                         className={cn(
-                          "py-3 px-2 rounded-lg text-[9px] font-black uppercase tracking-wider border transition-all text-center cursor-pointer",
+                          "py-3 px-2 rounded-none text-[9px] font-black uppercase tracking-wider border transition-all text-center cursor-pointer",
                           estCategory === cat
-                            ? "bg-gold text-black border-gold shadow-md font-bold"
-                            : "bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 text-foreground hover:border-gold"
+                            ? "bg-[#f4cf69] text-black border-[#f4cf69] shadow-md font-black"
+                            : "bg-[#0b0e14] border-[#243343] text-white hover:border-[#f4cf69]"
                         )}
                       >
-                        {cat}
+                        {cat.split(" ")[0]} {cat.split(" ")[1]}
                       </button>
                     ))}
                   </div>
@@ -389,10 +533,10 @@ export function Home() {
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#8d9bad]">
                       Guest Capacity
                     </label>
-                    <span className="font-mono text-sm font-black text-gold">{estGuests} Guests</span>
+                    <span className="font-mono text-sm font-black text-[#f4cf69]">{estGuests} Guests</span>
                   </div>
                   <input
                     type="range"
@@ -401,50 +545,92 @@ export function Home() {
                     step="10"
                     value={estGuests}
                     onChange={(e) => setEstGuests(Number(e.target.value))}
-                    className="w-full accent-gold cursor-pointer h-2 bg-slate-200 dark:bg-white/10 rounded-lg"
+                    className="w-full accent-[#f4cf69] cursor-pointer h-2 bg-[#0b0e14] rounded-none"
                   />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-4 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 bg-[#0b0e14] border border-[#243343] rounded-none cursor-pointer">
                     <input
                       type="checkbox"
                       checked={includeAv}
                       onChange={(e) => setIncludeAv(e.target.checked)}
-                      className="accent-gold h-4 w-4"
+                      className="accent-[#f4cf69] h-4 w-4"
                     />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Include Pro Sound & AV</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Include Sound & Lighting</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 bg-[#0b0e14] border border-[#243343] rounded-none cursor-pointer">
                     <input
                       type="checkbox"
                       checked={includeTicketing}
                       onChange={(e) => setIncludeTicketing(e.target.checked)}
-                      className="accent-gold h-4 w-4"
+                      className="accent-[#f4cf69] h-4 w-4"
                     />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Include Gate Passes / QR Tickets</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Include M-Pesa QR Gate Passes</span>
                   </label>
                 </div>
               </div>
 
-              {/* Estimate Calculation Banner with Selected Currency */}
-              <div className="p-6 bg-gold/10 border border-gold/40 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Estimate Calculation Banner with Green Action Button */}
+              <div className="p-6 bg-[#f4cf69]/10 border border-[#f4cf69]/40 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Estimated Turnkey Budget ({selectedCurrency})</p>
-                  <p className="text-2xl sm:text-3xl font-black text-gold font-mono">
+                  <p className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Estimated Budget ({selectedCurrency})</p>
+                  <p className="text-2xl sm:text-3xl font-black text-[#f4cf69] font-mono">
                     {formatCurrency(calculateEstimateInKes(), selectedCurrency)}
                   </p>
                 </div>
 
                 <Link
                   to="/booking"
-                  className="h-12 px-6 rounded-lg bg-gold text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-white transition-all shadow-lg shrink-0 w-full sm:w-auto"
+                  className="h-12 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shrink-0 w-full sm:w-auto transition-all cursor-pointer rounded-none"
                 >
                   Book Estimate <ArrowRight size={14} />
                 </Link>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. CLIENT TESTIMONIALS & TRUST REVIEWS */}
+      <section className="py-24 bg-[#0b0e14]/85 border-b border-[#172533]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-widest rounded-none">
+              <Star size={12} className="inline mr-1 fill-emerald-400" /> Rated 4.9/5
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              Trusted By Clients Across Kenya
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8d9bad]">
+              Here is what event organizers, corporate directors, and couples say about TOQUE REAL EVENTS LIMITED.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {clientReviews.map((rev, idx) => (
+              <div
+                key={idx}
+                className="p-6 bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69]/60 rounded-none space-y-4 shadow-xl flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="flex gap-1 text-[#f4cf69]">
+                    {[...Array(rev.rating)].map((_, i) => (
+                      <Star key={i} size={14} className="fill-[#f4cf69]" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed font-medium italic">
+                    "{rev.comment}"
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-[#172533] space-y-0.5">
+                  <strong className="text-sm font-bold text-white block">{rev.name}</strong>
+                  <span className="text-[10px] font-mono text-[#8d9bad] uppercase block">{rev.role}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

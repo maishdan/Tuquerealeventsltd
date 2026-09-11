@@ -564,7 +564,7 @@ function AdminOverview() {
               <div className="relative p-6 sm:p-8 bg-gradient-to-r from-[#0d1c28] via-[#09141f] to-[#050e17] border-2 border-[#d4a43b]/40 rounded-xl shadow-[0_12px_35px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
                 <div className="space-y-2.5 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e6b83f]/15 border border-[#e6b83f]/40 text-[#f4cf69] text-[9px] font-black uppercase tracking-[0.25em] rounded-md shadow-inner">
-                    <Crown size={14} className="text-[#f4cf69]" /> Royal Touch Events Administrator
+                    <Crown size={14} className="text-[#f4cf69]" /> TOQUE REAL EVENTS LIMITED Administrator
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">

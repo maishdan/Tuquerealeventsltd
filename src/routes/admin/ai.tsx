@@ -54,7 +54,7 @@ import {
 export const Route = createFileRoute("/admin/ai")({
   head: () =>
     createPageSeo({
-      title: "AI Africa Opportunity Intelligence & Discovery | Royal Touch Admin",
+      title: "AI Africa Opportunity Intelligence & Discovery | TOQUE REAL EVENTS LIMITED Admin",
       description: "Pan-Africa event discovery, public signals scanner, regional opportunity heatmap, and AI lead scoring system.",
       path: "/admin/ai",
       noindex: true,
@@ -122,7 +122,7 @@ export function AdminAI() {
   const [chatMessages, setChatMessages] = useState([
     {
       sender: "ai",
-      text: `Hello ${adminInfo.fullName} (${adminInfo.badge})! I am your Royal Touch Executive AI Advisor. I have analyzed your live Supabase database (${tickets.length} settled passes totaling ${formatKes(totalSettledRevenue)}, KSh ${pipelineValue.toLocaleString()} in active sales pipeline). How can I advise you on optimizing your business performance or event production today?`,
+      text: `Hello ${adminInfo.fullName} (${adminInfo.badge})! I am your TOQUE REAL Executive AI Advisor. I have analyzed your live Supabase database (${tickets.length} settled passes totaling ${formatKes(totalSettledRevenue)}, KSh ${pipelineValue.toLocaleString()} in active sales pipeline). How can I advise you on optimizing your business performance or event production today?`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -142,14 +142,14 @@ export function AdminAI() {
 
     setTimeout(() => {
       setIsAiReplying(false);
-      let reply = `Royal Touch Executive AI Strategy for ${adminInfo.fullName}: `;
+      let reply = `TOQUE REAL Executive AI Strategy for ${adminInfo.fullName}: `;
 
       if (query.toLowerCase().includes("revenue") || query.toLowerCase().includes("money") || query.toLowerCase().includes("profit")) {
         reply += `Your current database shows KSh ${totalSettledRevenue.toLocaleString()} in settled ticket cash and KSh ${pipelineValue.toLocaleString()} in active sales pipeline. To maximize net profit margins, prioritize closing open proposals representing KSh ${(pipelineValue * 0.45).toLocaleString()} in high-margin venue & AV contracts.`;
       } else if (query.toLowerCase().includes("lead") || query.toLowerCase().includes("client") || query.toLowerCase().includes("marketing")) {
         reply += `Your marketing intelligence indicates LinkedIn Ads yields a 340% ROI with 28% of total inbound corporate leads. We recommend reallocating 15% of lower-performing Meta budget toward LinkedIn sponsor posts targeting Nairobi HR & Procurement Leads.`;
       } else {
-        reply += `Based on your live system metrics, Royal Touch Events is currently operating at 87% operational readiness. We recommend scheduling automated follow-ups for open inquiries and leveraging our AI Outreach Generator to pitch corporate packages.`;
+        reply += `Based on your live system metrics, TOQUE REAL EVENTS LIMITED is currently operating at 87% operational readiness. We recommend scheduling automated follow-ups for open inquiries and leveraging our AI Outreach Generator to pitch corporate packages.`;
       }
 
       setChatMessages((prev) => [...prev, { sender: "ai", text: reply, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
@@ -392,7 +392,7 @@ export function AdminAI() {
   const handleGenerateOutreach = (opp: any) => {
     setSelectedOppForOutreach(opp);
     setOutreachDraft(
-      `Dear ${opp.organization} Team,\n\nWe noticed your upcoming "${opp.title}" scheduled for ${opp.date} in ${opp.location}.\n\nRoyal Touch Events is Kenya & East Africa's premier full-service luxury event management agency, specializing in end-to-end event planning, audio-visual stage production, VIP catering, and registration logistics.\n\nWe would welcome the opportunity to submit a tailored proposal for your upcoming event.\n\nKind regards,\nRoyal Touch Events Executive Team\nDirect Phone: +254 795 365 334 | eventsroyaltouch7@gmail.com`
+      `Dear ${opp.organization} Team,\n\nWe noticed your upcoming "${opp.title}" scheduled for ${opp.date} in ${opp.location}.\n\nTOQUE REAL EVENTS LIMITED is Kenya & East Africa's premier full-service luxury event management agency, specializing in end-to-end event planning, audio-visual stage production, VIP catering, and registration logistics.\n\nWe would welcome the opportunity to submit a tailored proposal for your upcoming event.\n\nKind regards,\nTOQUE REAL EVENTS LIMITED Executive Team\nDirect Phone: +254 795 365 334 | eventsroyaltouch7@gmail.com`
     );
     setActiveTab("outreach");
     showToast(`✓ Generated AI Outreach Draft for ${opp.organization}!`);
@@ -655,7 +655,7 @@ export function AdminAI() {
               <div className="relative p-6 sm:p-8 bg-gradient-to-r from-[#0d1c28] via-[#09141f] to-[#050e17] border-2 border-[#d4a43b]/40 rounded-xl shadow-[0_12px_35px_rgba(0,0,0,0.85),inset_0_1px_2px_rgba(255,255,255,0.15)] flex flex-col lg:flex-row lg:items-center justify-between gap-6 overflow-hidden">
                 <div className="space-y-2.5 relative z-10">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-[#e6b83f]/15 border border-[#e6b83f]/40 text-[#f4cf69] text-[9px] font-black uppercase tracking-[0.25em] rounded-md shadow-inner">
-                    <Crown size={14} className="text-[#f4cf69]" /> Royal Touch Pan-Africa AI Event Discovery Engine
+                    <Crown size={14} className="text-[#f4cf69]" /> TOQUE REAL Pan-Africa AI Event Discovery Engine
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
@@ -1135,7 +1135,7 @@ export function AdminAI() {
             {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
             <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
               <div className="flex flex-wrap items-center gap-2">
-                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED Nairobi.</span>
                 <span className="hidden sm:inline">•</span>
                 <a
                   href="https://myworldafric.vercel.app"
