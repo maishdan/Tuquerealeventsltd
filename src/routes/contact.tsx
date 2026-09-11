@@ -150,7 +150,7 @@ export function Contact() {
               <div className="space-y-4">
                 <ContactItem icon={Phone} label="Executive Direct Line" val="+254 795 365 334" href="tel:+254795365334" />
                 <ContactItem icon={MessageCircle} label="WhatsApp Concierge" val="Chat Live with Producer" href={`https://wa.me/${phone}`} gold />
-                <ContactItem icon={Mail} label="Official Email" val="eventsroyaltouch7@gmail.com" href="mailto:eventsroyaltouch7@gmail.com" />
+                <ContactItem icon={Mail} label="Official Email" val="realtoque0@gmail.com" href="mailto:realtoque0@gmail.com" />
                 <ContactItem icon={MapPin} label="Regional Headquarters" val="Upper Hill, Nairobi, Kenya" />
               </div>
             </div>

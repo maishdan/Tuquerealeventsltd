@@ -119,7 +119,7 @@ function AdminSettings() {
 
   // Settings Form States
   const [companyName, setCompanyName] = useState("TOQUE REAL EVENTS LIMITED");
-  const [companyEmail, setCompanyEmail] = useState("eventsroyaltouch7@gmail.com");
+  const [companyEmail, setCompanyEmail] = useState("realtoque0@gmail.com");
   const [companyPhone, setCompanyPhone] = useState("+254 795 365 334");
   const [address, setAddress] = useState("TOQUE REAL Executive Tower, Kilimani, Nairobi");
   const [taxPin, setTaxPin] = useState("P0512839210Z");

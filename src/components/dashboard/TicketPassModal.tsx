@@ -294,7 +294,7 @@ export function TicketPassModal({ ticket, isOpen, onClose }: TicketPassModalProp
             <!-- OFFICIAL FOOTER WITH FULL CONTACT DETAILS & WEBSITE -->
             <div class="contacts-bar">
               <div><span>TEL:</span> +254 795 365 334</div>
-              <div><span>EMAIL:</span> eventsroyaltouch7@gmail.com</div>
+              <div><span>EMAIL:</span> realtoque0@gmail.com</div>
               <div><span>HQ:</span> Upper Hill, Nairobi, Kenya</div>
               <div><span>WEBSITE:</span> www.royaltouchevents.co.ke</div>
             </div>

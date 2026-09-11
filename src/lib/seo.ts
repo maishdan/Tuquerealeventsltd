@@ -3,7 +3,7 @@ export const SITE_TAGLINE = "We plan. You celebrate. We make it memorable.";
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://royaltouchevents.co.ke";
 export const SITE_PHONE = "+254795365334";
-export const SITE_EMAIL = "eventsroyaltouch7@gmail.com";
+export const SITE_EMAIL = "realtoque0@gmail.com";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon-180x180.png`;
 
 export const SERVICE_KEYWORDS =

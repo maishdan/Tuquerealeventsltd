@@ -141,7 +141,7 @@ export function InvoiceModal({ booking, isOpen, onClose }: InvoiceModalProps) {
                 <div class="label">Issued By Organization:</div>
                 <div class="val">TOQUE REAL EVENTS LIMITED</div>
                 <div style="font-size: 11px; color: #475569; font-weight: 700;">TOQUE REAL Tower, Kilimani, Nairobi</div>
-                <div style="font-size: 11px; color: #475569; font-weight: 700;">eventsroyaltouch7@gmail.com</div>
+                <div style="font-size: 11px; color: #475569; font-weight: 700;">realtoque0@gmail.com</div>
               </div>
             </div>
 

@@ -345,7 +345,7 @@ export function AdminHelp() {
               <div className="p-5 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-lg space-y-2">
                 <Mail size={24} className="text-blue-400" />
                 <h4 className="font-bold text-white uppercase text-sm">Email Support</h4>
-                <p className="text-xs font-mono text-blue-400 font-bold">eventsroyaltouch7@gmail.com</p>
+                <p className="text-xs font-mono text-blue-400 font-bold">realtoque0@gmail.com</p>
                 <p className="text-[10px] text-[#8d9baa]">Direct inbox for billing, proposals, and system help.</p>
               </div>
 
