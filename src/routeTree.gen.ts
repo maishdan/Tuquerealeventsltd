@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as StaffRouteImport } from './routes/staff'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
@@ -58,6 +59,11 @@ import { Route as DashboardLayoutBookEventRouteImport } from './routes/dashboard
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StaffRoute = StaffRouteImport.update({
+  id: '/staff',
+  path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/staff': typeof StaffRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
@@ -345,6 +352,7 @@ export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/staff': typeof StaffRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AdminIndexRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/sign-up': typeof SignUpRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/staff': typeof StaffRoute
   '/terms': typeof TermsRoute
   '/admin/_layout': typeof AdminLayoutRoute
   '/admin/admin-booking': typeof AdminAdminBookingRoute
@@ -440,6 +449,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/sitemap.xml'
+    | '/staff'
     | '/terms'
     | '/admin'
     | '/admin/admin-booking'
@@ -487,6 +497,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/sitemap.xml'
+    | '/staff'
     | '/terms'
     | '/admin'
     | '/admin/admin-booking'
@@ -532,6 +543,7 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/sign-up'
     | '/sitemap.xml'
+    | '/staff'
     | '/terms'
     | '/admin/_layout'
     | '/admin/admin-booking'
@@ -580,6 +592,7 @@ export interface RootRouteChildren {
   SignInRoute: typeof SignInRoute
   SignUpRoute: typeof SignUpRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StaffRoute: typeof StaffRoute
   TermsRoute: typeof TermsRoute
   AdminLayoutRoute: typeof AdminLayoutRoute
   AdminAdminBookingRoute: typeof AdminAdminBookingRoute
@@ -610,6 +623,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/staff': {
+      id: '/staff'
+      path: '/staff'
+      fullPath: '/staff'
+      preLoaderRoute: typeof StaffRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap.xml': {
@@ -969,6 +989,7 @@ const rootRouteChildren: RootRouteChildren = {
   SignInRoute: SignInRoute,
   SignUpRoute: SignUpRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StaffRoute: StaffRoute,
   TermsRoute: TermsRoute,
   AdminLayoutRoute: AdminLayoutRoute,
   AdminAdminBookingRoute: AdminAdminBookingRoute,

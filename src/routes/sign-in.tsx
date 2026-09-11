@@ -197,13 +197,24 @@ function SignIn() {
           </form>
 
           <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col items-center gap-3 text-center">
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to Royal Touch Events?</p>
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to TOQUE REAL EVENTS LIMITED?</p>
             <Link
               to="/sign-up"
               className="h-12 px-8 border border-slate-300 dark:border-white/10 text-foreground hover:border-gold font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center transition-all cursor-pointer w-full"
             >
               Create Account
             </Link>
+
+            <div className="w-full pt-3 border-t border-slate-200 dark:border-white/10 space-y-2">
+              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest text-center">Staff & Operations Portal</p>
+              <Link
+                to="/staff"
+                className="h-12 w-full border-2 border-[#f4cf69]/60 bg-[#f4cf69]/10 hover:bg-[#f4cf69] hover:text-black text-[#f4cf69] font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
+              >
+                <span>♔ Staff & Operations Dashboard</span>
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
