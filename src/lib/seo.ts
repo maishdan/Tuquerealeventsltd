@@ -4,7 +4,7 @@ export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://royaltouchevents.co.ke";
 export const SITE_PHONE = "+254795365334";
 export const SITE_EMAIL = "eventsroyaltouch7@gmail.com";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon-180x180.png`;
 
 export const SERVICE_KEYWORDS =
   "TOQUE REAL EVENTS LIMITED, top event hoster Kenya, #1 luxury event management Nairobi, East Africa best event planners, corporate galas, luxury weddings Kenya, VIP event production, sound and lighting Nairobi, concert production, product launches, M-Pesa gate passes, high class event services Kenya";
@@ -16,8 +16,8 @@ export function absoluteUrl(path: string) {
 
 export function defaultSiteLinks() {
   return [
-    { rel: "icon", href: "/favicon.jpg", type: "image/jpeg" },
-    { rel: "apple-touch-icon", href: "/og-image.jpg" },
+    { rel: "icon", href: "/favicon-180x180.png", type: "image/png" },
+    { rel: "apple-touch-icon", href: "/favicon-180x180.png" },
     { rel: "manifest", href: "/site.webmanifest" },
   ];
 }
@@ -56,7 +56,7 @@ export function createPageSeo(options: {
       { name: "twitter:description", content: options.description },
       { name: "twitter:image", content: DEFAULT_OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: url }, { rel: "icon", href: "/favicon.jpg", type: "image/jpeg" }],
+    links: [{ rel: "canonical", href: url }, { rel: "icon", href: "/favicon-180x180.png", type: "image/png" }],
   };
 }
 

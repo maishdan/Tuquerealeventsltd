@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Royal Touch Events — Staff Dashboard</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#050812;color:#f7f4ed;font:14px Segoe UI,Arial,sans-serif}
+.app{display:flex;min-height:100vh}.side{position:fixed;width:225px;top:0;bottom:0;overflow:auto;background:#070b14;border-right:1px solid #202838;padding:20px 10px}
+.brand{text-align:center;padding:5px 0 22px;border-bottom:1px solid #202838;margin-bottom:12px;color:#d4ad6a}
+.brand b{display:block;font:17px Georgia;letter-spacing:2px}.brand small{letter-spacing:4px}
+.nav button{width:100%;border:0;background:none;color:#bfc6d3;text-align:left;padding:10px;border-radius:8px;margin:2px 0;cursor:pointer}
+.nav button:hover,.nav button.active{background:linear-gradient(90deg,#b78a4a,#735127);color:white}
+.nav .ico{display:inline-block;width:27px}.label{color:#697385;font-size:10px;text-transform:uppercase;letter-spacing:2px;padding:15px 10px 5px}
+.main{margin-left:225px;width:calc(100% - 225px)}.top{height:72px;border-bottom:1px solid #202838;display:flex;align-items:center;padding:0 25px;gap:15px;position:sticky;top:0;background:#070b14ee;z-index:5}
+.search{width:420px;background:#121b2b;border:1px solid #394356;border-radius:9px;padding:10px 14px;color:#9aa5b7}.search input{background:none;border:0;outline:0;color:white;width:90%}
+.user{margin-left:auto;display:flex;gap:10px;align-items:center}.avatar{width:36px;height:36px;border-radius:50%;background:#f1ddb0;color:#222;display:grid;place-items:center;font-weight:bold}
+.content{padding:27px}.hero{display:flex;justify-content:space-between;gap:20px;align-items:start}.hero h1{margin:0 0 5px;font-size:25px}.muted{color:#929bab;font-size:13px}
+.quick{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid #6d522f;background:linear-gradient(#3a2b1b,#241a10);color:#f5ead6;padding:10px 13px;border-radius:8px;cursor:pointer}
+.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin:18px 0 12px}.card,.panel{background:linear-gradient(145deg,#0b1220,#070c15);border:1px solid #202a3a;border-radius:10px}.card{padding:15px}.card h3{margin:0;color:#d4dae3;font-size:13px}.num{font-size:29px;margin-top:9px}.red{color:#ff6965}
+.grid{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:11px}.panel{padding:14px;min-width:0}.wide{grid-column:span 2}.pt{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px}.pt h2{font-size:15px;margin:0}.gold{color:#d3aa68;font-size:11px}
+.calendar{display:grid;grid-template-columns:270px 1fr;gap:15px}.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center}.cal div{padding:7px;color:#929bab;font-size:10px}.cal .today{background:#c59a58;color:#fff;border-radius:50%}.events{border-left:1px solid #202838;padding-left:12px;max-height:220px;overflow:auto}.event{border-left:3px solid #d49d50;background:#ffffff06;padding:8px;margin-bottom:7px;font-size:11px}.event small{display:block;color:#858fa0;margin-top:3px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}.actions .btn{text-align:left}.tasks{width:100%;border-collapse:collapse;font-size:11px}.tasks th,.tasks td{padding:9px;text-align:left;border-bottom:1px solid #202838}.tasks th{color:#8993a5;background:#101827}.alert{padding:10px;border:1px solid #263144;border-left:3px solid #d3a04f;border-radius:7px;margin:7px 0;font-size:11px}.alert.ok{border-left-color:#4fd18b}
+.quote{text-align:center;margin-top:12px;border:1px solid #202838;border-radius:9px;padding:15px;font:18px Georgia;color:#d8c4a1}
+.view{display:none}.view.active{display:block}.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:15px}.module{padding:20px;min-height:145px}.module h3{margin:10px 0 5px}.module p{color:#8993a4;font-size:11px;line-height:1.5}.toast{position:fixed;right:20px;bottom:20px;background:#172132;border:1px solid #705431;padding:12px 16px;border-radius:8px;display:none}.toast.show{display:block}
+@media(max-width:1100px){.cards{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}.modules{grid-template-columns:1fr 1fr}}
+@media(max-width:750px){.side{width:68px}.brand b,.brand small,.nav button span:not(.ico),.label{display:none}.nav button{text-align:center}.main{margin-left:68px;width:calc(100% - 68px)}.top{padding:0 12px}.search{width:180px}.hero{display:block}.quick{margin-top:14px}.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.wide{grid-column:auto}.calendar{grid-template-columns:1fr}.events{border:0;border-top:1px solid #202838;padding:10px 0 0}.modules{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side"><div class="brand">♔<b>ROYAL TOUCH</b><small>EVENTS</small></div>
+<nav class="nav" id="nav">
+<button class="active" data-page="overview"><span class="ico">🏠</span><span>Staff Overview</span></button>
+<button data-page="schedule"><span class="ico">📅</span><span>My Schedule</span></button>
+<button data-page="tasks"><span class="ico">✅</span><span>My Tasks</span></button>
+<button data-page="assigned"><span class="ico">📋</span><span>Assigned Events</span></button>
+<button data-page="notifications"><span class="ico">🔔</span><span>Notifications</span></button>
+<button data-page="messages"><span class="ico">💬</span><span>Internal Messages</span></button>
+<button data-page="profile"><span class="ico">👤</span><span>My Profile</span></button>
+<div class="label">Departments</div>
+<button data-page="decor"><span class="ico">🎨</span><span>Decor & Design</span></button>
+<button data-page="catering"><span class="ico">🍽️</span><span>Catering & Kitchen</span></button>
+<button data-page="media"><span class="ico">📸</span><span>Media & Photography</span></button>
+<button data-page="sound"><span class="ico">🔊</span><span>Sound & Entertainment</span></button>
+<button data-page="logistics"><span class="ico">🚚</span><span>Logistics & Operations</span></button>
+<button data-page="vendors"><span class="ico">🤝</span><span>Vendor / Supplier</span></button>
+<button data-page="finance"><span class="ico">💰</span><span>Finance & Accounting</span></button>
+<button data-page="inventory"><span class="ico">📦</span><span>Inventory & Assets</span></button>
+<button data-page="venue"><span class="ico">🏨</span><span>Venue Management</span></button>
+<button data-page="tickets"><span class="ico">🎟️</span><span>Ticketing & Registration</span></button>
+<button data-page="marketing"><span class="ico">📢</span><span>Marketing</span></button>
+<button data-page="reports"><span class="ico">📊</span><span>Reports & Analytics</span></button>
+<button data-page="field"><span class="ico">🗺️</span><span>Field Operations</span></button>
+</nav></aside>
+<main class="main"><header class="top"><div class="search">⌕ <input id="search" placeholder="Search clients, events, contacts..."></div><div class="user">🔔　 Wed, 10 Sep 2026　<div class="avatar">JO</div><div><b>Japheth Owiyo</b><small class="muted" style="display:block">Event Coordinator</small></div>⌄</div></header>
+<section class="content">
+<div id="overview" class="view active">
+<div class="hero"><div><h1>Welcome, Japheth Owiyo, Event Coordinator</h1><div class="muted">Your operational focus for today</div></div><div class="quick"><button class="btn" onclick="toast('New Client opened')">＋ New Client</button><button class="btn" onclick="toast('New Event opened')">▣ New Event</button><button class="btn" onclick="toast('Proposal workspace opened')">▤ Create Proposal</button><button class="btn" onclick="toast('Payment approvals opened')">▣ Approve Payment</button><button class="btn" onclick="toast('All modules opened')">▦ View All</button></div></div>
+<div class="cards"><div class="card"><h3>My Active Tasks</h3><div class="num">7</div></div><div class="card"><h3>Events This Week</h3><div class="num">3</div></div><div class="card"><h3>Pending Approvals</h3><div class="num">1</div></div><div class="card"><h3>Internal Messages</h3><div class="num">4 <small class="gold">Unread</small></div></div><div class="card"><h3>Event-Related Issues</h3><div class="num red">1 <small>(Critical)</small></div></div></div>
+<div class="grid">
+<div class="panel wide"><div class="pt"><h2>▣ Today's Schedule & Events</h2><span class="gold">View All →</span></div><div class="calendar"><div><div class="cal"><b>Sun</b><b>Mon</b><b>Tue</b><b>Wed</b><b>Thu</b><b>Fri</b><b>Sat</b><div>7</div><div>8</div><div>9</div><div class="today">10</div><div>11</div><div>12</div><div>13</div><div>14</div><div>15</div><div>16</div><div>17</div><div>18</div><div>19</div><div>20</div><div>21</div><div>22</div><div>23</div><div>24</div><div>25</div><div>26</div><div>27</div></div></div><div class="events"><div class="event"><b>09:00 — Decor Setup for ABC Corp</b><small>Venue · ABC Corp</small></div><div class="event"><b>14:00 — Venue Walkthrough for XYZ Org</b><small>Site visit</small></div><div class="event"><b>14:00 — Venue Walkthrough for XYZ Org</b><small>Site visit</small></div><div class="event"><b>16:30 — Catering Review</b><small>Royal Touch Kitchen</small></div></div></div></div>
+<div class="panel"><div class="pt"><h2>⚡ My Role-Specific Quick Actions</h2></div><div class="actions"><button class="btn" onclick="toast('Create New Task')">＋ Create New Task</button><button class="btn" onclick="toast('Assigned Events')">⌕ View My Assigned Events</button><button class="btn" onclick="toast('Messages')">✉ Check Messages</button><button class="btn" onclick="toast('Vendor connection')">🤝 Connect with Vendor</button><button class="btn" onclick="toast('Media submission')">📷 Submit Media</button><button class="btn" onclick="toast('Media submission')">📷 Submit Media</button></div></div>
+<div class="panel wide"><div class="pt"><h2>☑ My Upcoming Tasks & Deadlines</h2><span class="gold">View All →</span></div><table class="tasks"><tr><th>Task</th><th>Due Date</th><th>Event</th></tr><tr><td>☑ Finalize seating plan for Gala</td><td>Sep 15</td><td>Gala</td></tr><tr><td>□ Follow up on AV quote for Conference</td><td>Sep 16</td><td>Conference</td></tr><tr><td>☑ Confirm catering headcount</td><td>Sep 16</td><td>Conference</td></tr><tr><td>☑ Finalize vendor allocation</td><td>Sep 16</td><td>Gala</td></tr><tr><td>☑ Upload event requirements</td><td>Sep 16</td><td>XYZ Org</td></tr><tr><td>□ Prepare venue checklist</td><td>Sep 17</td><td>ABC Corp</td></tr></table></div>
+<div class="panel"><div class="pt"><h2>🔔 Event-Specific Alerts</h2><span class="gold">Visit →</span></div><div class="alert">⚠ Decor change request for Gala</div><div class="alert ok">✅ Catering confirmed for Conference</div><div class="alert">📎 New attachment added to Logistics Plan</div><div class="alert">📎 New attachment added to Logistics Plan</div></div>
+<div class="panel"><div class="pt"><h2>👑 CEO Decision Center</h2><span class="gold">View All →</span></div><div class="alert">💼 KES 350,000 — Approval request</div><div class="alert">▣ Event scope update — XYZ Org</div><div class="alert ok">✓ Task completed — Event setup</div><div style="margin-top:12px;padding:14px;text-align:center;color:#d8c4a1;font:14px Georgia">“Individual commitment to a group effort — that is what makes a team work.”<br><small>— Vince Lombardi</small></div></div>
+</div><div class="quote">Your contributions make extraordinary events happen.</div>
+</div>
+<div id="module" class="view"><div class="hero"><div><h1 id="title">Department</h1><div class="muted" id="desc"></div></div><button class="btn" onclick="toast('New record created')">＋ New Record</button></div><div class="cards"><div class="card"><h3>Active Items</h3><div class="num">18</div></div><div class="card"><h3>Pending Tasks</h3><div class="num">6</div></div><div class="card"><h3>Due Today</h3><div class="num">3</div></div><div class="card"><h3>Alerts</h3><div class="num red">1</div></div><div class="card"><h3>Completed</h3><div class="num">42</div></div></div><div class="modules" id="modules"></div></div>
+</section></main></div><div class="toast" id="toast"></div>
+<script>
+const data={
+schedule:["📅 My Schedule","Your calendar, shifts, appointments and event commitments.",["Calendar","Shifts","Appointments","Event Schedule","Availability","Time Off"]],
+tasks:["✅ My Tasks","Tasks assigned to you, priorities and completion tracking.",["All Tasks","Today","Overdue","High Priority","Completed","Task Calendar"]],
+assigned:["📋 Assigned Events","Events where you are an assigned coordinator or team member.",["Upcoming Events","Active Events","Event Briefs","Requirements","Team Assignments","Event Documents"]],
+notifications:["🔔 Notifications","System, event, task and operational alerts.",["All Notifications","Urgent","Events","Tasks","Approvals","Read History"]],
+messages:["💬 Internal Messages","Internal Royal Touch communication and team conversations.",["Inbox","Team Chat","Event Chats","Sent","Attachments","Archived"]],
+profile:["👤 My Profile","Your staff profile, role, contact details and preferences.",["Personal Details","Role & Permissions","Availability","Documents","Preferences","Security"]],
+decor:["🎨 Decor & Design","Themes, moodboards, decoration jobs, materials, installations and approvals.",["Assigned Events","Themes & Moodboards","Decoration Inventory","Setup Schedule","Design Approvals","Completed Projects"]],
+catering:["🍽️ Catering & Kitchen","Menus, guest counts, ingredients, kitchen production, dietary requirements and service.",["Menus","Guest Counts","Ingredients","Kitchen Tasks","Dietary Requirements","Delivery Schedule"]],
+media:["📸 Media & Photography","Photography, videography, equipment, editing queues, albums and delivery.",["Photography Jobs","Videography Jobs","Shot Lists","Equipment","Editing Queue","Client Review"]],
+sound:["🔊 Sound & Entertainment","Sound, DJs, MCs, performers, technical requirements and setup.",["Sound Assignments","DJ Assignments","MC Assignments","Performers","Equipment","Sound Check"]],
+logistics:["🚚 Logistics & Operations","Transport, drivers, deliveries, equipment movement, setup teams and incidents.",["Transport","Vehicles","Drivers","Deliveries","Equipment Movement","Incident Reports"]],
+vendors:["🤝 Vendor / Supplier","Vendor profiles, availability, quotations, orders, contracts and assignments.",["Vendors","Suppliers","Availability","Quotations","Orders","Vendor Assignments"]],
+finance:["💰 Finance & Accounting","Invoices, receipts, customer payments, balances, expenses and event profitability.",["Invoices","Receipts","Customer Payments","Outstanding Balances","Expenses","Financial Reports"]],
+inventory:["📦 Inventory & Assets","Assets, stock movements, reservations, check-out/check-in, maintenance and loss tracking.",["All Assets","Available","Reserved","Assigned","Maintenance","Stock Movements"]],
+venue:["🏨 Venue Management","Venues, availability, bookings, capacity, facilities, partners and requirements.",["Venues","Availability","Bookings","Capacity","Venue Partners","Setup Requirements"]],
+tickets:["🎟️ Ticketing & Registration","Ticket types, ticket sales, attendees, QR tickets, registration and check-in.",["Ticket Types","Ticket Sales","Attendees","Registrations","QR Tickets","Check-In"]],
+marketing:["📢 Marketing","Campaigns, social media, promotions, landing pages, leads and campaign analytics.",["Campaigns","Social Media","Email Campaigns","Promotions","Landing Pages","Campaign Analytics"]],
+reports:["📊 Reports & Analytics","Operational, sales, customer, staff, vendor, inventory and service reports.",["Event Reports","Sales Reports","Customer Reports","Staff Reports","Inventory Reports","Custom Reports"]],
+field:["🗺️ Field Operations","Assignments, venue routes, arrival check-in, setup progress, incidents and completion.",["Today's Assignments","My Events","Routes","Arrival Check-In","Setup Progress","Incident Reports"]]
+};
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");let k=b.dataset.page;if(k==="overview"){overview.classList.add("active");module.classList.remove("active");return}overview.classList.remove("active");module.classList.add("active");let d=data[k];title.textContent=d[0];desc.textContent=d[1];modules.innerHTML=d[2].map((x,i)=>`<div class="panel module"><div style="font-size:25px">${["▣","✓","◈","⌂","▤","◉"][i]}</div><h3>${x}</h3><p>Open and manage ${x.toLowerCase()} for your assigned Royal Touch role.</p><button class="btn" onclick="toast('${x} opened')">Open workspace →</button></div>`).join("")});
+function toast(s){let t=document.getElementById("toast");t.textContent=s;t.classList.add("show");clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove("show"),1800)}
+document.getElementById("search").onkeydown=e=>{if(e.key==="Enter")toast("Searching: "+e.target.value)}
+</script>
+</body></html>

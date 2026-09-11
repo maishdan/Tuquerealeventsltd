@@ -156,7 +156,7 @@ function AdminOverview() {
         <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
           {/* Brand Header */}
           <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
-            <Crown size={28} className="text-[#f4cf69]" />
+            <img src="/new logo.png" alt="TOQUE REAL Logo" className="h-8 w-8 rounded-full object-cover border border-[#f4cf69]/50 shadow-md" />
             {!isMenuCollapsed && (
               <>
                 <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>

@@ -10,8 +10,8 @@ export function Footer() {
         <div className="grid lg:grid-cols-12 gap-12 pb-16 border-b border-white/5">
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5">
-                <img src={eventsLogo} alt="TOQUE REAL EVENTS LIMITED Logo" className="h-full w-full object-cover" />
+              <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5 bg-black">
+                <img src="/new logo.png" alt="TOQUE REAL EVENTS LIMITED Logo" className="h-full w-full object-cover" />
               </div>
               <span className="text-xl font-black uppercase tracking-tighter text-white">
                 TOQUE REAL <span className="text-gold">EVENTS</span> LIMITED
