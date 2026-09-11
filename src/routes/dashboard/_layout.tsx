@@ -317,7 +317,7 @@ function ClientPortalLayout({ children }: { children?: ReactNode }) {
 
           {/* Footer */}
           <footer className="py-6 border-t border-[#172533] bg-[#02070d] text-center text-xs text-[#8d9bad] font-mono">
-            <p>© {new Date().getFullYear()} Royal Touch Events Group • <a href="https://myworldafric.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline italic text-[#f4cf69] font-serif">Powered by My World Africa</a></p>
+            <p>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED • <a href="https://myworldafric.vercel.app" target="_blank" rel="noopener noreferrer" className="hover:underline italic text-[#f4cf69] font-serif">Powered by My World Africa</a></p>
           </footer>
         </div>
       </div>

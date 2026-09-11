@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe, ChevronUp } from "lucide-react";
-import daniwestIcon from "../../assets/daniwest-icon.png";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 
 export function Footer() {
@@ -12,14 +11,14 @@ export function Footer() {
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3">
               <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5">
-                <img src={eventsLogo} alt="Royal Touch Logo" className="h-full w-full object-cover" />
+                <img src={eventsLogo} alt="TOQUE REAL EVENTS LIMITED Logo" className="h-full w-full object-cover" />
               </div>
-              <span className="text-2xl font-black uppercase tracking-tighter text-white">
-                Royal <span className="text-gold">Touch</span> Events
+              <span className="text-xl font-black uppercase tracking-tighter text-white">
+                TOQUE REAL <span className="text-gold">EVENTS</span> LIMITED
               </span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed max-w-sm font-medium">
-              Architecting extraordinary moments for the world's most discerning brands and individuals. Nairobi's premier choice for executive production.
+              Architecting extraordinary moments for the world's most discerning brands and individuals. Nairobi's premier choice for executive event production.
             </p>
             <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-black uppercase tracking-widest bg-emerald-500/5 px-4 py-2 rounded-full border border-emerald-500/20 w-fit">
               <ShieldCheck size={14} /> Certified Event Agency 2026
@@ -58,9 +57,9 @@ export function Footer() {
           <div className="space-y-6">
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">The Firm</h4>
             <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
-              <li><Link to="/about" className="hover:text-white transition-colors">The Royal Story</Link></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">Our Story</Link></li>
               <li><Link to="/services" className="hover:text-white transition-colors">Our Disciplines</Link></li>
-              <li><Link to="/portfolio" className="hover:text-white transition-colors">The Royal Vault</Link></li>
+              <li><Link to="/portfolio" className="hover:text-white transition-colors">Event Vault</Link></li>
               <li><Link to="/blog" className="hover:text-white transition-colors">Insight Hub</Link></li>
             </ul>
           </div>
@@ -80,7 +79,7 @@ export function Footer() {
             <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
               <li className="flex items-start gap-4">
                 <MapPin size={18} className="text-gold shrink-0 mt-0.5" />
-                <span className="leading-relaxed">Upper Hill District,<br />Nairobi, Kenya</span>
+                <span className="leading-relaxed">TOQUE REAL EXECUTIVE TOWER,<br />Kilimani, Nairobi, Kenya</span>
               </li>
               <li className="flex items-center gap-4">
                 <Phone size={16} className="text-gold shrink-0" />
@@ -100,7 +99,7 @@ export function Footer() {
                 { icon: Instagram, label: "Instagram" },
                 { icon: Facebook, label: "Facebook" },
                 { icon: Twitter, label: "Twitter" }
-              ].map((social, i) => (
+              ].map((social) => (
                 <a
                   key={social.label}
                   href="#"
@@ -123,7 +122,7 @@ export function Footer() {
         {/* Bottom: Legal & Credits (Formal Layout) */}
         <div className="border-t border-white/5 py-12 flex flex-col md:grid md:grid-cols-12 gap-8 items-center md:items-start text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
            <div className="md:col-span-4 text-center md:text-left">
-             © {new Date().getFullYear()} Royal Touch Events Group. All Rights Reserved.
+             © {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED. All Rights Reserved.
            </div>
 
            <nav className="md:col-span-4 flex flex-wrap justify-center gap-6 sm:gap-10">

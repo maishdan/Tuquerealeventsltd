@@ -314,8 +314,8 @@ function ClientSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
         <div className="text-2xl leading-none filter drop-shadow-[0_0_12px_rgba(230,184,63,0.3)]">♕</div>
         {!collapsed && (
           <>
-            <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
-            <div className="font-serif tracking-[4px] text-[10px] opacity-80 mt-0.5">CLIENT PORTAL</div>
+            <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
+            <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
           </>
         )}
       </div>

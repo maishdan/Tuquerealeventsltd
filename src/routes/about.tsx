@@ -23,11 +23,11 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/about")({
   head: () =>
     createPageSeo({
-      title: "Our Story & Philosophy | Royal Touch Events Nairobi",
+      title: "Our Story & Philosophy | TOQUE REAL EVENTS LIMITED Nairobi",
       description:
-        "Learn about Royal Touch Events' 15-year legacy of excellence in Nairobi. Discover our strategic approach to luxury event production and our commitment to ultimate client service.",
+        "Learn about TOQUE REAL EVENTS LIMITED's 15-year legacy of excellence in Nairobi. Discover our strategic approach to luxury event production and our commitment to ultimate client service.",
       path: "/about",
-      keywords: "about Royal Touch Events, event company Nairobi, luxury event production Kenya",
+      keywords: "about TOQUE REAL EVENTS LIMITED, event company Nairobi, luxury event production Kenya",
     }),
   component: About,
 });
@@ -87,7 +87,7 @@ function About() {
               <span className="text-gold font-display font-normal">Exceptional</span> Production.
             </h1>
             <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
-              For over 15 years, Royal Touch Events has stood as East Africa's premier authority in luxury event production. We engineer corporate milestones and private celebrations with unyielding precision.
+              For over 15 years, TOQUE REAL EVENTS LIMITED has stood as East Africa's premier authority in luxury event production. We engineer corporate milestones and private celebrations with unyielding precision.
             </p>
           </div>
 
@@ -145,7 +145,7 @@ function About() {
 
             <div className="lg:col-span-6 space-y-8">
               <div className="space-y-3">
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">The Royal Touch Edge</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">The TOQUE REAL Edge</p>
                 <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white leading-tight">
                   Professionalism Without Compromise
                 </h2>

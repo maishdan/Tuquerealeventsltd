@@ -244,6 +244,17 @@
   border-radius: 9999px;
 }
 
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
 @keyframes shimmer-x { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 @utility shimmer-border {
   background: linear-gradient(110deg, transparent 30%, oklch(0.82 0.13 85 / 0.35) 50%, transparent 70%);

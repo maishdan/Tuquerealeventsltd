@@ -158,8 +158,8 @@ export function AdminCustomers() {
             <Crown size={28} className="text-[#f4cf69]" />
             {!isMenuCollapsed && (
               <>
-                <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
-                <div className="font-serif tracking-[4px] text-[10px] opacity-80 mt-0.5">EVENTS</div>
+                <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
+                <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
               </>
             )}
           </div>

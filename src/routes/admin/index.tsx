@@ -159,8 +159,8 @@ function AdminOverview() {
             <Crown size={28} className="text-[#f4cf69]" />
             {!isMenuCollapsed && (
               <>
-                <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
-                <div className="font-serif tracking-[4px] text-[10px] opacity-80 mt-0.5">EVENTS</div>
+                <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
+                <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
               </>
             )}
           </div>
@@ -1089,7 +1089,7 @@ function AdminOverview() {
                   <p className="italic text-xs text-[#f0f2f5] font-serif leading-relaxed">
                     "Great leaders don't just manage today, they build tomorrow."
                   </p>
-                  <small className="block text-[#f4cf69] text-[9px] font-serif">— Royal Touch CEO</small>
+                  <small className="block text-[#f4cf69] text-[9px] font-serif">— TOQUE REAL CEO</small>
                 </div>
               </div>
             </div>
@@ -1097,7 +1097,7 @@ function AdminOverview() {
             {/* COMPACT SMALL ADMIN FOOTER */}
             <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
               <div className="flex flex-wrap items-center gap-2">
-                <span>© {new Date().getFullYear()} Royal Touch Events Nairobi.</span>
+                <span>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED Nairobi.</span>
                 <span className="hidden sm:inline">•</span>
                 <span className="italic text-[#f4cf69] font-serif">Powered by My World Africa</span>
               </div>

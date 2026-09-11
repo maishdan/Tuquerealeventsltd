@@ -173,7 +173,7 @@ function RootComponent() {
             <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
               <div className="relative flex flex-col min-h-screen">
                 {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
-                <main className={cn("flex-1", !isDashboard && "pt-20")}>
+                <main className={cn("flex-1", !isDashboard && "pt-28")}>
                   <Outlet />
                 </main>
                 {!isDashboard && <Footer />}

@@ -118,10 +118,10 @@ function AdminSettings() {
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
 
   // Settings Form States
-  const [companyName, setCompanyName] = useState("Royal Touch Events Ltd");
+  const [companyName, setCompanyName] = useState("TOQUE REAL EVENTS LIMITED");
   const [companyEmail, setCompanyEmail] = useState("eventsroyaltouch7@gmail.com");
   const [companyPhone, setCompanyPhone] = useState("+254 795 365 334");
-  const [address, setAddress] = useState("Royal Touch Executive Tower, Kilimani, Nairobi");
+  const [address, setAddress] = useState("TOQUE REAL Executive Tower, Kilimani, Nairobi");
   const [taxPin, setTaxPin] = useState("P0512839210Z");
   const [currency, setCurrency] = useState("KES");
   const [timezone, setTimezone] = useState("Africa/Nairobi");

@@ -1,4 +1,4 @@
-export const SITE_NAME = "Royal Touch Events";
+export const SITE_NAME = "TOQUE REAL EVENTS LIMITED";
 export const SITE_TAGLINE = "We plan. You celebrate. We make it memorable.";
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://royaltouchevents.co.ke";
@@ -7,7 +7,7 @@ export const SITE_EMAIL = "eventsroyaltouch7@gmail.com";
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 export const SERVICE_KEYWORDS =
-  "top event hoster Kenya, #1 luxury event management Nairobi, East Africa best event planners, corporate galas, luxury weddings Kenya, VIP event production, sound and lighting Nairobi, concert production, product launches, M-Pesa gate passes, high class event services Kenya";
+  "TOQUE REAL EVENTS LIMITED, top event hoster Kenya, #1 luxury event management Nairobi, East Africa best event planners, corporate galas, luxury weddings Kenya, VIP event production, sound and lighting Nairobi, concert production, product launches, M-Pesa gate passes, high class event services Kenya";
 
 export function absoluteUrl(path: string) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -65,7 +65,7 @@ export function organizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "EventPlanner",
     name: SITE_NAME,
-    description: "Kenya's Premier Luxury Event Management Agency & Production Specialist.",
+    description: "TOQUE REAL EVENTS LIMITED — Kenya's Premier Luxury Event Management Agency & Production Specialist.",
     url: SITE_URL,
     logo: DEFAULT_OG_IMAGE,
     image: DEFAULT_OG_IMAGE,
@@ -99,7 +99,7 @@ export function servicesJsonLd() {
     "@type": "ItemList",
     name: `${SITE_NAME} Premium Services`,
     description:
-      "Kenya's #1 Luxury Event Management & Production Agency. Corporate events, weddings, concerts, AV lighting, stage design, and gate passes.",
+      "TOQUE REAL EVENTS LIMITED — Kenya's #1 Luxury Event Management & Production Agency. Corporate events, weddings, concerts, AV lighting, stage design, and gate passes.",
     itemListElement: services.map((name, i) => ({
       "@type": "ListItem",
       position: i + 1,
