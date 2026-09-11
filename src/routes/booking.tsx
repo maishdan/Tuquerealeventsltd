@@ -198,9 +198,9 @@ function Booking() {
   };
 
   return (
-    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans overflow-x-hidden transition-colors duration-300">
+    <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans overflow-x-hidden transition-colors duration-300">
       {/* 1. HERO HEADER */}
-      <section className="relative min-h-[50vh] flex flex-col items-center justify-start overflow-hidden pt-12 pb-16 border-b border-slate-200 dark:border-white/10 bg-white dark:bg-[#0b0e14]">
+      <section className="relative min-h-[50vh] flex flex-col items-center justify-start overflow-hidden pt-12 pb-16 border-b border-white/10 bg-[#0b0e14]/85 backdrop-blur-md">
         <div className="absolute inset-0 z-0">
           {heroImages.map((src, idx) => (
             <img

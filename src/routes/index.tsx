@@ -219,6 +219,49 @@ export function Home() {
   const [includeAv, setIncludeAv] = useState<boolean>(true);
   const [includeTicketing, setIncludeTicketing] = useState<boolean>(false);
 
+  // Real-Time Sequential Typewriter Effect State
+  const line1Full = "TOQUE REAL EVENTS LIMITED";
+  const line2Full = "We Plan Your Event..........";
+  const line3Full = "You Celebrate....";
+
+  const [line1Typed, setLine1Typed] = useState("");
+  const [line2Typed, setLine2Typed] = useState("");
+  const [line3Typed, setLine3Typed] = useState("");
+
+  useEffect(() => {
+    let index1 = 0;
+    let index2 = 0;
+    let index3 = 0;
+
+    setLine1Typed("");
+    setLine2Typed("");
+    setLine3Typed("");
+
+    const timer = setInterval(() => {
+      if (index1 < line1Full.length) {
+        setLine1Typed(line1Full.slice(0, index1 + 1));
+        index1++;
+      } else if (index2 < line2Full.length) {
+        setLine2Typed(line2Full.slice(0, index2 + 1));
+        index2++;
+      } else if (index3 < line3Full.length) {
+        setLine3Typed(line3Full.slice(0, index3 + 1));
+        index3++;
+      } else {
+        setTimeout(() => {
+          index1 = 0;
+          index2 = 0;
+          index3 = 0;
+          setLine1Typed("");
+          setLine2Typed("");
+          setLine3Typed("");
+        }, 8000);
+      }
+    }, 60);
+
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImgIndex((prev) => (prev + 1) % heroImages.length);
@@ -258,7 +301,7 @@ export function Home() {
 
   return (
     <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans overflow-x-hidden transition-colors duration-300">
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION WITH 3-LINE TYPEWRITER TILE */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
         <div
           className="absolute inset-0 bg-cover bg-center bg-fixed opacity-90 transition-all duration-1000"
@@ -268,16 +311,35 @@ export function Home() {
         </div>
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 py-20 text-center space-y-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/40 text-[#f4cf69] text-xs font-black uppercase tracking-[0.25em] shadow-inner">
-            <Sparkles size={14} className="text-[#f4cf69]" /> TOQUE REAL EVENTS LIMITED
+          {/* Animated Typewriter 3-Horizontal Lines Directly Over Background */}
+          <div className="max-w-4xl mx-auto space-y-4 font-mono text-center">
+            {/* Horizontal Line 1 */}
+            <div className="flex items-center justify-center gap-2 text-[#f4cf69] text-xs sm:text-sm font-black uppercase tracking-[0.25em] drop-shadow-md">
+              <Sparkles size={16} className="text-[#f4cf69] shrink-0" />
+              <span>{line1Typed}</span>
+              {line1Typed.length < line1Full.length && (
+                <span className="inline-block w-2 h-4 bg-[#f4cf69] animate-pulse ml-1" />
+              )}
+            </div>
+
+            {/* Horizontal Line 2 */}
+            <div className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-tight font-display drop-shadow-2xl">
+              <span>{line2Typed}</span>
+              {line1Typed.length >= line1Full.length && line2Typed.length < line2Full.length && (
+                <span className="inline-block w-3 h-8 sm:h-12 bg-white animate-pulse ml-1" />
+              )}
+            </div>
+
+            {/* Horizontal Line 3 */}
+            <div className="text-2xl sm:text-5xl lg:text-6xl font-black text-emerald-400 font-display drop-shadow-2xl">
+              <span>{line3Typed}</span>
+              {line2Typed.length >= line2Full.length && (
+                <span className="inline-block w-3 h-8 sm:h-12 bg-emerald-400 animate-pulse ml-1" />
+              )}
+            </div>
           </div>
 
-          <h1 className="text-4xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tighter text-white leading-[0.9] drop-shadow-2xl">
-            We Plan Your Event. <br />
-            <span className="text-[#f4cf69] font-display font-normal normal-case">You Celebrate.</span>
-          </h1>
-
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-200 font-medium leading-relaxed">
+          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-200 font-medium leading-relaxed font-sans">
             Kenya's premier event planning agency. We organize stress-free events for everyone — family celebrations, birthdays, weddings, corporate summits, and public concerts.
           </p>
 

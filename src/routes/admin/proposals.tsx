@@ -229,7 +229,7 @@ export function AdminProposals() {
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
                   <DropdownMenuItem asChild>
-                    <Link to="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                    <Link to="/admin/settings" search={{ section: undefined }} className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                       <Settings size={15} className="text-[#f4cf69]" /> Settings
                     </Link>
                   </DropdownMenuItem>

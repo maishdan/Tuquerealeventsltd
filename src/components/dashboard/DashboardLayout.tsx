@@ -240,7 +240,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                   {isAdmin ? (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to="/admin/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                        <Link to="/admin/settings" search={{ section: undefined }} className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
                           <Settings size={15} className="text-gold" /> Settings
                         </Link>
                       </DropdownMenuItem>
