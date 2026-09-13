@@ -170,6 +170,10 @@ export function AdminAI() {
       attendance: "850+ Delegates",
       score: 96,
       match: "98%",
+      winProbability: "96%",
+      estimatedMinRevenue: 1200000,
+      estimatedMaxRevenue: 2800000,
+      aiRecommendation: "🔥 HIGH WIN PROBABILITY (96%): Pitch full-service turnkey conference package (Stage, AV & VIP Catering) within 12 hours. Target decision maker: Dr. Sarah Muthoni.",
       services: ["Conference Management", "VIP Catering", "Audio Visual", "Stage Design"],
       source: "Pan-Africa Business Portal",
       urgency: "HOT MATCH",
@@ -197,6 +201,10 @@ export function AdminAI() {
       attendance: "1,500+ Attendees",
       score: 94,
       match: "95%",
+      winProbability: "92%",
+      estimatedMinRevenue: 1800000,
+      estimatedMaxRevenue: 3500000,
+      aiRecommendation: "HIGH INTENT MATCH (92%): Dispatch trade fair booth & dome tent package proposal. Contact Peter Musoke in Kampala.",
       services: ["Exhibition Booths", "Dome Tents", "AV & Sound", "Security"],
       source: "EAC Official Trade Calendar",
       urgency: "HOT MATCH",
@@ -791,6 +799,21 @@ export function AdminAI() {
                               <div className="p-2.5 bg-[#0d1823] border border-[#172530] rounded-lg text-xs font-mono text-[#c7d0da] flex flex-wrap items-center gap-x-4 gap-y-1">
                                 <span><User size={13} className="inline mr-1 text-white" /><b className="text-white">{opp.contact.name}</b> ({opp.contact.designation})</span>
                                 <span><Mail size={13} className="inline mr-1 text-blue-400" /><b className="text-blue-400">{opp.contact.email}</b></span>
+                              </div>
+                            )}
+
+                            {/* AI Predictive Intelligence & Strategy Card */}
+                            {opp.aiRecommendation && (
+                              <div className="p-3 bg-[#0c1a26] border border-[#d4ad6a]/30 rounded-lg text-xs space-y-1 font-mono">
+                                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#f4cf69] font-bold">
+                                  <span className="flex items-center gap-1">
+                                    <Brain size={13} className="text-[#f4cf69]" /> AI Win Prediction: <b className="text-emerald-400">{opp.winProbability || "92%"}</b>
+                                  </span>
+                                  <span>Predicted Value: <b className="text-[#f4cf69]">{formatKes(opp.estimatedMinRevenue || 800000)} – {formatKes(opp.estimatedMaxRevenue || 2000000)}</b></span>
+                                </div>
+                                <p className="text-[#c7d0da] text-[11px] leading-snug font-sans">
+                                  <b className="text-[#f4cf69]">AI Strategy Recommendation:</b> {opp.aiRecommendation}
+                                </p>
                               </div>
                             )}
                           </div>

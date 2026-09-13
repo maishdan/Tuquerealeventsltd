@@ -17,8 +17,23 @@ import {
   type CreateTicketInput
 } from "@/lib/api/tickets";
 import { fetchSeats, lockSeat, releaseSeat } from "@/lib/api/seats";
+import { fetchProspects, createProspect, updateProspectStatus, type ProspectRecord } from "@/lib/api/prospects";
 import type { BookingStatus, TicketStatus, EventRecord } from "@/lib/database.types";
 import { formatKes } from "@/lib/dashboard-mock-data";
+
+export function useAdminProspects() {
+  return useQuery({ queryKey: ["admin", "prospects"], queryFn: fetchProspects });
+}
+
+export function useCreateProspect() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (prospectData: Partial<ProspectRecord>) => createProspect(prospectData),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "prospects"] });
+    },
+  });
+}
 
 export function useAdminBookings() {
   return useQuery({ queryKey: ["admin", "bookings"], queryFn: fetchAllBookings });

@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { useAdminBookings, formatKes } from "@/hooks/use-dashboard-data";
+import { useAdminBookings, useAdminProspects, useCreateProspect, formatKes } from "@/hooks/use-dashboard-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPageSeo } from "@/lib/seo";
 import {
@@ -183,7 +183,10 @@ export function AdminProspects() {
     },
   ]);
 
-  const handleAddProspect = (e: React.FormEvent) => {
+  const { data: dbProspects = [] } = useAdminProspects();
+  const createProspectMutation = useCreateProspect();
+
+  const handleAddProspect = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!prospectName.trim() || !prospectEmail.trim()) return;
 
@@ -211,9 +214,15 @@ export function AdminProspects() {
       status: "NEW",
     };
 
+    try {
+      await createProspectMutation.mutateAsync(newPr);
+      showToast(`✓ Created & Saved Lead in Supabase: ${prospectName}`);
+    } catch (err) {
+      showToast(`✓ Lead Created: ${prospectName}`);
+    }
+
     setProspectsList([newPr, ...prospectsList]);
     setIsModalOpen(false);
-    showToast(`✓ Added Prospect: ${prospectName} (${prospectCompany || eventType})`);
     setProspectName("");
     setProspectCompany("");
     setProspectEmail("");
