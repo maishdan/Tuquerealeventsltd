@@ -837,10 +837,6 @@ function AdminUsers() {
                                     <option value="admin">👑 EXECUTIVE ADMIN</option>
                                   </select>
                                 )}
-                                    <option value="customer">CLIENT</option>
-                                    <option value="admin">ADMIN</option>
-                                  </select>
-                                )}
 
                                 {/* Edit Button */}
                                 <button

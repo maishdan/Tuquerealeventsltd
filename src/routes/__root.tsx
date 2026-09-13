@@ -151,7 +151,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
+  const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/staff");
   const isHome = pathname === "/";
 
   useEffect(() => {
