@@ -37,6 +37,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
+
 export const Route = createFileRoute("/staff")({
   head: () =>
     createPageSeo({
@@ -45,8 +47,16 @@ export const Route = createFileRoute("/staff")({
       path: "/staff",
       noindex: true,
     }),
-  component: StaffDashboard,
+  component: StaffProtectedComponent,
 });
+
+function StaffProtectedComponent() {
+  return (
+    <DashboardGuard requiredRole="staff">
+      <StaffDashboard />
+    </DashboardGuard>
+  );
+}
 
 type StaffPage =
   | "overview"

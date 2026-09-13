@@ -61,11 +61,12 @@ function SignIn() {
       const email = auth.user.email?.toLowerCase();
       const isAdmin =
         auth.profile?.role === "admin" ||
-        auth.user.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+        email === "realtoque0@gmail.com" ||
         email === "eventsroyaltouch7@gmail.com" ||
         email === "abigaelmuthoni29@gmail.com";
+      const isStaff = auth.profile?.role === "staff";
 
-      const to = isAdmin ? "/admin" : "/dashboard";
+      const to = isAdmin ? "/admin" : isStaff ? "/staff" : "/dashboard";
       navigate({ to });
     }
   }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
@@ -100,11 +101,15 @@ function SignIn() {
       const role = await auth.signIn(res.data.email, res.data.password);
       const isTargetAdmin =
         role === "admin" ||
+        res.data.email.toLowerCase() === "realtoque0@gmail.com" ||
         res.data.email.toLowerCase() === "eventsroyaltouch7@gmail.com" ||
         res.data.email.toLowerCase() === "abigaelmuthoni29@gmail.com";
+      const isTargetStaff = role === "staff";
 
       if (isTargetAdmin) {
         navigate({ to: "/admin" });
+      } else if (isTargetStaff) {
+        navigate({ to: "/staff" });
       } else {
         navigate({ to: "/dashboard" });
       }
@@ -204,17 +209,6 @@ function SignIn() {
             >
               Create Account
             </Link>
-
-            <div className="w-full pt-3 border-t border-slate-200 dark:border-white/10 space-y-2">
-              <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest text-center">Staff & Operations Portal</p>
-              <Link
-                to="/staff"
-                className="h-12 w-full border-2 border-[#f4cf69]/60 bg-[#f4cf69]/10 hover:bg-[#f4cf69] hover:text-black text-[#f4cf69] font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-2 transition-all cursor-pointer shadow-lg"
-              >
-                <span>♔ Staff & Operations Dashboard</span>
-                <ArrowRight size={14} />
-              </Link>
-            </div>
           </div>
         </div>
       </div>

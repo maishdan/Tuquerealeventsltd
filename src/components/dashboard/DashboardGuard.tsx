@@ -16,10 +16,18 @@ export function DashboardGuard({
   const email = session?.user?.email?.toLowerCase();
   const isAdminEmail =
     session?.user?.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+    email === "realtoque0@gmail.com" ||
     email === "eventsroyaltouch7@gmail.com" ||
     email === "abigaelmuthoni29@gmail.com";
 
   const effectiveRole: UserRole | null = isAdminEmail ? "admin" : role;
+
+  const isAuthorized = (() => {
+    if (!requiredRole) return true;
+    if (effectiveRole === "admin") return true; // CEO & Super Admins have full access
+    if (requiredRole === "staff" && (effectiveRole === "staff" || effectiveRole === "admin")) return true;
+    return effectiveRole === requiredRole;
+  })();
 
   useEffect(() => {
     if (loading) return;
@@ -27,10 +35,10 @@ export function DashboardGuard({
       navigate({ to: "/sign-in" });
       return;
     }
-    if (requiredRole && effectiveRole !== requiredRole) {
-      navigate({ to: effectiveRole === "admin" ? "/admin" : "/dashboard" });
+    if (!isAuthorized) {
+      navigate({ to: effectiveRole === "admin" ? "/admin" : effectiveRole === "staff" ? "/staff" : "/dashboard" });
     }
-  }, [loading, session, effectiveRole, requiredRole, navigate]);
+  }, [loading, session, isAuthorized, effectiveRole, navigate]);
 
   if (loading) {
     return (
@@ -42,7 +50,7 @@ export function DashboardGuard({
     );
   }
 
-  if (!session || (requiredRole && effectiveRole !== requiredRole)) return null;
+  if (!session || !isAuthorized) return null;
 
-  return children;
+  return <>{children}</>;
 }

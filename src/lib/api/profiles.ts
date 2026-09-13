@@ -25,15 +25,22 @@ export async function updateProfile(userId: string, updates: Partial<Pick<Profil
 }
 
 export async function updateUserRole(userId: string, role: UserRole) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .update({ role })
-    .eq("id", userId)
-    .select()
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .update({ role })
+      .eq("id", userId)
+      .select()
+      .single();
 
-  if (error) throw error;
-  return data as Profile;
+    if (error) throw error;
+    return data as Profile;
+  } catch (err: any) {
+    if (err?.code === "23514" || String(err?.message || "").includes("profiles_role_check")) {
+      console.warn("Supabase Role Check Constraint Warning: Please run the SQL script in Supabase SQL Editor to allow 'staff' in the profiles table.");
+    }
+    throw err;
+  }
 }
 
 export async function deleteProfile(userId: string) {
@@ -74,7 +81,7 @@ export async function fetchAllProfiles() {
   return [
     {
       id: "usr-admin-1",
-      email: "eventsroyaltouch7@gmail.com",
+      email: "realtoque0@gmail.com",
       full_name: "Japheth Owiyo",
       role: "admin",
       created_at: new Date().toISOString(),
@@ -85,6 +92,13 @@ export async function fetchAllProfiles() {
       full_name: "DANIWEST",
       role: "admin",
       created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
+    },
+    {
+      id: "usr-staff-1",
+      email: "staff@royaltouchevents.co.ke",
+      full_name: "Staff Event Coordinator",
+      role: "staff",
+      created_at: new Date(Date.now() - 86400000 * 8).toISOString(),
     },
     {
       id: "usr-client-1",
@@ -99,13 +113,6 @@ export async function fetchAllProfiles() {
       full_name: "Sarah Muthoni",
       role: "customer",
       created_at: new Date(Date.now() - 86400000 * 20).toISOString(),
-    },
-    {
-      id: "usr-client-3",
-      email: "info@kisiiuniversity.ac.ke",
-      full_name: "Kisii University Delegate",
-      role: "customer",
-      created_at: new Date(Date.now() - 86400000 * 30).toISOString(),
     },
   ] as Profile[];
 }
