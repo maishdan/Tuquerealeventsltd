@@ -264,8 +264,9 @@ function AdminUsers() {
     allProfiles.unshift(profile);
   }
 
-  const clientProfiles = allProfiles.filter((p) => p.role === "customer" || !p.role);
+  const clientProfiles = allProfiles.filter((p) => p.role === "customer" || p.role === "client" || !p.role);
   const adminUsers = allProfiles.filter((p) => p.role === "admin");
+  const staffProfiles = allProfiles.filter((p) => p.role === "staff");
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
   // Filtered Users based on search query AND role filter
@@ -276,7 +277,10 @@ function AdminUsers() {
       (p.role && p.role.toLowerCase().includes(searchQuery.toLowerCase()));
 
     if (roleFilter === "CLIENTS") {
-      return matchesSearch && (p.role === "customer" || !p.role);
+      return matchesSearch && (p.role === "customer" || p.role === "client" || !p.role);
+    }
+    if (roleFilter === "STAFF") {
+      return matchesSearch && p.role === "staff";
     }
     if (roleFilter === "ADMINS") {
       return matchesSearch && p.role === "admin";
@@ -703,6 +707,16 @@ function AdminUsers() {
                     </button>
                     <button
                       type="button"
+                      onClick={() => setRoleFilter("STAFF")}
+                      className={cn(
+                        "px-3 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer",
+                        roleFilter === "STAFF" ? "bg-emerald-500 text-black font-black shadow-md" : "text-[#8d9bad] hover:text-white"
+                      )}
+                    >
+                      Staff ({staffProfiles.length})
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => setRoleFilter("ADMINS")}
                       className={cn(
                         "px-3 py-1 rounded text-[10px] font-bold uppercase transition-all cursor-pointer",
@@ -780,9 +794,13 @@ function AdminUsers() {
                                 <span className="px-2.5 py-1 rounded bg-[#f4cf69]/25 border border-[#f4cf69]/60 text-[#f4cf69] text-[9px] font-black uppercase flex items-center gap-1.5 w-fit shadow-md">
                                   <Crown size={12} className="text-[#f4cf69]" /> {badgeInfo.title}
                                 </span>
-                              ) : isAdmin ? (
+                              ) : client.role === "admin" ? (
                                 <span className="px-2.5 py-1 rounded bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[9px] font-black uppercase flex items-center gap-1 w-fit">
                                   <Shield size={11} /> EXECUTIVE ADMIN
+                                </span>
+                              ) : client.role === "staff" ? (
+                                <span className="px-2.5 py-1 rounded bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-[9px] font-black uppercase flex items-center gap-1 w-fit">
+                                  <Crown size={11} /> ♔ STAFF MEMBER
                                 </span>
                               ) : (
                                 <span className="px-2.5 py-1 rounded bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[9px] font-black uppercase w-fit block">
@@ -812,8 +830,13 @@ function AdminUsers() {
                                   <select
                                     value={client.role || "customer"}
                                     onChange={(e) => handleRoleChange(client.id, client.email, client.full_name || "", e.target.value as UserRole)}
-                                    className="h-8 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg px-2 outline-none cursor-pointer transition-colors"
+                                    className="h-8 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-xs font-bold text-white rounded-lg px-2 outline-none cursor-pointer transition-colors font-mono"
                                   >
+                                    <option value="customer">♟ CLIENT</option>
+                                    <option value="staff">♔ STAFF MEMBER</option>
+                                    <option value="admin">👑 EXECUTIVE ADMIN</option>
+                                  </select>
+                                )}
                                     <option value="customer">CLIENT</option>
                                     <option value="admin">ADMIN</option>
                                   </select>
