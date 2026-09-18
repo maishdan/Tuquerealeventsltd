@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell } from "lucide-react";
-
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { createPageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -140,6 +140,10 @@ function AdminOverview() {
   );
 
   const isSearchActive = searchQuery.trim().length > 0;
+
+  if (eventsLoading && bookingsLoading && ticketsLoading) {
+    return <LoadingScreen title="Loading Executive CEO Overview..." />;
+  }
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">

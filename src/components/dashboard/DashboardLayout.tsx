@@ -384,11 +384,11 @@ function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
     <div className="flex flex-col h-full min-h-0 relative font-sans">
       {/* Brand Crown Header */}
       <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] select-none">
-        <div className="text-2xl leading-none filter drop-shadow-[0_0_12px_rgba(230,184,63,0.3)]">♕</div>
+        <img src="/new logo.png" alt="TOQUE REAL Logo" className="h-8 w-8 rounded-full object-cover border border-[#f4cf69]/50 shadow-md" />
         {!collapsed && (
           <>
-            <div className="font-serif tracking-[2px] text-sm mt-1 font-bold">ROYAL TOUCH</div>
-            <div className="font-serif tracking-[4px] text-[10px] opacity-80 mt-0.5">EXECUTIVE ADMIN</div>
+            <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
+            <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
           </>
         )}
       </div>

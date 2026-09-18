@@ -28,6 +28,8 @@ import {
   HelpCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -109,12 +111,22 @@ export function StaffDashboard() {
   const { data: events = [] } = useAdminEvents();
   const { data: clients = [] } = useAdminClients();
 
+  const isMobile = useIsMobile();
   const [activePage, setActivePage] = useState<StaffPage>("overview");
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+
+  const handleMenuToggle = () => {
+    if (isMobile) {
+      setMobileOpen((prev) => !prev);
+    } else {
+      setIsMenuCollapsed((prev) => !prev);
+    }
+  };
 
   // Real KPI Metrics derived from live Supabase DB
   const activeTasksCount = bookings.filter((b) => b.status === "pending" || b.status === "planning").length || 7;
@@ -211,102 +223,33 @@ export function StaffDashboard() {
         </div>
       )}
 
+      {/* Mobile Sliding Side Sheet */}
+      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+        <SheetContent side="left" className="w-[225px] p-0 border-r border-[#202838] bg-[#070b14] text-white">
+          <StaffSidebarNav
+            activePage={activePage}
+            setActivePage={(p: StaffPage) => {
+              setActivePage(p);
+              setMobileOpen(false);
+            }}
+            isMenuCollapsed={false}
+            showToast={showToast}
+            setShowLogoutConfirmModal={setShowLogoutConfirmModal}
+          />
+        </SheetContent>
+      </Sheet>
+
       {/* App Shell Grid with Collapsible Sidebar */}
       <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[70px_1fr]" : "grid-cols-[225px_1fr]")}>
-        {/* SIDEBAR NAVIGATION */}
-        <aside className="border-r border-[#202838] bg-[#070b14] flex flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin p-3 space-y-3 z-50">
-          {/* Brand Logo Header */}
-          <div className="text-center pb-4 border-b border-[#202838] text-[#d4ad6a] pt-2">
-            <img src="/new logo.png" alt="TOQUE REAL Logo" className="h-9 w-9 mx-auto rounded-full object-cover border border-[#d4ad6a]/50 shadow-md mb-1" />
-            {!isMenuCollapsed && (
-              <>
-                <b className="block font-serif text-base tracking-[2px] leading-tight">TOQUE REAL</b>
-                <small className="block text-[9px] tracking-[3px] text-[#8993a4]">EVENTS LIMITED</small>
-              </>
-            )}
-          </div>
-
-          {/* Navigation Items */}
-          <nav className="space-y-1 text-xs">
-            {[
-              { id: "overview", label: "Staff Overview", icon: "🏠" },
-              { id: "schedule", label: "My Schedule", icon: "📅" },
-              { id: "tasks", label: "My Tasks", icon: "✅" },
-              { id: "assigned", label: "Assigned Events", icon: "📋" },
-              { id: "notifications", label: "Notifications", icon: "🔔" },
-              { id: "messages", label: "Internal Messages", icon: "💬" },
-              { id: "profile", label: "My Profile", icon: "👤" },
-            ].map((nav) => (
-              <button
-                key={nav.id}
-                onClick={() => {
-                  setActivePage(nav.id as StaffPage);
-                  showToast(`${nav.label} Workspace Opened`);
-                }}
-                className={cn(
-                  "w-full text-left px-3 py-2.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-2.5",
-                  activePage === nav.id
-                    ? "bg-gradient-to-r from-[#b78a4a] to-[#735127] text-white font-bold shadow-md"
-                    : "text-[#bfc6d3] hover:bg-[#121b2b] hover:text-white"
-                )}
-                title={nav.label}
-              >
-                <span className="text-base shrink-0">{nav.icon}</span>
-                {!isMenuCollapsed && <span>{nav.label}</span>}
-              </button>
-            ))}
-
-            {!isMenuCollapsed && (
-              <div className="text-[10px] text-[#697385] font-black uppercase tracking-[2px] pt-4 pb-1 px-3">
-                Departments
-              </div>
-            )}
-
-            {[
-              { id: "decor", label: "Decor & Design", icon: "🎨" },
-              { id: "catering", label: "Catering & Kitchen", icon: "🍽️" },
-              { id: "media", label: "Media & Photography", icon: "📸" },
-              { id: "sound", label: "Sound & Entertainment", icon: "🔊" },
-              { id: "logistics", label: "Logistics & Operations", icon: "🚚" },
-              { id: "vendors", label: "Vendor / Supplier", icon: "🤝" },
-              { id: "finance", label: "Finance & Accounting", icon: "💰" },
-              { id: "inventory", label: "Inventory & Assets", icon: "📦" },
-              { id: "venue", label: "Venue Management", icon: "🏨" },
-              { id: "tickets", label: "Ticketing & Registration", icon: "🎟️" },
-              { id: "marketing", label: "Marketing", icon: "📢" },
-              { id: "reports", label: "Reports & Analytics", icon: "📊" },
-              { id: "field", label: "Field Operations", icon: "🗺️" },
-            ].map((nav) => (
-              <button
-                key={nav.id}
-                onClick={() => {
-                  setActivePage(nav.id as StaffPage);
-                  showToast(`${nav.label} Department Workspace Opened`);
-                }}
-                className={cn(
-                  "w-full text-left px-3 py-2 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-2.5 text-xs",
-                  activePage === nav.id
-                    ? "bg-gradient-to-r from-[#b78a4a] to-[#735127] text-white font-bold shadow-md"
-                    : "text-[#bfc6d3] hover:bg-[#121b2b] hover:text-white"
-                )}
-                title={nav.label}
-              >
-                <span className="text-sm shrink-0">{nav.icon}</span>
-                {!isMenuCollapsed && <span>{nav.label}</span>}
-              </button>
-            ))}
-
-            {/* Sidebar Logout Button */}
-            <button
-              type="button"
-              onClick={() => setShowLogoutConfirmModal(true)}
-              className="w-full text-left px-3 py-2.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-2.5 text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 my-2"
-              title="Sign Out"
-            >
-              <LogOut size={16} className="text-rose-400 shrink-0" />
-              {!isMenuCollapsed && <span>Sign Out</span>}
-            </button>
-          </nav>
+        {/* DESKTOP SIDEBAR NAVIGATION */}
+        <aside className="hidden lg:flex border-r border-[#202838] bg-[#070b14] flex-col sticky top-0 h-screen overflow-y-auto scrollbar-thin p-3 space-y-3 z-50">
+          <StaffSidebarNav
+            activePage={activePage}
+            setActivePage={setActivePage}
+            isMenuCollapsed={isMenuCollapsed}
+            showToast={showToast}
+            setShowLogoutConfirmModal={setShowLogoutConfirmModal}
+          />
         </aside>
 
         {/* MAIN CONTENT AREA */}
@@ -847,5 +790,104 @@ export function StaffDashboard() {
         </div>
       )}
     </div>
+  );
+}
+
+function StaffSidebarNav({ activePage, setActivePage, isMenuCollapsed, showToast, setShowLogoutConfirmModal }: any) {
+  return (
+    <>
+      {/* Brand Logo Header */}
+      <div className="text-center pb-4 border-b border-[#202838] text-[#d4ad6a] pt-2 shrink-0">
+        <img src="/new logo.png" alt="TOQUE REAL Logo" className="h-9 w-9 mx-auto rounded-full object-cover border border-[#d4ad6a]/50 shadow-md mb-1" />
+        {!isMenuCollapsed && (
+          <>
+            <b className="block font-serif text-base tracking-[2px] leading-tight">TOQUE REAL</b>
+            <small className="block text-[9px] tracking-[3px] text-[#8993a4]">EVENTS LIMITED</small>
+          </>
+        )}
+      </div>
+
+      {/* Navigation Items */}
+      <nav className="space-y-1 text-xs flex-1">
+        {[
+          { id: "overview", label: "Staff Overview", icon: "🏠" },
+          { id: "schedule", label: "My Schedule", icon: "📅" },
+          { id: "tasks", label: "My Tasks", icon: "✅" },
+          { id: "assigned", label: "Assigned Events", icon: "📋" },
+          { id: "notifications", label: "Notifications", icon: "🔔" },
+          { id: "messages", label: "Internal Messages", icon: "💬" },
+          { id: "profile", label: "My Profile", icon: "👤" },
+        ].map((nav) => (
+          <button
+            key={nav.id}
+            onClick={() => {
+              setActivePage(nav.id as StaffPage);
+              showToast(`${nav.label} Workspace Opened`);
+            }}
+            className={cn(
+              "w-full text-left px-3 py-2.5 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-2.5",
+              activePage === nav.id
+                ? "bg-gradient-to-r from-[#b78a4a] to-[#735127] text-white font-bold shadow-md"
+                : "text-[#bfc6d3] hover:bg-[#121b2b] hover:text-white"
+            )}
+            title={nav.label}
+          >
+            <span className="text-base shrink-0">{nav.icon}</span>
+            {!isMenuCollapsed && <span>{nav.label}</span>}
+          </button>
+        ))}
+
+        {!isMenuCollapsed && (
+          <div className="text-[10px] text-[#697385] font-black uppercase tracking-[2px] pt-4 pb-1 px-3">
+            Departments
+          </div>
+        )}
+
+        {[
+          { id: "decor", label: "Decor & Design", icon: "🎨" },
+          { id: "catering", label: "Catering & Kitchen", icon: "🍽️" },
+          { id: "media", label: "Media & Photography", icon: "📸" },
+          { id: "sound", label: "Sound & Entertainment", icon: "🔊" },
+          { id: "logistics", label: "Logistics & Operations", icon: "🚚" },
+          { id: "vendors", label: "Vendor / Supplier", icon: "🤝" },
+          { id: "finance", label: "Finance & Accounting", icon: "💰" },
+          { id: "inventory", label: "Inventory & Assets", icon: "📦" },
+          { id: "venue", label: "Venue Management", icon: "🏨" },
+          { id: "tickets", label: "Ticketing & Registration", icon: "🎟️" },
+          { id: "marketing", label: "Marketing", icon: "📢" },
+          { id: "reports", label: "Reports & Analytics", icon: "📊" },
+          { id: "field", label: "Field Operations", icon: "🗺️" },
+        ].map((nav) => (
+          <button
+            key={nav.id}
+            onClick={() => {
+              setActivePage(nav.id as StaffPage);
+              showToast(`${nav.label} Department Workspace Opened`);
+            }}
+            className={cn(
+              "w-full text-left px-3 py-2 rounded-lg font-medium transition-all cursor-pointer flex items-center gap-2.5 text-xs",
+              activePage === nav.id
+                ? "bg-gradient-to-r from-[#b78a4a] to-[#735127] text-white font-bold shadow-md"
+                : "text-[#bfc6d3] hover:bg-[#121b2b] hover:text-white"
+            )}
+            title={nav.label}
+          >
+            <span className="text-sm shrink-0">{nav.icon}</span>
+            {!isMenuCollapsed && <span>{nav.label}</span>}
+          </button>
+        ))}
+
+        {/* Sidebar Logout Button */}
+        <button
+          type="button"
+          onClick={() => setShowLogoutConfirmModal(true)}
+          className="w-full text-left px-3 py-2.5 rounded-lg font-bold transition-all cursor-pointer flex items-center gap-2.5 text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 my-2"
+          title="Sign Out"
+        >
+          <LogOut size={16} className="text-rose-400 shrink-0" />
+          {!isMenuCollapsed && <span>Sign Out</span>}
+        </button>
+      </nav>
+    </>
   );
 }

@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe } from "lucide-react";
-import eventsLogo from "../../assets/events-logo.jpeg";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe, Smartphone } from "lucide-react";
 
 export function Footer() {
   return (
@@ -116,6 +115,41 @@ export function Footer() {
             >
               Request Quote
             </Link>
+          </div>
+        </div>
+
+        {/* MOBILE APPS COMING SOON TILE */}
+        <div className="my-8 p-6 bg-gradient-to-r from-[#121824] via-[#0d131f] to-[#121824] border border-gold/30 rounded-none shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest rounded-none">
+              <Smartphone size={13} /> Official Mobile App Status
+            </div>
+            <h4 className="text-lg font-black uppercase tracking-tight text-white font-serif">
+              TOQUE REAL Mobile Apps Coming Soon
+            </h4>
+            <p className="text-xs text-gray-400 font-medium">
+              Manage event bookings, scan gate QR passes, and access 24/7 concierge chat on iOS & Android.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            {/* Google Play Store Badge */}
+            <div className="h-12 px-4 bg-black/80 border border-white/15 rounded-none flex items-center gap-3 text-left hover:border-gold transition-colors group cursor-default shadow-md">
+              <img src="/playstore.jfif" alt="Google Play Store" className="h-6 w-6 object-contain rounded-sm shrink-0 group-hover:scale-110 transition-transform" />
+              <div>
+                <span className="block text-[8px] uppercase tracking-widest text-gray-400 font-bold">GET IT ON</span>
+                <span className="block text-xs font-black text-white uppercase tracking-wider font-mono">Google Play <small className="text-[#f4cf69] text-[9px] font-mono font-bold">(Soon)</small></span>
+              </div>
+            </div>
+
+            {/* Apple App Store Badge */}
+            <div className="h-12 px-4 bg-black/80 border border-white/15 rounded-none flex items-center gap-3 text-left hover:border-gold transition-colors group cursor-default shadow-md">
+              <img src="/apple.png" alt="Apple App Store" className="h-6 w-6 object-contain rounded-sm shrink-0 group-hover:scale-110 transition-transform" />
+              <div>
+                <span className="block text-[8px] uppercase tracking-widest text-gray-400 font-bold">Download on the</span>
+                <span className="block text-xs font-black text-white uppercase tracking-wider font-mono">App Store <small className="text-[#f4cf69] text-[9px] font-mono font-bold">(Soon)</small></span>
+              </div>
+            </div>
           </div>
         </div>
 

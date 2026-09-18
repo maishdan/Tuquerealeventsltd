@@ -375,7 +375,7 @@ export function AdminBookingConsole() {
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {filteredTickets.map((t) => (
                   <div key={t.id} className="p-5 bg-[#09141f] border border-[#243343] hover:border-[#f4cf69] rounded-xl transition-all space-y-3 shadow-md">
                     <div className="flex justify-between items-start">

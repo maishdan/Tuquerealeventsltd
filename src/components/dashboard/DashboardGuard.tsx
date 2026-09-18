@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import type { UserRole } from "@/lib/database.types";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 
 export function DashboardGuard({
   children,
@@ -41,13 +42,7 @@ export function DashboardGuard({
   }, [loading, session, isAuthorized, effectiveRole, navigate]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#03070d]">
-        <div className="bg-[#09141f] border border-[#f4cf69]/30 rounded-xl px-8 py-6 text-xs font-bold text-[#f4cf69] uppercase tracking-widest">
-          Authenticating Executive Session…
-        </div>
-      </div>
-    );
+    return <LoadingScreen title="Authenticating Executive Session..." />;
   }
 
   if (!session || !isAuthorized) return null;

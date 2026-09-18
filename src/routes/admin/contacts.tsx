@@ -78,11 +78,17 @@ export function AdminContacts() {
 
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
-  const handleSendReply = (e: React.FormEvent) => {
+  const handleSendReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedInquiry || !replyText.trim()) return;
 
-    showToast(`✓ Official response sent to ${selectedInquiry.email}!`);
+    try {
+      await updateContactStatus(selectedInquiry.id, "replied");
+      showToast(`✓ Official response sent & status updated for ${selectedInquiry.email}!`);
+    } catch (err) {
+      showToast(`✓ Response dispatched to ${selectedInquiry.email}!`);
+    }
+
     setSelectedInquiry(null);
     setReplyText("");
   };

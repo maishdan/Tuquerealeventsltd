@@ -34,6 +34,9 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import { FavoritesProvider } from "../contexts/FavoritesContext";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
+import { LoadingScreen } from "../components/common/LoadingScreen";
+import { CookieConsentBanner } from "../components/common/CookieConsentBanner";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 function NotFoundComponent() {
@@ -154,9 +157,26 @@ function RootComponent() {
   const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard") || pathname.startsWith("/staff");
   const isHome = pathname === "/";
 
+  // Loading Screen State (10 seconds duration for frontend reload/navigation & dashboard overview ONLY)
+  const [showRouteLoader, setShowRouteLoader] = useState(true);
+
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [pathname]);
+
+    const norm = pathname.replace(/\/$/, "");
+    const isDashboardOverview = norm === "/admin" || norm === "/dashboard" || norm === "/staff";
+    const shouldShowLoader = !isDashboard || isDashboardOverview;
+
+    if (shouldShowLoader) {
+      setShowRouteLoader(true);
+      const timer = setTimeout(() => {
+        setShowRouteLoader(false);
+      }, 10000); // Exactly 10 seconds timer
+      return () => clearTimeout(timer);
+    } else {
+      setShowRouteLoader(false);
+    }
+  }, [pathname, isDashboard]);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -171,12 +191,23 @@ function RootComponent() {
         <FavoritesProvider>
           <AuthProvider>
             <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
+              {/* 30-Second Loading Screen for Frontend Pages & Dashboard Overview */}
+              {showRouteLoader && (
+                <LoadingScreen
+                  title={isDashboard ? "Loading Executive Overview..." : "TOQUE REAL EVENTS LIMITED"}
+                  onSkip={() => setShowRouteLoader(false)}
+                />
+              )}
+
               <div className="relative flex flex-col min-h-screen">
                 {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
                 <main className={cn("flex-1", !isDashboard && "pt-28")}>
                   <Outlet />
                 </main>
                 {!isDashboard && <Footer />}
+
+                {/* Bottom Left One-Time Cookie Consent Banner */}
+                <CookieConsentBanner />
 
                 {/* Golden Scroll to Top Button */}
                 <button
