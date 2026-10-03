@@ -100,15 +100,8 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
   return (
     <>
-      {/* Brand Name Change Moving Marquee Header */}
-      <div className="fixed inset-x-0 top-0 z-[60] bg-[#f4cf69] text-black h-7 px-4 overflow-hidden flex items-center border-b border-[#d5a637] shadow-md">
-        <div className="whitespace-nowrap inline-block animate-marquee text-[10px] sm:text-xs font-black uppercase tracking-widest">
-          Official Notice: Company name changing from Royal Touch Events to TOQUE REAL EVENTS LIMITED &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; Official Notice: Company name changing from Royal Touch Events to TOQUE REAL EVENTS LIMITED &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; Official Notice: Company name changing from Royal Touch Events to TOQUE REAL EVENTS LIMITED
-        </div>
-      </div>
-
       <header className={cn(
-        "fixed inset-x-0 top-7 z-50 border-b h-20 bg-black border-white/10 text-white shadow-2xl transition-all duration-300"
+        "fixed inset-x-0 top-0 z-50 border-b h-20 bg-black border-white/10 text-white shadow-2xl transition-all duration-300"
       )}>
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-full flex items-center justify-between gap-4">
           {/* Left: Logo & Brand */}

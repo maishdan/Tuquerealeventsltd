@@ -115,19 +115,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           type: "application/ld+json",
           children: JSON.stringify(servicesJsonLd()),
         },
-        {
-          children: `
-            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-            (function(){
-            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-            s1.async=true;
-            s1.src='https://embed.tawk.to/6a6b3fa2a70ec81d5099831d/1jupf15bv';
-            s1.charset='UTF-8';
-            s1.setAttribute('crossorigin','*');
-            s0.parentNode.insertBefore(s1,s0);
-            })();
-          `,
-        },
       ],
     };
   },
