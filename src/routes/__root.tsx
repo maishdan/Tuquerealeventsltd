@@ -146,6 +146,17 @@ function RootComponent() {
 
   // Loading Screen State (10 seconds duration for frontend reload/navigation & dashboard overview ONLY)
   const [showRouteLoader, setShowRouteLoader] = useState(true);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 200);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -199,10 +210,16 @@ function RootComponent() {
                 {/* Golden Scroll to Top Button */}
                 <button
                   onClick={scrollToTop}
-                  className="fixed bottom-40 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
-                  title="Return to Command Center"
+                  className={cn(
+                    "fixed bottom-6 right-6 z-[9999] h-12 w-12 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_30px_rgba(212,175,55,0.4)] hover:scale-110 active:scale-95 group border-2 border-white/20 transition-all duration-300",
+                    showScrollTop
+                      ? "opacity-100 translate-y-0 pointer-events-auto cursor-pointer"
+                      : "opacity-0 translate-y-8 pointer-events-none"
+                  )}
+                  title="Return to top"
+                  aria-label="Scroll to top"
                 >
-                  <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
+                  <ChevronUp size={24} className="group-hover:-translate-y-0.5 transition-transform" />
                 </button>
               </div>
             </div>
