@@ -18,6 +18,9 @@ import { AgentAudioVisualizerBar, AgentState } from "@/components/agents-ui/Agen
 import {
   processCompanionCommand,
   interpretPage,
+  speakWithZephyrVoice,
+  playZephyrAudioSample,
+  ZEPHYR_VOICE_CONFIG,
   type CompanionContext
 } from "@/lib/ann-companion";
 import {
@@ -37,7 +40,8 @@ import {
   Minus,
   Eye,
   FileText,
-  Heart
+  Heart,
+  Music
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -92,7 +96,7 @@ export function AdminFloatingAIChatbot() {
     {
       id: "1",
       sender: "ai",
-      text: `Hi ${adminExactName}! I'm Ann, your AI companion. I'm so happy to see you! How are you doing today?`,
+      text: `Hi ${adminExactName}! I'm Ann, your AI companion powered by Zephyr's bright voice. I'm so happy to see you! How are you doing today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -135,53 +139,24 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Speech Synthesis with Warm Natural Cadence
+  // Zephyr Voice Speech Synthesis Wrapper
   const speakAIResponse = (text: string) => {
-    if (!("speechSynthesis" in window) || isVoiceMuted) return;
-
-    window.speechSynthesis.cancel();
-
-    const cleanSpeechText = text
-      .replace(/[*_~#]/g, "")
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
-      .trim();
-
-    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
-    utterance.rate = 0.98; // Warm conversational pacing
-    utterance.pitch = 1.05; // Friendly female pitch
-    utterance.volume = 1.0;
-
-    const voices = window.speechSynthesis.getVoices();
-
-    const femaleVoice =
-      voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.toLowerCase().includes("female") ||
-            v.name.includes("Samantha") ||
-            v.name.includes("Karen") ||
-            v.name.includes("Victoria") ||
-            v.name.includes("Zira") ||
-            v.name.includes("Google UK English Female") ||
-            v.name.includes("Google US English") ||
-            v.name.includes("Siri") ||
-            v.name.includes("Fiona"))
-      ) ||
-      voices.find((v) => v.lang.startsWith("en") && !v.name.toLowerCase().includes("male")) ||
-      voices.find((v) => v.lang.startsWith("en"));
-
-    if (femaleVoice) {
-      utterance.voice = femaleVoice;
-    }
-
-    setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
+    speakWithZephyrVoice(
+      text,
+      isVoiceMuted,
+      () => setIsSpeaking(true),
+      () => setIsSpeaking(false)
+    );
   };
 
-  // Automatic Warm Companion Greeting on Mount
+  // Play Zephyr Voice Sample Preview
+  const handleTestZephyrSample = async () => {
+    setIsSpeaking(true);
+    await playZephyrAudioSample();
+    setIsSpeaking(false);
+  };
+
+  // Automatic Warm Companion Greeting on Mount with Zephyr Voice
   useEffect(() => {
     if (!hasGreetedRef.current && adminExactName) {
       hasGreetedRef.current = true;
@@ -230,7 +205,7 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Toggle Chat Tile & Speak Warm Companion Greeting
+  // Toggle Chat Tile & Speak Warm Greeting with Zephyr Voice
   const handleToggleOpen = () => {
     if (!isOpen) {
       setIsOpen(true);
@@ -393,10 +368,10 @@ export function AdminFloatingAIChatbot() {
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-xs font-black uppercase tracking-wider text-white truncate flex items-center gap-1">
-                    ANN — COMPANION AI <Heart size={10} className="text-rose-400 fill-rose-400 shrink-0" />
+                    ANN — ZEPHYR VOICE <Heart size={10} className="text-rose-400 fill-rose-400 shrink-0" />
                   </h3>
                   <span className="px-1.5 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[8px] font-black uppercase tracking-widest rounded border border-[#f4cf69]/40 shrink-0">
-                    VOICE & VISION
+                    ZEPHYR AI
                   </span>
                 </div>
                 <p className="text-[10px] text-[#9caec2] font-medium flex items-center gap-1 truncate">
@@ -407,6 +382,15 @@ export function AdminFloatingAIChatbot() {
 
             {/* WINDOW CONTROL BUTTONS */}
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleTestZephyrSample}
+                className="p-1.5 rounded-lg bg-[#172533] border border-[#f4cf69]/50 text-[#f4cf69] hover:bg-[#1f3245] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold px-2"
+                title="Test Zephyr's official voice sample audio"
+              >
+                <Music size={12} /> Sample
+              </button>
+
               <button
                 type="button"
                 onClick={handleInterpretCurrentScreen}
@@ -428,7 +412,7 @@ export function AdminFloatingAIChatbot() {
                     ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
                     : "bg-[#172533] border-[#293d52] text-[#f4cf69] hover:bg-[#1f3245]"
                 )}
-                title={isVoiceMuted ? "Unmute Ann's Voice" : "Mute Ann's Voice"}
+                title={isVoiceMuted ? "Unmute Zephyr's Voice" : "Mute Zephyr's Voice"}
               >
                 {isVoiceMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
               </button>
@@ -488,8 +472,8 @@ export function AdminFloatingAIChatbot() {
                 {isListening
                   ? "ANN IS LISTENING TO YOUR VOICE..."
                   : isSpeaking
-                  ? "ANN IS SPEAKING NATURALLY..."
-                  : "ANN COMPANION ONLINE • VOICE & VISION ACTIVE"}
+                  ? "ZEPHYR VOICE SPEAKING (BRIGHT & UPBEAT)..."
+                  : "ZEPHYR VOICE ENGINE ONLINE • BRIGHT & CLEAR"}
               </span>
             </div>
 
@@ -570,7 +554,7 @@ export function AdminFloatingAIChatbot() {
                   )}
                 >
                   <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#899cb0] uppercase tracking-wider px-1">
-                    <span>{msg.sender === "user" ? adminExactName : "Ann Companion"}</span>
+                    <span>{msg.sender === "user" ? adminExactName : "Ann (Zephyr Voice)"}</span>
                     <span>•</span>
                     <span>{msg.timestamp}</span>
                   </div>
@@ -623,7 +607,7 @@ export function AdminFloatingAIChatbot() {
                   ? "bg-rose-600 text-white border-rose-400 animate-bounce shadow-[0_0_15px_rgba(225,29,72,0.6)]"
                   : "bg-[#0f1e2d] text-[#f4cf69] border-[#283e56] hover:bg-[#1a2e42] hover:border-[#f4cf69]"
               )}
-              title={isListening ? "Stop listening" : "Talk to Ann (Voice Assistant)"}
+              title={isListening ? "Stop listening" : "Talk to Ann (Zephyr Voice Assistant)"}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
             </button>
@@ -632,7 +616,7 @@ export function AdminFloatingAIChatbot() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={isListening ? "Ann is listening to your voice..." : "Chat, ask Ann to see the page, create events, message users..."}
+              placeholder={isListening ? "Ann is listening with Zephyr voice..." : "Chat, ask Ann to see the page, create events, message users..."}
               className="flex-1 h-10 px-3.5 bg-[#0d1b29] border border-[#203348] focus:border-[#f4cf69] rounded-xl text-xs text-white placeholder-[#687a8e] focus:outline-none transition-all"
             />
 
@@ -656,7 +640,7 @@ export function AdminFloatingAIChatbot() {
           "fixed bottom-28 right-4 sm:right-8 z-[9999] h-12 w-12 rounded-full p-0.5 bg-gradient-to-tr from-[#d5a637] via-[#f4cf69] to-[#896019] border-2 border-[#f4cf69] shadow-[0_8px_25px_rgba(244,207,105,0.6),0_0_15px_rgba(244,207,105,0.4)] hover:scale-110 active:scale-95 transition-all cursor-pointer group overflow-hidden flex items-center justify-center",
           isOpen && "ring-4 ring-[#f4cf69]/50"
         )}
-        title="Agent Ann — Companion Voice & Vision AI"
+        title="Agent Ann — Zephyr Voice AI Companion"
       >
         {/* Expanding Ripple Auras when Speaking or Listening */}
         {(isSpeaking || isListening) && (

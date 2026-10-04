@@ -27,6 +27,183 @@ export interface CompanionContext {
   sendMessageFn?: (opts: { userId: string; fromName: string; fromRole: string; body: string; subject?: string }) => Promise<any>;
 }
 
+// Universal System Voice Configuration — ZEPHYR FROM GEMINI VOICE LIBRARY
+export const ZEPHYR_VOICE_CONFIG = {
+  name: "Zephyr",
+  gender: "Female",
+  pitchType: "Higher Pitch",
+  characteristics: [
+    "Enthusiastic",
+    "Young Adult",
+    "Clear Articulation",
+    "Upbeat",
+    "General American Accent",
+    "Bright Tone"
+  ],
+  audioSampleUrl: "https://gstatic.com/aistudio/voices/samples/Zephyr.wav",
+  fileUri: "https://generativelanguage.googleapis.com/v1beta/files/l8ohk0ehyuwd",
+  pitchRate: 1.15, // Bright, enthusiastic female pitch
+  speakingRate: 1.02, // Clear, upbeat cadence
+};
+
+let audioContext: AudioContext | null = null;
+let currentSourceNode: AudioBufferSourceNode | null = null;
+
+function decodeBase64(base64: string): Uint8Array {
+  const binaryString = atob(base64);
+  const len = binaryString.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function decodeAudioData(
+  data: Uint8Array,
+  ctx: AudioContext,
+  sampleRate: number = 24000,
+  numChannels: number = 1
+): Promise<AudioBuffer> {
+  const dataInt16 = new Int16Array(data.buffer);
+  const frameCount = dataInt16.length / numChannels;
+  const buffer = ctx.createBuffer(numChannels, frameCount, sampleRate);
+
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = buffer.getChannelData(channel);
+    for (let i = 0; i < frameCount; i++) {
+      channelData[i] = dataInt16[i * numChannels + channel] / 32768.0;
+    }
+  }
+  return buffer;
+}
+
+// Universal Speech Synthesis Engine for Zephyr (Gemini REST API + Web Speech Fallback)
+export async function speakWithZephyrVoice(
+  text: string,
+  isMuted: boolean = false,
+  onStart?: () => void,
+  onEnd?: () => void
+) {
+  if (isMuted) return;
+
+  // Stop previous speech
+  if (currentSourceNode) {
+    try { currentSourceNode.stop(); } catch {}
+    currentSourceNode = null;
+  }
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  const cleanText = text
+    .replace(/[*_~#]/g, "")
+    .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+    .trim();
+
+  if (!cleanText) return;
+
+  const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_AI_KEY || "").trim();
+
+  // 1. Call Gemini Neural Audio REST API directly if key is present (No external package dependency)
+  if (apiKey) {
+    try {
+      onStart?.();
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: cleanText }] }],
+            generationConfig: {
+              responseModalities: ["AUDIO"],
+              speechConfig: {
+                voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+              },
+            },
+          }),
+        }
+      );
+
+      const json = await response.json();
+      const audioData = json?.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+
+      if (audioData) {
+        if (!audioContext || audioContext.state === "closed") {
+          audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
+        } else if (audioContext.state === "suspended") {
+          await audioContext.resume();
+        }
+
+        const rawBytes = decodeBase64(audioData);
+        const audioBuffer = await decodeAudioData(rawBytes, audioContext, 24000);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.connect(audioContext.destination);
+        source.onended = () => {
+          currentSourceNode = null;
+          onEnd?.();
+        };
+
+        currentSourceNode = source;
+        source.start();
+        return;
+      }
+    } catch (err) {
+      console.warn("[Ann Companion] Gemini REST API fallback to WebSpeech:", err);
+    }
+  }
+
+  // 2. Fallback: High-Fidelity Tuned Web Speech Engine with Zephyr Pitch & Speed Params
+  if (!("speechSynthesis" in window)) return;
+
+  const utterance = new SpeechSynthesisUtterance(cleanText);
+  utterance.rate = ZEPHYR_VOICE_CONFIG.speakingRate; // 1.02 — Upbeat cadence
+  utterance.pitch = ZEPHYR_VOICE_CONFIG.pitchRate;   // 1.15 — Bright Zephyr female pitch
+  utterance.volume = 1.0;
+
+  const voices = window.speechSynthesis.getVoices();
+
+  const zephyrMatchingVoice =
+    voices.find(
+      (v) =>
+        v.lang.startsWith("en") &&
+        (v.name.includes("Samantha") ||
+          v.name.includes("Google US English") ||
+          v.name.includes("Google UK English Female") ||
+          v.name.includes("Karen") ||
+          v.name.includes("Victoria") ||
+          v.name.includes("Zira") ||
+          v.name.includes("Siri") ||
+          v.name.includes("Jenny") ||
+          v.name.includes("Aria"))
+    ) ||
+    voices.find((v) => v.lang.startsWith("en") && !v.name.toLowerCase().includes("male")) ||
+    voices.find((v) => v.lang.startsWith("en"));
+
+  if (zephyrMatchingVoice) {
+    utterance.voice = zephyrMatchingVoice;
+  }
+
+  utterance.onstart = () => onStart?.();
+  utterance.onend = () => onEnd?.();
+  utterance.onerror = () => onEnd?.();
+
+  window.speechSynthesis.speak(utterance);
+}
+
+// Plays Zephyr's Raw High-Definition Sample Audio
+export function playZephyrAudioSample(): Promise<void> {
+  return new Promise((resolve) => {
+    const audio = new Audio(ZEPHYR_VOICE_CONFIG.audioSampleUrl);
+    audio.onended = () => resolve();
+    audio.onerror = () => resolve();
+    audio.play().catch(() => resolve());
+  });
+}
+
 // Generates an Executive PDF Report in a popup window
 export function generateExecutivePdfReport(
   userName: string,
@@ -69,13 +246,13 @@ export function generateExecutivePdfReport(
         </style>
       </head>
       <body>
-        <div className="container" id="report-content">
+        <div class="container" id="report-content">
           <div class="header">
             <div>
               <div class="brand">TOQUE REAL EVENTS LIMITED</div>
               <p style="color: #899cb0; margin-top: 4px; font-size: 13px;">Executive AI Report Prepared for Sir ${userName}</p>
             </div>
-            <div class="badge">OFFICIAL COMPANION REPORT</div>
+            <div class="badge">ZEPHYR GEMINI VOICE REPORT</div>
           </div>
 
           <div class="grid">
@@ -151,7 +328,7 @@ export function generateExecutivePdfReport(
           </table>
 
           <div class="footer">
-            <span>Generated automatically by Agent Ann Companion AI</span>
+            <span>Generated automatically by Agent Ann (Zephyr Gemini Voice Engine)</span>
             <span>Date: ${new Date().toLocaleDateString("en-US", { dateStyle: "full" })}</span>
           </div>
         </div>
@@ -271,7 +448,7 @@ export async function processCompanionCommand(
 ): Promise<CompanionResponse> {
   const input = rawInput.trim();
   if (!input) {
-    return { replyText: `Hi ${ctx.userName}! I'm listening. What's on your mind?` };
+    return { replyText: `Hi ${ctx.userName}! I'm listening with my Zephyr voice. What's on your mind?` };
   }
 
   const lower = input.toLowerCase();
@@ -315,7 +492,7 @@ export async function processCompanionCommand(
   // Friendly inquiries: "who are you", "who made you", "what is your name", "what can you do"
   if (lower.includes("who are you") || lower.includes("your name")) {
     return {
-      replyText: `I am Ann, your AI companion and executive assistant at Royal Touch Events! I'm here to converse with you, help you navigate our platform, manage events, message clients, and keep everything running smoothly like a trusted friend.`,
+      replyText: `I am Ann, your AI companion powered by the Zephyr Gemini voice engine at Royal Touch Events! I'm here to converse with you, help you navigate our platform, manage events, message clients, and keep everything running smoothly like a trusted friend.`,
     };
   }
 
@@ -456,7 +633,6 @@ export async function processCompanionCommand(
   // 4. CREATE EVENT TOOL
   if (lower.includes("create event") || lower.includes("add event") || lower.includes("plan event") || lower.includes("new event")) {
     if (ctx.createEventFn) {
-      // Extract title / venue / date if present, or use intelligent defaults
       const titleMatch = input.match(/(?:called|named|title|event)\s+['"]?([^'"]+?)['"]?(?=\s+on|\s+at|\s+with|\s+budget|$)/i);
       const venueMatch = input.match(/at\s+['"]?([^'"]+?)['"]?(?=\s+on|\s+with|\s+budget|$)/i);
       const dateMatch = input.match(/on\s+([a-zA-Z0-9\s,-]+?)(?=\s+at|\s+with|\s+budget|$)/i);
@@ -498,7 +674,6 @@ export async function processCompanionCommand(
   // 5. DELETE EVENT / RECORD TOOL
   if (lower.includes("delete event") || lower.includes("remove event") || lower.includes("cancel event")) {
     if (ctx.deleteEventFn && ctx.events.length > 0) {
-      // Find event matching name or delete the most recent
       const target = ctx.events.find((e) => lower.includes(e.name.toLowerCase())) || ctx.events[ctx.events.length - 1];
 
       if (target) {
@@ -528,7 +703,6 @@ export async function processCompanionCommand(
   // 7. SEND DIRECT MESSAGE TO USER TOOL
   if (lower.includes("send message") || lower.includes("message user") || lower.includes("send notification") || lower.includes("notify")) {
     if (ctx.sendMessageFn) {
-      // Find recipient from clients or use fallback recipient
       const userMatch = ctx.clients.find((c) => {
         const full = (c.full_name || "").toLowerCase();
         const em = (c.email || "").toLowerCase();
@@ -538,7 +712,6 @@ export async function processCompanionCommand(
       const targetUserId = userMatch ? userMatch.id : "user-default";
       const targetName = userMatch ? userMatch.full_name || userMatch.email : "Client";
 
-      // Extract message body if provided, or construct thoughtful default
       const bodyMatch = input.match(/(?:saying|message|text|with)\s+['"]?([^'"]+)['"]?$/i);
       const msgBody = bodyMatch ? bodyMatch[1] : `Hello ${targetName}, your event booking update from Royal Touch Events is confirmed!`;
 
