@@ -269,7 +269,7 @@ export function AdminFloatingAIChatbot() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] font-sans">
+    <div className="fixed bottom-24 right-6 z-[9999] font-sans">
       {/* POPUP TILE CHATBOT SCREEN */}
       {isOpen && (
         <div className="mb-4 w-[380px] sm:w-[420px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[82vh] bg-[#07131e]/95 border-2 border-[#e6b83f]/60 shadow-[0_20px_60px_rgba(0,0,0,0.9),0_0_30px_rgba(230,184,63,0.15)] backdrop-blur-2xl rounded-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-200">
