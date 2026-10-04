@@ -656,6 +656,13 @@ export function AdminAI() {
 
           {/* AI OPPORTUNITY INTELLIGENCE CONTENT BODY */}
           <section className="p-4 sm:p-6 space-y-4 max-w-[1700px] mx-auto">
+            {/* Upgraded AI Lead Generation Marquee Banner */}
+            <div className="bg-gradient-to-r from-[#d5a637] via-[#f4cf69] to-[#d5a637] text-black h-9 px-4 overflow-hidden flex items-center border border-[#f4cf69] rounded-xl shadow-lg shadow-[#f4cf69]/10">
+              <div className="whitespace-nowrap inline-block animate-marquee text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-black">
+                ⚡ UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; 🚀 UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; ⚡ UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; 🚀 UPGRADED AI FOR GENERATING LEADS COMING SOON
+              </div>
+            </div>
+
             {/* Executive 3D Tile Banner */}
             <div className="relative group z-0">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#d5a637]/30 via-[#f4cf69]/20 to-[#896019]/30 blur-md opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
