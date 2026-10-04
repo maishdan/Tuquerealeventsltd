@@ -1,14 +1,25 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useLocation } from "@tanstack/react-router";
 import {
   useAdminBookings,
   useAdminEvents,
   useAdminClients,
-  computeAdminKpis,
-  formatKes
+  useAdminContacts,
+  useAdminTickets,
+  useAdminProspects,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
 } from "@/hooks/use-dashboard-data";
+import { updateBookingStatus } from "@/lib/api/bookings";
+import { sendMessage } from "@/lib/api/messages";
 import { useAuth } from "@/contexts/AuthContext";
 import { AgentAudioVisualizerBar, AgentState } from "@/components/agents-ui/AgentAudioVisualizerBar";
+import {
+  processCompanionCommand,
+  interpretPage,
+  type CompanionContext
+} from "@/lib/ann-companion";
 import {
   Mic,
   MicOff,
@@ -23,7 +34,10 @@ import {
   Activity,
   Maximize2,
   Minimize2,
-  Minus
+  Minus,
+  Eye,
+  FileText,
+  Heart
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,39 +53,60 @@ type WindowMode = "floating" | "maximized";
 
 export function AdminFloatingAIChatbot() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, profile } = useAuth();
+
+  // Data Queries
   const { data: bookings = [] } = useAdminBookings();
   const { data: events = [] } = useAdminEvents();
   const { data: clients = [] } = useAdminClients();
+  const { data: contacts = [] } = useAdminContacts();
+  const { data: tickets = [] } = useAdminTickets();
+  const { data: prospects = [] } = useAdminProspects();
+
+  // Mutations
+  const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
+  const deleteEventMutation = useDeleteEvent();
 
   const [isOpen, setIsOpen] = useState(false);
   const [windowMode, setWindowMode] = useState<WindowMode>("floating");
   const [isVoiceMuted, setIsVoiceMuted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [transcriptPreview, setTranscriptPreview] = useState("");
   const [inputText, setInputText] = useState("");
 
   const emailLower = (user?.email || profile?.email || "").toLowerCase();
   const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
-  const bossName = rawName || (emailLower.includes("daniwest") ? "DANIWEST" : "Boss");
+
+  const adminExactName = (() => {
+    if (rawName && rawName.trim().length > 0) return rawName.trim();
+    if (emailLower.includes("eventsroyaltouch7@gmail.com")) return "Japheth Owiyo";
+    if (emailLower.includes("abigaelmuthoni29@gmail.com")) return "Daniwest";
+    return "Japheth Owiyo";
+  })();
 
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       id: "1",
       sender: "ai",
-      text: `Welcome to the system, ${bossName}! I am your Executive AI Agent. All system operations are running at peak efficiency. Speak or type instructions like 'go to bookings', 'open finance', or 'show revenue summary'. How can I assist you today?`,
+      text: `Hi ${adminExactName}! I'm Ann, your AI companion. I'm so happy to see you! How are you doing today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
+  const hasGreetedRef = useRef(false);
 
   const agentState: AgentState = isListening
     ? "listening"
     : isSpeaking
     ? "speaking"
+    : isThinking
+    ? "listening"
     : "idle";
 
   // Auto-scroll chat feed
@@ -81,7 +116,85 @@ export function AdminFloatingAIChatbot() {
     }
   }, [messages, isOpen, windowMode]);
 
-  // Speech Recognition initialization
+  // One-time media permission request
+  useEffect(() => {
+    const permKey = "ann_media_permissions_requested";
+    const alreadyRequested = localStorage.getItem(permKey);
+
+    if (!alreadyRequested && navigator.mediaDevices?.getUserMedia) {
+      localStorage.setItem(permKey, "true");
+      navigator.mediaDevices
+        .getUserMedia({ audio: true, video: true })
+        .then((stream) => stream.getTracks().forEach((track) => track.stop()))
+        .catch(() => {
+          navigator.mediaDevices
+            .getUserMedia({ audio: true })
+            .then((stream) => stream.getTracks().forEach((track) => track.stop()))
+            .catch(() => {});
+        });
+    }
+  }, []);
+
+  // Speech Synthesis with Warm Natural Cadence
+  const speakAIResponse = (text: string) => {
+    if (!("speechSynthesis" in window) || isVoiceMuted) return;
+
+    window.speechSynthesis.cancel();
+
+    const cleanSpeechText = text
+      .replace(/[*_~#]/g, "")
+      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
+      .trim();
+
+    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
+    utterance.rate = 0.98; // Warm conversational pacing
+    utterance.pitch = 1.05; // Friendly female pitch
+    utterance.volume = 1.0;
+
+    const voices = window.speechSynthesis.getVoices();
+
+    const femaleVoice =
+      voices.find(
+        (v) =>
+          v.lang.startsWith("en") &&
+          (v.name.toLowerCase().includes("female") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Karen") ||
+            v.name.includes("Victoria") ||
+            v.name.includes("Zira") ||
+            v.name.includes("Google UK English Female") ||
+            v.name.includes("Google US English") ||
+            v.name.includes("Siri") ||
+            v.name.includes("Fiona"))
+      ) ||
+      voices.find((v) => v.lang.startsWith("en") && !v.name.toLowerCase().includes("male")) ||
+      voices.find((v) => v.lang.startsWith("en"));
+
+    if (femaleVoice) {
+      utterance.voice = femaleVoice;
+    }
+
+    setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  // Automatic Warm Companion Greeting on Mount
+  useEffect(() => {
+    if (!hasGreetedRef.current && adminExactName) {
+      hasGreetedRef.current = true;
+      const welcomeMsg = `Hi ${adminExactName}! I'm Ann, your AI companion. I'm so happy to see you! How are you doing today?`;
+      const timer = setTimeout(() => {
+        speakAIResponse(welcomeMsg);
+      }, 1200);
+
+      return () => clearTimeout(timer);
+    }
+  }, [adminExactName]);
+
+  // Speech Recognition setup
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
@@ -117,57 +230,18 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Text-To-Speech Synthesis
-  const speakAIResponse = (text: string) => {
-    if (!("speechSynthesis" in window) || isVoiceMuted) return;
-
-    window.speechSynthesis.cancel();
-
-    const cleanSpeechText = text
-      .replace(/[*_~#]/g, "")
-      .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu, "")
-      .trim();
-
-    const utterance = new SpeechSynthesisUtterance(cleanSpeechText);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoice =
-      voices.find(
-        (v) =>
-          v.lang.startsWith("en") &&
-          (v.name.includes("Natural") ||
-            v.name.includes("Google") ||
-            v.name.includes("Daniel") ||
-            v.name.includes("Samantha") ||
-            v.name.includes("Alex"))
-      ) || voices.find((v) => v.lang.startsWith("en"));
-
-    if (englishVoice) {
-      utterance.voice = englishVoice;
-    }
-
-    setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
-  };
-
-  // Welcome Greeting when Boss clicks the floating icon
+  // Toggle Chat Tile & Speak Warm Companion Greeting
   const handleToggleOpen = () => {
     if (!isOpen) {
       setIsOpen(true);
-      const greeting = `Welcome back to the Command Center, ${bossName}! All system operations are synced and running smoothly. What are your commands today?`;
+      const greeting = `Hi ${adminExactName}! I'm right here with you. How can I help or chat with you today?`;
       speakAIResponse(greeting);
     } else {
       setIsOpen(false);
     }
   };
 
-  // Toggle Voice Listening
+  // Toggle Mic
   const toggleListening = () => {
     if (!recognitionRef.current) {
       alert("Voice recognition is not supported by your browser. Please use text input.");
@@ -192,8 +266,27 @@ export function AdminFloatingAIChatbot() {
     }
   };
 
-  // Process Voice or Typed System Command
-  const handleUserCommand = (rawCommand: string) => {
+  // Build Companion Context object
+  const buildContext = (): CompanionContext => ({
+    userName: adminExactName,
+    currentPath: location.pathname || "/admin",
+    navigate: (opts) => navigate(opts),
+    bookings,
+    events,
+    clients,
+    contacts,
+    tickets,
+    prospects,
+    createEventFn: async (data) => createEventMutation.mutateAsync(data),
+    updateEventFn: async (opts) => updateEventMutation.mutateAsync(opts),
+    deleteEventFn: async (id) => deleteEventMutation.mutateAsync(id),
+    updateBookingStatusFn: async (opts) => updateBookingStatus(opts.id, opts.status),
+    sendMessageFn: async (opts) =>
+      sendMessage(opts.userId, opts.fromName, opts.fromRole, opts.body, opts.subject),
+  });
+
+  // Handle User Input (Text or Voice)
+  const handleUserCommand = async (rawCommand: string) => {
     const command = rawCommand.trim();
     if (!command) return;
 
@@ -208,97 +301,57 @@ export function AdminFloatingAIChatbot() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText("");
+    setIsThinking(true);
 
-    const lower = command.toLowerCase();
-    let replyText = "";
-    let actionTaken = "";
+    try {
+      const ctx = buildContext();
+      const response = await processCompanionCommand(command, ctx);
 
-    const kpis = computeAdminKpis(bookings, clients, events);
+      setIsThinking(false);
 
-    // 1. Navigation Commands
-    if (lower.includes("booking") || lower.includes("crm") || lower.includes("sales") || lower.includes("reservation")) {
-      replyText = `Opening Sales & CRM Bookings Directory, ${bossName}. You currently have ${bookings.length} live bookings in the database.`;
-      actionTaken = "Navigated to /admin/bookings";
-      navigate({ to: "/admin/bookings" });
-    } else if (lower.includes("event") || lower.includes("production")) {
-      replyText = `Opening Event Production Hub, ${bossName}. There are ${events.length} registered events in total.`;
-      actionTaken = "Navigated to /admin/events";
-      navigate({ to: "/admin/events" });
-    } else if (lower.includes("finance") || lower.includes("revenue") || lower.includes("money") || lower.includes("cash")) {
-      replyText = `Accessing Financial Command Center, ${bossName}. Your gross revenue stands at ${formatKes(kpis.totalRevenue)}.`;
-      actionTaken = "Navigated to /admin/finance";
-      navigate({ to: "/admin/finance" });
-    } else if (lower.includes("payment") || lower.includes("receipt") || lower.includes("paid")) {
-      replyText = `Opening Payment Transactions & Invoices, ${bossName}.`;
-      actionTaken = "Navigated to /admin/payments";
-      navigate({ to: "/admin/payments" });
-    } else if (lower.includes("user") || lower.includes("client") || lower.includes("customer")) {
-      replyText = `Opening Client Directory, ${bossName}. There are ${clients.length} registered clients operating on the platform.`;
-      actionTaken = "Navigated to /admin/users";
-      navigate({ to: "/admin/users" });
-    } else if (lower.includes("prospect") || lower.includes("pipeline") || lower.includes("lead")) {
-      replyText = `Opening Prospects & Sales Pipeline, ${bossName}.`;
-      actionTaken = "Navigated to /admin/prospects";
-      navigate({ to: "/admin/prospects" });
-    } else if (lower.includes("proposal") || lower.includes("quote") || lower.includes("quotation")) {
-      replyText = `Opening Proposals and Quotations Hub, ${bossName}.`;
-      actionTaken = "Navigated to /admin/proposals";
-      navigate({ to: "/admin/proposals" });
-    } else if (lower.includes("ai") || lower.includes("insight") || lower.includes("discovery") || lower.includes("scan")) {
-      replyText = `Navigating to Pan-Africa AI Event Discovery Engine, ${bossName}.`;
-      actionTaken = "Navigated to /admin/ai";
-      navigate({ to: "/admin/ai" });
-    } else if (lower.includes("marketing") || lower.includes("campaign")) {
-      replyText = `Opening Marketing Intelligence Command Center, ${bossName}.`;
-      actionTaken = "Navigated to /admin/marketing";
-      navigate({ to: "/admin/marketing" });
-    } else if (lower.includes("report") || lower.includes("analytic")) {
-      replyText = `Opening Executive Reports & Operations Analytics, ${bossName}.`;
-      actionTaken = "Navigated to /admin/reports";
-      navigate({ to: "/admin/reports" });
-    } else if (lower.includes("team") || lower.includes("staff")) {
-      replyText = `Opening Personnel Directory & Team Command, ${bossName}.`;
-      actionTaken = "Navigated to /admin/team";
-      navigate({ to: "/admin/team" });
-    } else if (lower.includes("setting") || lower.includes("config")) {
-      replyText = `Opening System Settings, ${bossName}.`;
-      actionTaken = "Navigated to /admin/settings";
-      navigate({ to: "/admin/settings" });
-    } else if (lower.includes("contact") || lower.includes("message") || lower.includes("inquiry")) {
-      replyText = `Opening Inbound Messages and Notifications, ${bossName}.`;
-      actionTaken = "Navigated to /admin/contacts";
-      navigate({ to: "/admin/contacts" });
-    } else if (lower.includes("home") || lower.includes("overview") || lower.includes("dashboard")) {
-      replyText = `Returning to CEO Executive Overview, ${bossName}.`;
-      actionTaken = "Navigated to /admin";
-      navigate({ to: "/admin" });
-    }
-    // 2. Intelligence Queries
-    else if (lower.includes("stat") || lower.includes("summary") || lower.includes("health") || lower.includes("performance") || lower.includes("fetch")) {
-      replyText = `System Performance Briefing for ${bossName}: Gross Revenue is ${formatKes(kpis.totalRevenue)}. Active Bookings: ${bookings.length}. Active Events: ${events.length}. Total Registered Clients: ${clients.length}. System health is operating at 100%.`;
-      actionTaken = "Live System Metrics Queried";
-    } else if (lower.includes("who is the boss") || lower.includes("who am i") || lower.includes("ceo") || lower.includes("who is ceo")) {
-      replyText = `You are ${bossName}, Super Admin Developer & CEO of TOQUE REAL EVENTS LIMITED. You hold full supreme administrative authority over this enterprise system.`;
-    } else if (lower.includes("company") || lower.includes("toque real") || lower.includes("royal touch")) {
-      replyText = "TOQUE REAL EVENTS LIMITED (formerly Royal Touch Events) is East Africa's premier luxury event planning and production agency headquartered in Kilimani, Nairobi, Kenya.";
-    } else if (lower.includes("help") || lower.includes("command") || lower.includes("what can you do")) {
-      replyText = `Commands you can give me include: 'Go to Bookings', 'Open Finance', 'Fetch Data', 'Show Revenue', 'Open Events', 'Go to Users', 'Open AI Insights', or 'System Settings'. Simply speak or type!`;
-    } else {
-      replyText = `Understood, ${bossName}. Executing on your command: "${command}". All database records and modules are synced in real-time.`;
-    }
-
-    setTimeout(() => {
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
-        text: replyText,
+        text: response.replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        actionTaken,
+        actionTaken: response.actionTaken,
       };
 
       setMessages((prev) => [...prev, aiMsg]);
-      speakAIResponse(replyText);
-    }, 400);
+      speakAIResponse(response.replyText);
+    } catch (err) {
+      setIsThinking(false);
+      const fallbackText = `I'm right here, ${adminExactName}! Something unexpected happened, but everything is safe in our system. What would you like us to do next?`;
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          sender: "ai",
+          text: fallbackText,
+          timestamp,
+        },
+      ]);
+      speakAIResponse(fallbackText);
+    }
+  };
+
+  // Interpret current screen
+  const handleInterpretCurrentScreen = () => {
+    const ctx = buildContext();
+    const result = interpretPage(location.pathname, ctx);
+
+    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    const aiMsg: ChatMessage = {
+      id: Date.now().toString(),
+      sender: "ai",
+      text: result.replyText,
+      timestamp,
+      actionTaken: result.actionTaken,
+    };
+
+    setMessages((prev) => [...prev, aiMsg]);
+    speakAIResponse(result.replyText);
   };
 
   const handleSubmitText = (e: React.FormEvent) => {
@@ -317,13 +370,13 @@ export function AdminFloatingAIChatbot() {
             "fixed z-[99999] bg-[#07131e]/98 border-2 border-[#f4cf69] shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_50px_rgba(244,207,105,0.3)] backdrop-blur-2xl rounded-2xl flex flex-col overflow-hidden transition-all duration-300 font-sans text-white",
             windowMode === "maximized"
               ? "inset-2 sm:inset-6 lg:inset-10 w-auto h-auto"
-              : "bottom-24 right-3 sm:right-6 w-[92vw] sm:w-[440px] max-w-[calc(100vw-1.5rem)] h-[580px] max-h-[78vh]"
+              : "bottom-24 right-3 sm:right-6 w-[92vw] sm:w-[450px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[80vh]"
           )}
         >
           {/* TOPBAR HEADER */}
           <div className="p-3.5 bg-gradient-to-r from-[#0d1d2b] via-[#0a1824] to-[#060e17] border-b border-[#f4cf69]/40 flex items-center justify-between shrink-0 select-none">
             <div className="flex items-center gap-3">
-              {/* Custom AI Agent Avatar */}
+              {/* Agent Ann Avatar */}
               <div className="relative shrink-0">
                 <div
                   className={cn(
@@ -331,7 +384,7 @@ export function AdminFloatingAIChatbot() {
                     isSpeaking && "scale-110 animate-pulse"
                   )}
                 >
-                  <img src="/tagent.png" alt="Executive AI Agent" className="h-full w-full object-cover rounded-full" />
+                  <img src="/agent.png" alt="Agent Ann" className="h-full w-full object-cover rounded-full" />
                 </div>
                 <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-[#07131e] animate-ping" />
                 <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-[#07131e]" />
@@ -339,21 +392,30 @@ export function AdminFloatingAIChatbot() {
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-white truncate">
-                    TOQUE REAL EXECUTIVE AI
+                  <h3 className="text-xs font-black uppercase tracking-wider text-white truncate flex items-center gap-1">
+                    ANN — COMPANION AI <Heart size={10} className="text-rose-400 fill-rose-400 shrink-0" />
                   </h3>
                   <span className="px-1.5 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[8px] font-black uppercase tracking-widest rounded border border-[#f4cf69]/40 shrink-0">
-                    TALKING BOT
+                    VOICE & VISION
                   </span>
                 </div>
                 <p className="text-[10px] text-[#9caec2] font-medium flex items-center gap-1 truncate">
-                  <Crown size={11} className="text-[#f4cf69] shrink-0" /> Serving {bossName} (CEO Command)
+                  <Crown size={11} className="text-[#f4cf69] shrink-0" /> Companion to {adminExactName}
                 </p>
               </div>
             </div>
 
             {/* WINDOW CONTROL BUTTONS */}
             <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={handleInterpretCurrentScreen}
+                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#f4cf69] hover:bg-[#1f3245] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold px-2"
+                title="Ask Ann to interpret the current page"
+              >
+                <Eye size={13} /> Inspect
+              </button>
+
               <button
                 type="button"
                 onClick={() => {
@@ -366,7 +428,7 @@ export function AdminFloatingAIChatbot() {
                     ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
                     : "bg-[#172533] border-[#293d52] text-[#f4cf69] hover:bg-[#1f3245]"
                 )}
-                title={isVoiceMuted ? "Unmute AI Voice" : "Mute AI Voice"}
+                title={isVoiceMuted ? "Unmute Ann's Voice" : "Mute Ann's Voice"}
               >
                 {isVoiceMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
               </button>
@@ -378,7 +440,7 @@ export function AdminFloatingAIChatbot() {
                     {
                       id: "1",
                       sender: "ai",
-                      text: `Chat cleared, ${bossName}! Ready for your next voice or text instruction.`,
+                      text: `Chat refreshed! What would you like us to work on or talk about now, ${adminExactName}?`,
                       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
                     },
                   ]);
@@ -393,18 +455,9 @@ export function AdminFloatingAIChatbot() {
                 type="button"
                 onClick={() => setWindowMode(windowMode === "floating" ? "maximized" : "floating")}
                 className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#f4cf69] hover:text-white hover:bg-[#1f3245] transition-all cursor-pointer"
-                title={windowMode === "maximized" ? "Restore to Tile" : "Maximize to Full Page"}
+                title={windowMode === "maximized" ? "Restore to Tile" : "Maximize Window"}
               >
                 {windowMode === "maximized" ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#9caec2] hover:text-white hover:bg-[#1f3245] transition-all cursor-pointer"
-                title="Minimize Tile"
-              >
-                <Minus size={15} />
               </button>
 
               <button
@@ -433,14 +486,14 @@ export function AdminFloatingAIChatbot() {
               />
               <span className="text-[#a4b5c7] uppercase tracking-wider font-bold">
                 {isListening
-                  ? "LISTENING TO YOUR VOICE..."
+                  ? "ANN IS LISTENING TO YOUR VOICE..."
                   : isSpeaking
-                  ? "AGENT IS SPEAKING..."
-                  : "AGENT ONLINE • VOICE & TEXT SYNCD"}
+                  ? "ANN IS SPEAKING NATURALLY..."
+                  : "ANN COMPANION ONLINE • VOICE & VISION ACTIVE"}
               </span>
             </div>
 
-            {/* Live 5-Bar Agent Audio Visualizer */}
+            {/* Live 5-Bar Audio Visualizer */}
             <AgentAudioVisualizerBar
               state={agentState}
               barCount={5}
@@ -449,46 +502,46 @@ export function AdminFloatingAIChatbot() {
             />
           </div>
 
-          {/* QUICK COMMAND CHIPS */}
+          {/* QUICK COMPANION CHIPS */}
           <div className="px-3 py-2 bg-[#091624] border-b border-[#182736] flex items-center gap-1.5 overflow-x-auto scrollbar-none text-[9px] font-black uppercase tracking-wider text-[#9caec2] shrink-0">
             <span className="text-[#f4cf69] shrink-0 font-bold flex items-center gap-0.5">
               <Zap size={10} /> Quick:
             </span>
             <button
-              onClick={() => handleUserCommand("go to bookings")}
-              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
+              onClick={() => handleUserCommand("Hi Ann, how are you doing today?")}
+              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold flex items-center gap-1"
             >
-              📅 Bookings
+              💬 Chat
             </button>
             <button
-              onClick={() => handleUserCommand("open finance")}
-              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
+              onClick={handleInterpretCurrentScreen}
+              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold flex items-center gap-1"
             >
-              💰 Finance
+              👁️ Interpret Page
             </button>
             <button
-              onClick={() => handleUserCommand("fetch system summary")}
-              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
-            >
-              📊 Fetch Stats
-            </button>
-            <button
-              onClick={() => handleUserCommand("open events")}
+              onClick={() => handleUserCommand("Take me to events page and tell me what you see")}
               className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
             >
               🎪 Events
             </button>
             <button
-              onClick={() => handleUserCommand("go to users")}
+              onClick={() => handleUserCommand("Take me to bookings page and interpret what is there")}
+              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
+            >
+              📅 Bookings
+            </button>
+            <button
+              onClick={() => handleUserCommand("Take me to finance page and pull a PDF report")}
+              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold flex items-center gap-1"
+            >
+              📄 PDF Report
+            </button>
+            <button
+              onClick={() => handleUserCommand("Take me to users page")}
               className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
             >
               👥 Clients
-            </button>
-            <button
-              onClick={() => handleUserCommand("go to ai insights")}
-              className="px-2.5 py-1 rounded-md bg-[#122233] border border-[#22364c] hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all whitespace-nowrap shrink-0 cursor-pointer font-bold"
-            >
-              💡 AI Insights
             </button>
           </div>
 
@@ -498,14 +551,14 @@ export function AdminFloatingAIChatbot() {
               <div
                 key={msg.id}
                 className={cn(
-                  "flex items-start gap-2.5 max-w-[90%] sm:max-w-[82%]",
+                  "flex items-start gap-2.5 max-w-[90%] sm:max-w-[85%]",
                   msg.sender === "user" ? "ml-auto flex-row-reverse" : "mr-auto"
                 )}
               >
                 {msg.sender === "ai" && (
                   <img
-                    src="/tagent.png"
-                    alt="AI Agent"
+                    src="/agent.png"
+                    alt="Agent Ann"
                     className="h-7 w-7 rounded-full object-cover border border-[#f4cf69]/60 shadow-md shrink-0 mt-1"
                   />
                 )}
@@ -517,7 +570,7 @@ export function AdminFloatingAIChatbot() {
                   )}
                 >
                   <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#899cb0] uppercase tracking-wider px-1">
-                    <span>{msg.sender === "user" ? bossName : "Executive AI"}</span>
+                    <span>{msg.sender === "user" ? adminExactName : "Ann Companion"}</span>
                     <span>•</span>
                     <span>{msg.timestamp}</span>
                   </div>
@@ -542,10 +595,17 @@ export function AdminFloatingAIChatbot() {
               </div>
             ))}
 
+            {isThinking && (
+              <div className="mr-auto max-w-[85%] flex items-center gap-2 p-3 bg-[#0d1b29] border border-[#f4cf69]/30 text-[#f4cf69] text-xs rounded-xl font-sans animate-pulse">
+                <img src="/agent.png" alt="Ann" className="h-5 w-5 rounded-full object-cover shrink-0" />
+                <span>Ann is thinking and interpreting...</span>
+              </div>
+            )}
+
             {isListening && transcriptPreview && (
               <div className="mr-auto max-w-[88%] p-3 bg-rose-950/50 border border-rose-500/50 text-rose-200 text-xs rounded-xl font-mono animate-pulse flex items-center gap-2">
-                <img src="/tagent.png" alt="AI Agent" className="h-5 w-5 rounded-full object-cover shrink-0" />
-                <span>🎤 Hearing: "{transcriptPreview}"</span>
+                <img src="/agent.png" alt="Agent Ann" className="h-5 w-5 rounded-full object-cover shrink-0" />
+                <span>🎤 Ann Hearing: "{transcriptPreview}"</span>
               </div>
             )}
 
@@ -563,7 +623,7 @@ export function AdminFloatingAIChatbot() {
                   ? "bg-rose-600 text-white border-rose-400 animate-bounce shadow-[0_0_15px_rgba(225,29,72,0.6)]"
                   : "bg-[#0f1e2d] text-[#f4cf69] border-[#283e56] hover:bg-[#1a2e42] hover:border-[#f4cf69]"
               )}
-              title={isListening ? "Stop listening" : "Speak command (Voice AI)"}
+              title={isListening ? "Stop listening" : "Talk to Ann (Voice Assistant)"}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
             </button>
@@ -572,7 +632,7 @@ export function AdminFloatingAIChatbot() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={isListening ? "Listening to your voice..." : "Type command or talk..."}
+              placeholder={isListening ? "Ann is listening to your voice..." : "Chat, ask Ann to see the page, create events, message users..."}
               className="flex-1 h-10 px-3.5 bg-[#0d1b29] border border-[#203348] focus:border-[#f4cf69] rounded-xl text-xs text-white placeholder-[#687a8e] focus:outline-none transition-all"
             />
 
@@ -580,7 +640,7 @@ export function AdminFloatingAIChatbot() {
               type="submit"
               disabled={!inputText.trim()}
               className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#d5a637] to-[#f4cf69] text-black flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95 transition-all shadow-md shrink-0 cursor-pointer"
-              title="Send command"
+              title="Send message to Ann"
             >
               <Send size={16} />
             </button>
@@ -588,7 +648,7 @@ export function AdminFloatingAIChatbot() {
         </div>
       )}
 
-      {/* COMPACT CIRCULAR FLOATING TRIGGER BUTTON */}
+      {/* COMPACT CIRCULAR FLOATING TRIGGER BUTTON WITH RIPPLE VISUALIZATION */}
       <button
         type="button"
         onClick={handleToggleOpen}
@@ -596,16 +656,20 @@ export function AdminFloatingAIChatbot() {
           "fixed bottom-28 right-4 sm:right-8 z-[9999] h-12 w-12 rounded-full p-0.5 bg-gradient-to-tr from-[#d5a637] via-[#f4cf69] to-[#896019] border-2 border-[#f4cf69] shadow-[0_8px_25px_rgba(244,207,105,0.6),0_0_15px_rgba(244,207,105,0.4)] hover:scale-110 active:scale-95 transition-all cursor-pointer group overflow-hidden flex items-center justify-center",
           isOpen && "ring-4 ring-[#f4cf69]/50"
         )}
-        title="TOQUE REAL Executive Talking AI Assistant"
+        title="Agent Ann — Companion Voice & Vision AI"
       >
+        {/* Expanding Ripple Auras when Speaking or Listening */}
         {(isSpeaking || isListening) && (
-          <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#f4cf69] to-[#d5a637] opacity-85 blur animate-ping" />
+          <>
+            <span className="absolute -inset-2 rounded-full border-2 border-[#f4cf69] opacity-80 animate-ping" />
+            <span className="absolute -inset-4 rounded-full bg-[#f4cf69]/25 blur-md animate-pulse" />
+          </>
         )}
 
         <div className="relative h-full w-full rounded-full overflow-hidden flex items-center justify-center bg-[#07131e]">
           <img
-            src="/tagent.png"
-            alt="AI Agent"
+            src="/agent.png"
+            alt="Agent Ann"
             className="h-full w-full object-cover rounded-full transition-transform duration-300 group-hover:scale-110"
           />
 
