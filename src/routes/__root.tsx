@@ -36,6 +36,7 @@ import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
 import { LoadingScreen } from "../components/common/LoadingScreen";
 import { CookieConsentBanner } from "../components/common/CookieConsentBanner";
+import { AdminFloatingAIChatbot } from "../components/dashboard/AdminFloatingAIChatbot";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -206,6 +207,9 @@ function RootComponent() {
 
                 {/* Bottom Left One-Time Cookie Consent Banner */}
                 <CookieConsentBanner />
+
+                {/* Floating Talking AI Assistant strictly for Admin Dashboard ONLY */}
+                {pathname.startsWith("/admin") && <AdminFloatingAIChatbot />}
 
                 {/* Golden Scroll to Top Button */}
                 <button
