@@ -8,6 +8,7 @@ import {
   formatKes
 } from "@/hooks/use-dashboard-data";
 import { useAuth } from "@/contexts/AuthContext";
+import { AgentAudioVisualizerBar, AgentState } from "@/components/agents-ui/AgentAudioVisualizerBar";
 import {
   Mic,
   MicOff,
@@ -34,74 +35,7 @@ interface ChatMessage {
   actionTaken?: string;
 }
 
-type AgentState = "idle" | "listening" | "thinking" | "speaking";
 type WindowMode = "floating" | "maximized";
-
-// LiveKit-Style 5-Bar Reactive Audio Visualizer Component
-export function AgentAudioVisualizerBar({
-  state,
-  barCount = 5,
-  size = "lg",
-}: {
-  state: AgentState;
-  barCount?: number;
-  size?: "sm" | "md" | "lg";
-}) {
-  const [barHeights, setBarHeights] = useState<number[]>([30, 50, 80, 40, 60]);
-
-  useEffect(() => {
-    let interval: any;
-    if (state === "speaking") {
-      interval = setInterval(() => {
-        setBarHeights(
-          Array.from({ length: barCount }, () => Math.floor(Math.random() * 75) + 25)
-        );
-      }, 110);
-    } else if (state === "listening") {
-      interval = setInterval(() => {
-        setBarHeights(
-          Array.from({ length: barCount }, () => Math.floor(Math.random() * 55) + 20)
-        );
-      }, 140);
-    } else if (state === "thinking") {
-      interval = setInterval(() => {
-        setBarHeights((prev) => {
-          const first = prev[0];
-          return [...prev.slice(1), first];
-        });
-      }, 180);
-    } else {
-      setBarHeights([25, 40, 60, 35, 20].slice(0, barCount));
-    }
-
-    return () => clearInterval(interval);
-  }, [state, barCount]);
-
-  const heightClass = size === "lg" ? "h-10 sm:h-12" : size === "md" ? "h-7" : "h-5";
-  const barWidth = size === "lg" ? "w-2 sm:w-2.5" : size === "md" ? "w-1.5" : "w-1";
-
-  return (
-    <div className={cn("flex items-center justify-center gap-1.5", heightClass)}>
-      {barHeights.map((h, i) => (
-        <div
-          key={i}
-          style={{ height: `${h}%` }}
-          className={cn(
-            "rounded-full transition-all duration-150 shadow-sm",
-            barWidth,
-            state === "speaking"
-              ? "bg-gradient-to-t from-[#d5a637] via-[#f4cf69] to-[#ffffff] shadow-[0_0_12px_rgba(244,207,105,0.9)]"
-              : state === "listening"
-              ? "bg-gradient-to-t from-rose-600 via-rose-400 to-rose-200 shadow-[0_0_12px_rgba(225,29,72,0.8)]"
-              : state === "thinking"
-              ? "bg-gradient-to-t from-amber-500 via-[#f4cf69] to-amber-100 shadow-[0_0_10px_rgba(245,158,11,0.7)]"
-              : "bg-[#283e54]"
-          )}
-        />
-      ))}
-    </div>
-  );
-}
 
 export function AdminFloatingAIChatbot() {
   const navigate = useNavigate();
@@ -115,7 +49,6 @@ export function AdminFloatingAIChatbot() {
   const [isVoiceMuted, setIsVoiceMuted] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isThinking, setIsThinking] = useState(false);
   const [transcriptPreview, setTranscriptPreview] = useState("");
   const [inputText, setInputText] = useState("");
 
@@ -135,13 +68,10 @@ export function AdminFloatingAIChatbot() {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Derived Agent State for Visualizer
-  const agentState: AgentState = isSpeaking
-    ? "speaking"
-    : isListening
+  const agentState: AgentState = isListening
     ? "listening"
-    : isThinking
-    ? "thinking"
+    : isSpeaking
+    ? "speaking"
     : "idle";
 
   // Auto-scroll chat feed
@@ -187,12 +117,9 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Text-To-Speech Synthesis (Speech Output)
+  // Text-To-Speech Synthesis
   const speakAIResponse = (text: string) => {
-    if (!("speechSynthesis" in window) || isVoiceMuted) {
-      setIsSpeaking(false);
-      return;
-    }
+    if (!("speechSynthesis" in window) || isVoiceMuted) return;
 
     window.speechSynthesis.cancel();
 
@@ -270,7 +197,6 @@ export function AdminFloatingAIChatbot() {
     const command = rawCommand.trim();
     if (!command) return;
 
-    setIsThinking(true);
     const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     const userMsg: ChatMessage = {
@@ -362,7 +288,6 @@ export function AdminFloatingAIChatbot() {
     }
 
     setTimeout(() => {
-      setIsThinking(false);
       const aiMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: "ai",
@@ -373,7 +298,7 @@ export function AdminFloatingAIChatbot() {
 
       setMessages((prev) => [...prev, aiMsg]);
       speakAIResponse(replyText);
-    }, 450);
+    }, 400);
   };
 
   const handleSubmitText = (e: React.FormEvent) => {
@@ -392,7 +317,7 @@ export function AdminFloatingAIChatbot() {
             "fixed z-[99999] bg-[#07131e]/98 border-2 border-[#f4cf69] shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_50px_rgba(244,207,105,0.3)] backdrop-blur-2xl rounded-2xl flex flex-col overflow-hidden transition-all duration-300 font-sans text-white",
             windowMode === "maximized"
               ? "inset-2 sm:inset-6 lg:inset-10 w-auto h-auto"
-              : "bottom-24 right-3 sm:right-6 w-[92vw] sm:w-[440px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[82vh]"
+              : "bottom-24 right-3 sm:right-6 w-[92vw] sm:w-[440px] max-w-[calc(100vw-1.5rem)] h-[580px] max-h-[78vh]"
           )}
         >
           {/* TOPBAR HEADER */}
@@ -418,7 +343,7 @@ export function AdminFloatingAIChatbot() {
                     TOQUE REAL EXECUTIVE AI
                   </h3>
                   <span className="px-1.5 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[8px] font-black uppercase tracking-widest rounded border border-[#f4cf69]/40 shrink-0">
-                    TALKING AGENT
+                    TALKING BOT
                   </span>
                 </div>
                 <p className="text-[10px] text-[#9caec2] font-medium flex items-center gap-1 truncate">
@@ -493,54 +418,35 @@ export function AdminFloatingAIChatbot() {
             </div>
           </div>
 
-          {/* REAL-TIME AGENT AUDIO VISUALIZER STAGE */}
-          <div className="px-4 py-3 bg-gradient-to-r from-[#040c14] via-[#091724] to-[#040c14] border-b border-[#182736] flex items-center justify-between shrink-0 shadow-inner">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <img
-                  src="/tagent.png"
-                  alt="Live Agent"
-                  className={cn(
-                    "h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover border-2 border-[#f4cf69] shadow-md transition-all duration-300",
-                    isSpeaking && "scale-105 shadow-[0_0_20px_rgba(244,207,105,0.7)]"
-                  )}
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span
-                    className={cn(
-                      "h-2.5 w-2.5 rounded-full",
-                      isListening
-                        ? "bg-rose-500 animate-ping"
-                        : isSpeaking
-                        ? "bg-[#f4cf69] animate-pulse"
-                        : isThinking
-                        ? "bg-amber-400 animate-pulse"
-                        : "bg-emerald-400"
-                    )}
-                  />
-                  <span className="text-[10px] sm:text-xs font-mono font-black uppercase tracking-wider text-white">
-                    {isListening
-                      ? "LISTENING TO VOICE..."
-                      : isSpeaking
-                      ? "AGENT TALKING..."
-                      : isThinking
-                      ? "THINKING..."
-                      : "AGENT ONLINE • READY"}
-                  </span>
-                </div>
-                <p className="text-[9px] text-[#8d9fbd] font-medium font-mono">
-                  {isListening ? "Hearing Boss instructions" : "Voice Speech & Text Synced"}
-                </p>
-              </div>
+          {/* REAL AGENT 5-BAR AUDIO VISUALIZER STRIP */}
+          <div className="px-4 py-2 bg-[#040c14] border-b border-[#182736] flex items-center justify-between text-[10px] font-mono shrink-0">
+            <div className="flex items-center gap-2">
+              <span
+                className={cn(
+                  "h-2.5 w-2.5 rounded-full",
+                  isListening
+                    ? "bg-rose-500 animate-ping"
+                    : isSpeaking
+                    ? "bg-[#f4cf69] animate-pulse"
+                    : "bg-emerald-400"
+                )}
+              />
+              <span className="text-[#a4b5c7] uppercase tracking-wider font-bold">
+                {isListening
+                  ? "LISTENING TO YOUR VOICE..."
+                  : isSpeaking
+                  ? "AGENT IS SPEAKING..."
+                  : "AGENT ONLINE • VOICE & TEXT SYNCD"}
+              </span>
             </div>
 
-            {/* LIVEKIT-STYLE 5-BAR AUDIO VISUALIZER */}
-            <div className="px-3 py-1.5 bg-[#07131e] border border-[#203347] rounded-xl shadow-inner flex items-center gap-2">
-              <AgentAudioVisualizerBar state={agentState} size="lg" barCount={5} />
-            </div>
+            {/* Live 5-Bar Agent Audio Visualizer */}
+            <AgentAudioVisualizerBar
+              state={agentState}
+              barCount={5}
+              size="sm"
+              className="py-1 px-2.5 h-8 border-[#f4cf69]/40 bg-[#091522]"
+            />
           </div>
 
           {/* QUICK COMMAND CHIPS */}
@@ -586,7 +492,7 @@ export function AdminFloatingAIChatbot() {
             </button>
           </div>
 
-          {/* CHAT FEED (TEXT OUTPUT OF WHAT AGENT SAYS & USER INPUTS) */}
+          {/* CHAT FEED */}
           <div className="flex-1 p-4 overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-[#203245]">
             {messages.map((msg) => (
               <div
@@ -611,7 +517,7 @@ export function AdminFloatingAIChatbot() {
                   )}
                 >
                   <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#899cb0] uppercase tracking-wider px-1">
-                    <span>{msg.sender === "user" ? bossName : "Executive AI Agent"}</span>
+                    <span>{msg.sender === "user" ? bossName : "Executive AI"}</span>
                     <span>•</span>
                     <span>{msg.timestamp}</span>
                   </div>
@@ -646,7 +552,7 @@ export function AdminFloatingAIChatbot() {
             <div ref={chatEndRef} />
           </div>
 
-          {/* INPUT FORM PANEL (TYPING & VOICE) */}
+          {/* INPUT FORM PANEL */}
           <form onSubmit={handleSubmitText} className="p-3 bg-[#050e17] border-t border-[#182736] flex items-center gap-2 shrink-0">
             <button
               type="button"
@@ -666,7 +572,7 @@ export function AdminFloatingAIChatbot() {
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
-              placeholder={isListening ? "Listening to your voice..." : "Type command or instruction..."}
+              placeholder={isListening ? "Listening to your voice..." : "Type command or talk..."}
               className="flex-1 h-10 px-3.5 bg-[#0d1b29] border border-[#203348] focus:border-[#f4cf69] rounded-xl text-xs text-white placeholder-[#687a8e] focus:outline-none transition-all"
             />
 
