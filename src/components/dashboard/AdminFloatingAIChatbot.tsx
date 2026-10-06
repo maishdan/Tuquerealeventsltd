@@ -39,9 +39,10 @@ import {
   Minimize2,
   Minus,
   Eye,
-  FileText,
   Heart,
-  Music
+  Music,
+  ChevronUp,
+  Radio
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +54,7 @@ interface ChatMessage {
   actionTaken?: string;
 }
 
-type WindowMode = "floating" | "maximized";
+type WindowMode = "floating" | "maximized" | "minimized-bar";
 
 export function AdminFloatingAIChatbot() {
   const navigate = useNavigate();
@@ -96,7 +97,7 @@ export function AdminFloatingAIChatbot() {
     {
       id: "1",
       sender: "ai",
-      text: `Hi ${adminExactName}! I'm Ann, your AI companion powered by Zephyr's bright voice. I'm so happy to see you! How are you doing today?`,
+      text: `Hi ${adminExactName}! I'm Ann, your AI companion. I'm powered exclusively by Zephyr's bright female voice! How can I help or chat with you today?`,
       timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
@@ -115,7 +116,7 @@ export function AdminFloatingAIChatbot() {
 
   // Auto-scroll chat feed
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && windowMode !== "minimized-bar") {
       chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isOpen, windowMode]);
@@ -139,7 +140,7 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Zephyr Voice Speech Synthesis Wrapper
+  // Strict Zephyr Female Voice Speech Synthesis Wrapper
   const speakAIResponse = (text: string) => {
     speakWithZephyrVoice(
       text,
@@ -149,7 +150,7 @@ export function AdminFloatingAIChatbot() {
     );
   };
 
-  // Play Zephyr Voice Sample Preview
+  // Play Zephyr Official Voice Sample Preview
   const handleTestZephyrSample = async () => {
     setIsSpeaking(true);
     await playZephyrAudioSample();
@@ -205,14 +206,16 @@ export function AdminFloatingAIChatbot() {
     }
   }, []);
 
-  // Toggle Chat Tile & Speak Warm Greeting with Zephyr Voice
+  // Toggle Chat Tile & Speak Warm Greeting
   const handleToggleOpen = () => {
     if (!isOpen) {
       setIsOpen(true);
+      setWindowMode("floating");
       const greeting = `Hi ${adminExactName}! I'm right here with you. How can I help or chat with you today?`;
       speakAIResponse(greeting);
     } else {
       setIsOpen(false);
+      if ("speechSynthesis" in window) window.speechSynthesis.cancel();
     }
   };
 
@@ -338,24 +341,62 @@ export function AdminFloatingAIChatbot() {
 
   return (
     <>
-      {/* FLOATING TILE SCREEN */}
-      {isOpen && (
+      {/* MINIMIZED BAR MODE */}
+      {isOpen && windowMode === "minimized-bar" && (
+        <div className="fixed bottom-24 right-3 sm:right-6 z-[99999] bg-[#07131e]/98 border-2 border-[#f4cf69] shadow-[0_15px_40px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-full px-4 py-2.5 flex items-center gap-3 text-white font-sans animate-in fade-in slide-in-from-bottom-4">
+          <div className="relative shrink-0 cursor-pointer" onClick={() => setWindowMode("floating")}>
+            <img src="/agent.png" alt="Agent Ann" className="h-8 w-8 rounded-full object-cover border border-[#f4cf69]" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 border border-[#07131e]" />
+          </div>
+
+          <div className="cursor-pointer" onClick={() => setWindowMode("floating")}>
+            <div className="text-xs font-black text-[#f4cf69] flex items-center gap-1">
+              ANN — ZEPHYR AI <Heart size={9} className="text-rose-400 fill-rose-400" />
+            </div>
+            <div className="text-[10px] text-[#9caec2] font-mono">Companion to {adminExactName}</div>
+          </div>
+
+          <div className="flex items-center gap-1.5 ml-2 border-l border-[#203348] pl-2.5">
+            <button
+              onClick={() => setWindowMode("floating")}
+              className="px-2.5 py-1 rounded-full bg-[#122233] border border-[#f4cf69]/50 text-[#f4cf69] text-[10px] font-bold hover:bg-[#1a2e42] transition-all cursor-pointer flex items-center gap-1"
+              title="Expand Chat Tile"
+            >
+              <ChevronUp size={12} /> Expand
+            </button>
+
+            <button
+              onClick={() => {
+                setIsOpen(false);
+                if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+              }}
+              className="p-1 rounded-full bg-[#172533] border border-rose-500/40 text-rose-300 hover:bg-rose-600 hover:text-white transition-all cursor-pointer"
+              title="Close Chatbot"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* FLOATING TILE SCREEN OR MAXIMIZED WINDOW */}
+      {isOpen && windowMode !== "minimized-bar" && (
         <div
           className={cn(
             "fixed z-[99999] bg-[#07131e]/98 border-2 border-[#f4cf69] shadow-[0_25px_70px_rgba(0,0,0,0.95),0_0_50px_rgba(244,207,105,0.3)] backdrop-blur-2xl rounded-2xl flex flex-col overflow-hidden transition-all duration-300 font-sans text-white",
             windowMode === "maximized"
               ? "inset-2 sm:inset-6 lg:inset-10 w-auto h-auto"
-              : "bottom-24 right-3 sm:right-6 w-[92vw] sm:w-[450px] max-w-[calc(100vw-1.5rem)] h-[600px] max-h-[80vh]"
+              : "bottom-24 right-3 sm:right-6 w-[94vw] sm:w-[460px] max-w-[calc(100vw-1.5rem)] h-[620px] max-h-[82vh]"
           )}
         >
-          {/* TOPBAR HEADER */}
-          <div className="p-3.5 bg-gradient-to-r from-[#0d1d2b] via-[#0a1824] to-[#060e17] border-b border-[#f4cf69]/40 flex items-center justify-between shrink-0 select-none">
-            <div className="flex items-center gap-3">
-              {/* Agent Ann Avatar */}
+          {/* TOPBAR HEADER WITH FULLY VISIBLE & ACCESSIBLE BUTTONS */}
+          <div className="p-3 sm:p-3.5 bg-gradient-to-r from-[#0d1d2b] via-[#0a1824] to-[#060e17] border-b border-[#f4cf69]/40 flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 shrink-0 select-none">
+            {/* Left Info Brand */}
+            <div className="flex items-center gap-2.5 min-w-0">
               <div className="relative shrink-0">
                 <div
                   className={cn(
-                    "h-11 w-11 rounded-full bg-gradient-to-tr from-[#d5a637] via-[#f4cf69] to-[#896019] p-0.5 shadow-lg border border-[#f4cf69] flex items-center justify-center overflow-hidden transition-transform",
+                    "h-10 w-10 sm:h-11 sm:w-11 rounded-full bg-gradient-to-tr from-[#d5a637] via-[#f4cf69] to-[#896019] p-0.5 shadow-lg border border-[#f4cf69] flex items-center justify-center overflow-hidden transition-transform",
                     isSpeaking && "scale-110 animate-pulse"
                   )}
                 >
@@ -370,8 +411,8 @@ export function AdminFloatingAIChatbot() {
                   <h3 className="text-xs font-black uppercase tracking-wider text-white truncate flex items-center gap-1">
                     ANN — ZEPHYR VOICE <Heart size={10} className="text-rose-400 fill-rose-400 shrink-0" />
                   </h3>
-                  <span className="px-1.5 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[8px] font-black uppercase tracking-widest rounded border border-[#f4cf69]/40 shrink-0">
-                    ZEPHYR AI
+                  <span className="px-1.5 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[8px] font-black uppercase tracking-widest rounded border border-[#f4cf69]/40 shrink-0 hidden sm:inline-block">
+                    ZEPHYR FEMALE
                   </span>
                 </div>
                 <p className="text-[10px] text-[#9caec2] font-medium flex items-center gap-1 truncate">
@@ -380,43 +421,49 @@ export function AdminFloatingAIChatbot() {
               </div>
             </div>
 
-            {/* WINDOW CONTROL BUTTONS */}
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={handleTestZephyrSample}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#f4cf69]/50 text-[#f4cf69] hover:bg-[#1f3245] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold px-2"
-                title="Test Zephyr's official voice sample audio"
-              >
-                <Music size={12} /> Sample
-              </button>
-
+            {/* Right Action Control Buttons Bar (All Clearly Visible & Functional) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
+              {/* Inspect Button */}
               <button
                 type="button"
                 onClick={handleInterpretCurrentScreen}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#f4cf69] hover:bg-[#1f3245] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-bold px-2"
-                title="Ask Ann to interpret the current page"
+                className="px-2 py-1.5 rounded-lg bg-[#142637] border border-[#2c435c] text-[#f4cf69] hover:bg-[#1e344a] hover:border-[#f4cf69] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-extrabold shadow-sm active:scale-95"
+                title="Inspect & interpret current page screen"
               >
-                <Eye size={13} /> Inspect
+                <Eye size={13} className="text-[#f4cf69]" />
+                <span className="hidden xs:inline">Inspect</span>
               </button>
 
+              {/* Zephyr Sample Audio Test Button */}
+              <button
+                type="button"
+                onClick={handleTestZephyrSample}
+                className="px-2 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] hover:bg-[#1e344a] transition-all cursor-pointer flex items-center gap-1 text-[10px] font-extrabold shadow-sm active:scale-95"
+                title="Play Zephyr's official high-definition female voice sample"
+              >
+                <Music size={12} className="text-[#f4cf69]" />
+                <span className="hidden xs:inline">Sample</span>
+              </button>
+
+              {/* Voice Mute/Unmute Toggle */}
               <button
                 type="button"
                 onClick={() => {
                   setIsVoiceMuted(!isVoiceMuted);
-                  if (isSpeaking) window.speechSynthesis.cancel();
+                  if (isSpeaking && "speechSynthesis" in window) window.speechSynthesis.cancel();
                 }}
                 className={cn(
-                  "p-1.5 rounded-lg border transition-all cursor-pointer",
+                  "p-1.5 rounded-lg border transition-all cursor-pointer active:scale-95",
                   isVoiceMuted
-                    ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
-                    : "bg-[#172533] border-[#293d52] text-[#f4cf69] hover:bg-[#1f3245]"
+                    ? "bg-rose-500/20 border-rose-500/50 text-rose-400"
+                    : "bg-[#142637] border-[#2c435c] text-[#f4cf69] hover:bg-[#1e344a]"
                 )}
                 title={isVoiceMuted ? "Unmute Zephyr's Voice" : "Mute Zephyr's Voice"}
               >
                 {isVoiceMuted ? <VolumeX size={15} /> : <Volume2 size={15} />}
               </button>
 
+              {/* Reset Conversation Button */}
               <button
                 type="button"
                 onClick={() => {
@@ -429,25 +476,40 @@ export function AdminFloatingAIChatbot() {
                     },
                   ]);
                 }}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#9caec2] hover:text-white hover:bg-[#1f3245] transition-all cursor-pointer"
+                className="p-1.5 rounded-lg bg-[#142637] border border-[#2c435c] text-[#9caec2] hover:text-white hover:bg-[#1e344a] transition-all cursor-pointer active:scale-95"
                 title="Reset Conversation"
               >
                 <RotateCcw size={15} />
               </button>
 
+              {/* Minimize Tile Button */}
+              <button
+                type="button"
+                onClick={() => setWindowMode("minimized-bar")}
+                className="p-1.5 rounded-lg bg-[#142637] border border-[#2c435c] text-[#f4cf69] hover:text-white hover:bg-[#1e344a] transition-all cursor-pointer active:scale-95"
+                title="Minimize Tile to Bottom Bar"
+              >
+                <Minus size={15} />
+              </button>
+
+              {/* Maximize / Restore Toggle Button */}
               <button
                 type="button"
                 onClick={() => setWindowMode(windowMode === "floating" ? "maximized" : "floating")}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#f4cf69] hover:text-white hover:bg-[#1f3245] transition-all cursor-pointer"
-                title={windowMode === "maximized" ? "Restore to Tile" : "Maximize Window"}
+                className="p-1.5 rounded-lg bg-[#142637] border border-[#2c435c] text-[#f4cf69] hover:text-white hover:bg-[#1e344a] transition-all cursor-pointer active:scale-95"
+                title={windowMode === "maximized" ? "Restore Tile" : "Maximize Window"}
               >
                 {windowMode === "maximized" ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
               </button>
 
+              {/* Close / Cancel Button */}
               <button
                 type="button"
-                onClick={() => setIsOpen(false)}
-                className="p-1.5 rounded-lg bg-[#172533] border border-[#293d52] text-[#9caec2] hover:text-white hover:bg-rose-600 transition-all cursor-pointer ml-0.5"
+                onClick={() => {
+                  setIsOpen(false);
+                  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+                }}
+                className="p-1.5 rounded-lg bg-rose-950/80 border border-rose-500/60 text-rose-300 hover:text-white hover:bg-rose-600 transition-all cursor-pointer active:scale-95 ml-0.5"
                 title="Close AI Assistant"
               >
                 <X size={15} />
@@ -472,8 +534,8 @@ export function AdminFloatingAIChatbot() {
                 {isListening
                   ? "ANN IS LISTENING TO YOUR VOICE..."
                   : isSpeaking
-                  ? "ZEPHYR VOICE SPEAKING (BRIGHT & UPBEAT)..."
-                  : "ZEPHYR VOICE ENGINE ONLINE • BRIGHT & CLEAR"}
+                  ? "ZEPHYR FEMALE VOICE SPEAKING..."
+                  : "ZEPHYR FEMALE VOICE ENGINE ONLINE"}
               </span>
             </div>
 
@@ -554,7 +616,7 @@ export function AdminFloatingAIChatbot() {
                   )}
                 >
                   <div className="flex items-center gap-1.5 text-[8px] font-mono text-[#899cb0] uppercase tracking-wider px-1">
-                    <span>{msg.sender === "user" ? adminExactName : "Ann (Zephyr Voice)"}</span>
+                    <span>{msg.sender === "user" ? adminExactName : "Ann (Zephyr Female Voice)"}</span>
                     <span>•</span>
                     <span>{msg.timestamp}</span>
                   </div>
@@ -607,7 +669,7 @@ export function AdminFloatingAIChatbot() {
                   ? "bg-rose-600 text-white border-rose-400 animate-bounce shadow-[0_0_15px_rgba(225,29,72,0.6)]"
                   : "bg-[#0f1e2d] text-[#f4cf69] border-[#283e56] hover:bg-[#1a2e42] hover:border-[#f4cf69]"
               )}
-              title={isListening ? "Stop listening" : "Talk to Ann (Zephyr Voice Assistant)"}
+              title={isListening ? "Stop listening" : "Talk to Ann (Zephyr Female Voice)"}
             >
               {isListening ? <MicOff size={18} /> : <Mic size={18} />}
             </button>

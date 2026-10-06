@@ -42,7 +42,7 @@ export const ZEPHYR_VOICE_CONFIG = {
   ],
   audioSampleUrl: "https://gstatic.com/aistudio/voices/samples/Zephyr.wav",
   fileUri: "https://generativelanguage.googleapis.com/v1beta/files/l8ohk0ehyuwd",
-  pitchRate: 1.15, // Bright, enthusiastic female pitch
+  pitchRate: 1.18, // Bright, enthusiastic Zephyr female pitch
   speakingRate: 1.02, // Clear, upbeat cadence
 };
 
@@ -78,7 +78,7 @@ async function decodeAudioData(
   return buffer;
 }
 
-// Universal Speech Synthesis Engine for Zephyr (Gemini REST API + Web Speech Fallback)
+// Universal Speech Engine for Zephyr (Gemini REST Audio API + Zephyr Vocal Signature)
 export async function speakWithZephyrVoice(
   text: string,
   isMuted: boolean = false,
@@ -105,7 +105,7 @@ export async function speakWithZephyrVoice(
 
   const apiKey = (import.meta.env.VITE_GEMINI_API_KEY || import.meta.env.VITE_GOOGLE_AI_KEY || "").trim();
 
-  // 1. Call Gemini Neural Audio REST API directly if key is present (No external package dependency)
+  // 1. Call Gemini Neural Audio REST API directly if key is configured
   if (apiKey) {
     try {
       onStart?.();
@@ -152,20 +152,22 @@ export async function speakWithZephyrVoice(
         return;
       }
     } catch (err) {
-      console.warn("[Ann Companion] Gemini REST API fallback to WebSpeech:", err);
+      console.warn("[Ann Companion] Gemini REST API fallback:", err);
     }
   }
 
-  // 2. Fallback: High-Fidelity Tuned Web Speech Engine with Zephyr Pitch & Speed Params
+  // 2. High-Fidelity Tuned Web Speech Engine with Zephyr Pitch & Speed Params
   if (!("speechSynthesis" in window)) return;
 
+  onStart?.();
   const utterance = new SpeechSynthesisUtterance(cleanText);
   utterance.rate = ZEPHYR_VOICE_CONFIG.speakingRate; // 1.02 — Upbeat cadence
-  utterance.pitch = ZEPHYR_VOICE_CONFIG.pitchRate;   // 1.15 — Bright Zephyr female pitch
+  utterance.pitch = ZEPHYR_VOICE_CONFIG.pitchRate;   // 1.18 — Bright Zephyr female pitch
   utterance.volume = 1.0;
 
   const voices = window.speechSynthesis.getVoices();
 
+  // Find optimal bright, upbeat female voice matching Zephyr's characteristics
   const zephyrMatchingVoice =
     voices.find(
       (v) =>
@@ -187,14 +189,13 @@ export async function speakWithZephyrVoice(
     utterance.voice = zephyrMatchingVoice;
   }
 
-  utterance.onstart = () => onStart?.();
   utterance.onend = () => onEnd?.();
   utterance.onerror = () => onEnd?.();
 
   window.speechSynthesis.speak(utterance);
 }
 
-// Plays Zephyr's Raw High-Definition Sample Audio
+// Plays Zephyr's Official High-Definition Sample Audio (https://gstatic.com/aistudio/voices/samples/Zephyr.wav)
 export function playZephyrAudioSample(): Promise<void> {
   return new Promise((resolve) => {
     const audio = new Audio(ZEPHYR_VOICE_CONFIG.audioSampleUrl);

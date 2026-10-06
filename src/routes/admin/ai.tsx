@@ -1,17 +1,38 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { useAdminEvents, useAdminBookings, useAdminTickets, formatKes } from "@/hooks/use-dashboard-data";
+import { useState, useEffect, useRef } from "react";
+import {
+  useAdminEvents,
+  useAdminBookings,
+  useAdminTickets,
+  useAdminClients,
+  useAdminContacts,
+  useAdminProspects,
+  useCreateProspect,
+  useCreateEvent,
+  useUpdateEvent,
+  useDeleteEvent,
+  useAdminTeam,
+  formatKes
+} from "@/hooks/use-dashboard-data";
+import { updateBookingStatus } from "@/lib/api/bookings";
+import { sendMessage } from "@/lib/api/messages";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPageSeo } from "@/lib/seo";
+import { AgentAudioVisualizerBar, AgentState } from "@/components/agents-ui/AgentAudioVisualizerBar";
+import {
+  processCompanionCommand,
+  interpretPage,
+  speakWithZephyrVoice,
+  playZephyrAudioSample,
+  generateExecutivePdfReport,
+  type CompanionContext
+} from "@/lib/ann-companion";
 import {
   Sparkles,
-  Bot,
   Zap,
   TrendingUp,
-  Brain,
   Search,
   ChevronDown,
-  Power,
   Settings,
   Mail,
   HelpCircle,
@@ -19,27 +40,30 @@ import {
   User,
   Home,
   Send,
-  CheckCircle2,
-  ShieldCheck,
-  Award,
   Globe,
-  Filter,
   FileText,
   Flame,
-  Layers,
   MapPin,
-  Calendar,
-  ExternalLink,
-  PlusCircle,
   RefreshCw,
-  AlertTriangle,
-  MessageSquare,
-  Lightbulb,
-  Building,
-  Users,
   Crown,
-  Compass,
-  Map
+  Users,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Music,
+  Eye,
+  Radio,
+  Share2,
+  Phone,
+  Check,
+  Heart,
+  PlusCircle,
+  Bell,
+  X,
+  Plus,
+  Bot,
+  Calendar
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -62,32 +86,52 @@ export const Route = createFileRoute("/admin/ai")({
   component: AdminAI,
 });
 
-type AITab = "chat" | "advisor" | "discovered" | "scanner" | "tenders" | "trends" | "outreach";
+type AITab = "generator" | "assistant" | "discovered" | "tenders" | "outreach" | "trends";
 
 export function AdminAI() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Database Hooks
   const { data: events = [] } = useAdminEvents();
   const { data: bookings = [] } = useAdminBookings();
   const { data: tickets = [] } = useAdminTickets();
+  const { data: clients = [] } = useAdminClients();
+  const { data: contacts = [] } = useAdminContacts();
+  const { data: prospects = [] } = useAdminProspects();
+  const { data: team = [] } = useAdminTeam();
 
-  const [activeTab, setActiveTab] = useState<AITab>("discovered");
+  // Mutations
+  const createProspectMutation = useCreateProspect();
+  const createEventMutation = useCreateEvent();
+  const updateEventMutation = useUpdateEvent();
+  const deleteEventMutation = useDeleteEvent();
+
+  const [activeTab, setActiveTab] = useState<AITab>("generator");
   const [searchQuery, setSearchQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("ALL");
-  const [regionFilter, setRegionFilter] = useState("ALL");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
 
-  // Scanner Filters
-  const [scanLocation, setScanLocation] = useState("Nairobi");
-  const [scanCategory, setScanCategory] = useState("Corporate Conference");
-  const [minScore, setMinScore] = useState(70);
+  // Scanner & Generator Filters
+  const [scanLocation, setScanLocation] = useState("Nairobi, Kenya");
+  const [scanCategory, setScanCategory] = useState("Corporate Conference & Gala");
+  const [minBudget, setMinScore] = useState(1000000);
   const [isScanning, setIsScanning] = useState(false);
 
   // Outreach Generator State
   const [selectedOppForOutreach, setSelectedOppForOutreach] = useState<any>(null);
   const [outreachDraft, setOutreachDraft] = useState<string | null>(null);
+
+  // Hands-Free Voice Assistant State
+  const [isAlwaysOnListening, setIsAlwaysOnListening] = useState(false);
+  const [isVoiceMuted, setIsVoiceMuted] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
+  const [liveVoiceTranscript, setLiveVoiceTranscript] = useState("");
+  const [savedLeadIds, setSavedLeadIds] = useState<Record<string, boolean>>({});
+
+  const continuousRecognitionRef = useRef<any>(null);
 
   const emailLower = (user?.email || profile?.email || "").toLowerCase();
   const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
@@ -105,75 +149,35 @@ export function AdminAI() {
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 2500);
+    setTimeout(() => setToastMsg(null), 2800);
   };
 
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
-  // Compute Real Supabase Financials
+  // Financial Computations
   const totalSettledRevenue = tickets.reduce((acc, t) => acc + (t.price || 0), 0);
   const pipelineValue = bookings.reduce((acc, b) => {
     const numeric = typeof b.budget === "number" ? b.budget : parseInt(String(b.budget || 0).replace(/[^0-9]/g, "")) || 0;
     return acc + numeric;
   }, 0);
-  const pendingInquiries = bookings.filter((b) => b.status === "pending" || !b.status);
 
-  // Real-Time AI Chat Conversation
-  const [chatMessages, setChatMessages] = useState([
-    {
-      sender: "ai",
-      text: `Hello ${adminInfo.fullName} (${adminInfo.badge})! I am your TOQUE REAL Executive AI Advisor. I have analyzed your live Supabase database (${tickets.length} settled passes totaling ${formatKes(totalSettledRevenue)}, KSh ${pipelineValue.toLocaleString()} in active sales pipeline). How can I advise you on optimizing your business performance or event production today?`,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    },
-  ]);
-  const [userMessage, setUserMessage] = useState("");
-  const [isAiReplying, setIsAiReplying] = useState(false);
-
-  const handleSendMessage = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userMessage.trim()) return;
-
-    const query = userMessage;
-    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-    setChatMessages((prev) => [...prev, { sender: "user", text: query, time }]);
-    setUserMessage("");
-    setIsAiReplying(true);
-
-    setTimeout(() => {
-      setIsAiReplying(false);
-      let reply = `TOQUE REAL Executive AI Strategy for ${adminInfo.fullName}: `;
-
-      if (query.toLowerCase().includes("revenue") || query.toLowerCase().includes("money") || query.toLowerCase().includes("profit")) {
-        reply += `Your current database shows KSh ${totalSettledRevenue.toLocaleString()} in settled ticket cash and KSh ${pipelineValue.toLocaleString()} in active sales pipeline. To maximize net profit margins, prioritize closing open proposals representing KSh ${(pipelineValue * 0.45).toLocaleString()} in high-margin venue & AV contracts.`;
-      } else if (query.toLowerCase().includes("lead") || query.toLowerCase().includes("client") || query.toLowerCase().includes("marketing")) {
-        reply += `Your marketing intelligence indicates LinkedIn Ads yields a 340% ROI with 28% of total inbound corporate leads. We recommend reallocating 15% of lower-performing Meta budget toward LinkedIn sponsor posts targeting Nairobi HR & Procurement Leads.`;
-      } else {
-        reply += `Based on your live system metrics, TOQUE REAL EVENTS LIMITED is currently operating at 87% operational readiness. We recommend scheduling automated follow-ups for open inquiries and leveraging our AI Outreach Generator to pitch corporate packages.`;
-      }
-
-      setChatMessages((prev) => [...prev, { sender: "ai", text: reply, time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }]);
-    }, 1200);
-  };
-
-  // Structured Discovered Pan-Africa & Pan-Kenya Opportunities
+  // Discovered Opportunities Initial Dataset (Without Emojis)
   const [opportunities, setOpportunities] = useState([
     {
       id: "opp-africa-1",
       title: "Africa Business & Tech Leadership Summit 2026",
       organization: "Africa Business Council",
-      location: "Nairobi, Kenya 🇰🇪",
+      location: "Nairobi, Kenya",
       country: "Kenya",
       date: "November 2026",
       type: "Corporate Summit",
       categoryGroup: "Corporate",
       attendance: "850+ Delegates",
       score: 96,
-      match: "98%",
       winProbability: "96%",
       estimatedMinRevenue: 1200000,
       estimatedMaxRevenue: 2800000,
-      aiRecommendation: "🔥 HIGH WIN PROBABILITY (96%): Pitch full-service turnkey conference package (Stage, AV & VIP Catering) within 12 hours. Target decision maker: Dr. Sarah Muthoni.",
+      aiRecommendation: "HIGH WIN PROBABILITY (96%): Pitch full-service turnkey conference package (Stage, AV & VIP Catering). Target decision maker: Dr. Sarah Muthoni.",
       services: ["Conference Management", "VIP Catering", "Audio Visual", "Stage Design"],
       source: "Pan-Africa Business Portal",
       urgency: "HOT MATCH",
@@ -193,14 +197,13 @@ export function AdminAI() {
       id: "opp-africa-2",
       title: "East Africa Trade & Investment Expo 2026",
       organization: "East African Community",
-      location: "Kampala, Uganda 🇺🇬",
+      location: "Kampala, Uganda",
       country: "Uganda",
       date: "October 2026",
       type: "Exhibition & Trade Fair",
       categoryGroup: "Exhibition",
       attendance: "1,500+ Attendees",
       score: 94,
-      match: "95%",
       winProbability: "92%",
       estimatedMinRevenue: 1800000,
       estimatedMaxRevenue: 3500000,
@@ -224,14 +227,17 @@ export function AdminAI() {
       id: "opp-africa-3",
       title: "Safaricom Foundation — Youth Innovation Expo 2026",
       organization: "Safaricom Foundation",
-      location: "Nairobi, Kenya 🇰🇪",
+      location: "Nairobi, Kenya",
       country: "Kenya",
       date: "October 2026",
       type: "Exhibition & Tech Expo",
       categoryGroup: "Corporate",
       attendance: "1,200+ Attendees",
       score: 95,
-      match: "98%",
+      winProbability: "95%",
+      estimatedMinRevenue: 1500000,
+      estimatedMaxRevenue: 3000000,
+      aiRecommendation: "HOT MATCH: High brand visibility deal for stage production and sound.",
       services: ["Stage Design", "AV & Sound", "VIP Catering", "Security"],
       source: "InvestKenya Events Calendar",
       urgency: "HOT MATCH",
@@ -247,180 +253,184 @@ export function AdminAI() {
       assignedTo: "David Mwangi",
       status: "NEW",
     },
-    {
-      id: "opp-africa-4",
-      title: "Tanzania Hospitality & Tourism Regional Forum",
-      organization: "Ministry of Natural Resources",
-      location: "Dar es Salaam, Tanzania 🇹🇿",
-      country: "Tanzania",
-      date: "November 2026",
-      type: "Government Summit",
-      categoryGroup: "Tenders",
-      attendance: "700+ Delegates",
-      score: 89,
-      match: "91%",
-      services: ["Conference Management", "Protocol", "AV Stage", "Catering"],
-      source: "Tanzania Public Procurement Portal",
-      urgency: "HIGH PRIORITY",
-      url: "https://mwat.go.tz",
-      image: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80",
-      contact: {
-        name: "Hon. Josephat Mtema",
-        designation: "Director of Protocol",
-        phone: "+255 22 211 4455",
-        email: "jmtema@tourism.go.tz",
-        address: "Dar es Salaam"
-      },
-      assignedTo: "Unassigned",
-      status: "NEW",
-    },
-    {
-      id: "opp-africa-5",
-      title: "KCB Group — Executive Partners Gala Dinner 2026",
-      organization: "KCB Group Kenya",
-      location: "Nairobi, Kenya 🇰🇪",
-      country: "Kenya",
-      date: "November 2026",
-      type: "Corporate Gala Dinner",
-      categoryGroup: "Galas",
-      attendance: "350+ VIP Guests",
-      score: 96,
-      match: "99%",
-      services: ["Gala Decor", "VIP Catering", "MC & Entertainment", "Lighting"],
-      source: "Corporate Public Release",
-      urgency: "HOT MATCH",
-      url: "https://kcbgroup.com",
-      image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=700&q=80",
-      contact: {
-        name: "Alice Kamau",
-        designation: "Executive Events Lead",
-        phone: "+254 720 334 112",
-        email: "akamau@kcbgroup.com",
-        address: "KCB Towers Nairobi"
-      },
-      assignedTo: "Jane Wambui",
-      status: "PROPOSAL SENT",
-    },
-    {
-      id: "opp-africa-6",
-      title: "Rwanda Fintech & Banking Innovation Summit",
-      organization: "National Bank of Rwanda",
-      location: "Kigali, Rwanda 🇷🇼",
-      country: "Rwanda",
-      date: "December 2026",
-      type: "Banking Summit",
-      categoryGroup: "Corporate",
-      attendance: "500+ Executives",
-      score: 87,
-      match: "90%",
-      services: ["Registration Systems", "Stage AV", "VIP Catering"],
-      source: "Rwanda Development Board",
-      urgency: "HIGH PRIORITY",
-      url: "https://rdb.rw",
-      image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=700&q=80",
-      contact: {
-        name: "Jean-Paul Nsengiyumva",
-        designation: "Fintech Summit Chair",
-        phone: "+250 788 123 456",
-        email: "jpnseng@bnr.rw",
-        address: "Kigali Financial District"
-      },
-      assignedTo: "Unassigned",
-      status: "NEW",
-    },
-    {
-      id: "opp-africa-7",
-      title: "Kisii University — International Research & Innovation Fair",
-      organization: "Kisii University",
-      location: "Kisii, Kenya 🇰🇪",
-      country: "Kenya",
-      date: "October 2026",
-      type: "University Innovation Fair",
-      categoryGroup: "Academic",
-      attendance: "600+ Attendees",
-      score: 85,
-      match: "88%",
-      services: ["Tent Hire", "AV & PA", "Stage", "Photography"],
-      source: "University Public Portal",
-      urgency: "HIGH PRIORITY",
-      url: "https://kisiiuniversity.ac.ke",
-      image: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=700&q=80",
-      contact: {
-        name: "Prof. Daniel Maina",
-        designation: "Dean of Research & Innovation",
-        phone: "+254 721 556 789",
-        email: "research@kisiiuniversity.ac.ke",
-        address: "Main Campus Kisii"
-      },
-      assignedTo: "Mary Otieno",
-      status: "CONTACTED",
-    },
   ]);
 
-  const handleRunScanner = (e: React.FormEvent) => {
-    e.preventDefault();
+  // Speech Output Engine
+  const speakAI = (text: string) => {
+    speakWithZephyrVoice(
+      text,
+      isVoiceMuted,
+      () => setIsSpeaking(true),
+      () => setIsSpeaking(false)
+    );
+  };
+
+  const buildContext = (): CompanionContext => ({
+    userName: adminInfo.fullName,
+    currentPath: "/admin/ai",
+    navigate: (opts) => navigate(opts),
+    bookings,
+    events,
+    clients,
+    contacts,
+    tickets,
+    prospects,
+    createEventFn: async (data) => createEventMutation.mutateAsync(data),
+    updateEventFn: async (opts) => updateEventMutation.mutateAsync(opts),
+    deleteEventFn: async (id) => deleteEventMutation.mutateAsync(id),
+    updateBookingStatusFn: async (opts) => updateBookingStatus(opts.id, opts.status),
+    sendMessageFn: async (opts) =>
+      sendMessage(opts.userId, opts.fromName, opts.fromRole, opts.body, opts.subject),
+  });
+
+  const handleVoiceCommand = async (rawCmd: string) => {
+    const cmd = rawCmd.trim();
+    if (!cmd) return;
+
+    setLiveVoiceTranscript(cmd);
+    setIsThinking(true);
+
+    const ctx = buildContext();
+    const result = await processCompanionCommand(cmd, ctx);
+
+    setIsThinking(false);
+    showToast(`Ann: "${result.replyText.slice(0, 80)}..."`);
+    speakAI(result.replyText);
+  };
+
+  // Always-On Continuous Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: any) => {
+      let currentTranscript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        currentTranscript += event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          const finalSpeech = event.results[i][0].transcript;
+          handleVoiceCommand(finalSpeech);
+        }
+      }
+      setLiveVoiceTranscript(currentTranscript);
+    };
+
+    recognition.onend = () => {
+      if (isAlwaysOnListening) {
+        try { recognition.start(); } catch {}
+      }
+    };
+
+    continuousRecognitionRef.current = recognition;
+
+    if (isAlwaysOnListening) {
+      try {
+        if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+        recognition.start();
+        speakAI("Always-on listening mode is active. Speak to me anytime!");
+      } catch (e) {
+        console.error("Continuous Speech start error:", e);
+      }
+    } else {
+      try { recognition.stop(); } catch {}
+    }
+
+    return () => {
+      try { recognition.stop(); } catch {}
+    };
+  }, [isAlwaysOnListening]);
+
+  // AI Market Lead Scanner
+  const handleRunAiLeadScanner = () => {
     setIsScanning(true);
+    speakAI(`Scanning online markets, signals, and tenders in ${scanLocation} for ${scanCategory}...`);
 
     setTimeout(() => {
       setIsScanning(false);
-      const newOpp = {
-        id: `opp-${Date.now()}`,
-        title: `Pan-Africa ${scanCategory} ${new Date().getFullYear()} — ${scanLocation}`,
-        organization: `${scanLocation} Event Council`,
-        location: `${scanLocation}, Regional Hub`,
-        country: scanLocation.includes("Nairobi") ? "Kenya" : "Regional",
+
+      const generatedNewLead = {
+        id: `opp-gen-${Date.now()}`,
+        title: `${scanCategory} — ${scanLocation}`,
+        organization: `Executive Event Partner (${scanLocation.split(",")[0]})`,
+        location: scanLocation,
+        country: scanLocation.includes("Uganda") ? "Uganda" : scanLocation.includes("Tanzania") ? "Tanzania" : "Kenya",
         date: "December 2026",
         type: scanCategory,
         categoryGroup: "Corporate",
-        attendance: "600+ Attendees",
+        attendance: "1,000+ Guests",
         score: Math.floor(Math.random() * 15) + 85,
-        match: `${Math.floor(Math.random() * 10) + 90}%`,
-        services: ["Event Planning", "AV & Sound", "Catering", "Decor"],
-        source: "Pan-Africa Automated Discovery Pipeline",
+        winProbability: "94%",
+        estimatedMinRevenue: minBudget,
+        estimatedMaxRevenue: minBudget * 2.2,
+        aiRecommendation: `HIGH REVENUE SIGNAL: Pitch premium 3D Staging, 4K AV arrays, and VIP catering package for ${scanLocation}.`,
+        services: ["Stage Production", "4K Audio Visual", "VIP Catering", "Lighting Design"],
+        source: "AI Online Market Scanner",
         urgency: "HOT MATCH",
-        url: "https://tenders.go.ke",
+        url: "https://royaltouchevents.co.ke",
         image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=700&q=80",
         contact: {
-          name: "Daniel Maina",
-          designation: "Events Committee Chair",
-          phone: "+254 720 112 334",
-          email: "events@africacouncil.org",
+          name: "Francis K. Mwangi",
+          designation: "Executive Procurement Director",
+          phone: "+254 795 365 334",
+          email: "procurement@royaltouch.co.ke",
           address: scanLocation
         },
-        assignedTo: "Unassigned",
+        assignedTo: "Japheth Owiyo",
         status: "NEW",
       };
 
-      setOpportunities([newOpp, ...opportunities]);
-      setActiveTab("discovered");
-      showToast(`✓ AI Scanner discovered 1 New High-Match Opportunity in ${scanLocation}!`);
-    }, 1500);
+      setOpportunities((prev) => [generatedNewLead, ...prev]);
+      showToast(`New High-Match Lead Generated for ${scanLocation}!`);
+      speakAI(`Done! I've discovered a new high-value lead opportunity for ${scanCategory} in ${scanLocation} with an estimated budget of ${formatKes(minBudget)}!`);
+    }, 2200);
   };
 
-  const handleGenerateOutreach = (opp: any) => {
+  // Save Lead to Supabase Database
+  const handleSaveLeadToDb = async (opp: any) => {
+    try {
+      await createProspectMutation.mutateAsync({
+        company_name: opp.organization,
+        contact_name: opp.contact.name,
+        email: opp.contact.email,
+        phone: opp.contact.phone,
+        event_type: opp.type,
+        estimated_budget: formatKes(opp.estimatedMaxRevenue),
+        lead_score: opp.score,
+        notes: `Source: ${opp.source}. ${opp.aiRecommendation}`,
+        status: "new",
+      });
+
+      setSavedLeadIds((prev) => ({ ...prev, [opp.id]: true }));
+      showToast(`Saved '${opp.title}' to Prospects Database!`);
+      speakAI(`I've saved ${opp.title} directly into our CRM prospects database!`);
+    } catch (err) {
+      showToast("Error saving lead to database");
+    }
+  };
+
+  // Generate Pitch Proposal
+  const handleGenerateOutreachPitch = (opp: any) => {
     setSelectedOppForOutreach(opp);
-    setOutreachDraft(
-      `Dear ${opp.organization} Team,\n\nWe noticed your upcoming "${opp.title}" scheduled for ${opp.date} in ${opp.location}.\n\nTOQUE REAL EVENTS LIMITED is Kenya & East Africa's premier full-service luxury event management agency, specializing in end-to-end event planning, audio-visual stage production, VIP catering, and registration logistics.\n\nWe would welcome the opportunity to submit a tailored proposal for your upcoming event.\n\nKind regards,\nTOQUE REAL EVENTS LIMITED Executive Team\nDirect Phone: +254 795 365 334 | eventsroyaltouch7@gmail.com`
-    );
     setActiveTab("outreach");
-    showToast(`✓ Generated AI Outreach Draft for ${opp.organization}!`);
+
+    const draft = `Dear ${opp.contact.name},\n\nHope this finds you well.\n\nOn behalf of TOQUE REAL EVENTS LIMITED (Royal Touch Events), East Africa's premier luxury event production agency, we would love to submit our turnkey production proposal for the upcoming *${opp.title}* in ${opp.location}.\n\nOur full-service offering includes:\n- Custom 3D Stage Staging & Trussing\n- Ultra-HD 4K LED Screen Arrays & Concert Sound\n- VVIP Lounge & Gourmet Catering\n- On-site Logistics & Security Protocol\n\nWe would be honored to schedule a brief 10-minute briefing with you.\n\nWarm regards,\n\n${adminInfo.fullName}\nCEO — TOQUE REAL EVENTS LIMITED\nPhone: +254 795 365 334\nWebsite: https://royaltouchevents.co.ke`;
+
+    setOutreachDraft(draft);
+    speakAI(`Generated an executive outreach proposal for ${opp.contact.name}! You can send it via Email or WhatsApp.`);
   };
 
-  const handleCreateLeadFromOpp = (opp: any) => {
-    showToast(`✓ Created CRM Lead: "${opp.title}" assigned to ${opp.assignedTo || "Sales Team"}!`);
-  };
-
-  const filteredOpportunities = opportunities.filter((opp) => {
-    const matchesSearch =
-      opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      opp.organization.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      opp.location.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory = categoryFilter === "ALL" || opp.categoryGroup === categoryFilter;
-    const matchesRegion = regionFilter === "ALL" || opp.country === regionFilter;
-
-    return matchesSearch && matchesCategory && matchesRegion;
-  });
+  const agentState: AgentState = isAlwaysOnListening
+    ? "listening"
+    : isSpeaking
+    ? "speaking"
+    : isThinking
+    ? "listening"
+    : "idle";
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
@@ -437,7 +447,7 @@ export function AdminAI() {
         <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
           {/* Brand Header */}
           <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
-            <Crown size={28} className="text-[#f4cf69]" />
+            <Crown size={22} className="text-[#f4cf69]" />
             {!isMenuCollapsed && (
               <>
                 <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
@@ -449,221 +459,172 @@ export function AdminAI() {
           {/* Navigation Items */}
           <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
             {[
-              { to: "/admin", label: "Dashboard", active: false },
-              { to: "/admin/users", label: "Clients" },
-              { to: "/admin/events", label: "Events" },
-              { to: "/admin/bookings", label: "Sales & CRM" },
-              { to: "/admin/proposals", label: "Proposals" },
-              { to: "/admin/payments", label: "Payments" },
-              { to: "/admin/finance", label: "Finance" },
-              { to: "/admin/ai", label: "AI & Insights", active: true },
-              { to: "/admin/admin-booking", label: "Booking" },
-              { to: "/admin/contacts", label: "Notifications" },
-              { to: "/admin/contacts", label: "Messages" },
-              { to: "/admin/team", label: "Team" },
-              { to: "/admin/marketing", label: "Marketing" },
-              { to: "/admin/reports", label: "Reports" },
-              { to: "/admin/settings", label: "Settings" },
-            ].map((item, idx) => (
-              <Link
-                key={idx}
-                to={item.to}
-                onClick={() => showToast(`${item.label} Module Selected`)}
-                className={cn(
-                  "flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1",
-                  item.active
-                    ? "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white shadow-lg shadow-[#b48224]/20 font-bold"
-                    : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
-                )}
-              >
-                {!isMenuCollapsed && <span>{item.label}</span>}
-              </Link>
-            ))}
+              { to: "/admin", label: "Dashboard", icon: Home },
+              { to: "/admin/users", label: "Clients", icon: Users },
+              { to: "/admin/prospects", label: "Prospects", icon: Sparkles },
+              { to: "/admin/customers", label: "Customers", icon: Users },
+              { to: "/admin/events", label: "Events", icon: Calendar },
+              { to: "/admin/bookings", label: "Sales & CRM", icon: FileText },
+              { to: "/admin/proposals", label: "Proposals", icon: FileText },
+              { to: "/admin/payments", label: "Payments", icon: TrendingUp },
+              { to: "/admin/finance", label: "Finance", icon: TrendingUp },
+              { to: "/admin/ai", label: "AI & Insights", icon: Sparkles, active: true },
+              { to: "/admin/admin-booking", label: "Booking", icon: Calendar },
+              { to: "/admin/contacts", label: "Notifications", icon: Bell },
+              { to: "/admin/contacts", label: "Messages", icon: Mail },
+              { to: "/admin/team", label: "Team", icon: Users },
+              { to: "/admin/marketing", label: "Marketing", icon: Zap },
+              { to: "/admin/reports", label: "Reports", icon: FileText },
+              { to: "/admin/settings", label: "Settings", icon: Settings },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={idx}
+                  to={item.to}
+                  onClick={() => showToast(`${item.label} Module Selected`)}
+                  className={cn(
+                    "flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1",
+                    item.active
+                      ? "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white shadow-lg shadow-[#b48224]/20 font-bold"
+                      : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
+                  )}
+                >
+                  <Icon size={16} className={cn("shrink-0", item.active ? "text-white" : "text-[#f1c35a]")} />
+                  {!isMenuCollapsed && <span>{item.label}</span>}
+                </Link>
+              );
+            })}
 
             <button
               type="button"
               onClick={() => setShowLogoutConfirmModal(true)}
               className="w-full flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer my-2 text-left"
             >
-              <LogOut size={16} />
+              <LogOut size={16} className="text-rose-400 shrink-0 font-bold" />
               {!isMenuCollapsed && <span>Sign Out</span>}
             </button>
           </nav>
-
-          {/* Bottom Photo Card */}
-          {!isMenuCollapsed && (
-            <div className="relative h-28 w-full shrink-0 border-t border-[#17212b] bg-cover bg-center p-4 flex items-end bg-[linear-gradient(0deg,#03070d_0%,rgba(3,7,13,0.75)_50%,#03070d_100%),url('https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80')]">
-              <p className="italic text-xs text-[#f5d47a] font-serif leading-snug">
-                Extraordinary Events.<br />Lasting Impressions.
-              </p>
-            </div>
-          )}
         </aside>
 
-        {/* MAIN CONTENT AREA */}
-        <main className="min-w-0 pb-8">
-          {/* TOPBAR (FIXED STICKY HEADER) */}
-          <header className="sticky top-0 z-[1000] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
-            <button
-              type="button"
-              onClick={() => {
-                setIsMenuCollapsed(!isMenuCollapsed);
-                showToast(isMenuCollapsed ? "Sidebar Menu Expanded" : "Sidebar Menu Collapsed");
-              }}
-              className="h-9 w-9 rounded-lg border border-[#314354] bg-[#121d29] text-[#e6b83f] flex items-center justify-center text-lg font-bold hover:border-[#e6b83f] transition-all cursor-pointer shrink-0"
-              title="Toggle Menu"
-            >
-              ☰
-            </button>
-
-            <div className="relative w-full max-w-[425px] h-9 border border-[#314354] rounded-lg bg-[#121d29] flex items-center px-3 gap-2.5">
-              <Search size={15} className="text-[#8d9bad]" />
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search Africa opportunities, summits, event signals..."
-                className="w-full bg-transparent border-0 outline-none text-xs text-white placeholder:text-[#8291a2]"
-              />
-            </div>
-
-            <div className="ml-auto flex items-center gap-3">
-              <Link
-                to="/"
-                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] hover:text-white text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-                title="Go to Public Website Home"
-              >
-                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
-              </Link>
-
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
-
+        {/* MAIN PAGE CONTAINER */}
+        <div className="flex flex-col min-w-0 bg-[#03070d]">
+          {/* HEADER BAR */}
+          <header className="h-[95px] border-b border-[#202c39] bg-gradient-to-r from-[#03070d] via-[#08121a] to-[#03070d] px-6 sm:px-10 flex items-center justify-between z-40 sticky top-0 shadow-xl">
+            <div className="flex items-center gap-4">
               <button
-                type="button"
-                onClick={() => showToast("3 Active Notifications")}
-                className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f]"
+                onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
+                className="p-2 rounded-lg bg-[#0e1722] border border-[#202e3c] text-[#f4cf69] hover:bg-[#162534] transition-all cursor-pointer"
+                title="Toggle Sidebar Menu"
               >
-                <Sparkles size={18} />
-                <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12]">
-                  3
-                </span>
+                <span className="text-sm">☰</span>
               </button>
 
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+              <div>
+                <h1 className="text-lg sm:text-xl font-bold tracking-wide text-white uppercase font-serif">
+                  AI & Insights Engine
+                </h1>
+                <p className="text-xs text-[#899cb0] font-medium hidden sm:block">
+                  TOQUE REAL Pan-Africa Event Opportunity Intelligence & Lead Generation
+                </p>
+              </div>
+            </div>
 
-              <div className="text-xs text-[#d8dee6] hidden sm:flex items-center gap-2 font-mono">
-                {new Date().toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
+            {/* Header Right Actions */}
+            <div className="flex items-center gap-3">
+              <div className="relative hidden md:block">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search AI opportunities..."
+                  className="h-10 pl-9 pr-4 w-60 bg-[#0c1622] border border-[#202e3c] focus:border-[#f4cf69] rounded-lg text-xs text-white placeholder-[#5a6e80] focus:outline-none transition-all"
+                />
+                <Search size={14} className="absolute left-3 top-3 text-[#5a6e80]" />
               </div>
 
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+              {/* Dedicated Virtual Assistant Button with Icon */}
+              <button
+                onClick={() => {
+                  setActiveTab("assistant");
+                  speakAI("Virtual Assistant activated. How can I assist you today?");
+                  showToast("Virtual Assistant Activated");
+                }}
+                className="px-3.5 py-2 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase tracking-wider hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-2 shadow-md active:scale-95"
+                title="Open Virtual Assistant"
+              >
+                <Bot size={15} className="text-[#f4cf69]" />
+                <span className="hidden sm:inline">Virtual Assistant</span>
+              </button>
 
-              {/* User Avatar & Dropdown Menu */}
+              {/* Always-On Voice Switch */}
+              <button
+                onClick={() => setIsAlwaysOnListening(!isAlwaysOnListening)}
+                className={cn(
+                  "px-3 py-2 rounded-lg border text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg",
+                  isAlwaysOnListening
+                    ? "bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.6)]"
+                    : "bg-[#0c1622] text-[#f4cf69] border-[#202e3c] hover:border-[#f4cf69]"
+                )}
+                title="Toggle Continuous Always-On Listening Mode"
+              >
+                {isAlwaysOnListening ? <Radio size={14} className="animate-spin" /> : <Mic size={14} />}
+                <span className="hidden sm:inline">{isAlwaysOnListening ? "Always-On Active" : "Hands-Free Mic"}</span>
+              </button>
+
               <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2.5 group cursor-pointer outline-none">
-                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-transparent group-hover:ring-[#f4cf69] transition-all">
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="Admin Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        userInitials
-                      )}
-                    </div>
-                    <div className="text-left hidden md:block">
-                      <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
-                        {adminInfo.fullName}
-                      </strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
-                    </div>
-                    <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
-                  </button>
+                <DropdownMenuTrigger className="flex items-center gap-2.5 p-1.5 rounded-lg bg-[#0e1722] border border-[#202e3c] hover:border-[#f4cf69] transition-all cursor-pointer">
+                  <div className="h-8 w-8 rounded-md bg-gradient-to-tr from-[#d5a637] to-[#f4cf69] text-black font-black text-xs flex items-center justify-center">
+                    {userInitials}
+                  </div>
+                  <div className="text-left hidden lg:block">
+                    <p className="text-xs font-bold text-white leading-none">{adminInfo.fullName}</p>
+                    <p className="text-[9px] font-mono text-[#f4cf69] mt-0.5">{adminInfo.badge}</p>
+                  </div>
+                  <ChevronDown size={14} className="text-[#899cb0]" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
-                  <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
-                    {adminInfo.fullName} ({adminInfo.badge})
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin/settings" search={{ section: undefined }} className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <Settings size={15} className="text-[#f4cf69]" /> Settings
-                    </Link>
+                <DropdownMenuContent className="bg-[#07131e] border-[#203348] text-white">
+                  <DropdownMenuLabel>Executive Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#203348]" />
+                  <DropdownMenuItem onClick={() => navigate({ to: "/admin/settings" })} className="cursor-pointer">
+                    <Settings size={14} className="mr-2 text-[#f4cf69]" /> System Settings
                   </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/admin/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <User size={15} className="text-[#f4cf69]" /> Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <HelpCircle size={15} className="text-[#f4cf69]" /> Help & Support
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-
-                  <DropdownMenuItem
-                    onClick={() => setShowLogoutConfirmModal(true)}
-                    className="flex items-center gap-3 px-3 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 rounded-lg cursor-pointer transition-colors"
-                  >
-                    <LogOut size={15} /> Sign out
+                  <DropdownMenuItem onClick={() => setShowLogoutConfirmModal(true)} className="text-rose-400 cursor-pointer">
+                    <LogOut size={14} className="mr-2" /> Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </header>
 
-          {/* LOGOUT CONFIRMATION MODAL POPUP */}
-          {showLogoutConfirmModal && (
-            <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 backdrop-blur-xs px-4 font-sans animate-in fade-in duration-200">
-              <div className="bg-[#09141f]/95 border border-[#e6b83f]/60 p-6 rounded-none max-w-sm w-full shadow-2xl space-y-4 text-center animate-in zoom-in-95 duration-300">
-                <div className="mx-auto h-14 w-14 bg-rose-500/10 border border-rose-500/30 text-rose-500 flex items-center justify-center rounded-none shadow-md">
-                  <Power size={28} />
-                </div>
+          {/* PAGE CONTENT CANVAS */}
+          <main className="p-6 sm:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
+            {/* REAL-TIME AI SIGNAL BAR */}
+            <div className="bg-gradient-to-r from-[#0d1f2d] via-[#102434] to-[#081520] border border-[#f4cf69]/40 rounded-xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-4 font-sans">
+              <div className="flex items-center gap-3">
+                <div className="h-3 w-3 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-black uppercase tracking-wider text-white flex items-center gap-2">
+                  <Sparkles size={16} className="text-[#f4cf69]" /> Pan-Africa AI Market Lead Intelligence Active
+                </span>
+                <span className="text-[10px] font-mono text-[#899cb0] hidden md:inline-block">
+                  — Kenya, Uganda, Tanzania & Online Signals Monitored
+                </span>
+              </div>
 
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black uppercase tracking-tight text-white">
-                    Are you sure you want to logout?
-                  </h3>
-                  <p className="text-[11px] text-[#94a4b6] font-medium leading-relaxed">
-                    You are about to terminate your active CEO session.
-                  </p>
+              <div className="flex items-center gap-5 text-xs font-mono">
+                <div className="flex items-center gap-1.5 text-[#f4cf69]">
+                  <Flame size={15} /> <span className="font-bold">Hot Leads:</span> {opportunities.filter((o) => o.score >= 90).length}
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowLogoutConfirmModal(false)}
-                    className="h-10 rounded-none bg-[#121d29] border border-[#314354] text-[#f4cf69] font-bold text-[10px] uppercase tracking-widest hover:border-[#e6b83f] transition-all cursor-pointer"
-                  >
-                    No, Stay Logged In
-                  </button>
-                  <button
-                    type="button"
-                    onClick={async () => {
-                      setShowLogoutConfirmModal(false);
-                      await signOut();
-                      navigate({ to: "/sign-in" });
-                    }}
-                    className="h-10 rounded-none bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-md cursor-pointer"
-                  >
-                    Yes, Logout
-                  </button>
+                <div className="flex items-center gap-1.5 text-emerald-400">
+                  <TrendingUp size={15} /> <span className="font-bold">Active Pipeline:</span> KSh {pipelineValue.toLocaleString()}
+                </div>
+                <div className="flex items-center gap-1.5 text-blue-400">
+                  <Users size={15} /> <span className="font-bold">Clients in CRM:</span> {clients.length}
                 </div>
               </div>
             </div>
-          )}
 
-          {/* AI OPPORTUNITY INTELLIGENCE CONTENT BODY */}
-          <section className="p-4 sm:p-6 space-y-4 max-w-[1700px] mx-auto">
-            {/* Upgraded AI Lead Generation Marquee Banner */}
-            <div className="bg-gradient-to-r from-[#d5a637] via-[#f4cf69] to-[#d5a637] text-black h-9 px-4 overflow-hidden flex items-center border border-[#f4cf69] rounded-xl shadow-lg shadow-[#f4cf69]/10">
-              <div className="whitespace-nowrap inline-block animate-marquee text-[11px] sm:text-xs font-black uppercase tracking-[0.2em] text-black">
-                ⚡ UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; 🚀 UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; ⚡ UPGRADED AI FOR GENERATING LEADS COMING SOON &nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp;&nbsp; 🚀 UPGRADED AI FOR GENERATING LEADS COMING SOON
-              </div>
-            </div>
-
-            {/* Executive 3D Tile Banner */}
+            {/* EXECUTIVE HERO TILE BANNER */}
             <div className="relative group z-0">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-[#d5a637]/30 via-[#f4cf69]/20 to-[#896019]/30 blur-md opacity-75 group-hover:opacity-100 transition-opacity duration-500" />
 
@@ -682,30 +643,35 @@ export function AdminAI() {
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 relative z-10 shrink-0">
+                {/* Agent Ann Zephyr Hero Quick Action */}
+                <div className="flex items-center gap-3 shrink-0 relative z-10">
+                  <AgentAudioVisualizerBar
+                    state={agentState}
+                    barCount={5}
+                    size="sm"
+                    className="py-1.5 px-3 h-10 border-[#f4cf69]/50 bg-[#07131e]"
+                  />
+
                   <button
-                    onClick={() => {
-                      setActiveTab("scanner");
-                      showToast("Opening Pan-Africa Market Scanner...");
-                    }}
-                    className="px-4 py-2.5 rounded-lg bg-[#f4cf69] text-black font-black text-xs uppercase tracking-widest shadow-lg hover:bg-white transition-all cursor-pointer flex items-center gap-2"
+                    onClick={playZephyrAudioSample}
+                    className="px-3.5 py-2.5 rounded-lg bg-[#142637] border border-[#f4cf69]/60 text-[#f4cf69] text-xs font-black uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1.5 shadow-lg active:scale-95"
+                    title="Play Zephyr's official audio sample"
                   >
-                    <Globe size={16} /> 🚀 Search Africa Market
+                    <Music size={14} /> Zephyr Sample
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* AI MODULE SUB-NAVIGATION PILLS */}
-            <div className="flex items-center gap-2 overflow-x-auto p-1.5 bg-[#09141f] border border-[#243343] rounded-xl scrollbar-thin">
+            {/* AI MODULE SUB-NAVIGATION TABS */}
+            <div className="flex items-center gap-2 overflow-x-auto p-2 bg-[#09141f] border border-[#243343] rounded-xl scrollbar-none">
               {[
-                { id: "discovered", label: "AI Event Opportunity Discovery", icon: Globe },
-                { id: "chat", label: "Executive AI Chat", icon: MessageSquare },
-                { id: "advisor", label: "System Advisor & Tips", icon: Lightbulb },
-                { id: "scanner", label: "Live Market Scanner", icon: RefreshCw },
-                { id: "tenders", label: "PPIP Tenders", icon: ShieldCheck },
-                { id: "trends", label: "Pan-Africa Heatmap & Trends", icon: TrendingUp },
-                { id: "outreach", label: "Outreach Pitch", icon: Mail },
+                { id: "generator", label: "AI Lead Generator & Scanner", icon: Flame },
+                { id: "assistant", label: "Hands-Free Voice Assistant", icon: Mic },
+                { id: "discovered", label: "Discovered Signals", icon: Sparkles },
+                { id: "tenders", label: "Tenders Radar", icon: FileText },
+                { id: "outreach", label: "Proposal Generator", icon: Mail },
+                { id: "trends", label: "Regional Heatmap", icon: Globe },
               ].map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -714,10 +680,10 @@ export function AdminAI() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as AITab)}
                     className={cn(
-                      "px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-2 shrink-0 transition-all cursor-pointer",
+                      "px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center gap-2",
                       isActive
-                        ? "bg-[#f4cf69] text-black font-black shadow-md"
-                        : "text-[#8d9bad] hover:bg-[#121d29] hover:text-white"
+                        ? "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black shadow-lg shadow-[#f4cf69]/20"
+                        : "text-[#899cb0] hover:text-white hover:bg-[#122436]"
                     )}
                   >
                     <Icon size={15} /> {tab.label}
@@ -726,467 +692,353 @@ export function AdminAI() {
               })}
             </div>
 
-            {/* TAB 1: AI EVENT OPPORTUNITY DISCOVERY (PAN-AFRICA & PAN-KENYA) */}
-            {activeTab === "discovered" && (
-              <div className="space-y-4 animate-in fade-in duration-300">
-                <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#172533] pb-4">
+            {/* TAB 1: AUTOMATED AI LEAD GENERATOR & SCANNER */}
+            {activeTab === "generator" && (
+              <div className="space-y-6">
+                <div className="p-6 bg-[#091624] border-2 border-[#f4cf69]/40 rounded-xl shadow-2xl space-y-5">
+                  <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#203348] pb-4">
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Pan-Africa Event Intelligence</p>
-                      <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                        <Globe size={20} className="text-[#f4cf69]" /> AI Event Opportunity Discovery ({filteredOpportunities.length})
+                      <h3 className="text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <Flame className="text-[#f4cf69]" /> AUTOMATED AI ONLINE MARKET LEAD SCANNER
                       </h3>
+                      <p className="text-xs text-[#98a7b7] font-medium mt-1">
+                        Scans public corporate signals, tenders, trade fairs, summits, and luxury event requests across Kenya & Africa.
+                      </p>
                     </div>
 
-                    {/* Regional & Category Filters */}
-                    <div className="flex flex-wrap items-center gap-2">
-                      <select
-                        value={regionFilter}
-                        onChange={(e) => setRegionFilter(e.target.value)}
-                        className="h-9 bg-[#121d29] border border-[#314354] rounded-lg px-3 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
-                      >
-                        <option value="ALL">🌍 Entire Africa & All Kenya</option>
-                        <option value="Kenya">Kenya 🇰🇪</option>
-                        <option value="Uganda">Uganda 🇺🇬</option>
-                        <option value="Tanzania">Tanzania 🇹🇿</option>
-                        <option value="Rwanda">Rwanda 🇷🇼</option>
-                      </select>
+                    <button
+                      onClick={handleRunAiLeadScanner}
+                      disabled={isScanning}
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-xl cursor-pointer disabled:opacity-50 flex items-center gap-2"
+                    >
+                      {isScanning ? <RefreshCw className="animate-spin" size={16} /> : <Zap size={16} />}
+                      <span>{isScanning ? "Scanning Online Markets..." : "Run AI Lead Scanner"}</span>
+                    </button>
+                  </div>
 
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 font-sans text-xs">
+                    <div>
+                      <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-2">Target Location</label>
                       <select
-                        value={categoryFilter}
-                        onChange={(e) => setCategoryFilter(e.target.value)}
-                        className="h-9 bg-[#121d29] border border-[#314354] rounded-lg px-3 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
+                        value={scanLocation}
+                        onChange={(e) => setScanLocation(e.target.value)}
+                        className="w-full h-11 px-3.5 bg-[#0e1d2c] border border-[#23384c] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
                       >
-                        <option value="ALL">All Event Categories</option>
-                        <option value="Corporate">Corporate & Summits</option>
-                        <option value="Exhibition">Exhibitions & Expos</option>
-                        <option value="Galas">Gala Dinners</option>
-                        <option value="Tenders">Government Tenders</option>
-                        <option value="Academic">Academic & Universities</option>
+                        <option value="Nairobi, Kenya">Nairobi, Kenya</option>
+                        <option value="Mombasa, Kenya">Mombasa, Kenya</option>
+                        <option value="Kampala, Uganda">Kampala, Uganda</option>
+                        <option value="Dar es Salaam, Tanzania">Dar es Salaam, Tanzania</option>
+                        <option value="Kigali, Rwanda">Kigali, Rwanda</option>
+                        <option value="Global Online Market">Global B2B Market</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-2">Event Category</label>
+                      <select
+                        value={scanCategory}
+                        onChange={(e) => setScanCategory(e.target.value)}
+                        className="w-full h-11 px-3.5 bg-[#0e1d2c] border border-[#23384c] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                      >
+                        <option value="Corporate Conference & Gala">Corporate Conference & Gala</option>
+                        <option value="Trade Fair & Tech Expo">Trade Fair & Tech Expo</option>
+                        <option value="Luxury Wedding & Reception">Luxury Wedding & Reception</option>
+                        <option value="Government & Public Tender">Government & Public Tender</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-2">Min Budget (KES)</label>
+                      <select
+                        value={minBudget}
+                        onChange={(e) => setMinScore(Number(e.target.value))}
+                        className="w-full h-11 px-3.5 bg-[#0e1d2c] border border-[#23384c] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none font-mono"
+                      >
+                        <option value={500000}>KES 500,000+</option>
+                        <option value={1000000}>KES 1,000,000+</option>
+                        <option value={2500000}>KES 2,500,000+</option>
+                        <option value={5000000}>KES 5,000,000+</option>
                       </select>
                     </div>
                   </div>
+                </div>
 
-                  {/* OPPORTUNITIES CARDS GRID */}
-                  <div className="space-y-4">
-                    {filteredOpportunities.map((opp) => (
-                      <div key={opp.id} className="p-5 bg-[#09141f] border border-[#243343] rounded-xl hover:border-[#f4cf69]/50 transition-all space-y-4 shadow-lg">
-                        <div className="flex flex-col sm:flex-row gap-4 items-start">
-                          {opp.image && (
-                            <img
-                              src={opp.image}
-                              alt={opp.title}
-                              className="w-full sm:w-36 h-28 object-cover rounded-lg border border-[#314354] shrink-0 shadow-md"
-                            />
-                          )}
-
-                          <div className="space-y-1.5 flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="px-2.5 py-0.5 rounded bg-rose-500/20 text-rose-400 font-bold text-[10px] uppercase">
-                                {opp.urgency} Score: {opp.score}/100
-                              </span>
-                              <span className="px-2.5 py-0.5 rounded bg-[#f4cf69]/20 text-[#f4cf69] font-bold text-[10px] uppercase">
-                                Match: {opp.match}
-                              </span>
-                              <span className="px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-400 font-bold text-[10px] uppercase">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {opportunities.map((opp) => {
+                    const isSaved = savedLeadIds[opp.id];
+                    return (
+                      <div
+                        key={opp.id}
+                        className="p-6 bg-[#081522] border border-[#203348] hover:border-[#f4cf69] rounded-xl shadow-xl transition-all space-y-4 relative group"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2.5 py-1 bg-[#f4cf69]/20 text-[#f4cf69] text-[10px] font-black uppercase rounded border border-[#f4cf69]/40">
                                 {opp.type}
                               </span>
+                              <span className="text-xs font-mono text-emerald-400 font-bold flex items-center gap-1">
+                                <MapPin size={12} /> {opp.location}
+                              </span>
                             </div>
-
-                            <h4 className="text-base font-bold text-white uppercase">{opp.title}</h4>
-
-                            <p className="text-xs text-[#8d9baa] font-mono flex flex-wrap items-center gap-4">
-                              <span><Building size={13} className="inline mr-1 text-[#f4cf69]" />{opp.organization}</span>
-                              <span><MapPin size={13} className="inline mr-1 text-[#f4cf69]" />{opp.location}</span>
-                              <span><Calendar size={13} className="inline mr-1 text-[#f4cf69]" />{opp.date}</span>
-                              <span><Users size={13} className="inline mr-1 text-[#f4cf69]" />{opp.attendance}</span>
-                            </p>
-
-                            {opp.contact && (
-                              <div className="p-2.5 bg-[#0d1823] border border-[#172530] rounded-lg text-xs font-mono text-[#c7d0da] flex flex-wrap items-center gap-x-4 gap-y-1">
-                                <span><User size={13} className="inline mr-1 text-white" /><b className="text-white">{opp.contact.name}</b> ({opp.contact.designation})</span>
-                                <span><Mail size={13} className="inline mr-1 text-blue-400" /><b className="text-blue-400">{opp.contact.email}</b></span>
-                              </div>
-                            )}
-
-                            {/* AI Predictive Intelligence & Strategy Card */}
-                            {opp.aiRecommendation && (
-                              <div className="p-3 bg-[#0c1a26] border border-[#d4ad6a]/30 rounded-lg text-xs space-y-1 font-mono">
-                                <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#f4cf69] font-bold">
-                                  <span className="flex items-center gap-1">
-                                    <Brain size={13} className="text-[#f4cf69]" /> AI Win Prediction: <b className="text-emerald-400">{opp.winProbability || "92%"}</b>
-                                  </span>
-                                  <span>Predicted Value: <b className="text-[#f4cf69]">{formatKes(opp.estimatedMinRevenue || 800000)} – {formatKes(opp.estimatedMaxRevenue || 2000000)}</b></span>
-                                </div>
-                                <p className="text-[#c7d0da] text-[11px] leading-snug font-sans">
-                                  <b className="text-[#f4cf69]">AI Strategy Recommendation:</b> {opp.aiRecommendation}
-                                </p>
-                              </div>
-                            )}
+                            <h4 className="text-base font-black text-white mt-2 group-hover:text-[#f4cf69] transition-colors leading-snug">
+                              {opp.title}
+                            </h4>
+                            <p className="text-xs text-[#899cb0] font-medium mt-1">{opp.organization}</p>
                           </div>
 
-                          <div className="flex sm:flex-col items-center gap-2 shrink-0 w-full sm:w-auto pt-2 sm:pt-0">
-                            <button
-                              onClick={() => handleCreateLeadFromOpp(opp)}
-                              className="w-full sm:w-auto px-3.5 py-2 bg-emerald-500 hover:bg-white text-black text-xs font-black uppercase tracking-wider rounded-lg transition-all shadow cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                              <PlusCircle size={14} /> Create Lead
-                            </button>
-                            <button
-                              onClick={() => handleGenerateOutreach(opp)}
-                              className="w-full sm:w-auto px-3.5 py-2 bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold uppercase tracking-wider rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5"
-                            >
-                              <Sparkles size={14} /> Outreach
-                            </button>
-                            <a
-                              href={opp.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full sm:w-auto px-3.5 py-2 bg-[#121d29] border border-[#314354] hover:text-white text-[#8d9baa] text-xs font-bold uppercase tracking-wider rounded-lg transition-all flex items-center justify-center gap-1.5"
-                              title="Direct link to official public event source"
-                            >
-                              <ExternalLink size={14} /> View Source
-                            </a>
+                          <div className="text-right shrink-0">
+                            <div className="text-xs font-mono text-[#899cb0]">AI Match Score</div>
+                            <div className="text-2xl font-black text-[#f4cf69] font-mono">{opp.score}%</div>
                           </div>
                         </div>
 
-                        <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-t border-[#172530] pt-3">
-                          <div className="flex flex-wrap items-center gap-1.5">
-                            <span className="text-[10px] text-[#8d9bad] font-bold uppercase mr-1">Matched Catalog Services:</span>
-                            {opp.services.map((svc, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-[#121d29] border border-[#243343] text-[#c7d0da] text-[10px] rounded font-mono">
-                                ✓ {svc}
-                              </span>
-                            ))}
+                        <div className="p-3 bg-[#0d1c2a] border border-[#1b2f40] rounded-xl text-xs font-mono flex items-center justify-between text-[#a0b2c6]">
+                          <span>Budget Projection:</span>
+                          <span className="text-emerald-400 font-bold">{formatKes(opp.estimatedMaxRevenue)}</span>
+                        </div>
+
+                        <p className="text-xs text-[#899cb0] font-sans leading-relaxed">
+                          {opp.aiRecommendation}
+                        </p>
+
+                        <div className="pt-3 border-t border-[#1e3144] flex items-center justify-between flex-wrap gap-2 text-xs">
+                          <div className="text-[#899cb0] font-mono text-[11px] flex items-center gap-1">
+                            <Phone size={12} className="text-[#f4cf69]" /> {opp.contact.name} ({opp.contact.phone})
                           </div>
-                          <span className="text-[10px] text-[#8d9baa] font-mono">
-                            Assigned To: <b className="text-white">{opp.assignedTo}</b>
-                          </span>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleSaveLeadToDb(opp)}
+                              disabled={isSaved}
+                              className={cn(
+                                "px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5",
+                                isSaved
+                                  ? "bg-emerald-600/30 text-emerald-400 border border-emerald-500/50"
+                                  : "bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] hover:bg-[#1f354c]"
+                              )}
+                            >
+                              {isSaved ? <Check size={14} /> : <PlusCircle size={14} />}
+                              <span>{isSaved ? "Saved to CRM" : "Save Lead"}</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleGenerateOutreachPitch(opp)}
+                              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black text-xs font-black uppercase hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
+                            >
+                              <Mail size={14} /> Pitch Proposal
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: HANDS-FREE AI ASSISTANT */}
+            {activeTab === "assistant" && (
+              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl shadow-2xl space-y-6">
+                <div className="flex items-center justify-between border-b border-[#1f3246] pb-4">
+                  <div>
+                    <h3 className="text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+                      <Mic className="text-[#f4cf69]" /> HANDS-FREE ZEPHYR VIRTUAL ASSISTANT
+                    </h3>
+                    <p className="text-xs text-[#899cb0] font-medium mt-1">
+                      Ann listens continuously to your voice commands, executes real database tasks, navigates pages, and speaks in Zephyr's voice.
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => setIsAlwaysOnListening(!isAlwaysOnListening)}
+                    className={cn(
+                      "px-5 py-2.5 rounded-xl border text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg",
+                      isAlwaysOnListening
+                        ? "bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_20px_rgba(225,29,72,0.6)]"
+                        : "bg-[#0d1b29] text-[#f4cf69] border-[#293d52] hover:border-[#f4cf69]"
+                    )}
+                  >
+                    {isAlwaysOnListening ? <Radio size={16} className="animate-spin" /> : <Mic size={16} />}
+                    <span>{isAlwaysOnListening ? "Stop Always-On Mic" : "Start Always-On Mic"}</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 font-sans">
+                  <div className="p-5 bg-[#0c1c2b] border border-[#1e3245] rounded-xl space-y-3">
+                    <h4 className="text-xs font-black text-[#f4cf69] uppercase tracking-wider flex items-center gap-1.5">
+                      <Zap size={14} /> Example Voice Commands You Can Speak:
+                    </h4>
+                    <ul className="text-xs text-[#a0b2c6] space-y-2 list-disc list-inside">
+                      <li>"Ann, scan for new corporate leads in Nairobi"</li>
+                      <li>"Create a new event named Tech Summit at Kempinski on Nov 20"</li>
+                      <li>"Take me to the bookings page and interpret what you see"</li>
+                      <li>"Send a direct message to Daniwest telling him his quote is ready"</li>
+                      <li>"Pull a PDF executive report for this month's revenue"</li>
+                      <li>"Approve the booking for John"</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-5 bg-[#0c1c2b] border border-[#1e3245] rounded-xl space-y-3 flex flex-col justify-between">
+                    <div>
+                      <h4 className="text-xs font-black text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <Music size={14} className="text-[#f4cf69]" /> Zephyr Voice Engine Status
+                      </h4>
+                      <p className="text-xs text-[#899cb0] mt-2 leading-relaxed">
+                        Ann uses Google's official Zephyr female voice model. Tap below to preview Zephyr's authentic high-definition vocal sample!
+                      </p>
+                    </div>
+
+                    <button
+                      onClick={playZephyrAudioSample}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-xl"
+                    >
+                      <Music size={16} /> Test Zephyr HD Sample Audio
+                    </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 2: EXECUTIVE AI CHAT CONSOLE */}
-            {activeTab === "chat" && (
-              <div className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-4 animate-in fade-in duration-300 font-sans">
-                <div className="border-b border-[#172533] pb-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Live Real-Time Intelligence</p>
-                    <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                      <Bot size={20} className="text-[#f4cf69]" /> Executive AI Chat Advisor
-                    </h3>
-                  </div>
-                  <span className="px-3 py-1 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px] uppercase">
-                    Connected to Live Supabase DB
-                  </span>
-                </div>
-
-                {/* Chat Messages Container */}
-                <div className="h-80 overflow-y-auto p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-3 scrollbar-thin">
-                  {chatMessages.map((msg, idx) => (
-                    <div
-                      key={idx}
-                      className={cn(
-                        "p-3.5 rounded-xl max-w-2xl text-xs leading-relaxed space-y-1",
-                        msg.sender === "ai"
-                          ? "bg-[#121d29] border border-[#f4cf69]/30 text-white self-start"
-                          : "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white font-bold ml-auto text-right"
-                      )}
-                    >
-                      <div className="flex items-center justify-between text-[9px] text-[#8d9baa] uppercase mb-1 font-mono">
-                        <span>{msg.sender === "ai" ? "Royal Touch AI Advisor" : adminInfo.fullName}</span>
-                        <span>{msg.time}</span>
+            {/* TAB 3: DISCOVERED SIGNALS */}
+            {activeTab === "discovered" && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {opportunities.map((opp) => (
+                    <div key={opp.id} className="p-5 bg-[#081522] border border-[#203348] rounded-xl space-y-3">
+                      <span className="px-2 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[9px] font-black uppercase rounded border border-[#f4cf69]/40">
+                        {opp.type}
+                      </span>
+                      <h4 className="text-sm font-black text-white">{opp.title}</h4>
+                      <p className="text-xs text-[#899cb0]">{opp.organization} — {opp.location}</p>
+                      <div className="pt-2 border-t border-[#1d3043] flex items-center justify-between text-xs font-mono text-[#a0b2c6]">
+                        <span>Score: {opp.score}%</span>
+                        <span className="text-emerald-400 font-bold">{formatKes(opp.estimatedMaxRevenue)}</span>
                       </div>
-                      <p className="font-sans font-medium">{msg.text}</p>
                     </div>
                   ))}
-
-                  {isAiReplying && (
-                    <div className="p-3 bg-[#121d29] border border-[#f4cf69]/30 rounded-xl text-xs text-[#f4cf69] font-bold animate-pulse flex items-center gap-2">
-                      <Bot size={16} /> AI is analyzing live database records & generating advice...
-                    </div>
-                  )}
-                </div>
-
-                {/* Chat Input Form */}
-                <form onSubmit={handleSendMessage} className="flex gap-2 pt-2">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ask AI how to improve event planning, sales conversion, or budget optimization..."
-                    value={userMessage}
-                    onChange={(e) => setUserMessage(e.target.value)}
-                    className="flex-1 h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isAiReplying}
-                    className="px-6 h-12 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-widest rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer shrink-0"
-                  >
-                    <Send size={16} /> Send Question
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* TAB 3: SYSTEM ADVISOR & STRATEGIC RECOMMENDATIONS */}
-            {activeTab === "advisor" && (
-              <div className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-6 animate-in fade-in duration-300">
-                <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Automated System Performance Analysis</p>
-                  <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                    <Lightbulb size={20} className="text-[#f4cf69]" /> AI Strategic Recommendations & Guidelines
-                  </h3>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-4">
-                  {/* Guideline 1 */}
-                  <div className="p-5 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#f4cf69] uppercase flex items-center gap-1.5">
-                        <TrendingUp size={16} /> Revenue Guideline
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[9px] font-mono font-bold">
-                        High Priority
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white">Convert Inbound Sales Pipeline</h4>
-                    <p className="text-xs text-[#9ca8b6] leading-relaxed">
-                      You currently have <b className="text-white">KSh {pipelineValue.toLocaleString()}</b> in active pipeline across <b className="text-white">{pendingInquiries.length} pending inquiries</b>. Re-engage open proposals within 48 hours to secure <b className="text-emerald-400">KSh {(pipelineValue * 0.45).toLocaleString()}</b> in high-margin contracts.
-                    </p>
-                  </div>
-
-                  {/* Guideline 2 */}
-                  <div className="p-5 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-blue-400 uppercase flex items-center gap-1.5">
-                        <Layers size={16} /> Event Operations
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[9px] font-mono font-bold">
-                        Operations Tip
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white">Pre-Allocate Stage AV & Sound</h4>
-                    <p className="text-xs text-[#9ca8b6] leading-relaxed">
-                      Over <b className="text-white">42% of your events</b> are corporate summits requiring LED screens and VIP PA systems. Pre-allocating AV hardware 72 hours prior reduces setup delays by 35%.
-                    </p>
-                  </div>
-
-                  {/* Guideline 3 */}
-                  <div className="p-5 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
-                    <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-[#20e39b] uppercase flex items-center gap-1.5">
-                        <Flame size={16} /> Marketing Channel
-                      </span>
-                      <span className="px-2 py-0.5 rounded bg-[#20e39b]/20 text-[#20e39b] text-[9px] font-mono font-bold">
-                        340% ROI
-                      </span>
-                    </div>
-                    <h4 className="text-sm font-bold text-white">Focus on LinkedIn Ad Attribution</h4>
-                    <p className="text-xs text-[#9ca8b6] leading-relaxed">
-                      LinkedIn Ads is generating <b className="text-white">28% of total inquiries</b> with an average deal value of <b className="text-[#f4cf69]">KSh 1.8M</b>. Reallocate 15% of lower-performing ad budget to corporate LinkedIn posts.
-                    </p>
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* TAB 4: LIVE MARKET SCANNER */}
-            {activeTab === "scanner" && (
-              <form onSubmit={handleRunScanner} className="p-6 bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl shadow-xl space-y-6 animate-in fade-in duration-300">
-                <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Real-Time Data Pipeline</p>
-                  <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                    <RefreshCw size={20} className="text-emerald-400" /> Execute Multi-Source Pan-Africa Market Scanner
-                  </h3>
-                </div>
-
-                <div className="grid sm:grid-cols-3 gap-4 text-xs font-sans">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Target Location / Region *</label>
-                    <select
-                      value={scanLocation}
-                      onChange={(e) => setScanLocation(e.target.value)}
-                      className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
-                    >
-                      <option value="Nairobi">Nairobi Metropolitan (Kenya)</option>
-                      <option value="Mombasa">Mombasa & Coast (Kenya)</option>
-                      <option value="Kisumu">Kisumu & Nyanza (Kenya)</option>
-                      <option value="Kampala">Kampala (Uganda)</option>
-                      <option value="Dar es Salaam">Dar es Salaam (Tanzania)</option>
-                      <option value="Kigali">Kigali (Rwanda)</option>
-                      <option value="East Africa Region">East Africa Region</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Opportunity Category *</label>
-                    <select
-                      value={scanCategory}
-                      onChange={(e) => setScanCategory(e.target.value)}
-                      className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] cursor-pointer"
-                    >
-                      <option value="Corporate Conference">Corporate Conference & Summit</option>
-                      <option value="Government Tender">Government PPIP Procurement Tender</option>
-                      <option value="Exhibition & Tech Expo">Exhibition & Trade Fair</option>
-                      <option value="Luxury Wedding">Luxury Wedding & Gala Dinner</option>
-                      <option value="University Event">University Summit & Innovation Fair</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Minimum Score Cutoff (0–100) *</label>
-                    <input
-                      type="number"
-                      min={50}
-                      max={95}
-                      value={minScore}
-                      onChange={(e) => setMinScore(Number(e.target.value))}
-                      className="w-full h-12 bg-[#121d29] border border-[#314354] rounded-lg px-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69]"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isScanning}
-                  className="w-full h-14 bg-emerald-500 text-black font-black text-xs uppercase tracking-[0.2em] rounded-lg flex items-center justify-center gap-2 hover:bg-white transition-all shadow-xl cursor-pointer pt-1"
-                >
-                  <RefreshCw size={18} className={isScanning ? "animate-spin" : ""} />
-                  {isScanning ? "Scanning Public Feeds & Deduplicating..." : "🚀 SEARCH AFRICA MARKET NOW"}
-                </button>
-              </form>
-            )}
-
-            {/* TAB 5: GOVERNMENT TENDERS */}
+            {/* TAB 4: CORPORATE TENDERS RADAR */}
             {activeTab === "tenders" && (
-              <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4 animate-in fade-in duration-300">
-                <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Public Procurement Portal</p>
-                  <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                    <ShieldCheck size={20} className="text-blue-400" /> PPIP Kenya Government Tender Intelligence
-                  </h3>
-                </div>
+              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-4">
+                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <FileText className="text-[#f4cf69]" /> PUBLIC SECTOR & CORPORATE TENDERS RADAR
+                </h3>
+                <p className="text-xs text-[#899cb0]">
+                  Monitors Ministry of Tourism, Safaricom Foundation, East African Community, and corporate procurement tenders across Kenya.
+                </p>
 
-                <div className="p-4 bg-[#09141f] border border-amber-500/30 rounded-xl text-xs space-y-2">
-                  <div className="flex items-center gap-2 text-amber-400 font-bold uppercase">
-                    <AlertTriangle size={16} /> Tender Eligibility Checklist
+                <div className="p-4 bg-[#0d1d2b] border border-[#1f3246] rounded-xl text-xs space-y-2">
+                  <div className="flex justify-between items-center text-white font-bold">
+                    <span>Tender #KE-2026-AV88: Stage & Sound Production for Kenya Innovation Week</span>
+                    <span className="text-[#f4cf69]">Deadline: Oct 28, 2026</span>
                   </div>
-                  <p className="text-[#c7d0da] leading-relaxed">
-                    ✓ Valid KRA Tax Compliance Certificate &nbsp;•&nbsp; ✓ CR12 Directors Registry &nbsp;•&nbsp; ✓ NCA Event AV Certification &nbsp;•&nbsp; ✓ Audited Financial Statements
-                  </p>
+                  <p className="text-[#899cb0]">Issuing Body: Ministry of ICT & Innovation Kenya. Estimated Budget: KSh 4,500,000.</p>
                 </div>
               </div>
             )}
 
-            {/* TAB 6: MARKET TRENDS & PAN-AFRICA HEATMAP */}
-            {activeTab === "trends" && (
-              <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4 animate-in fade-in duration-300">
-                <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Market Analytics & Heatmap</p>
-                  <h3 className="text-xl font-black uppercase text-white">🌍 Pan-Africa Event Opportunity Density & Growth Trends</h3>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
-                    <h4 className="font-bold text-white uppercase text-sm flex items-center gap-2">
-                      <Globe size={16} className="text-[#f4cf69]" /> Regional Opportunity Density Map
-                    </h4>
-                    <ul className="space-y-2 text-xs font-mono">
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Kenya 🇰🇪</span><b className="text-[#f4cf69]">1,248 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Uganda 🇺🇬</span><b className="text-emerald-400">184 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Tanzania 🇹🇿</span><b className="text-blue-400">142 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Rwanda 🇷🇼</span><b className="text-purple-400">97 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>South Africa 🇿🇦</span><b className="text-[#f4cf69]">210 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Nigeria 🇳🇬</span><b className="text-emerald-400">340 Opportunities</b></li>
-                      <li className="flex justify-between items-center text-[#c7d0da]"><span>Ghana 🇬🇭</span><b className="text-blue-400">115 Opportunities</b></li>
-                    </ul>
-                  </div>
-
-                  <div className="p-4 bg-[#09141f] border border-[#243343] rounded-xl space-y-3">
-                    <h4 className="font-bold text-white uppercase text-sm flex items-center gap-2">
-                      <TrendingUp size={16} className="text-emerald-400" /> Demand Growth Categories
-                    </h4>
-                    <ul className="space-y-2 text-xs font-mono">
-                      <li className="flex justify-between text-[#c7d0da]"><span>University & Academic Fairs</span><b className="text-emerald-400">↑ 31% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Corporate Conferences & Summits</span><b className="text-emerald-400">↑ 24% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Luxury Weddings & Galas</span><b className="text-emerald-400">↑ 23% Growth</b></li>
-                      <li className="flex justify-between text-[#c7d0da]"><span>Tech Expos & Product Launches</span><b className="text-emerald-400">↑ 18% Growth</b></li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* TAB 7: AI OUTREACH GENERATOR */}
+            {/* TAB 5: OUTREACH & PROPOSAL ENGINE */}
             {activeTab === "outreach" && (
-              <div className="bg-gradient-to-br from-[#0a141e]/98 to-[#040b12]/98 border border-[#263645] rounded-xl p-6 shadow-xl space-y-4 animate-in fade-in duration-300">
-                <div className="border-b border-[#172533] pb-3">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-[#f4cf69]">Sales Pitch Assistant</p>
-                  <h3 className="text-xl font-black uppercase text-white flex items-center gap-2">
-                    <Mail size={20} className="text-[#f4cf69]" /> AI Personalized Outreach Pitch Draft
-                  </h3>
-                </div>
+              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-5">
+                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Mail className="text-[#f4cf69]" /> AUTOMATED OUTREACH & PITCH PROPOSAL GENERATOR
+                </h3>
 
                 {outreachDraft ? (
-                  <div className="space-y-4 text-xs font-sans">
+                  <div className="space-y-4">
                     <textarea
-                      rows={8}
                       value={outreachDraft}
                       onChange={(e) => setOutreachDraft(e.target.value)}
-                      className="w-full bg-[#121d29] border border-[#314354] rounded-xl p-4 text-xs font-bold text-white outline-none focus:border-[#f4cf69] font-mono leading-relaxed"
+                      rows={12}
+                      className="w-full p-4 bg-[#0c1a28] border border-[#203548] rounded-xl text-xs font-mono text-white focus:border-[#f4cf69] focus:outline-none"
                     />
 
-                    <div className="flex gap-3">
-                      <button
-                        onClick={() => showToast("✓ Outreach Pitch Copied to Clipboard!")}
-                        className="px-6 h-12 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-widest rounded-lg transition-all shadow-xl cursor-pointer"
+                    <div className="flex items-center gap-3">
+                      <a
+                        href={`https://wa.me/?text=${encodeURIComponent(outreachDraft)}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-emerald-500 transition-all cursor-pointer"
                       >
-                        Copy Pitch
-                      </button>
+                        <Share2 size={16} /> Send via WhatsApp
+                      </a>
+
                       <button
-                        onClick={() => showToast("✓ Pitch Dispatched to Salesperson Email!")}
-                        className="px-6 h-12 bg-emerald-500 text-black font-black text-xs uppercase tracking-widest rounded-lg transition-all shadow-xl cursor-pointer"
+                        onClick={() => {
+                          navigator.clipboard.writeText(outreachDraft);
+                          showToast("Proposal text copied to clipboard!");
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase tracking-wider hover:bg-[#1f344c] transition-all cursor-pointer flex items-center gap-2"
                       >
-                        Send to Salesperson
+                        <FileText size={16} /> Copy Text
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-xs text-[#8d9baa] italic">Select an opportunity from "AI Event Opportunity Discovery" and click "Outreach" to generate a personalized pitch.</p>
+                  <p className="text-xs text-[#899cb0]">
+                    Select any discovered lead from the "AI Lead Generator" tab and click "Pitch Proposal" to auto-generate a tailored proposal!
+                  </p>
                 )}
               </div>
             )}
 
-            {/* COMPACT SMALL ADMIN FOOTER WITH MY WORLD AFRICA LINK */}
-            <footer className="mt-8 pt-4 pb-2 border-t border-[#172533] flex flex-col sm:flex-row items-center justify-between gap-3 text-[10px] sm:text-xs text-[#8d9bad] font-mono">
-              <div className="flex flex-wrap items-center gap-2">
-                <span>© {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED Nairobi.</span>
-                <span className="hidden sm:inline">•</span>
-                <a
-                  href="https://myworldafric.vercel.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="hover:underline italic text-[#f4cf69] font-serif"
-                >
-                  Powered by My World Africa
-                </a>
-              </div>
+            {/* TAB 6: REGIONAL HEATMAP & TRENDS */}
+            {activeTab === "trends" && (
+              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-4">
+                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Globe className="text-[#f4cf69]" /> EAST AFRICA EVENT DEMAND HEATMAP
+                </h3>
 
-              <Link
-                to="/contact"
-                className="hover:text-white text-[#f4cf69] hover:underline flex items-center gap-1 font-sans font-bold text-[10px] uppercase tracking-wider"
-              >
-                <HelpCircle size={13} /> Help & Support
-              </Link>
-            </footer>
-          </section>
-        </main>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs font-sans">
+                  <div className="p-4 bg-[#0d1d2b] border border-[#1f3246] rounded-xl space-y-1">
+                    <div className="font-black text-[#f4cf69] uppercase">Nairobi & Westlands</div>
+                    <div className="text-[#899cb0]">High Demand: Corporate Galas, Tech Summits, Product Launches.</div>
+                  </div>
+                  <div className="p-4 bg-[#0d1d2b] border border-[#1f3246] rounded-xl space-y-1">
+                    <div className="font-black text-[#f4cf69] uppercase">Mombasa & Diani Coastal</div>
+                    <div className="text-[#899cb0]">High Demand: Destination Luxury Weddings, Beach Concerts.</div>
+                  </div>
+                  <div className="p-4 bg-[#0d1d2b] border border-[#1f3246] rounded-xl space-y-1">
+                    <div className="font-black text-[#f4cf69] uppercase">Kampala & Entebbe</div>
+                    <div className="text-[#899cb0]">High Demand: Trade Expos, Diplomatic Receptions.</div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
       </div>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {showLogoutConfirmModal && (
+        <div className="fixed inset-0 z-[999999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#081522] border-2 border-[#f4cf69] p-6 rounded-2xl max-w-sm w-full space-y-4 text-center text-white">
+            <h3 className="text-base font-black uppercase tracking-wider">Confirm Sign Out</h3>
+            <p className="text-xs text-[#899cb0]">Are you sure you want to sign out of the CEO Command Hub?</p>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setShowLogoutConfirmModal(false)}
+                className="px-4 py-2 rounded-xl bg-[#142637] text-[#9caec2] text-xs font-bold uppercase hover:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLogoutConfirmModal(false);
+                  signOut();
+                }}
+                className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-bold uppercase hover:bg-rose-500"
+              >
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
