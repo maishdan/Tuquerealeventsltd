@@ -660,16 +660,26 @@ export function AdminAI() {
 
             {/* Header Right Actions */}
             <div className="flex items-center gap-2 sm:gap-3 shrink-0 ml-auto">
+              {/* Universal Global Search Bar */}
               <div className="relative hidden xl:block">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search AI opportunities..."
-                  className="h-10 pl-9 pr-4 w-52 lg:w-60 bg-[#0c1622] border border-[#202e3c] focus:border-[#f4cf69] rounded-lg text-xs text-white placeholder-[#5a6e80] focus:outline-none transition-all"
+                  placeholder="Search registered clients, emails, roles..."
+                  className="h-9 pl-9 pr-4 w-52 lg:w-60 bg-[#121d29] border border-[#314354] focus:border-[#f4cf69] rounded-lg text-xs text-white placeholder-[#8291a2] focus:outline-none transition-all"
                 />
-                <Search size={14} className="absolute left-3 top-3 text-[#5a6e80]" />
+                <Search size={14} className="absolute left-3 top-2.5 text-[#8d9bad]" />
               </div>
+
+              {/* Website Home Link */}
+              <Link
+                to="/"
+                className="h-9 px-3 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm hidden sm:flex"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span>Website Home</span>
+              </Link>
 
               {/* Dedicated Virtual Assistant Button with Icon */}
               <button
@@ -678,7 +688,7 @@ export function AdminAI() {
                   speakAI("Virtual Assistant activated. How can I assist you today?");
                   showToast("Virtual Assistant Activated");
                 }}
-                className="px-2.5 sm:px-3.5 py-2 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase tracking-wider hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow-md active:scale-95"
+                className="px-2.5 sm:px-3.5 py-2 h-9 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase tracking-wider hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shadow-md active:scale-95"
                 title="Open Virtual Assistant"
               >
                 <Bot size={15} className="text-[#f4cf69]" />
@@ -689,7 +699,7 @@ export function AdminAI() {
               <button
                 onClick={() => setIsAlwaysOnListening(!isAlwaysOnListening)}
                 className={cn(
-                  "px-2.5 sm:px-3 py-2 rounded-lg border text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer shadow-lg",
+                  "px-2.5 sm:px-3 h-9 rounded-lg border text-xs font-black uppercase tracking-wider flex items-center gap-1.5 sm:gap-2 transition-all cursor-pointer shadow-lg",
                   isAlwaysOnListening
                     ? "bg-rose-600 text-white border-rose-400 animate-pulse shadow-[0_0_15px_rgba(225,29,72,0.6)]"
                     : "bg-[#0c1622] text-[#f4cf69] border-[#202e3c] hover:border-[#f4cf69]"
@@ -700,9 +710,10 @@ export function AdminAI() {
                 <span className="hidden sm:inline">{isAlwaysOnListening ? "Always-On Active" : "Mic"}</span>
               </button>
 
+              {/* User Avatar Dropdown */}
               <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 p-1.5 rounded-lg bg-[#0e1722] border border-[#202e3c] hover:border-[#f4cf69] transition-all cursor-pointer">
-                  <div className="h-8 w-8 rounded-md bg-gradient-to-tr from-[#d5a637] to-[#f4cf69] text-black font-black text-xs flex items-center justify-center shrink-0">
+                <DropdownMenuTrigger className="flex items-center gap-2 h-9 px-2 rounded-lg bg-[#121d29] border border-[#314354] hover:border-[#f4cf69] transition-all cursor-pointer">
+                  <div className="h-7 w-7 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shrink-0">
                     {userInitials}
                   </div>
                   <div className="text-left hidden lg:block">
@@ -711,9 +722,9 @@ export function AdminAI() {
                   </div>
                   <ChevronDown size={14} className="text-[#899cb0] hidden sm:block" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-[#07131e] border-[#203348] text-white">
-                  <DropdownMenuLabel>Executive Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-[#203348]" />
+                <DropdownMenuContent className="bg-[#09141f] border-[#f4cf69]/40 text-white">
+                  <DropdownMenuLabel className="text-[#f4cf69]">Executive Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
                   <DropdownMenuItem onClick={() => navigate({ to: "/admin/settings" })} className="cursor-pointer">
                     <Settings size={14} className="mr-2 text-[#f4cf69]" /> System Settings
                   </DropdownMenuItem>

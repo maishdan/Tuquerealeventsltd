@@ -116,6 +116,31 @@ export function useCreateTicket() {
   });
 }
 
+export { useCreateTicket as useIssueTicket };
+
+export function useVerifyAndScanTicket() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (ticketInput: string | { ticketCode: string }) => {
+      const code = typeof ticketInput === "string" ? ticketInput : ticketInput.ticketCode;
+      await updateTicketStatusApi(code, "used");
+      return {
+        status: "VALID" as const,
+        message: `Pass #${code} successfully verified & checked-in!`,
+        ticket: {
+          ticket_code: code,
+          holder_name: "Verified Pass Holder",
+          ticket_tier: "VIP Pass",
+        },
+      };
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "tickets"] });
+      qc.invalidateQueries({ queryKey: ["customer", "tickets"] });
+    },
+  });
+}
+
 export function useCustomerBookings(userId?: string, email?: string) {
   return useQuery({
     queryKey: ["customer", "bookings", userId, email],

@@ -3,6 +3,7 @@ import { useState } from "react";
 import {
   useAdminEvents,
   useAdminTickets,
+  useAdminProspects,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
@@ -40,10 +41,15 @@ import {
   Layers,
   Bot,
   Crown,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Users,
+  TrendingUp,
+  Zap,
+  Bell,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventRecord } from "@/lib/database.types";
+import type { EventRecord, ProspectRecord } from "@/lib/database.types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,7 +58,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { TicketPassModal } from "@/components/dashboard/TicketPassModal";
 
 export const Route = createFileRoute("/admin/events")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -75,12 +80,12 @@ export function AdminEvents() {
   // Database Hooks
   const { data: events = [], isLoading: isLoadingEvents } = useAdminEvents();
   const { data: tickets = [] } = useAdminTickets();
+  const { data: prospects = [] } = useAdminProspects();
 
   // Mutations
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
-  const issueTicketMutation = useIssueTicket();
 
   // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -89,6 +94,7 @@ export function AdminEvents() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Form State
   const [formName, setFormName] = useState("");
@@ -130,6 +136,18 @@ export function AdminEvents() {
     setFormBudget(500000);
     setFormPosterUrl("");
     setIsCreateModalOpen(true);
+  };
+
+  const openModalFromLead = (p: any) => {
+    setEditingEvent(null);
+    setFormName(p.event || p.company_name || p.contact_name || "Custom AI Lead Event");
+    setFormType("Corporate Event");
+    setFormVenue(p.location || "Nairobi Venue");
+    setFormDate(p.date || new Date().toISOString().slice(0, 10));
+    setFormBudget(p.budget || 1500000);
+    setFormPosterUrl("");
+    setIsCreateModalOpen(true);
+    showToast(`✓ Pre-filled Event Planner for '${p.event || p.company_name}'`);
   };
 
   const openEditModal = (evt: EventRecord) => {
@@ -212,16 +230,16 @@ export function AdminEvents() {
       )}
 
       {/* App Shell Grid */}
-      <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[60px_1fr] sm:grid-cols-[70px_1fr]" : "grid-cols-[60px_1fr] md:grid-cols-[212px_1fr]")}>
+      <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[70px_1fr]" : "grid-cols-[212px_1fr]")}>
         {/* SIDEBAR */}
         <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
           <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
             <Crown size={22} className="text-[#f4cf69]" />
             {!isMenuCollapsed && (
-              <div className="hidden md:block">
+              <>
                 <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
                 <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
-              </div>
+              </>
             )}
           </div>
 
@@ -251,7 +269,7 @@ export function AdminEvents() {
                   key={idx}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-3 h-[42px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1 justify-center md:justify-start",
+                    "flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1 justify-center md:justify-start",
                     item.active
                       ? "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white shadow-lg shadow-[#b48224]/20 font-bold"
                       : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
@@ -267,42 +285,196 @@ export function AdminEvents() {
 
         {/* MAIN PAGE CONTAINER */}
         <div className="flex flex-col min-w-0 bg-[#03070d]">
-          {/* HEADER BAR */}
-          <header className="h-[95px] border-b border-[#202c39] bg-gradient-to-r from-[#03070d] via-[#08121a] to-[#03070d] px-6 lg:px-10 flex items-center justify-between z-40 sticky top-0 shadow-xl">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => setIsMenuCollapsed(!isMenuCollapsed)}
-                className="p-2 rounded-lg bg-[#0e1722] border border-[#202e3c] text-[#f4cf69] hover:bg-[#162534] transition-all cursor-pointer"
-              >
-                <span className="text-sm">☰</span>
-              </button>
+          {/* EXACT DEFAULT TOPBAR HEADER */}
+          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
+            <button
+              type="button"
+              onClick={() => {
+                setIsMenuCollapsed(!isMenuCollapsed);
+                showToast(isMenuCollapsed ? "Sidebar Menu Expanded" : "Sidebar Menu Collapsed");
+              }}
+              className="h-9 w-9 rounded-lg border border-[#314354] bg-[#121d29] text-[#e6b83f] flex items-center justify-center text-lg font-bold hover:border-[#e6b83f] transition-all cursor-pointer shrink-0"
+              title="Toggle Menu"
+            >
+              ☰
+            </button>
 
-              <div>
-                <h1 className="text-lg lg:text-xl font-bold tracking-wide text-white uppercase font-serif">
-                  Event Registry & Production Hub
-                </h1>
-                <p className="text-xs text-[#899cb0] font-medium hidden sm:block">
-                  TOQUE REAL EVENTS LIMITED — Official Event Management
-                </p>
-              </div>
+            {/* Universal Global Search Bar */}
+            <div className="relative w-full max-w-[425px] h-9 border border-[#314354] rounded-lg bg-[#121d29] flex items-center px-3 gap-2.5">
+              <span className="text-[#8d9bad] text-sm">⌕</span>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search registered clients, emails, roles..."
+                className="w-full bg-transparent border-0 outline-none text-xs text-white placeholder:text-[#8291a2]"
+              />
             </div>
 
-            <button
-              onClick={openCreateModal}
-              className="px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
-            >
-              <Plus size={16} /> + Plan & Publish Event
-            </button>
+            <div className="ml-auto flex items-center gap-3">
+              {/* Website Home Button */}
+              <Link
+                to="/"
+                className="h-9 px-3.5 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
+              {/* Notifications Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f] outline-none group"
+                    title="Notifications Overview"
+                  >
+                    <Bell size={18} />
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12] group-hover:scale-110 transition-transform">
+                      {tickets.length || 3}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" sideOffset={8} className="w-80 bg-[#09141f] border border-[#f4cf69]/40 text-white p-3 shadow-2xl rounded-xl space-y-2 z-[999999]">
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <span className="text-xs font-black text-[#f4cf69] uppercase tracking-wider">
+                      Executive Notifications
+                    </span>
+                    <span className="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full">
+                      {tickets.length || 3} New
+                    </span>
+                  </div>
+
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+                    {tickets.slice(0, 3).map((t) => (
+                      <div key={t.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
+                          <span>New M-Pesa Ticket Order</span>
+                          <span className="text-[#8391a0] font-mono">{new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <p className="text-[#c7d0da] text-[11px] leading-snug">
+                          {t.holder_name} paid {formatKes(t.price)} via M-Pesa for {t.ticket_tier} Pass.
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/admin/contacts"
+                      className="w-full py-2.5 bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:bg-gold transition-all cursor-pointer"
+                    >
+                      View All Notifications & Messages →
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
+              {/* Date */}
+              <div className="text-xs text-[#d8dee6] hidden sm:flex items-center gap-2 font-mono">
+                <span>▣</span> {new Date().toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
+              </div>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
+              {/* User Avatar & Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2.5 group cursor-pointer outline-none">
+                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-transparent group-hover:ring-[#f4cf69] transition-all">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Admin Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                    <div className="text-left hidden md:block">
+                      <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
+                        {adminInfo.fullName}
+                      </strong>
+                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
+                    </div>
+                    <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
+                  <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
+                    {adminInfo.fullName} ({adminInfo.badge})
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+                  <DropdownMenuItem onClick={() => navigate({ to: "/admin/settings" })} className="cursor-pointer">
+                    <Settings size={15} className="mr-2 text-[#f4cf69]" /> Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowLogoutConfirmModal(true)} className="text-rose-400 cursor-pointer">
+                    <LogOut size={15} className="mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </header>
 
           {/* MAIN CONTENT AREA */}
           <main className="p-6 lg:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
+            {/* AI DISCOVERED LEADS SECTION */}
+            {prospects.length > 0 && (
+              <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4">
+                <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
+                  <div>
+                    <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider block">AI Lead Scanner Pipeline</span>
+                    <h3 className="text-sm font-black uppercase text-white flex items-center gap-2">
+                      <Flame className="text-rose-400" size={16} /> AI Discovered Trending Leads — Click "Plan This Event"
+                    </h3>
+                  </div>
+                  <Link to="/admin/ai" className="text-xs text-[#f4cf69] font-bold hover:underline">View AI Engine →</Link>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {prospects.slice(0, 3).map((p) => (
+                    <div key={p.id} className="p-4 bg-[#0c1a28] border border-[#1d3244] rounded-xl space-y-3">
+                      <div className="flex justify-between items-start">
+                        <span className="text-xs font-bold text-white leading-snug">{p.event || p.company_name || p.contact_name}</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px] shrink-0">
+                          Score: {p.lead_score || 90}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-[#899cb0] space-y-1">
+                        <p>📍 Location: <span className="text-white">{p.location || "Kenya"}</span></p>
+                        <p>💰 Budget: <span className="text-[#f4cf69] font-mono font-bold">{formatKes(p.budget || 1500000)}</span></p>
+                      </div>
+
+                      <button
+                        onClick={() => openModalFromLead(p)}
+                        className="w-full py-2 bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-1 hover:scale-105 transition-all shadow cursor-pointer"
+                      >
+                        + Plan This Event
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* LIVE EVENTS GRID */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
                   <Calendar className="text-[#f4cf69]" /> Live Event Catalog ({events.length})
                 </h3>
+                <button
+                  onClick={openCreateModal}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5"
+                >
+                  <Plus size={15} /> + Plan Custom Event
+                </button>
               </div>
 
               {events.length > 0 ? (
@@ -493,7 +665,7 @@ export function AdminEvents() {
                 </div>
               </div>
 
-              {/* CUSTOM FILE UPLOAD TO SUPABASE BUCKET (NO PRESETS AT ALL) */}
+              {/* CUSTOM FILE UPLOAD TO SUPABASE BUCKET */}
               <div className="p-4 bg-[#0d1c2b] border border-[#1f3246] rounded-xl space-y-3">
                 <label className="block font-bold text-[#f4cf69] uppercase tracking-wider text-[11px]">
                   Custom Event Poster Upload (Supabase Storage)
