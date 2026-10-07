@@ -19,9 +19,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell, Loader2, RefreshCw } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell } from "lucide-react";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
-import { ActivityIndicator } from "@/components/common/ActivityIndicator";
 import { createPageSeo } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -50,10 +49,6 @@ export function AdminDashboard() {
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  // Activity Indicator Test Modal
-  const [spinnerSize, setSpinnerSize] = useState<"sm" | "md" | "lg" | "xl">("lg");
-  const [showFullscreenThrobber, setShowFullscreenThrobber] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -99,14 +94,6 @@ export function AdminDashboard() {
         <div className="fixed bottom-6 right-6 z-[9999] px-5 py-3 bg-[#142231] border border-[#3c4d5e] text-white text-xs font-bold shadow-2xl rounded-lg animate-in slide-in-from-bottom-4 duration-300">
           {toastMsg}
         </div>
-      )}
-
-      {/* FULLSCREEN THROBBER SPINNER TEST MODAL */}
-      {showFullscreenThrobber && (
-        <LoadingScreen
-          message="Executing Fullscreen AI Activity Indicator Test..."
-          onSkip={() => setShowFullscreenThrobber(false)}
-        />
       )}
 
       {/* App Shell Grid */}
@@ -451,50 +438,6 @@ export function AdminDashboard() {
               </button>
             </div>
 
-            {/* ACTIVITY INDICATOR / SPINNER THROBBER PREVIEW TILE */}
-            <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1f3246] pb-3">
-                <div>
-                  <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider block">Activity Indicator Engine</span>
-                  <h3 className="text-sm font-black uppercase text-white flex items-center gap-2">
-                    <Loader2 className="text-[#f4cf69] animate-spin" size={16} /> Activity Indicator / Throbber Control & Live Test
-                  </h3>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2">
-                  {(["sm", "md", "lg", "xl"] as const).map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSpinnerSize(s)}
-                      className={cn(
-                        "px-3 py-1 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer",
-                        spinnerSize === s
-                          ? "bg-[#f4cf69] text-black font-black"
-                          : "bg-[#0c1a28] text-[#899cb0] border border-[#203548] hover:text-white"
-                      )}
-                    >
-                      {s} Size
-                    </button>
-                  ))}
-
-                  <button
-                    onClick={() => setShowFullscreenThrobber(true)}
-                    className="px-3.5 py-1 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow"
-                  >
-                    Test Fullscreen Throbber →
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-6 bg-[#0c1a28] border border-[#1b2f40] rounded-xl flex flex-col items-center justify-center space-y-3">
-                <ActivityIndicator
-                  size={spinnerSize}
-                  label={`Live Activity Indicator / Throbber (${spinnerSize.toUpperCase()} Mode)`}
-                  sublabel="TOQUE REAL EVENTS LIMITED — Official Glowing Gold Orbit Throbber"
-                />
-              </div>
-            </div>
-
             {/* ROW 1: REVENUE OVERVIEW CHART, SALES PIPELINE FUNNEL & CEO QUICK ACTIONS */}
             <div className="grid lg:grid-cols-12 gap-4">
               {/* Revenue Overview Bar Chart */}
@@ -711,7 +654,7 @@ export function AdminDashboard() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="text-[#899cb0] border-b border-[#1f3246]">
+                      <tr className="text-[#899cb0] border-b border-[#172530]">
                         <th className="pb-2">Client Name</th>
                         <th className="pb-2">Email Address</th>
                         <th className="pb-2 text-right">Passes</th>
