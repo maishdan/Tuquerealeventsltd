@@ -63,7 +63,12 @@ import {
   X,
   Plus,
   Bot,
-  Calendar
+  Calendar,
+  MessageSquare,
+  Copy,
+  ExternalLink,
+  UserCheck,
+  Building
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -86,7 +91,7 @@ export const Route = createFileRoute("/admin/ai")({
   component: AdminAI,
 });
 
-type AITab = "generator" | "assistant" | "discovered" | "tenders" | "outreach" | "trends";
+type AITab = "messages" | "generator" | "assistant" | "discovered" | "tenders" | "trends";
 
 export function AdminAI() {
   const { user, profile, signOut } = useAuth();
@@ -107,7 +112,7 @@ export function AdminAI() {
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
 
-  const [activeTab, setActiveTab] = useState<AITab>("generator");
+  const [activeTab, setActiveTab] = useState<AITab>("messages");
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
@@ -119,9 +124,11 @@ export function AdminAI() {
   const [minBudget, setMinScore] = useState(1000000);
   const [isScanning, setIsScanning] = useState(false);
 
-  // Outreach Generator State
-  const [selectedOppForOutreach, setSelectedOppForOutreach] = useState<any>(null);
-  const [outreachDraft, setOutreachDraft] = useState<string | null>(null);
+  // Messages & Planner Lead Outreach State
+  const [activeTemplateType, setActiveTemplateType] = useState<"email" | "whatsapp" | "sms">("email");
+  const [selectedPlanner, setSelectedPlanner] = useState<any>(null);
+  const [customPitchText, setCustomPitchText] = useState("");
+  const [savedLeadIds, setSavedLeadIds] = useState<Record<string, boolean>>({});
 
   // Hands-Free Voice Assistant State
   const [isAlwaysOnListening, setIsAlwaysOnListening] = useState(false);
@@ -129,7 +136,6 @@ export function AdminAI() {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
   const [liveVoiceTranscript, setLiveVoiceTranscript] = useState("");
-  const [savedLeadIds, setSavedLeadIds] = useState<Record<string, boolean>>({});
 
   const continuousRecognitionRef = useRef<any>(null);
 
@@ -161,7 +167,7 @@ export function AdminAI() {
     return acc + numeric;
   }, 0);
 
-  // Discovered Opportunities Initial Dataset (Without Emojis)
+  // Discovered Opportunities & Event Planners Lead Dataset
   const [opportunities, setOpportunities] = useState([
     {
       id: "opp-africa-1",
@@ -186,7 +192,7 @@ export function AdminAI() {
       contact: {
         name: "Dr. Sarah Muthoni",
         designation: "Head of Regional Procurement",
-        phone: "+254 722 884 921",
+        phone: "+254722884921",
         email: "smuthoni@africabusiness.org",
         address: "Westlands Nairobi"
       },
@@ -216,7 +222,7 @@ export function AdminAI() {
       contact: {
         name: "Peter Musoke",
         designation: "Trade Expo Coordinator",
-        phone: "+256 701 445 889",
+        phone: "+256701445889",
         email: "pmusoke@eac.int",
         address: "Kampala City"
       },
@@ -246,7 +252,7 @@ export function AdminAI() {
       contact: {
         name: "Peter Otieno",
         designation: "Corporate Affairs Director",
-        phone: "+254 733 901 442",
+        phone: "+254733901442",
         email: "potieno@safaricom.co.ke",
         address: "Waiyaki Way Nairobi"
       },
@@ -254,6 +260,35 @@ export function AdminAI() {
       status: "NEW",
     },
   ]);
+
+  // Default Template Messages
+  const getDefaultEmailTemplate = (planner: any) => {
+    const pName = planner ? planner.contact.name : "Event Planner";
+    const title = planner ? planner.title : "Upcoming Corporate Production";
+    const loc = planner ? planner.location : "Nairobi, Kenya";
+
+    return `Subject: Turnkey Event Production Proposal — ${title}\n\nDear ${pName},\n\nHope this finds you well.\n\nOn behalf of TOQUE REAL EVENTS LIMITED (Royal Touch Events), East Africa's premier luxury event production agency, we would love to submit our turnkey production proposal for ${title} in ${loc}.\n\nOur full-service offering includes:\n- Custom 3D Stage Staging & Trussing\n- Ultra-HD 4K LED Screen Arrays & Concert Sound Systems\n- VVIP Lounge Setup & Gourmet Catering\n- On-site Event Logistics & Security Protocols\n\nWe would be honored to schedule a brief 10-minute briefing with you.\n\nWarm regards,\n\n${adminInfo.fullName}\nCEO — TOQUE REAL EVENTS LIMITED\nPhone: +254 795 365 334 | https://royaltouchevents.co.ke`;
+  };
+
+  const getDefaultWhatsAppTemplate = (planner: any) => {
+    const pName = planner ? planner.contact.name : "Planner";
+    const title = planner ? planner.title : "Upcoming Production";
+    const loc = planner ? planner.location : "Nairobi";
+
+    return `Hello ${pName}, this is ${adminInfo.fullName} from Royal Touch Events. We noticed your upcoming *${title}* in ${loc}. We specialize in high-definition stage, 4K sound & VIP catering for corporate galas in Kenya & East Africa. Would you be open to a quick 5-minute chat or proposal review? Website: https://royaltouchevents.co.ke`;
+  };
+
+  const getDefaultSmsTemplate = (planner: any) => {
+    const title = planner ? planner.title : "Event Production";
+    return `Royal Touch Events: High-production stage, AV & VIP catering for ${title}. View proposal: https://royaltouchevents.co.ke or call +254795365334.`;
+  };
+
+  // Set default selected planner on load
+  useEffect(() => {
+    if (opportunities.length > 0 && !selectedPlanner) {
+      setSelectedPlanner(opportunities[0]);
+    }
+  }, [opportunities]);
 
   // Speech Output Engine
   const speakAI = (text: string) => {
@@ -376,7 +411,7 @@ export function AdminAI() {
         contact: {
           name: "Francis K. Mwangi",
           designation: "Executive Procurement Director",
-          phone: "+254 795 365 334",
+          phone: "+254795365334",
           email: "procurement@royaltouch.co.ke",
           address: scanLocation
         },
@@ -385,6 +420,7 @@ export function AdminAI() {
       };
 
       setOpportunities((prev) => [generatedNewLead, ...prev]);
+      setSelectedPlanner(generatedNewLead);
       showToast(`New High-Match Lead Generated for ${scanLocation}!`);
       speakAI(`Done! I've discovered a new high-value lead opportunity for ${scanCategory} in ${scanLocation} with an estimated budget of ${formatKes(minBudget)}!`);
     }, 2200);
@@ -411,17 +447,6 @@ export function AdminAI() {
     } catch (err) {
       showToast("Error saving lead to database");
     }
-  };
-
-  // Generate Pitch Proposal
-  const handleGenerateOutreachPitch = (opp: any) => {
-    setSelectedOppForOutreach(opp);
-    setActiveTab("outreach");
-
-    const draft = `Dear ${opp.contact.name},\n\nHope this finds you well.\n\nOn behalf of TOQUE REAL EVENTS LIMITED (Royal Touch Events), East Africa's premier luxury event production agency, we would love to submit our turnkey production proposal for the upcoming *${opp.title}* in ${opp.location}.\n\nOur full-service offering includes:\n- Custom 3D Stage Staging & Trussing\n- Ultra-HD 4K LED Screen Arrays & Concert Sound\n- VVIP Lounge & Gourmet Catering\n- On-site Logistics & Security Protocol\n\nWe would be honored to schedule a brief 10-minute briefing with you.\n\nWarm regards,\n\n${adminInfo.fullName}\nCEO — TOQUE REAL EVENTS LIMITED\nPhone: +254 795 365 334\nWebsite: https://royaltouchevents.co.ke`;
-
-    setOutreachDraft(draft);
-    speakAI(`Generated an executive outreach proposal for ${opp.contact.name}! You can send it via Email or WhatsApp.`);
   };
 
   const agentState: AgentState = isAlwaysOnListening
@@ -663,14 +688,14 @@ export function AdminAI() {
               </div>
             </div>
 
-            {/* AI MODULE SUB-NAVIGATION TABS */}
+            {/* AI MODULE SUB-NAVIGATION TABS (WITH MESSAGES TAB) */}
             <div className="flex items-center gap-2 overflow-x-auto p-2 bg-[#09141f] border border-[#243343] rounded-xl scrollbar-none">
               {[
+                { id: "messages", label: "Messages", icon: MessageSquare },
                 { id: "generator", label: "AI Lead Generator & Scanner", icon: Flame },
                 { id: "assistant", label: "Hands-Free Voice Assistant", icon: Mic },
                 { id: "discovered", label: "Discovered Signals", icon: Sparkles },
                 { id: "tenders", label: "Tenders Radar", icon: FileText },
-                { id: "outreach", label: "Proposal Generator", icon: Mail },
                 { id: "trends", label: "Regional Heatmap", icon: Globe },
               ].map((tab) => {
                 const Icon = tab.icon;
@@ -682,7 +707,7 @@ export function AdminAI() {
                     className={cn(
                       "px-4 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer flex items-center gap-2",
                       isActive
-                        ? "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black shadow-lg shadow-[#f4cf69]/20"
+                        ? "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black shadow-lg shadow-[#f4cf69]/20 font-black"
                         : "text-[#899cb0] hover:text-white hover:bg-[#122436]"
                     )}
                   >
@@ -691,6 +716,238 @@ export function AdminAI() {
                 );
               })}
             </div>
+
+            {/* TAB: MESSAGES & DIRECT EVENT PLANNER OUTREACH HUB */}
+            {activeTab === "messages" && (
+              <div className="space-y-6">
+                {/* DEFAULT SAMPLE MESSAGES & PITCH TEMPLATES BOX */}
+                <div className="p-6 bg-[#091624] border-2 border-[#f4cf69]/40 rounded-xl shadow-2xl space-y-5">
+                  <div className="flex items-center justify-between flex-wrap gap-4 border-b border-[#203348] pb-4">
+                    <div>
+                      <h3 className="text-base font-black uppercase tracking-wider text-white flex items-center gap-2">
+                        <MessageSquare className="text-[#f4cf69]" /> DIRECT EVENT PLANNER MESSAGES & DEFAULT OUTREACH TEMPLATES
+                      </h3>
+                      <p className="text-xs text-[#98a7b7] font-medium mt-1">
+                        Select an event planner lead below to auto-generate default pitch emails, WhatsApp messages, calls, and SMS texts.
+                      </p>
+                    </div>
+
+                    {/* Template Type Selector */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setActiveTemplateType("email")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5",
+                          activeTemplateType === "email"
+                            ? "bg-[#f4cf69] text-black font-black"
+                            : "bg-[#142637] text-[#899cb0] hover:text-white"
+                        )}
+                      >
+                        <Mail size={14} /> Email
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTemplateType("whatsapp")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5",
+                          activeTemplateType === "whatsapp"
+                            ? "bg-emerald-500 text-black font-black"
+                            : "bg-[#142637] text-[#899cb0] hover:text-white"
+                        )}
+                      >
+                        <Share2 size={14} /> WhatsApp
+                      </button>
+
+                      <button
+                        onClick={() => setActiveTemplateType("sms")}
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all cursor-pointer flex items-center gap-1.5",
+                          activeTemplateType === "sms"
+                            ? "bg-blue-500 text-white font-black"
+                            : "bg-[#142637] text-[#899cb0] hover:text-white"
+                        )}
+                      >
+                        <Phone size={14} /> SMS
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* ACTIVE TEMPLATE DISPLAY & COPY CONTROLS */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs font-mono text-[#899cb0]">
+                      <span>
+                        Default Sample Message for:{" "}
+                        <strong className="text-[#f4cf69]">
+                          {selectedPlanner ? selectedPlanner.contact.name : "Event Planner"}
+                        </strong>{" "}
+                        ({selectedPlanner ? selectedPlanner.title : "Event"})
+                      </span>
+                      <span className="text-emerald-400 font-bold uppercase">{activeTemplateType} format</span>
+                    </div>
+
+                    <textarea
+                      value={
+                        activeTemplateType === "email"
+                          ? getDefaultEmailTemplate(selectedPlanner)
+                          : activeTemplateType === "whatsapp"
+                          ? getDefaultWhatsAppTemplate(selectedPlanner)
+                          : getDefaultSmsTemplate(selectedPlanner)
+                      }
+                      onChange={(e) => setCustomPitchText(e.target.value)}
+                      rows={6}
+                      className="w-full p-4 bg-[#0c1a28] border border-[#203548] rounded-xl text-xs font-mono text-white focus:border-[#f4cf69] focus:outline-none"
+                    />
+
+                    <div className="flex items-center gap-3 flex-wrap pt-1">
+                      <button
+                        onClick={() => {
+                          const txt =
+                            activeTemplateType === "email"
+                              ? getDefaultEmailTemplate(selectedPlanner)
+                              : activeTemplateType === "whatsapp"
+                              ? getDefaultWhatsAppTemplate(selectedPlanner)
+                              : getDefaultSmsTemplate(selectedPlanner);
+                          navigator.clipboard.writeText(txt);
+                          showToast("Copied sample default message to clipboard!");
+                        }}
+                        className="px-4 py-2.5 rounded-xl bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-black uppercase tracking-wider hover:bg-[#1f344c] transition-all cursor-pointer flex items-center gap-2"
+                      >
+                        <Copy size={15} /> Copy Default Template
+                      </button>
+
+                      {selectedPlanner && (
+                        <>
+                          <a
+                            href={`mailto:${selectedPlanner.contact.email}?subject=${encodeURIComponent(
+                              `Turnkey Event Production Proposal — ${selectedPlanner.title}`
+                            )}&body=${encodeURIComponent(getDefaultEmailTemplate(selectedPlanner))}`}
+                            className="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-black uppercase tracking-wider hover:bg-blue-500 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+                          >
+                            <Mail size={15} /> Send Email Directly
+                          </a>
+
+                          <a
+                            href={`https://wa.me/${selectedPlanner.contact.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                              getDefaultWhatsAppTemplate(selectedPlanner)
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-black uppercase tracking-wider hover:bg-emerald-500 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+                          >
+                            <Share2 size={15} /> Open WhatsApp Chat
+                          </a>
+
+                          <a
+                            href={`sms:${selectedPlanner.contact.phone.replace(/[^0-9]/g, "")}?body=${encodeURIComponent(
+                              getDefaultSmsTemplate(selectedPlanner)
+                            )}`}
+                            className="px-4 py-2.5 rounded-xl bg-purple-600 text-white text-xs font-black uppercase tracking-wider hover:bg-purple-500 transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+                          >
+                            <Phone size={15} /> Send SMS
+                          </a>
+
+                          <a
+                            href={`tel:${selectedPlanner.contact.phone.replace(/[^0-9]/g, "")}`}
+                            className="px-4 py-2.5 rounded-xl bg-[#182a3c] border border-emerald-500/50 text-emerald-400 text-xs font-black uppercase tracking-wider hover:bg-[#20364b] transition-all cursor-pointer flex items-center gap-2 shadow-lg"
+                          >
+                            <Phone size={15} /> Direct Call
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* VERIFIED EVENT PLANNER & CORPORATE LEAD CONTACT CARDS GRID */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-black uppercase tracking-wider text-[#f4cf69] flex items-center gap-2">
+                    <UserCheck size={16} /> VERIFIED EVENT PLANNER & PROCUREMENT DIRECTORY ({opportunities.length} LEADS)
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {opportunities.map((opp) => {
+                      const isSelected = selectedPlanner?.id === opp.id;
+                      return (
+                        <div
+                          key={opp.id}
+                          className={cn(
+                            "p-5 bg-[#081522] border rounded-xl shadow-xl transition-all space-y-4 relative cursor-pointer",
+                            isSelected
+                              ? "border-[#f4cf69] bg-[#0d1d2b] ring-2 ring-[#f4cf69]/30"
+                              : "border-[#203348] hover:border-[#f4cf69]/60"
+                          )}
+                          onClick={() => setSelectedPlanner(opp)}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <span className="px-2 py-0.5 bg-[#f4cf69]/20 text-[#f4cf69] text-[9px] font-black uppercase rounded border border-[#f4cf69]/40">
+                                {opp.type}
+                              </span>
+                              <h5 className="text-sm font-black text-white mt-2 leading-snug">{opp.title}</h5>
+                              <p className="text-xs text-[#899cb0] mt-0.5">{opp.organization}</p>
+                            </div>
+
+                            <div className="text-right shrink-0">
+                              <span className="text-xs font-mono text-emerald-400 font-bold">{formatKes(opp.estimatedMaxRevenue)}</span>
+                            </div>
+                          </div>
+
+                          {/* Contact Details Box */}
+                          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl text-xs space-y-1.5 font-sans">
+                            <div className="font-bold text-white flex items-center gap-1.5">
+                              <User size={13} className="text-[#f4cf69]" /> {opp.contact.name}
+                            </div>
+                            <div className="text-[11px] text-[#899cb0]">{opp.contact.designation}</div>
+                            <div className="text-[11px] font-mono text-emerald-400 flex items-center gap-1">
+                              <Phone size={12} /> {opp.contact.phone}
+                            </div>
+                            <div className="text-[11px] font-mono text-[#a0b2c6] flex items-center gap-1 truncate">
+                              <Mail size={12} /> {opp.contact.email}
+                            </div>
+                          </div>
+
+                          {/* Direct Action Buttons */}
+                          <div className="pt-2 border-t border-[#1e3144] flex items-center justify-between gap-2 text-xs">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPlanner(opp);
+                                setActiveTemplateType("email");
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/40 text-[#f4cf69] text-[10px] font-bold uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Mail size={12} /> Email
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPlanner(opp);
+                                setActiveTemplateType("whatsapp");
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-400 text-[10px] font-bold uppercase hover:bg-emerald-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Share2 size={12} /> WhatsApp
+                            </button>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedPlanner(opp);
+                                setActiveTemplateType("sms");
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-blue-950/80 border border-blue-500/50 text-blue-300 text-[10px] font-bold uppercase hover:bg-blue-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Phone size={12} /> SMS
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* TAB 1: AUTOMATED AI LEAD GENERATOR & SCANNER */}
             {activeTab === "generator" && (
@@ -823,10 +1080,13 @@ export function AdminAI() {
                             </button>
 
                             <button
-                              onClick={() => handleGenerateOutreachPitch(opp)}
+                              onClick={() => {
+                                setSelectedPlanner(opp);
+                                setActiveTab("messages");
+                              }}
                               className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black text-xs font-black uppercase hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
                             >
-                              <Mail size={14} /> Pitch Proposal
+                              <MessageSquare size={14} /> Send Message
                             </button>
                           </div>
                         </div>
@@ -941,52 +1201,7 @@ export function AdminAI() {
               </div>
             )}
 
-            {/* TAB 5: OUTREACH & PROPOSAL ENGINE */}
-            {activeTab === "outreach" && (
-              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-5">
-                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Mail className="text-[#f4cf69]" /> AUTOMATED OUTREACH & PITCH PROPOSAL GENERATOR
-                </h3>
-
-                {outreachDraft ? (
-                  <div className="space-y-4">
-                    <textarea
-                      value={outreachDraft}
-                      onChange={(e) => setOutreachDraft(e.target.value)}
-                      rows={12}
-                      className="w-full p-4 bg-[#0c1a28] border border-[#203548] rounded-xl text-xs font-mono text-white focus:border-[#f4cf69] focus:outline-none"
-                    />
-
-                    <div className="flex items-center gap-3">
-                      <a
-                        href={`https://wa.me/?text=${encodeURIComponent(outreachDraft)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-emerald-500 transition-all cursor-pointer"
-                      >
-                        <Share2 size={16} /> Send via WhatsApp
-                      </a>
-
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(outreachDraft);
-                          showToast("Proposal text copied to clipboard!");
-                        }}
-                        className="px-4 py-2.5 rounded-xl bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase tracking-wider hover:bg-[#1f344c] transition-all cursor-pointer flex items-center gap-2"
-                      >
-                        <FileText size={16} /> Copy Text
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-[#899cb0]">
-                    Select any discovered lead from the "AI Lead Generator" tab and click "Pitch Proposal" to auto-generate a tailored proposal!
-                  </p>
-                )}
-              </div>
-            )}
-
-            {/* TAB 6: REGIONAL HEATMAP & TRENDS */}
+            {/* TAB 5: REGIONAL HEATMAP & TRENDS */}
             {activeTab === "trends" && (
               <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-4">
                 <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
