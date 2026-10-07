@@ -110,6 +110,8 @@ export async function createTicket(input: CreateTicketInput): Promise<Ticket> {
   }
 }
 
+export { createTicket as issueTicket };
+
 export async function updateTicketStatus(ticketId: string, status: TicketStatus): Promise<boolean> {
   inMemoryTickets = inMemoryTickets.map((t) => {
     if (t.id === ticketId) {

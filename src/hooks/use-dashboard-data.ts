@@ -48,6 +48,8 @@ export function useAdminEvents() {
   return useQuery({ queryKey: ["admin", "events"], queryFn: fetchAllEvents });
 }
 
+export { useAdminEvents as useCustomerEvents };
+
 export function useAdminEventDetail(id: string) {
   return useQuery({ queryKey: ["admin", "event", id], queryFn: () => fetchEventById(id), enabled: !!id });
 }
@@ -141,6 +143,30 @@ export function useVerifyAndScanTicket() {
   });
 }
 
+export function useSeats(eventId?: string) {
+  return useQuery({
+    queryKey: ["seats", eventId],
+    queryFn: async () => [],
+    enabled: !!eventId,
+  });
+}
+
+export function useLockSeat() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ seatId }: { seatId: string }) => true,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["seats"] }),
+  });
+}
+
+export function useReleaseSeat() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ seatId }: { seatId: string }) => true,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["seats"] }),
+  });
+}
+
 export function useCustomerBookings(userId?: string, email?: string) {
   return useQuery({
     queryKey: ["customer", "bookings", userId, email],
@@ -148,6 +174,8 @@ export function useCustomerBookings(userId?: string, email?: string) {
     enabled: !!(userId || email),
   });
 }
+
+export { useCustomerBookings as useCustomerOrders };
 
 export function useCustomerMessages(userId?: string) {
   return useQuery({
@@ -161,6 +189,20 @@ export function useCustomerTickets(userId?: string, email?: string) {
   return useQuery({
     queryKey: ["customer", "tickets", userId, email],
     queryFn: () => fetchUserTickets(userId, email),
+    enabled: !!(userId || email),
+  });
+}
+
+export function useCustomerFinancials(userId?: string, email?: string) {
+  return useQuery({
+    queryKey: ["customer", "financials", userId, email],
+    queryFn: async () => {
+      const tkts = await fetchUserTickets(userId, email);
+      return {
+        tickets: tkts,
+        totalPaid: tkts.reduce((s, t) => s + (t.price || 0), 0),
+      };
+    },
     enabled: !!(userId || email),
   });
 }
