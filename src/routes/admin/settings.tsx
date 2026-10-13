@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   useAdminClients,
   useAdminEvents,
@@ -8,6 +9,8 @@ import {
   formatKes
 } from "@/hooks/use-dashboard-data";
 import { useAuth } from "@/contexts/AuthContext";
+import { resetSystemToDefault } from "@/lib/api/reset-system";
+import { FactoryResetScreen } from "@/components/common/FactoryResetScreen";
 import {
   Settings as SettingsIcon,
   Building2,
@@ -61,7 +64,9 @@ import {
   Wifi,
   FileCode,
   Layers,
-  CheckSquare
+  CheckSquare,
+  RotateCcw,
+  Factory
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -77,6 +82,7 @@ import { createPageSeo } from "@/lib/seo";
 export function AdminSettings() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
 
   const emailLower = (user?.email || profile?.email || "").toLowerCase();
   const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
@@ -105,6 +111,10 @@ export function AdminSettings() {
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+
+  // Factory System Reset States
+  const [showFactoryResetConfirm, setShowFactoryResetConfirm] = useState(false);
+  const [isResettingSystem, setIsResettingSystem] = useState(false);
 
   // Settings Form States
   const [companyName, setCompanyName] = useState("TOQUE REAL EVENTS LIMITED");
@@ -190,6 +200,21 @@ export function AdminSettings() {
     }
   };
 
+  const startFactoryResetProcess = () => {
+    setShowFactoryResetConfirm(false);
+    setIsResettingSystem(true);
+  };
+
+  const handleFinishFactoryReset = async () => {
+    await resetSystemToDefault();
+    qc.invalidateQueries();
+    setIsResettingSystem(false);
+    showToast("✓ System Factory Reset Complete! All dashboards restored to default zero state.");
+    setTimeout(() => {
+      window.location.href = "/admin";
+    }, 1000);
+  };
+
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
   return (
@@ -200,6 +225,9 @@ export function AdminSettings() {
           {toastMsg}
         </div>
       )}
+
+      {/* FACTORY RESET ANIMATED PROGRESS OVERLAY SCREEN */}
+      {isResettingSystem && <FactoryResetScreen onComplete={handleFinishFactoryReset} />}
 
       {/* App Shell Grid */}
       <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[70px_1fr]" : "grid-cols-[212px_1fr]")}>
@@ -420,7 +448,7 @@ export function AdminSettings() {
                   { id: "users_rbac", label: "Users, Profile & RBAC", icon: Users },
                   { id: "finance_tax", label: "Finance & M-Pesa", icon: DollarSign },
                   { id: "integrations", label: "APIs & Webhooks", icon: Radio },
-                  { id: "backup_data", label: "Database Backups", icon: Database },
+                  { id: "backup_data", label: "Backups & Reset", icon: Database },
                 ].map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeCategory === tab.id;
@@ -715,22 +743,79 @@ export function AdminSettings() {
               </div>
             )}
 
-            {/* CATEGORY 6: DATABASE BACKUPS */}
+            {/* CATEGORY 6: DATABASE BACKUPS & FACTORY SYSTEM RESET */}
             {activeCategory === "backup_data" && (
-              <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-4 text-xs font-sans">
-                <h3 className="text-sm font-black uppercase text-white border-b border-[#1f3246] pb-3">Automated Database Backups & RLS Verification</h3>
-                <div className="p-4 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-2">
-                  <span className="text-emerald-400 font-bold block">✓ Automated Daily Snapshot Schedule: 03:00 AM EAT</span>
-                  <p className="text-[#899cb0]">Row Level Security (RLS) is active on all 16 operational Supabase tables.</p>
+              <div className="space-y-6">
+                {/* Database Backups Card */}
+                <div className="p-6 bg-[#081522] border border-[#203348] rounded-xl space-y-4 text-xs font-sans">
+                  <h3 className="text-sm font-black uppercase text-white border-b border-[#1f3246] pb-3 flex items-center gap-2">
+                    <Database size={16} className="text-[#f4cf69]" /> Automated Database Backups & RLS Verification
+                  </h3>
+                  <div className="p-4 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-2">
+                    <span className="text-emerald-400 font-bold block">✓ Automated Daily Snapshot Schedule: 03:00 AM EAT</span>
+                    <p className="text-[#899cb0]">Row Level Security (RLS) is active on all 16 operational Supabase tables.</p>
+                  </div>
+                  <button onClick={() => showToast("✓ Triggered full PostgreSQL database backup snapshot!")} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider">
+                    Trigger Immediate Database Backup
+                  </button>
                 </div>
-                <button onClick={() => showToast("✓ Triggered full PostgreSQL database backup snapshot!")} className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider">
-                  Trigger Immediate Database Backup
-                </button>
+
+                {/* Factory Reset System Card */}
+                <div className="p-6 bg-[#081522] border-2 border-rose-500/50 rounded-xl space-y-4 text-xs font-sans">
+                  <div className="flex justify-between items-center border-b border-rose-500/30 pb-3">
+                    <h3 className="text-sm font-black uppercase text-rose-300 flex items-center gap-2">
+                      <RotateCcw size={18} className="text-rose-400" /> Factory System Reset (Reset System to Default Zero State)
+                    </h3>
+                    <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 font-mono font-bold text-[10px]">
+                      DANGER ZONE
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-[#a0b2c6] leading-relaxed">
+                    Restores all Admin and Customer Dashboards to fresh default zero state for testing. Wipes all bookings, tickets, events, proposals, contacts, and messaging logs while preserving all registered user accounts (<code className="text-[#f4cf69] font-mono">profiles</code> & <code className="text-[#f4cf69] font-mono">auth.users</code>).
+                  </p>
+
+                  <button
+                    onClick={() => setShowFactoryResetConfirm(true)}
+                    className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-xl flex items-center gap-2"
+                  >
+                    <Factory size={16} /> ⚠️ Execute Factory System Reset
+                  </button>
+                </div>
               </div>
             )}
           </div>
         </main>
       </div>
+
+      {/* FACTORY RESET CONFIRMATION MODAL */}
+      {showFactoryResetConfirm && (
+        <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#081522] border-2 border-rose-500 p-6 rounded-2xl max-w-md w-full space-y-4 text-center text-white shadow-2xl">
+            <div className="h-12 w-12 rounded-2xl bg-rose-500/20 border border-rose-500 text-rose-400 flex items-center justify-center mx-auto text-xl font-bold">
+              ⚠️
+            </div>
+            <h3 className="text-base font-black uppercase tracking-wider text-rose-300">Confirm Factory System Reset</h3>
+            <p className="text-xs text-[#a0b2c6] leading-relaxed">
+              Are you sure you want to reset the system to default zero state? This will erase all bookings, tickets, events, proposals, and logs to allow fresh testing. Registered user accounts will be kept intact.
+            </p>
+            <div className="flex items-center justify-center gap-3 pt-3">
+              <button
+                onClick={() => setShowFactoryResetConfirm(false)}
+                className="px-5 py-2.5 rounded-xl bg-[#142637] text-[#9caec2] text-xs font-bold uppercase hover:text-white cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={startFactoryResetProcess}
+                className="px-6 py-2.5 rounded-xl bg-rose-600 text-white font-black text-xs uppercase tracking-wider hover:bg-rose-500 cursor-pointer shadow-lg"
+              >
+                Yes, Execute Reset
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* LOGOUT CONFIRMATION MODAL */}
       {showLogoutConfirmModal && (
