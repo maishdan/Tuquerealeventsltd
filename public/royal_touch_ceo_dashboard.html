@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Touch Events — CEO Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#03070d;
+  --panel:#07101a;
+  --panel2:#09141f;
+  --panel3:#0d1925;
+  --line:#243343;
+  --line2:#172533;
+  --text:#f4f7fb;
+  --muted:#94a4b6;
+  --gold:#e6b83f;
+  --gold2:#a87519;
+  --gold3:#f4cf69;
+  --green:#20e39b;
+  --red:#ff5964;
+  --blue:#2c9cff;
+  --cyan:#13c7b8;
+  --purple:#9c65e9;
+  --orange:#ff9651;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text)}
+button,input{font:inherit}
+button{cursor:pointer}
+body{overflow-x:hidden}
+
+/* ---------- APP SHELL ---------- */
+.app{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:212px 1fr;
+  background:
+    radial-gradient(circle at 73% 0%,rgba(36,73,101,.13),transparent 31%),
+    linear-gradient(135deg,#02060b,#06101a 48%,#03070d);
+  transition:grid-template-columns .3s ease;
+}
+
+.app.collapsed-menu{
+  grid-template-columns:70px 1fr !important;
+}
+.app.collapsed-menu .brand-name,
+.app.collapsed-menu .brand-sub,
+.app.collapsed-menu .nav a span:not(.nav-icon),
+.app.collapsed-menu .sidebar-photo{
+  display:none !important;
+}
+.app.collapsed-menu .brand{
+  height:74px !important;
+}
+.app.collapsed-menu .brand-mark{
+  font-size:22px !important;
+}
+.app.collapsed-menu .nav a{
+  justify-content:center !important;
+  padding:0 !important;
+}
+.app.collapsed-menu .nav-icon{
+  margin:0 !important;
+}
+
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  position:sticky;top:0;height:100vh;
+  border-right:1px solid #202c39;
+  background:linear-gradient(180deg,#02070d 0%,#050b12 55%,#02060b 100%);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  z-index:60;
+}
+.brand{
+  position:sticky;top:0;z-index:10;
+  height:95px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  border-bottom:1px solid #17212b;
+  color:var(--gold3);
+  background:linear-gradient(180deg,#02070d 0%,#050b12 100%);
+  flex:none;
+}
+.brand-mark{font-size:27px;line-height:1;text-shadow:0 0 18px rgba(230,184,63,.25)}
+.brand-name{font-family:Georgia,serif;letter-spacing:2px;font-size:15px;margin-top:6px}
+.brand-sub{font-family:Georgia,serif;letter-spacing:4px;font-size:11px;margin-top:2px}
+
+.nav{
+  padding:13px 10px 20px;
+  flex:1;
+  overflow-y:auto;
+  scrollbar-width:thin;
+  scrollbar-color:#243343 #07101a;
+}
+.nav::-webkit-scrollbar{width:5px}
+.nav::-webkit-scrollbar-track{background:#07101a}
+.nav::-webkit-scrollbar-thumb{background:#243343;border-radius:4px}
+.nav::-webkit-scrollbar-thumb:hover{background:#e6b83f}
+.nav a{
+  display:flex;align-items:center;gap:13px;
+  height:43px;padding:0 13px;margin:4px 0;
+  color:#c7d0da;text-decoration:none;font-size:13px;font-weight:500;
+  border-radius:9px;transition:.2s ease;
+}
+.nav a:hover{background:#111b27;color:#fff}
+.nav a.active{
+  color:#fff;
+  background:linear-gradient(100deg,#a9741b,#d5a637 58%,#896019);
+  box-shadow:0 6px 18px rgba(180,130,36,.18),inset 0 1px rgba(255,255,255,.17);
+}
+.nav-icon{width:20px;text-align:center;font-size:17px;color:#f1c35a}
+.active .nav-icon{color:#fff}
+
+.sidebar-photo{
+  position:relative;
+  width:100%;
+  height:115px;
+  flex:none;
+  background:
+    linear-gradient(0deg,#03070d 0%,rgba(3,7,13,.75) 50%,#03070d 100%),
+    url("https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=700&q=80") center/cover;
+  border-top:1px solid #17212b;
+}
+.sidebar-photo:after{
+  content:"Extraordinary Events.\A Lasting Impressions.";
+  white-space:pre;
+  position:absolute;left:18px;bottom:12px;
+  font:italic 12px/1.3 Georgia,serif;color:#f5d47a;
+}
+
+/* ---------- MAIN ---------- */
+.main{min-width:0;padding-bottom:22px}
+.menu-toggle-btn{
+  width:38px;height:38px;border:1px solid #314354;border-radius:10px;
+  background:#121d29;color:#e6b83f;display:grid;place-items:center;
+  font-size:18px;font-weight:bold;cursor:pointer;transition:.2s ease;
+  flex:none;
+}
+.menu-toggle-btn:hover{
+  border-color:#e6b83f;background:#1a2838;
+}
+.topbar{
+  position:sticky;top:0;z-index:50;
+  height:74px;display:flex;align-items:center;gap:16px;
+  padding:0 22px;border-bottom:1px solid #202b37;
+  background:rgba(3,8,14,.95);backdrop-filter:blur(14px);
+  box-shadow:0 4px 20px rgba(0,0,0,.4);
+}
+.search{
+  width:min(425px,42vw);height:38px;border:1px solid #314354;border-radius:10px;
+  background:#121d29;display:flex;align-items:center;gap:11px;padding:0 13px;
+  color:#8d9bad;box-shadow:inset 0 1px rgba(255,255,255,.025);
+}
+.search input{border:0;outline:0;background:transparent;color:#fff;width:100%;font-size:12px}
+.search input::placeholder{color:#8291a2}
+.top-spacer{flex:1}
+.top-icon{
+  position:relative;width:37px;height:37px;display:grid;place-items:center;
+  border:0;background:transparent;color:#e8edf3;font-size:21px;
+}
+.badge{
+  position:absolute;top:0;right:1px;background:#f0444f;color:white;
+  width:18px;height:18px;border-radius:50%;display:grid;place-items:center;
+  font-size:10px;font-weight:800;border:2px solid #050b12;
+}
+.divider{height:39px;width:1px;background:#34404d}
+.date{font-size:12px;color:#d8dee6;display:flex;gap:9px;align-items:center;white-space:nowrap}
+.user{display:flex;align-items:center;gap:10px;min-width:150px}
+.avatar{
+  width:36px;height:36px;border-radius:50%;display:grid;place-items:center;
+  color:#25200f;background:#f2e8cd;font-weight:800;font-size:12px;
+}
+.user strong{font-size:12px;display:block}
+.user small{font-size:10px;color:#9ca8b6}
+.chevron{margin-left:auto;color:#9ba6b3}
+
+/* ---------- CONTENT HEADER ---------- */
+.content{padding:18px 17px 0}
+.welcome{
+  display:flex;align-items:center;gap:14px;margin:0 3px 12px;
+}
+.welcome h1{font-size:23px;margin:0 0 3px;font-weight:700;letter-spacing:-.4px}
+.welcome p{font-size:12px;color:#98a7b7;margin:0}
+.crown{color:#f1bf45;font-size:24px}
+
+/* ---------- ACTIONS ---------- */
+.actions{
+  display:flex;gap:9px;justify-content:flex-end;margin:-2px 0 18px;
+}
+.action{
+  border:1px solid #6c572b;border-radius:9px;background:linear-gradient(180deg,#171718,#0e1217);
+  color:#e9edf3;padding:10px 14px;font-size:11px;font-weight:600;
+  box-shadow:inset 0 1px rgba(255,255,255,.04);
+}
+.action:hover{border-color:#d4a43b;transform:translateY(-1px)}
+.action b{color:#efbd43;font-size:17px;margin-right:7px;vertical-align:-2px}
+
+/* ---------- CARDS ---------- */
+.kpis{
+  display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;
+}
+.card{
+  border:1px solid #263645;border-radius:11px;
+  background:linear-gradient(145deg,rgba(10,20,30,.98),rgba(4,11,18,.98));
+  box-shadow:0 8px 22px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.025);
+}
+.kpi{min-height:109px;padding:12px 10px 9px}
+.kpi-top{display:flex;align-items:center;gap:8px;color:#bdc8d4;font-size:10px}
+.kpi-icon{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  color:#f0c044;background:#19202a;border:1px solid #2a3440;font-size:18px;flex:none;
+}
+.kpi-value{font-size:17px;font-weight:700;color:#f1f4f8;margin:9px 0 6px 42px;white-space:nowrap}
+.kpi-trend{font-size:10px;margin-left:42px;white-space:nowrap}
+.up{color:var(--green)}.down{color:var(--red)}.neutral{color:#f1c045}
+.kpi-trend span{color:#8796a6;margin-left:3px}
+
+/* ---------- GRID ---------- */
+.row{display:grid;gap:9px;margin-top:10px}
+.row.one{grid-template-columns:1.28fr 1fr .86fr}
+.row.two{grid-template-columns:1.15fr .93fr .75fr .74fr}
+.row.three{grid-template-columns:1.15fr .93fr .74fr .74fr}
+
+.panel{padding:13px 12px;min-width:0}
+.panel-title{
+  display:flex;align-items:center;gap:9px;margin-bottom:11px;
+  font-size:13px;font-weight:700;
+}
+.panel-title .mini-icon{color:#f1c044;font-size:18px}
+.panel-title .link{margin-left:auto;color:#d8b45a;font-size:10px;font-weight:500}
+.panel-title .link:hover{text-decoration:underline}
+
+/* ---------- REVENUE CHART ---------- */
+.revenue{height:262px}
+.chart-wrap{display:grid;grid-template-columns:1fr 112px;gap:14px;height:205px}
+.chart{
+  position:relative;border-left:1px solid #263542;border-bottom:1px solid #263542;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 36px,#1b2a36 37px);
+  margin:2px 0 26px 37px;
+}
+.y-labels{position:absolute;left:-35px;top:-7px;height:157px;display:flex;flex-direction:column;justify-content:space-between;color:#9aa7b4;font-size:8px}
+.bars{position:absolute;inset:0 8px 0 8px;display:flex;align-items:flex-end;justify-content:space-around}
+.month{height:100%;flex:1;display:flex;align-items:flex-end;justify-content:center;gap:4px;position:relative}
+.bar{width:14px;border-radius:2px 2px 0 0;box-shadow:0 -1px 5px rgba(0,0,0,.25)}
+.bar.rev{height:var(--h);background:linear-gradient(#f0c54c,#a9761e)}
+.bar.target{height:calc(var(--h) + 15px);background:#5c7085}
+.month-label{position:absolute;bottom:-23px;color:#9ca9b6;font-size:9px}
+.line-svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.legend{position:absolute;bottom:-43px;left:8px;display:flex;gap:14px;font-size:9px;color:#a5b0bb}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;margin-right:4px;vertical-align:-1px}
+.legend .yellow{background:#f0c44a}.legend .gray{background:#66788a}.legend .green{background:#20e39b}
+.revenue-side{padding-top:6px}
+.side-label{font-size:10px;color:#a8b4c0}.side-value{font-size:16px;font-weight:700;margin:5px 0 11px}
+.donut{
+  width:82px;height:82px;border-radius:50%;
+  background:conic-gradient(var(--green) 0 42%,#263848 42% 100%);
+  display:grid;place-items:center;margin:0 auto 9px;position:relative;
+}
+.donut:after{content:"";width:61px;height:61px;background:#09141f;border-radius:50%;position:absolute}
+.donut span{z-index:1;font-size:13px;font-weight:700}.donut small{display:block;font-size:8px;color:#b8c2cc;text-align:center}
+
+/* ---------- FUNNEL ---------- */
+.pipeline{height:262px}
+.funnel-area{display:grid;grid-template-columns:1fr 1.08fr;gap:13px;height:185px}
+.funnel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.funnel div{height:27px;clip-path:polygon(0 0,100% 0,90% 100%,10% 100%);width:92%;background:#2d9af5}
+.funnel div:nth-child(2){width:78%;background:#20bdb0}
+.funnel div:nth-child(3){width:65%;background:#f5c448}
+.funnel div:nth-child(4){width:51%;background:#ff9450}
+.funnel div:nth-child(5){width:36%;background:#9c62df}
+.funnel-list{padding-top:5px}
+.f-row{display:grid;grid-template-columns:12px 1fr 22px 55px;gap:6px;align-items:center;margin:7px 0;font-size:9px}
+.f-row .ball{width:11px;height:11px;border-radius:50%}
+.f-row:nth-child(1) .ball{background:#2d9af5}.f-row:nth-child(2) .ball{background:#20bdb0}.f-row:nth-child(3) .ball{background:#f5c448}.f-row:nth-child(4) .ball{background:#ff9450}.f-row:nth-child(5) .ball{background:#9c62df}
+.f-row .amt{text-align:right;color:#f0f3f7}.f-row .count{text-align:right;color:#e2e8ee}
+.metrics{border-top:1px solid #243240;padding-top:8px;display:grid;grid-template-columns:repeat(4,1fr)}
+.metric{padding:0 7px;border-right:1px solid #243240}.metric:last-child{border:0}
+.metric small{font-size:8px;color:#8897a6}.metric strong{display:block;font-size:11px;margin-top:3px}
+
+/* ---------- QUICK ACTIONS ---------- */
+.quick{height:262px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:7px}
+.quick button{
+  min-height:38px;border:1px solid #594b2d;border-radius:7px;
+  background:linear-gradient(180deg,#4a3b20,#282216);color:#eee;
+  text-align:left;padding:7px 9px;font-size:10px;font-weight:600;
+}
+.quick button:hover{border-color:#d8ae45}
+.quick button span{color:#f3c44e;font-size:15px;margin-right:6px}
+.quick button.dark{background:linear-gradient(180deg,#111a25,#0a1119);border-color:#2c3947}
+
+/* ---------- TABLES ---------- */
+.table-panel{height:213px}
+table{width:100%;border-collapse:collapse;font-size:9px}
+th{color:#8d9baa;font-weight:500;text-align:left;background:#0d1823;padding:6px 7px}
+td{padding:8px 7px;border-bottom:1px solid #172530;color:#dbe2e9}
+.status{display:inline-block;padding:4px 7px;border-radius:12px;background:#084e3d;color:#3be5ad;font-size:8px}
+.status.risk{background:#55480d;color:#f6cf50}
+.event-name{font-weight:600;color:#dce4ec}
+.mini-progress{height:6px;background:#1c2b36;border-radius:8px;overflow:hidden;min-width:70px}
+.mini-progress i{display:block;height:100%;background:linear-gradient(90deg,#3ee0a3,#66e9b6);border-radius:8px}
+.dept{display:flex;align-items:center;gap:5px}
+.dept-icon{width:13px;height:13px;border-radius:50%;display:grid;place-items:center;font-size:7px;background:#16a77b}
+
+/* ---------- FINANCE ---------- */
+.finance{height:213px}
+.finance-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:26px}
+.fin-item{padding:6px 0;border-bottom:1px solid #172530;display:flex;justify-content:space-between;font-size:9px}
+.fin-item span{color:#a5b1be}.fin-item strong{color:#e7edf2}
+.alerts{display:flex;gap:7px;margin-top:8px}
+.alert{flex:1;border-radius:6px;padding:7px 6px;font-size:8px;font-weight:700;background:#4b191c;color:#ff6b71}
+.alert.warn{background:#4d3c0b;color:#f4c947}.alert.ok{background:#123e32;color:#45e4ae}
+
+/* ---------- OPERATIONS ---------- */
+.ops{height:213px}
+.ops-body{display:flex;align-items:center;gap:10px}
+.ops-donut{width:90px;height:90px;border-radius:50%;background:conic-gradient(#21e39b 0 87%,#253846 87%);display:grid;place-items:center;position:relative;flex:none}
+.ops-donut:after{content:"";width:67px;height:67px;background:#08131d;border-radius:50%;position:absolute}
+.ops-donut strong{z-index:2;font-size:15px}.ops-donut span{z-index:2;position:absolute;margin-top:27px;font-size:7px;color:#a9b5c0}
+.checks{flex:1}.check{display:flex;gap:7px;align-items:center;font-size:9px;margin:6px 0;color:#c9d2dc}.check b{color:#18e09a;font-size:13px}
+
+/* ---------- ACTIVITY ---------- */
+.activity{height:244px}
+.activity-item{display:flex;gap:9px;padding:7px 0;border-bottom:1px solid #172530}
+.activity-icon{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#17232e;color:#dbe3eb;font-size:13px;flex:none}
+.activity p{margin:0;font-size:9px;color:#dfe5eb;line-height:1.4}.activity small{font-size:8px;color:#8391a0}
+
+/* ---------- BOTTOM ---------- */
+.team,.marketing,.decision{height:222px}
+.marketing-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.big-number{font-size:13px;font-weight:700;margin:3px 0}
+.big-number span{font-size:9px;color:#24dd99;margin-left:4px}
+.lead-source{display:flex;gap:11px;align-items:center}
+.source-donut{width:76px;height:76px;border-radius:50%;background:conic-gradient(#2d9af5 0 28%,#16c6b5 28% 50%,#f6c444 50% 68%,#ff9652 68% 78%,#9c62e0 78% 88%,#5b7186 88% 100%);position:relative;display:grid;place-items:center}
+.source-donut:after{content:"";width:50px;height:50px;border-radius:50%;background:#09141f;position:absolute}
+.source-donut span{z-index:2;font-size:8px;text-align:center}.source-donut strong{display:block;font-size:13px}
+.source-list{font-size:8px;line-height:1.9}.source-list i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}
+.decision-box{border-radius:7px;padding:7px;margin:5px 0;font-size:8px;line-height:1.5}
+.decision-box.red{background:#43191e;color:#f7a0a4}.decision-box.yellow{background:#45370d;color:#e8ca62}.decision-box.green{background:#103a2f;color:#63dfb1}
+.quote{
+  height:192px;display:flex;align-items:center;justify-content:center;text-align:center;
+  background:
+    linear-gradient(0deg,rgba(2,7,13,.85),rgba(2,7,13,.2)),
+    url("https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80") center/cover;
+}
+.quote p{font:italic 15px/1.45 Georgia,serif;color:#f0f2f5;margin:0 18px}.quote small{display:block;color:#d3ae4f;font:10px Georgia,serif;margin-top:9px}
+
+/* ---------- RESPONSIVE ---------- */
+@media(max-width:1250px){
+  .app{grid-template-columns:190px 1fr}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .row.one{grid-template-columns:1.15fr 1fr}
+  .row.one .quick{grid-column:span 2}
+  .row.two,.row.three{grid-template-columns:1fr 1fr}
+  .activity,.quote{height:230px}
+}
+@media(max-width:850px){
+  .app{grid-template-columns:70px 1fr}
+  .brand-name,.brand-sub,.nav a span:not(.nav-icon),.sidebar-photo{display:none}
+  .brand{height:74px}.brand-mark{font-size:22px}
+  .nav a{justify-content:center;padding:0}.nav-icon{margin:0}
+  .user{min-width:auto}.user div:not(.avatar){display:none}
+  .date{display:none}
+  .topbar{gap:10px;padding:0 10px}
+  .search{width:55vw}
+  .actions{overflow:auto;justify-content:flex-start;padding-bottom:2px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .row.one,.row.two,.row.three{grid-template-columns:1fr}
+  .row.one .quick{grid-column:auto}
+}
+@media(max-width:520px){
+  .content{padding:12px 8px}
+  .topbar{height:62px}
+  .welcome h1{font-size:19px}
+  .kpis{grid-template-columns:1fr}
+  .kpi{min-height:98px}
+  .chart-wrap{grid-template-columns:1fr}
+  .revenue-side{display:none}
+  .pipeline{height:auto}
+  .funnel-area{grid-template-columns:1fr}
+  .funnel{display:none}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px}
+  .metric{border:0}
+  table{font-size:8px}
+  th,td{padding:6px 4px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">♕</div>
+    <div class="brand-name">ROYAL TOUCH</div>
+    <div class="brand-sub">EVENTS</div>
+  </div>
+  <nav class="nav">
+    <a class="active" href="#"><span class="nav-icon">▣</span><span>Dashboard</span></a>
+    <a href="#"><span class="nav-icon">♟</span><span>Clients</span></a>
+    <a href="#"><span class="nav-icon">▦</span><span>Events</span></a>
+    <a href="#"><span class="nav-icon">▤</span><span>Sales & CRM</span></a>
+    <a href="#"><span class="nav-icon">✥</span><span>Finance</span></a>
+    <a href="#"><span class="nav-icon">⚙</span><span>Operations</span></a>
+    <a href="#"><span class="nav-icon">♟</span><span>Team</span></a>
+    <a href="#"><span class="nav-icon">✦</span><span>Marketing</span></a>
+    <a href="#"><span class="nav-icon">▣</span><span>Reports</span></a>
+    <a href="#"><span class="nav-icon">⚙</span><span>Settings</span></a>
+  </nav>
+  <div class="sidebar-photo"></div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <button id="menuToggle" class="menu-toggle-btn" title="Toggle Sidebar Menu" onclick="toggleSidebarMenu()">☰</button>
+    <label class="search">⌕ <input id="search" placeholder="Search clients, events, contacts..." /></label>
+    <div class="top-spacer"></div>
+    <button class="top-icon" title="Notifications">♧<i class="badge">3</i></button>
+    <div class="divider"></div>
+    <div class="date">▣ <span>Wed, 10 Sep 2026</span></div>
+    <div class="divider"></div>
+    <div class="user">
+      <div class="avatar">JO</div>
+      <div><strong>Japheth Owiyo</strong><small>CEO</small></div>
+      <span class="chevron">⌄</span>
+    </div>
+  </header>
+
+  <section class="content">
+    <div class="welcome">
+      <div><h1>Good Morning, Japheth <span class="crown">♛</span></h1><p>Here's how your business is performing today.</p></div>
+    </div>
+
+    <div class="actions">
+      <button class="action" onclick="toast('New Client form opened')"><b>＋</b>New Client</button>
+      <button class="action" onclick="toast('New Event form opened')"><b>▣</b>New Event</button>
+      <button class="action" onclick="toast('Proposal creator opened')"><b>▤</b>Create Proposal</button>
+      <button class="action" onclick="toast('Payment approval opened')"><b>▣</b>Approve Payment</button>
+      <button class="action" onclick="toast('Showing all modules')"><b>▦</b>View All</button>
+    </div>
+
+    <div class="kpis">
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">◎</div>Total Revenue</div><div class="kpi-value">KSh 4,800,000</div><div class="kpi-trend up">↑ 18% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">↗</div>This Month Revenue</div><div class="kpi-value">KSh 850,000</div><div class="kpi-trend up">↑ 12% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">▽</div>Sales Pipeline</div><div class="kpi-value">KSh 12,500,000</div><div class="kpi-trend up">↑ 25% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">▣</div>Upcoming Events</div><div class="kpi-value">8</div><div class="kpi-trend up">↑ 2 <span>new this week</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">♟</div>Active Clients</div><div class="kpi-value">32</div><div class="kpi-trend up">↑ 6% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">▣</div>Outstanding Payments</div><div class="kpi-value">KSh 1,400,000</div><div class="kpi-trend down">↓ 15% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">⌁</div>Profit Margin</div><div class="kpi-value">28%</div><div class="kpi-trend up">↑ 5% <span>vs last month</span></div></div>
+      <div class="card kpi"><div class="kpi-top"><div class="kpi-icon">!</div>Critical Issues</div><div class="kpi-value">3</div><div class="kpi-trend down">↓ 2 <span>resolved</span></div></div>
+    </div>
+
+    <!-- ROW 1 -->
+    <div class="row one">
+      <section class="card panel revenue">
+        <div class="panel-title"><span class="mini-icon">▥</span>Revenue Overview <span class="link">Last 6 Months⌄</span></div>
+        <div class="chart-wrap">
+          <div class="chart">
+            <div class="y-labels"><span>2.5M</span><span>2.0M</span><span>1.5M</span><span>1.0M</span><span>500K</span><span>0</span></div>
+            <div class="bars">
+              <div class="month"><i class="bar rev" style="--h:55px"></i><i class="bar target" style="--h:72px"></i><span class="month-label">Apr</span></div>
+              <div class="month"><i class="bar rev" style="--h:72px"></i><i class="bar target" style="--h:86px"></i><span class="month-label">May</span></div>
+              <div class="month"><i class="bar rev" style="--h:88px"></i><i class="bar target" style="--h:102px"></i><span class="month-label">Jun</span></div>
+              <div class="month"><i class="bar rev" style="--h:108px"></i><i class="bar target" style="--h:122px"></i><span class="month-label">Jul</span></div>
+              <div class="month"><i class="bar rev" style="--h:128px"></i><i class="bar target" style="--h:143px"></i><span class="month-label">Aug</span></div>
+              <div class="month"><i class="bar rev" style="--h:140px"></i><i class="bar target" style="--h:157px"></i><span class="month-label">Sep</span></div>
+            </div>
+            <svg class="line-svg" viewBox="0 0 400 180" preserveAspectRatio="none">
+              <polyline points="15,145 90,137 160,129 230,117 300,93 375,82" fill="none" stroke="#20e39b" stroke-width="2"/>
+              <g fill="#20e39b"><circle cx="15" cy="145" r="3"/><circle cx="90" cy="137" r="3"/><circle cx="160" cy="129" r="3"/><circle cx="230" cy="117" r="3"/><circle cx="300" cy="93" r="3"/><circle cx="375" cy="82" r="3"/></g>
+            </svg>
+            <div class="legend"><span><i class="dot yellow"></i>Revenue</span><span><i class="dot gray"></i>Target</span><span><i class="dot green"></i>Profit</span></div>
+          </div>
+          <div class="revenue-side">
+            <div class="side-label">Monthly Revenue</div><div class="side-value">KSh 850,000</div>
+            <div class="donut"><span>42%<small>of target</small></span></div>
+            <div class="side-label">Annual Target</div><div class="side-value">KSh 24,000,000</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel pipeline">
+        <div class="panel-title"><span class="mini-icon">♜</span>Sales Pipeline <span class="link">View Details →</span></div>
+        <div class="funnel-area">
+          <div class="funnel"><div></div><div></div><div></div><div></div><div></div></div>
+          <div class="funnel-list">
+            <div class="f-row"><i class="ball"></i><span>New Leads</span><b class="count">24</b><b class="amt">KSh 4.2M</b></div>
+            <div class="f-row"><i class="ball"></i><span>Qualified</span><b class="count">15</b><b class="amt">KSh 3.5M</b></div>
+            <div class="f-row"><i class="ball"></i><span>Proposal Sent</span><b class="count">9</b><b class="amt">KSh 2.8M</b></div>
+            <div class="f-row"><i class="ball"></i><span>Negotiation</span><b class="count">5</b><b class="amt">KSh 1.7M</b></div>
+            <div class="f-row"><i class="ball"></i><span>Won</span><b class="count">4</b><b class="amt">KSh 1.2M</b></div>
+          </div>
+        </div>
+        <div class="metrics"><div class="metric"><small>Lead Conversion Rate</small><strong>16.7%</strong></div><div class="metric"><small>Avg. Deal Value</small><strong>KSh 1.3M</strong></div><div class="metric"><small>New Clients</small><strong>4</strong></div><div class="metric"><small>Lost Opportunities</small><strong>3</strong></div></div>
+      </section>
+
+      <section class="card panel quick">
+        <div class="panel-title"><span class="mini-icon">ϟ</span>CEO Quick Actions</div>
+        <div class="quick-grid">
+          <button onclick="toast('New Client')"><span>＋</span>New Client</button>
+          <button onclick="toast('New Event')"><span>＋</span>New Event</button>
+          <button onclick="toast('Create Proposal')"><span>＋</span>Create Proposal</button>
+          <button onclick="toast('Approve Payment')"><span>＋</span>Approve Payment</button>
+          <button onclick="toast('Assign Task')"><span>＋</span>Assign Task</button>
+          <button class="dark" onclick="toast('CRM opened')"><span>♟</span>View CRM</button>
+          <button class="dark" onclick="toast('Finance opened')"><span>⚙</span>View Finance</button>
+          <button class="dark" onclick="toast('Operations opened')"><span>⚙</span>View Operations</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- ROW 2 -->
+    <div class="row two">
+      <section class="card panel table-panel">
+        <div class="panel-title"><span class="mini-icon">▣</span>Upcoming Events <span class="link">View All →</span></div>
+        <table>
+          <thead><tr><th>Event</th><th>Client</th><th>Date</th><th>Budget</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td class="event-name">Corporate Gala</td><td>ABC Ltd</td><td>15 Sep 2026</td><td>KSh 1.2M</td><td><span class="status">On Track</span></td></tr>
+            <tr><td class="event-name">Conference</td><td>XYZ Org</td><td>22 Sep 2026</td><td>KSh 850K</td><td><span class="status risk">At Risk</span></td></tr>
+            <tr><td class="event-name">Product Launch</td><td>Client</td><td>30 Sep 2026</td><td>KSh 1.5M</td><td><span class="status">On Track</span></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card panel finance">
+        <div class="panel-title"><span class="mini-icon">▣</span>Financial Position <span class="link">View Details →</span></div>
+        <div class="finance-grid">
+          <div><div class="fin-item"><span>Cash Position</span><strong>KSh 2.4M</strong></div><div class="fin-item"><span>Accounts Receivable</span><strong>KSh 1.4M</strong></div><div class="fin-item"><span>Accounts Payable</span><strong>KSh 600K</strong></div><div class="fin-item"><span>Expenses (MTD)</span><strong>KSh 920K</strong></div></div>
+          <div><div class="fin-item"><span>Gross Profit</span><strong>KSh 1.8M</strong></div><div class="fin-item"><span>Net Profit</span><strong>KSh 780K</strong></div><div class="fin-item"><span>Unpaid Invoices</span><strong>KSh 450K</strong></div><div class="fin-item"><span>Deposits Received</span><strong>KSh 1.1M</strong></div></div>
+        </div>
+        <div class="alerts"><div class="alert">▣ Payment Overdue<br><span>1 Overdue</span></div><div class="alert warn">▲ Budget Exceeded<br><span>by 8%</span></div><div class="alert ok">✓ September Target<br><span>72%</span></div></div>
+      </section>
+
+      <section class="card panel ops">
+        <div class="panel-title"><span class="mini-icon">▣</span>Operations Readiness <span class="link">View All →</span></div>
+        <div class="ops-body">
+          <div class="ops-donut"><strong>87%</strong><span>Ready</span></div>
+          <div class="checks">
+            <div class="check"><b>●</b>Equipment</div><div class="check"><b>●</b>Suppliers</div><div class="check"><b>●</b>Venues</div><div class="check"><b>●</b>Logistics</div><div class="check"><b>●</b>Transport</div><div class="check"><b>●</b>Staffing</div><div class="check"><b>●</b>Production</div><div class="check"><b>●</b>Event Setup</div><div class="check"><b>●</b>Security</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel activity">
+        <div class="panel-title">Recent Activity <span class="link">View All →</span></div>
+        <div class="activity-item"><div class="activity-icon">in</div><div><p>New lead from LinkedIn</p><small>ABC Ltd · 2h ago</small></div></div>
+        <div class="activity-item"><div class="activity-icon">▣</div><div><p>Payment received</p><small>KSh 350,000 · 4h ago</small></div></div>
+        <div class="activity-item"><div class="activity-icon">▤</div><div><p>Event proposal sent</p><small>XYZ Org · 6h ago</small></div></div>
+        <div class="activity-item"><div class="activity-icon">✓</div><div><p>Task completed</p><small>Event setup · 8h ago</small></div></div>
+        <div class="activity-item"><div class="activity-icon">♟</div><div><p>New client added</p><small>Global Solutions · 12h ago</small></div></div>
+      </section>
+    </div>
+
+    <!-- ROW 3 -->
+    <div class="row three">
+      <section class="card panel team">
+        <div class="panel-title"><span class="mini-icon">♟</span>Team Performance <span class="link">View All →</span></div>
+        <table>
+          <thead><tr><th>Department</th><th>Performance</th><th>Tasks Done</th><th>Missed Deadlines</th></tr></thead>
+          <tbody>
+            <tr><td><span class="dept"><i class="dept-icon">S</i>Sales</span></td><td><div class="mini-progress"><i style="width:92%"></i></div></td><td>24</td><td>1</td></tr>
+            <tr><td><span class="dept"><i class="dept-icon">E</i>Event Planning</span></td><td><div class="mini-progress"><i style="width:88%"></i></div></td><td>18</td><td>2</td></tr>
+            <tr><td><span class="dept"><i class="dept-icon">O</i>Operations</span></td><td><div class="mini-progress"><i style="width:84%"></i></div></td><td>16</td><td>2</td></tr>
+            <tr><td><span class="dept"><i class="dept-icon">P</i>Production</span></td><td><div class="mini-progress"><i style="width:90%"></i></div></td><td>20</td><td>1</td></tr>
+            <tr><td><span class="dept"><i class="dept-icon">F</i>Finance</span></td><td><div class="mini-progress"><i style="width:81%"></i></div></td><td>14</td><td>2</td></tr>
+            <tr><td><span class="dept"><i class="dept-icon">M</i>Marketing</span></td><td><div class="mini-progress"><i style="width:76%"></i></div></td><td>12</td><td>3</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card panel marketing">
+        <div class="panel-title"><span class="mini-icon">♛</span>Marketing Intelligence <span class="link">View All →</span></div>
+        <div class="marketing-grid">
+          <div>
+            <div class="side-label">Website Visitors</div><div class="big-number">8,432 <span>↑ 22%</span></div>
+            <div class="side-label">Facebook Leads</div><div class="big-number">42 <span>↑ 18%</span></div>
+            <div class="side-label">Instagram Leads</div><div class="big-number">37 <span>↑ 12%</span></div>
+            <div class="side-label">LinkedIn Leads</div><div class="big-number">34 <span>↑ 26%</span></div>
+            <div class="side-label">Cost per Lead</div><div class="big-number">KSh 320 <span class="down">↓ 18%</span></div>
+          </div>
+          <div>
+            <div class="lead-source">
+              <div class="source-donut"><span><strong>172</strong>Total Leads</span></div>
+              <div class="source-list"><div><i style="background:#2d9af5"></i>LinkedIn 28%</div><div><i style="background:#16c6b5"></i>WhatsApp 22%</div><div><i style="background:#f6c444"></i>Instagram 18%</div><div><i style="background:#ff9652"></i>Website 10%</div><div><i style="background:#9c62e0"></i>TikTok 7%</div></div>
+            </div>
+            <div style="margin-top:12px;font-size:8px;color:#8795a3">Best Lead Source</div><strong style="font-size:10px">in LinkedIn</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="card panel decision">
+        <div class="panel-title"><span class="mini-icon">⚠</span>CEO Decision Center <span class="link">View All →</span></div>
+        <div class="decision-box red">● <b>Requires Your Decision</b><br>Approve KSh 350K production budget<br>Approve new supplier contract<br>Approve event proposal<br>Review overdue client payment</div>
+        <div class="decision-box yellow">● <b>Requires Attention</b><br>Event production delay<br>Low marketing conversion<br>Supplier quotation pending</div>
+        <div class="decision-box green">● <b>On Track</b><br>Corporate Gala<br>September sales target<br>Website leads</div>
+      </section>
+
+      <section class="card quote">
+        <div><div style="font-size:28px;color:#e6bd4d">♕</div><p>"Great leaders<br>don't just manage today,<br>they build tomorrow."</p><small>— Royal Touch CEO</small></div>
+      </section>
+    </div>
+  </section>
+</main>
+</div>
+
+<div id="toast" style="position:fixed;right:20px;bottom:20px;display:none;padding:12px 16px;background:#142231;border:1px solid #3c4d5e;border-radius:9px;box-shadow:0 12px 30px #000;color:#fff;font-size:12px;z-index:99"></div>
+
+<script>
+const toastBox=document.getElementById('toast');
+let toastTimer;
+function toast(message){
+  toastBox.textContent=message;
+  toastBox.style.display='block';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastBox.style.display='none',1800);
+}
+function toggleSidebarMenu(){
+  const app = document.querySelector('.app');
+  app.classList.toggle('collapsed-menu');
+  if(app.classList.contains('collapsed-menu')){
+    toast('Sidebar menu hidden / collapsed');
+  } else {
+    toast('Sidebar menu revealed / expanded');
+  }
+}
+document.querySelectorAll('.nav a').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    toast(a.innerText.trim()+' selected');
+  });
+});
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  document.querySelectorAll('table tbody tr').forEach(row=>{
+    row.style.display=row.innerText.toLowerCase().includes(q)?'':'none';
+  });
+});
+</script>
+</body>
+</html>

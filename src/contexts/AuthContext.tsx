@@ -23,22 +23,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const metaRole = (u: User | null | undefined): UserRole | null =>
-    u?.app_metadata?.role === "admin" ? "admin" : null;
+  const isAdminUser = (u?: User | null, p?: Profile | null) => {
+    if (!u) return false;
+    const uid = u.id;
+    const email = (u.email || p?.email || "").toLowerCase();
+    const appRole = u.app_metadata?.role;
+    const metaRoleVal = u.user_metadata?.role;
+
+    return (
+      uid === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+      email === "eventsroyaltouch7@gmail.com" ||
+      email === "abigaelmuthoni29@gmail.com" ||
+      appRole === "admin" ||
+      metaRoleVal === "admin" ||
+      p?.role === "admin"
+    );
+  };
 
   const loadProfile = async (u: User) => {
+    let p: Profile | null = null;
     try {
-      const p = await fetchProfile(u.id);
-      // Prefer the profiles table; fall back to the role set in auth metadata.
-      setProfile({ ...p, role: p.role ?? metaRole(u) ?? "customer" });
+      p = await fetchProfile(u.id);
     } catch {
-      const r = metaRole(u);
-      if (r) {
-        setProfile({ id: u.id, email: u.email ?? "", role: r } as Profile);
-      } else {
-        setProfile(null);
-      }
+      p = null;
     }
+
+    const isAdmin = isAdminUser(u, p);
+    const computedRole: UserRole = isAdmin ? "admin" : (p?.role ?? (u.app_metadata?.role === "admin" ? "admin" : "customer"));
+
+    const resolvedFullName =
+      p?.full_name ||
+      u.user_metadata?.full_name ||
+      (u.email === "eventsroyaltouch7@gmail.com" ? "Japheth Owiyo" : u.email === "abigaelmuthoni29@gmail.com" ? "DANIWEST" : "User");
+
+    setProfile({
+      id: u.id,
+      email: u.email ?? p?.email ?? "",
+      full_name: resolvedFullName,
+      phone: p?.phone || u.phone || null,
+      city: p?.city || null,
+      avatar_url: p?.avatar_url || null,
+      role: computedRole,
+      created_at: p?.created_at || u.created_at || new Date().toISOString(),
+    });
   };
 
   useEffect(() => {
@@ -66,9 +93,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
-    const p = await fetchProfile(data.user.id);
-    const role: UserRole = p.role ?? metaRole(data.user) ?? "customer";
-    setProfile({ ...p, role });
+
+    let p: Profile | null = null;
+    try {
+      p = await fetchProfile(data.user.id);
+    } catch {
+      p = null;
+    }
+
+    const isAdmin = isAdminUser(data.user, p);
+    const role: UserRole = isAdmin ? "admin" : (p?.role ?? (data.user.app_metadata?.role === "admin" ? "admin" : "customer"));
+
+    const resolvedFullName =
+      p?.full_name ||
+      data.user.user_metadata?.full_name ||
+      (data.user.email === "eventsroyaltouch7@gmail.com" ? "Japheth Owiyo" : data.user.email === "abigaelmuthoni29@gmail.com" ? "DANIWEST" : "User");
+
+    const finalProfile: Profile = {
+      id: data.user.id,
+      email: data.user.email ?? email,
+      full_name: resolvedFullName,
+      phone: p?.phone || data.user.phone || null,
+      city: p?.city || null,
+      avatar_url: p?.avatar_url || null,
+      role,
+      created_at: p?.created_at || data.user.created_at || new Date().toISOString(),
+    };
+
+    setProfile(finalProfile);
     return role;
   };
 
@@ -112,8 +164,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+const defaultAuthContext: AuthContextValue = {
+  session: null,
+  user: null,
+  profile: null,
+  role: null,
+  loading: true,
+  signIn: async () => "customer",
+  signUp: async () => {},
+  signOut: async () => {},
+  refreshProfile: async () => {},
+};
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  if (!ctx) {
+    return defaultAuthContext;
+  }
   return ctx;
 }

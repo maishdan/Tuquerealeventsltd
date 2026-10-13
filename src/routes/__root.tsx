@@ -15,7 +15,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { AlertCircle, ChevronUp } from "lucide-react";
 
 import bgVenue from "../assets/bg-venue.jpg";
@@ -34,7 +34,6 @@ import { ThemeProvider } from "../contexts/ThemeContext";
 import { FavoritesProvider } from "../contexts/FavoritesContext";
 import { Header } from "../components/site/Header";
 import { Footer } from "../components/site/Footer";
-import { AdminFloatingAIChatbot } from "../components/dashboard/AdminFloatingAIChatbot";
 import { cn } from "@/lib/utils";
 
 function NotFoundComponent() {
@@ -113,6 +112,19 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           type: "application/ld+json",
           children: JSON.stringify(servicesJsonLd()),
         },
+        {
+          children: `
+            var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+            (function(){
+            var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+            s1.async=true;
+            s1.src='https://embed.tawk.to/6a6b3fa2a70ec81d5099831d/1jupf15bv';
+            s1.charset='UTF-8';
+            s1.setAttribute('crossorigin','*');
+            s0.parentNode.insertBefore(s1,s0);
+            })();
+          `,
+        },
       ],
     };
   },
@@ -141,17 +153,6 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
   const isHome = pathname === "/";
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 200);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -177,22 +178,13 @@ function RootComponent() {
                 </main>
                 {!isDashboard && <Footer />}
 
-                {/* Floating Talking AI Assistant strictly for Admin Dashboard ONLY */}
-                {pathname.startsWith("/admin") && <AdminFloatingAIChatbot />}
-
                 {/* Golden Scroll to Top Button */}
                 <button
                   onClick={scrollToTop}
-                  className={cn(
-                    "fixed bottom-6 right-6 z-[9999] h-12 w-12 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_30px_rgba(212,175,55,0.4)] hover:scale-110 active:scale-95 group border-2 border-white/20 transition-all duration-300",
-                    showScrollTop
-                      ? "opacity-100 translate-y-0 pointer-events-auto cursor-pointer"
-                      : "opacity-0 translate-y-8 pointer-events-none"
-                  )}
-                  title="Return to top"
-                  aria-label="Scroll to top"
+                  className="fixed bottom-40 right-6 z-[9999] h-14 w-14 rounded-full bg-gold text-[#0b0e14] flex items-center justify-center shadow-[0_10px_40px_rgba(212,175,55,0.4)] hover:scale-110 transition-all active:scale-95 animate-bounce group border-2 border-white/20"
+                  title="Return to Command Center"
                 >
-                  <ChevronUp size={24} className="group-hover:-translate-y-0.5 transition-transform" />
+                  <ChevronUp size={28} className="group-hover:-translate-y-1 transition-transform" />
                 </button>
               </div>
             </div>

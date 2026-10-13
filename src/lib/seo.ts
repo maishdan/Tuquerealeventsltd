@@ -1,13 +1,13 @@
-export const SITE_NAME = "Royal Touch Events";
+export const SITE_NAME = "TOQUE REAL EVENTS LIMITED";
 export const SITE_TAGLINE = "We plan. You celebrate. We make it memorable.";
 export const SITE_URL =
-  (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://royaltouchevents.vercel.app";
+  (import.meta.env.VITE_SITE_URL as string | undefined) ?? "https://royaltouchevents.co.ke";
 export const SITE_PHONE = "+254795365334";
-export const SITE_EMAIL = "eventsroyaltouch7@gmail.com";
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/og-image.jpg`;
+export const SITE_EMAIL = "realtoque0@gmail.com";
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/favicon-180x180.png`;
 
 export const SERVICE_KEYWORDS =
-  "corporate events, weddings, birthday parties, concerts, conferences, product launches, event decoration, sound and lighting, photography, videography, MC entertainment, event planning Nairobi, Kenya event management";
+  "TOQUE REAL EVENTS LIMITED, top event hoster Kenya, #1 luxury event management Nairobi, East Africa best event planners, corporate galas, luxury weddings Kenya, VIP event production, sound and lighting Nairobi, concert production, product launches, M-Pesa gate passes, high class event services Kenya";
 
 export function absoluteUrl(path: string) {
   const normalized = path.startsWith("/") ? path : `/${path}`;
@@ -16,8 +16,8 @@ export function absoluteUrl(path: string) {
 
 export function defaultSiteLinks() {
   return [
-    { rel: "icon", href: "/favicon.jpg", type: "image/jpeg" },
-    { rel: "apple-touch-icon", href: "/og-image.jpg" },
+    { rel: "icon", href: "/favicon-180x180.png", type: "image/png" },
+    { rel: "apple-touch-icon", href: "/favicon-180x180.png" },
     { rel: "manifest", href: "/site.webmanifest" },
   ];
 }
@@ -38,7 +38,7 @@ export function createPageSeo(options: {
     meta: [
       { title: fullTitle },
       { name: "description", content: options.description },
-      ...(options.keywords ? [{ name: "keywords", content: options.keywords }] : []),
+      { name: "keywords", content: options.keywords || SERVICE_KEYWORDS },
       { name: "robots", content: options.noindex ? "noindex, nofollow" : "index, follow" },
       { name: "author", content: SITE_NAME },
       { name: "geo.region", content: "KE-30" },
@@ -49,14 +49,14 @@ export function createPageSeo(options: {
       { property: "og:description", content: options.description },
       { property: "og:url", content: url },
       { property: "og:image", content: DEFAULT_OG_IMAGE },
-      { property: "og:image:alt", content: `${SITE_NAME} — premium event planning in Nairobi` },
+      { property: "og:image:alt", content: `${SITE_NAME} — Kenya's Top-Class Event Management Agency` },
       { property: "og:locale", content: "en_KE" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: fullTitle },
       { name: "twitter:description", content: options.description },
       { name: "twitter:image", content: DEFAULT_OG_IMAGE },
     ],
-    links: [{ rel: "canonical", href: url }],
+    links: [{ rel: "canonical", href: url }, { rel: "icon", href: "/favicon-180x180.png", type: "image/png" }],
   };
 }
 
@@ -65,7 +65,7 @@ export function organizationJsonLd() {
     "@context": "https://schema.org",
     "@type": "EventPlanner",
     name: SITE_NAME,
-    description: SITE_TAGLINE,
+    description: "TOQUE REAL EVENTS LIMITED — Kenya's Premier Luxury Event Management Agency & Production Specialist.",
     url: SITE_URL,
     logo: DEFAULT_OG_IMAGE,
     image: DEFAULT_OG_IMAGE,
@@ -77,30 +77,29 @@ export function organizationJsonLd() {
       addressCountry: "KE",
     },
     areaServed: { "@type": "Country", name: "Kenya" },
-    sameAs: [],
+    sameAs: ["https://myworldafric.vercel.app"],
   };
 }
 
 export function servicesJsonLd() {
   const services = [
-    "Corporate Events",
-    "Weddings",
-    "Birthday Parties",
-    "Concerts",
+    "Luxury Corporate Events",
+    "High-Class Weddings",
+    "VIP Concerts & Galas",
+    "Product Launches & Summits",
     "Conferences",
-    "Product Launches",
-    "Event Decoration",
-    "Sound & Lighting",
-    "Photography & Video",
-    "MC & Entertainment",
+    "Event Decoration & Stage Design",
+    "Sound, AV & Lighting Production",
+    "Photography & Videography",
+    "MC & Royal Entertainment",
   ];
 
   return {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: `${SITE_NAME} Services`,
+    name: `${SITE_NAME} Premium Services`,
     description:
-      "Plan, design, produce, capture. Full-stack event production — corporate events, weddings, concerts, decoration, AV, photography and entertainment.",
+      "TOQUE REAL EVENTS LIMITED — Kenya's #1 Luxury Event Management & Production Agency. Corporate events, weddings, concerts, AV lighting, stage design, and gate passes.",
     itemListElement: services.map((name, i) => ({
       "@type": "ListItem",
       position: i + 1,

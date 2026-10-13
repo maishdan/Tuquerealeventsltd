@@ -75,22 +75,22 @@ function CustomerOverview() {
         <div className="flex flex-wrap gap-3">
           <Link
             to="/dashboard/host-event"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 border border-gold/40 text-gold hover:bg-gold hover:text-black rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-gold/5"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 bg-emerald-500 hover:bg-emerald-600 text-black font-black text-[10px] uppercase tracking-widest rounded-none transition-all shadow-lg cursor-pointer"
           >
             <Globe size={16} /> Host Event
           </Link>
           <Link
             to="/dashboard/book-event"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 bg-gold text-black rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/20"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 h-12 px-5 bg-[#f4cf69] text-black font-black text-[10px] uppercase tracking-widest hover:bg-white transition-all shadow-xl shadow-gold/20 rounded-none cursor-pointer"
           >
             <Sparkles size={16} /> Book Event
           </Link>
         </div>
       </div>
 
-      {/* KPI Cards */}
+      {/* KPI Cards (Sharp Edged Tiles) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link to="/dashboard/events" className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-gold/30 transition-all shadow-sm">
+        <Link to="/dashboard/events" className="bg-[#09141f] border border-[#243343] rounded-none p-5 relative overflow-hidden group cursor-pointer hover:border-[#f4cf69] transition-all shadow-sm">
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-gold uppercase tracking-[0.2em] mb-1">My Events</p>
@@ -100,13 +100,13 @@ function CustomerOverview() {
                 <span className="text-[10px] text-emerald-500 font-bold">Secured & Active</span>
               </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center border border-gold/20">
+            <div className="h-10 w-10 rounded-none bg-gold/10 flex items-center justify-center border border-gold/20">
               <PartyPopper size={20} className="text-gold" />
             </div>
           </div>
         </Link>
 
-        <Link to="/dashboard/bookings" className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-blue-500/30 transition-all shadow-sm">
+        <Link to="/dashboard/bookings" className="bg-[#09141f] border border-[#243343] rounded-none p-5 relative overflow-hidden group cursor-pointer hover:border-blue-500/50 transition-all shadow-sm">
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] mb-1">Inquiries</p>
@@ -116,13 +116,13 @@ function CustomerOverview() {
                 <span className="text-[10px] text-blue-400 font-bold">Processing Status</span>
               </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+            <div className="h-10 w-10 rounded-none bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
               <CalendarDays size={20} className="text-blue-400" />
             </div>
           </div>
         </Link>
 
-        <Link to="/dashboard/messages" className="bg-card border border-white/5 rounded-xl p-5 relative overflow-hidden group cursor-pointer hover:border-emerald-500/30 transition-all shadow-sm">
+        <Link to="/dashboard/messages" className="bg-[#09141f] border border-[#243343] rounded-none p-5 relative overflow-hidden group cursor-pointer hover:border-emerald-500/50 transition-all shadow-sm">
           <div className="flex justify-between items-start relative z-10">
             <div>
               <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-[0.2em] mb-1">Concierge</p>
@@ -132,7 +132,7 @@ function CustomerOverview() {
                 <span className="text-[10px] text-emerald-400 font-bold">Direct Response</span>
               </div>
             </div>
-            <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+            <div className="h-10 w-10 rounded-none bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
               <MessageSquare size={20} className="text-emerald-400" />
             </div>
           </div>
@@ -140,8 +140,8 @@ function CustomerOverview() {
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Upcoming Events Section */}
-        <div className="bg-card border border-white/5 rounded-2xl overflow-hidden p-6 shadow-sm">
+        {/* Upcoming Events Section (Sharp Edged) */}
+        <div className="bg-[#09141f] border border-[#243343] rounded-none overflow-hidden p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
             <div>
               <h4 className="text-foreground font-bold text-lg">Upcoming Celebrations</h4>
@@ -153,8 +153,8 @@ function CustomerOverview() {
           </div>
 
           {events.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 border border-dashed border-border rounded-xl">
-              <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center">
+            <div className="py-12 flex flex-col items-center justify-center text-center space-y-4 border border-dashed border-[#243343] rounded-none">
+              <div className="h-12 w-12 rounded-none bg-white/5 flex items-center justify-center">
                 <Heart size={20} className="text-gray-500" />
               </div>
               <div>
@@ -165,9 +165,9 @@ function CustomerOverview() {
           ) : (
             <div className="space-y-4">
               {events.slice(0, 3).map((e) => (
-                <div key={e.id} className="group p-4 rounded-xl bg-white/5 border border-white/5 hover:border-gold/20 transition-all flex items-center justify-between">
+                <div key={e.id} className="group p-4 rounded-none bg-white/5 border border-white/5 hover:border-gold/20 transition-all flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-lg bg-gold/10 flex items-center justify-center text-gold">
+                    <div className="h-10 w-10 rounded-none bg-gold/10 flex items-center justify-center text-gold">
                       {e.event_type?.includes("Wedding") ? <Heart size={18} /> : <Trophy size={18} />}
                     </div>
                     <div>

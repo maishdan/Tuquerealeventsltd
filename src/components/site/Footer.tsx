@@ -1,7 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe, ChevronUp } from "lucide-react";
-import daniwestIcon from "../../assets/daniwest-icon.png";
-import eventsLogo from "../../assets/events-logo.jpeg";
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, ShieldCheck, ArrowRight, Globe, Smartphone } from "lucide-react";
 
 export function Footer() {
   return (
@@ -11,15 +9,15 @@ export function Footer() {
         <div className="grid lg:grid-cols-12 gap-12 pb-16 border-b border-white/5">
           <div className="lg:col-span-4 space-y-8">
             <Link to="/" className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5">
-                <img src={eventsLogo} alt="Royal Touch Logo" className="h-full w-full object-cover" />
+              <div className="h-12 w-12 rounded-full overflow-hidden border border-gold/30 shadow-xl shadow-gold/5 bg-black">
+                <img src="/new logo.png" alt="TOQUE REAL EVENTS LIMITED Logo" className="h-full w-full object-cover" />
               </div>
-              <span className="text-2xl font-black uppercase tracking-tighter text-white">
-                Royal <span className="text-gold">Touch</span> Events
+              <span className="text-xl font-black uppercase tracking-tighter text-white">
+                TOQUE REAL <span className="text-gold">EVENTS</span> LIMITED
               </span>
             </Link>
             <p className="text-sm text-gray-500 leading-relaxed max-w-sm font-medium">
-              Architecting extraordinary moments for the world's most discerning brands and individuals. Nairobi's premier choice for executive production.
+              Architecting extraordinary moments for the world's most discerning brands and individuals. Nairobi's premier choice for executive event production.
             </p>
             <div className="flex items-center gap-2 text-[10px] text-emerald-500 font-black uppercase tracking-widest bg-emerald-500/5 px-4 py-2 rounded-full border border-emerald-500/20 w-fit">
               <ShieldCheck size={14} /> Certified Event Agency 2026
@@ -58,9 +56,9 @@ export function Footer() {
           <div className="space-y-6">
             <h4 className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">The Firm</h4>
             <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
-              <li><Link to="/about" className="hover:text-white transition-colors">The Royal Story</Link></li>
+              <li><Link to="/about" className="hover:text-white transition-colors">Our Story</Link></li>
               <li><Link to="/services" className="hover:text-white transition-colors">Our Disciplines</Link></li>
-              <li><Link to="/portfolio" className="hover:text-white transition-colors">The Royal Vault</Link></li>
+              <li><Link to="/portfolio" className="hover:text-white transition-colors">Event Vault</Link></li>
               <li><Link to="/blog" className="hover:text-white transition-colors">Insight Hub</Link></li>
             </ul>
           </div>
@@ -80,7 +78,7 @@ export function Footer() {
             <ul className="space-y-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
               <li className="flex items-start gap-4">
                 <MapPin size={18} className="text-gold shrink-0 mt-0.5" />
-                <span className="leading-relaxed">Upper Hill District,<br />Nairobi, Kenya</span>
+                <span className="leading-relaxed">TOQUE REAL EXECUTIVE TOWER,<br />Kilimani, Nairobi, Kenya</span>
               </li>
               <li className="flex items-center gap-4">
                 <Phone size={16} className="text-gold shrink-0" />
@@ -88,7 +86,7 @@ export function Footer() {
               </li>
               <li className="flex items-center gap-4">
                 <Mail size={16} className="text-gold shrink-0" />
-                <span className="lowercase">eventsroyaltouch7@gmail.com</span>
+                <span className="lowercase">realtoque0@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -100,7 +98,7 @@ export function Footer() {
                 { icon: Instagram, label: "Instagram" },
                 { icon: Facebook, label: "Facebook" },
                 { icon: Twitter, label: "Twitter" }
-              ].map((social, i) => (
+              ].map((social) => (
                 <a
                   key={social.label}
                   href="#"
@@ -120,32 +118,61 @@ export function Footer() {
           </div>
         </div>
 
+        {/* MOBILE APPS COMING SOON TILE */}
+        <div className="my-8 p-6 bg-gradient-to-r from-[#121824] via-[#0d131f] to-[#121824] border border-gold/30 rounded-none shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="space-y-1 text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest rounded-none">
+              <Smartphone size={13} /> Official Mobile App Status
+            </div>
+            <h4 className="text-lg font-black uppercase tracking-tight text-white font-serif">
+              TOQUE REAL Mobile Apps Coming Soon
+            </h4>
+            <p className="text-xs text-gray-400 font-medium">
+              Manage event bookings, scan gate QR passes, and access 24/7 concierge chat on iOS & Android.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 shrink-0">
+            {/* Google Play Store Badge */}
+            <div className="h-12 px-4 bg-black/80 border border-white/15 rounded-none flex items-center gap-3 text-left hover:border-gold transition-colors group cursor-default shadow-md">
+              <img src="/playstore.jfif" alt="Google Play Store" className="h-6 w-6 object-contain rounded-sm shrink-0 group-hover:scale-110 transition-transform" />
+              <div>
+                <span className="block text-[8px] uppercase tracking-widest text-gray-400 font-bold">GET IT ON</span>
+                <span className="block text-xs font-black text-white uppercase tracking-wider font-mono">Google Play <small className="text-[#f4cf69] text-[9px] font-mono font-bold">(Soon)</small></span>
+              </div>
+            </div>
+
+            {/* Apple App Store Badge */}
+            <div className="h-12 px-4 bg-black/80 border border-white/15 rounded-none flex items-center gap-3 text-left hover:border-gold transition-colors group cursor-default shadow-md">
+              <img src="/apple.png" alt="Apple App Store" className="h-6 w-6 object-contain rounded-sm shrink-0 group-hover:scale-110 transition-transform" />
+              <div>
+                <span className="block text-[8px] uppercase tracking-widest text-gray-400 font-bold">Download on the</span>
+                <span className="block text-xs font-black text-white uppercase tracking-wider font-mono">App Store <small className="text-[#f4cf69] text-[9px] font-mono font-bold">(Soon)</small></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Bottom: Legal & Credits (Formal Layout) */}
         <div className="border-t border-white/5 py-12 flex flex-col md:grid md:grid-cols-12 gap-8 items-center md:items-start text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
            <div className="md:col-span-4 text-center md:text-left">
-             © {new Date().getFullYear()} Royal Touch Events Group. All Rights Reserved.
+             © {new Date().getFullYear()} TOQUE REAL EVENTS LIMITED. All Rights Reserved.
            </div>
 
-           <nav className="md:col-span-4 flex justify-center gap-10">
+           <nav className="md:col-span-4 flex flex-wrap justify-center gap-6 sm:gap-10">
              <Link to="/terms" className="hover:text-gold transition-colors">Terms</Link>
              <Link to="/privacy" className="hover:text-gold transition-colors">Privacy</Link>
-             <Link to="/copyright" className="hover:text-gold transition-colors">Copyright</Link>
+             <Link to="/contact" className="hover:text-gold transition-colors">Help & Support</Link>
            </nav>
 
-           <div className="md:col-span-4 flex justify-center md:justify-end items-center gap-3">
-              <img
-                src={daniwestIcon}
-                alt="Daniwest Tech"
-                className="h-4 w-4 grayscale opacity-40"
-              />
-              <span className="opacity-60">Engineered by</span>
+           <div className="md:col-span-4 flex justify-center md:justify-end items-center">
               <a
-                href="https://daniwesttechnologies.vercel.app"
+                href="https://myworldafric.vercel.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gold hover:text-white transition-colors"
+                className="hover:underline italic text-gold font-serif normal-case text-xs font-medium"
               >
-                Daniwest Tech Ltd
+                Powered by My World Africa
               </a>
            </div>
         </div>

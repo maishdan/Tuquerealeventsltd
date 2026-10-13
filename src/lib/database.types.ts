@@ -1,4 +1,4 @@
-export type UserRole = "admin" | "customer";
+export type UserRole = "admin" | "staff" | "customer" | "client";
 export type BookingStatus = "pending" | "confirmed" | "planning" | "inquiry" | "cancelled";
 export type BookingPaymentStatus = "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED";
 export type BookingState = "PENDING_PAYMENT" | "CONFIRMED" | "CANCELLED" | "EXPIRED" | "COMPLETED";

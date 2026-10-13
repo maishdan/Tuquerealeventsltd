@@ -1,29 +1,27 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
-  ArrowRight,
-  Search,
-  Star,
-  ChevronDown,
   ShieldCheck,
-  Zap,
-  Globe,
-  Award,
-  Users,
-  BarChart3,
-  CheckCircle2,
-  Clock,
-  Briefcase,
-  History,
-  LayoutDashboard,
-  Sparkles,
-  Command,
   Smartphone,
-  Ticket as TicketIcon,
-  Calculator,
+  BarChart3,
+  History,
   Building2,
   Heart,
   Music,
+  ArrowRight,
+  Calculator,
+  Clock,
+  CheckCircle2,
+  Sparkles,
+  Users,
+  Award,
+  Globe,
+  DollarSign,
+  Calendar,
+  MapPin,
+  Star,
+  Ticket as TicketIcon,
+  MessageSquare,
   Check
 } from "lucide-react";
 import corporate from "../assets/gallery-corporate.jpg";
@@ -32,6 +30,18 @@ import concert from "../assets/gallery-concert.jpg";
 import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 import { formatKes } from "@/lib/dashboard-mock-data";
 import { cn } from "@/lib/utils";
+
+export const Route = createFileRoute("/")({
+  head: () =>
+    createPageSeo({
+      title: "TOQUE REAL EVENTS LIMITED | Premier Event Planning & Production Nairobi",
+      description:
+        "TOQUE REAL EVENTS LIMITED is Kenya's premier event planning agency for community celebrations, weddings, corporate summits, and concerts. Simple, reliable, and accessible for everyone.",
+      path: "/",
+      keywords: SERVICE_KEYWORDS,
+    }),
+  component: Home,
+});
 
 const heroImages = [
   "/back/e1.jfif",
@@ -47,79 +57,210 @@ const heroImages = [
 const trustPillars = [
   {
     icon: ShieldCheck,
-    title: "100% Technical Uptime",
-    desc: "Redundant high-spec power & audio-visual systems for zero-failure event execution.",
+    title: "100% Technical Reliability",
+    desc: "Backup generators and professional sound systems so your event never stops.",
   },
   {
     icon: Smartphone,
-    title: "Instant M-Pesa Ticketing",
-    desc: "Automated gate ticket generation with encrypted QR code verification scanner.",
+    title: "Instant M-Pesa Gate Tickets",
+    desc: "Fast digital pass generation sent straight to phone with verified QR code scanning.",
   },
   {
     icon: BarChart3,
-    title: "Strategic Brand ROI",
-    desc: "Events engineered to maximize engagement, media reach, and stakeholder value.",
+    title: "Transparent Fair Pricing",
+    desc: "Clear upfront quotes for all budgets — from small family parties to massive summits.",
   },
   {
     icon: History,
-    title: "15 Years Legacy",
-    desc: "Over 480+ high-profile events executed across Nairobi and East Africa.",
+    title: "15 Years Experience",
+    desc: "Over 1,200+ successful events organized across Nairobi and East Africa.",
+  },
+];
+
+const upcomingEventsList = [
+  {
+    id: "evt-1",
+    title: "East Africa Business & Tech Leadership Summit 2026",
+    category: "Corporate Conference",
+    date: "20 Nov 2026",
+    location: "KICC Nairobi, Kenya",
+    price: 5000,
+    tier: "VIP Pass",
+    image: "/back/e1.jfif",
+  },
+  {
+    id: "evt-2",
+    title: "Safaricom Youth Innovation & Tech Expo 2026",
+    category: "Exhibition & Expo",
+    date: "15 Oct 2026",
+    location: "Westlands, Nairobi",
+    price: 1500,
+    tier: "Regular Pass",
+    image: "/back/e2.jfif",
+  },
+  {
+    id: "evt-3",
+    title: "TOQUE REAL Grand Luxury Gala & Cultural Night",
+    category: "Luxury Gala",
+    date: "12 Dec 2026",
+    location: "Villa Rosa Kempinski Nairobi",
+    price: 15000,
+    tier: "VVIP All Access",
+    image: "/back/e3.jfif",
+  },
+  {
+    id: "evt-4",
+    title: "Nairobi Music & Cultural Festival 2026",
+    category: "Concert & Festival",
+    date: "20 Dec 2026",
+    location: "Nyayo Stadium, Nairobi",
+    price: 0,
+    tier: "Free Public Pass",
+    image: "/back/e4.jfif",
   },
 ];
 
 const serviceSectors = [
   {
+    id: "sec-community",
+    title: "Community & Private Gatherings",
+    subtitle: "Birthdays, Graduations, Family Events",
+    icon: Users,
+    img: wedding,
+    badge: "Budget Friendly",
+    features: [
+      "PA Sound System & Microphones",
+      "Decor, Tables & Chairs Setup",
+      "Fair Pricing for Everyday Clients",
+    ],
+    startingFrom: 15000,
+  },
+  {
     id: "sec-corp",
-    title: "Corporate Command",
-    subtitle: "AGMs, Summits & Launches",
+    title: "Corporate Conferences & AGMs",
+    subtitle: "Company Summits & Product Launches",
     icon: Building2,
     img: corporate,
     badge: "Enterprise Standard",
     features: [
-      "AGM & Stakeholder Governance",
-      "Experiential Product Reveals",
-      "Multi-Track AV Orchestration",
+      "HD LED Screens & Stage Rigging",
+      "Delegate Registration & Gate Pass",
+      "VIP Catering & Protocol Staff",
     ],
-    startingFrom: 350000,
+    startingFrom: 150000,
   },
   {
     id: "sec-luxury",
-    title: "Luxury Weddings",
-    subtitle: "Bespoke & Private Celebrations",
+    title: "Luxury Weddings & Galas",
+    subtitle: "Bespoke Weddings & Evening Galas",
     icon: Heart,
     img: wedding,
-    badge: "Exclusive Access",
+    badge: "VIP Exclusive",
     features: [
-      "Floral Architecture & Styling",
-      "Discreet VIP Security",
-      "Bespoke Sound & Lighting Blueprint",
+      "Custom Floral Architecture & Lighting",
+      "VIP Security & Protocol Leads",
+      "Gourmet Catering & Bar Service",
     ],
-    startingFrom: 500000,
+    startingFrom: 300000,
   },
   {
     id: "sec-concert",
-    title: "Stadium Concerts",
-    subtitle: "Festivals & Large Scale",
+    title: "Stadium Concerts & Festivals",
+    subtitle: "Public Concerts & Festivals",
     icon: Music,
     img: concert,
-    badge: "Massive Production",
+    badge: "Large Production",
     features: [
-      "Stadium Grade Rigging & Audio",
-      "Live 4K Streaming & Media Hub",
-      "Gate QR Ticket Verification",
+      "Stadium Grade Audio & Stage Rigging",
+      "Live 4K Media Broadcast & Screens",
+      "Encrypted M-Pesa QR Gate Scanning",
     ],
-    startingFrom: 750000,
+    startingFrom: 500000,
   },
+];
+
+const clientReviews = [
+  {
+    name: "Dr. Sarah Muthoni",
+    role: "Corporate HR Director, Nairobi",
+    comment: "TOQUE REAL EVENTS LIMITED managed our 800-delegate summit in Westlands. Flawless 4K AV, zero technical delays, and M-Pesa QR check-in made the event effortless.",
+    rating: 5,
+  },
+  {
+    name: "Daniel & Mary Kamau",
+    role: "Wedding Couple, Kilimani",
+    comment: "They handled our wedding with 300 guests with incredible decor and VIP catering. Very honest pricing and great communication from start to finish!",
+    rating: 5,
+  },
+  {
+    name: "Peter Otieno",
+    role: "Concert Promoter, Mombasa",
+    comment: "Stadium sound, stage lighting, and digital QR ticket verification were 100% reliable. Best production team in Kenya!",
+    rating: 5,
+  },
+];
+
+const currencies = [
+  { code: "KES", symbol: "KSh", name: "Kenya Shillings (KES)", rate: 1 },
+  { code: "USD", symbol: "$", name: "US Dollar (USD)", rate: 0.0077 },
+  { code: "EUR", symbol: "€", name: "Euro (EUR)", rate: 0.0071 },
+  { code: "GBP", symbol: "£", name: "British Pound (GBP)", rate: 0.0060 },
+  { code: "UGX", symbol: "UGX ", name: "Uganda Shillings (UGX)", rate: 28.5 },
+  { code: "TZS", symbol: "TZS ", name: "Tanzania Shillings (TZS)", rate: 20.2 },
 ];
 
 export function Home() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   // Quick Estimator State
-  const [estGuests, setEstGuests] = useState<number>(200);
-  const [estCategory, setEstCategory] = useState<string>("Corporate Summit");
+  const [estGuests, setEstGuests] = useState<number>(100);
+  const [estCategory, setEstCategory] = useState<string>("Community & Private Gatherings");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("KES");
   const [includeAv, setIncludeAv] = useState<boolean>(true);
-  const [includeTicketing, setIncludeTicketing] = useState<boolean>(true);
+  const [includeTicketing, setIncludeTicketing] = useState<boolean>(false);
+
+  // Real-Time Sequential Typewriter Effect State
+  const line1Full = "TOQUE REAL EVENTS LIMITED";
+  const line2Full = "We Plan Your Event..........";
+  const line3Full = "You Celebrate....";
+
+  const [line1Typed, setLine1Typed] = useState("");
+  const [line2Typed, setLine2Typed] = useState("");
+  const [line3Typed, setLine3Typed] = useState("");
+
+  useEffect(() => {
+    let index1 = 0;
+    let index2 = 0;
+    let index3 = 0;
+
+    setLine1Typed("");
+    setLine2Typed("");
+    setLine3Typed("");
+
+    const timer = setInterval(() => {
+      if (index1 < line1Full.length) {
+        setLine1Typed(line1Full.slice(0, index1 + 1));
+        index1++;
+      } else if (index2 < line2Full.length) {
+        setLine2Typed(line2Full.slice(0, index2 + 1));
+        index2++;
+      } else if (index3 < line3Full.length) {
+        setLine3Typed(line3Full.slice(0, index3 + 1));
+        index3++;
+      } else {
+        setTimeout(() => {
+          index1 = 0;
+          index2 = 0;
+          index3 = 0;
+          setLine1Typed("");
+          setLine2Typed("");
+          setLine3Typed("");
+        }, 8000);
+      }
+    }, 60);
+
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -128,114 +269,110 @@ export function Home() {
     return () => clearInterval(timer);
   }, []);
 
-  const calculateEstimate = () => {
-    let base = estCategory === "Corporate Summit" ? 250000 : estCategory === "Luxury Wedding" ? 450000 : 600000;
-    let perGuest = estGuests * 450;
-    let avCost = includeAv ? 150000 : 0;
-    let ticketCost = includeTicketing ? 50000 : 0;
+  const calculateEstimateInKes = () => {
+    let base =
+      estCategory === "Community & Private Gatherings"
+        ? 15000
+        : estCategory === "Corporate Conferences & AGMs"
+        ? 150000
+        : estCategory === "Luxury Weddings & Galas"
+        ? 300000
+        : 500000;
+
+    let perGuest = estGuests * (estCategory === "Community & Private Gatherings" ? 150 : 350);
+    let avCost = includeAv ? (estCategory === "Community & Private Gatherings" ? 10000 : 80000) : 0;
+    let ticketCost = includeTicketing ? 15000 : 0;
+
     return base + perGuest + avCost + ticketCost;
   };
 
+  const formatCurrency = (amountInKes: number, currCode: string) => {
+    const curr = currencies.find((c) => c.code === currCode) || currencies[0];
+    const converted = amountInKes * curr.rate;
+
+    if (currCode === "KES") {
+      return `${curr.symbol} ${Math.round(converted).toLocaleString()}`;
+    }
+    if (currCode === "UGX" || currCode === "TZS") {
+      return `${curr.symbol}${Math.round(converted).toLocaleString()}`;
+    }
+    return `${curr.symbol}${converted.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+  };
+
   return (
-    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans overflow-x-hidden transition-colors duration-300">
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex flex-col items-center justify-start overflow-hidden pt-12 pb-20">
-        <div className="absolute inset-0 z-0">
-          {heroImages.map((src, idx) => (
-            <img
-              key={src}
-              src={src}
-              alt="Royal Touch Hero"
-              className={cn(
-                "absolute inset-0 h-full w-full object-cover transition-opacity duration-[2500ms] ease-in-out scale-105",
-                idx === currentImgIndex ? "opacity-15 dark:opacity-25" : "opacity-0"
-              )}
-            />
-          ))}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-slate-50/95 to-[#f8fafc] dark:from-[#0b0e14]/90 dark:via-[#0b0e14]/95 dark:to-[#0b0e14]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(212,175,55,0.12),transparent_70%)]" />
+    <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans overflow-x-hidden transition-colors duration-300">
+      {/* 1. HERO SECTION WITH 3-LINE TYPEWRITER TILE */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden pt-20">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-fixed opacity-90 transition-all duration-1000"
+          style={{ backgroundImage: `url('/ltd.png')` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e14] via-[#0b0e14]/60 to-[#0b0e14]/20" />
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 w-full text-center mt-12 md:mt-20">
-          <div className="max-w-5xl mx-auto space-y-10 animate-in fade-in zoom-in duration-700">
-            {/* Tech Badge */}
-            <div className="flex justify-center">
-              <div className="inline-flex items-center gap-3 px-5 py-2 rounded-none bg-gold/10 border border-gold/40 text-gold text-[10px] font-black uppercase tracking-[0.3em] shadow-sm">
-                <Sparkles size={14} className="text-gold animate-pulse" /> Precision Production & Instant M-Pesa Ticketing
-              </div>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 py-20 text-center space-y-8">
+          {/* Animated Typewriter 3-Horizontal Lines Directly Over Background */}
+          <div className="max-w-4xl mx-auto space-y-4 font-mono text-center">
+            {/* Horizontal Line 1 */}
+            <div className="flex items-center justify-center gap-2 text-[#f4cf69] text-xs sm:text-sm font-black uppercase tracking-[0.25em] drop-shadow-md">
+              <Sparkles size={16} className="text-[#f4cf69] shrink-0" />
+              <span>{line1Typed}</span>
+              {line1Typed.length < line1Full.length && (
+                <span className="inline-block w-2 h-4 bg-[#f4cf69] animate-pulse ml-1" />
+              )}
             </div>
 
-            {/* Main Headline */}
-            <div className="space-y-4">
-              <h1 className="text-4xl sm:text-7xl lg:text-[100px] font-black tracking-tighter uppercase leading-[0.88] text-[#0b0e14] dark:text-white">
-                Architecting <br />
-                <span className="text-gold text-gradient-gold">Excellence.</span>
-              </h1>
-              <p className="max-w-2xl mx-auto text-sm sm:text-lg md:text-xl font-medium text-slate-700 dark:text-gray-300 leading-relaxed">
-                Nairobi's premier event production agency. Transform your corporate summits, luxury weddings, and major concerts with 100% technical uptime and automated QR ticketing.
-              </p>
+            {/* Horizontal Line 2 */}
+            <div className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-tight font-display drop-shadow-2xl">
+              <span>{line2Typed}</span>
+              {line1Typed.length >= line1Full.length && line2Typed.length < line2Full.length && (
+                <span className="inline-block w-3 h-8 sm:h-12 bg-white animate-pulse ml-1" />
+              )}
             </div>
 
-            {/* Sharp Edge Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
-              <Link
-                to="/booking"
-                className="h-16 px-12 rounded-none bg-gold text-black font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#0b0e14] hover:text-gold transition-all duration-300 shadow-xl shadow-gold/20 w-full sm:w-auto"
-              >
-                Inquire Project Brief <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/events"
-                className="h-16 px-12 rounded-none border border-slate-300 dark:border-white/10 bg-white/80 dark:bg-white/5 text-foreground font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center hover:border-gold hover:text-gold transition-all duration-300 w-full sm:w-auto gap-3 shadow-sm"
-              >
-                <TicketIcon size={18} className="text-gold" /> Explore Gate Tickets
-              </Link>
+            {/* Horizontal Line 3 */}
+            <div className="text-2xl sm:text-5xl lg:text-6xl font-black text-emerald-400 font-display drop-shadow-2xl">
+              <span>{line3Typed}</span>
+              {line2Typed.length >= line2Full.length && (
+                <span className="inline-block w-3 h-8 sm:h-12 bg-emerald-400 animate-pulse ml-1" />
+              )}
             </div>
+          </div>
 
-            {/* Technology Stats Bar */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-12 max-w-4xl mx-auto">
-              {[
-                { label: "Technical Uptime", val: "100.0%" },
-                { label: "M-Pesa Gate Check-in", val: "Instant QR" },
-                { label: "Events Delivered", val: "480+ Projects" },
-                { label: "Client Satisfaction", val: "5.0 Rating" },
-              ].map((s, i) => (
-                <div key={i} className="bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-5 rounded-none space-y-1 shadow-sm text-center">
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">{s.label}</p>
-                  <p className="text-xl font-black text-gold font-mono">{s.val}</p>
-                </div>
-              ))}
-            </div>
+          <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-200 font-medium leading-relaxed font-sans">
+            Kenya's premier event planning agency. We organize stress-free events for everyone — family celebrations, birthdays, weddings, corporate summits, and public concerts.
+          </p>
+
+          {/* VIBRANT GREEN CTA BUTTONS */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
+            <Link
+              to="/booking"
+              className="h-14 px-8 rounded-none bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-2xl shadow-emerald-500/30 w-full sm:w-auto cursor-pointer"
+            >
+              Plan Your Event <ArrowRight size={16} />
+            </Link>
+            <Link
+              to="/services"
+              className="h-14 px-8 rounded-none border border-white/20 bg-black/60 backdrop-blur-md text-white font-black text-xs uppercase tracking-widest flex items-center justify-center hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all w-full sm:w-auto"
+            >
+              View All Services
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 2. OPERATIONAL PILLARS */}
-      <section className="py-24 bg-white dark:bg-[#0b0e14] border-y border-slate-200 dark:border-white/10 relative">
+      {/* 2. TRUST PILLARS BAR */}
+      <section className="py-12 bg-[#0b0e14]/85 backdrop-blur-md border-y border-[#172533]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="text-center max-w-3xl mx-auto space-y-3 mb-16">
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Built For Perfection</p>
-            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-              Why Elite Clients Choose Royal Touch
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trustPillars.map((pillar, i) => (
-              <div
-                key={i}
-                className="group relative p-8 rounded-none bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 hover:border-gold transition-all duration-300 space-y-6 shadow-sm"
-              >
-                <div className="h-14 w-14 rounded-none bg-gold/10 border border-gold/30 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-black transition-all">
-                  <pillar.icon size={28} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {trustPillars.map((p, i) => (
+              <div key={i} className="flex items-start gap-4 p-5 rounded-none bg-[#121722]/90 backdrop-blur-md border border-[#243343] hover:border-[#f4cf69]/60 shadow-xl transition-all">
+                <div className="h-10 w-10 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] flex items-center justify-center shrink-0">
+                  <p.icon size={20} />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="font-display text-2xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white group-hover:text-gold transition-colors">
-                    {pillar.title}
-                  </h3>
-                  <p className="text-xs text-slate-600 dark:text-gray-400 leading-relaxed font-medium">
-                    {pillar.desc}
-                  </p>
+                <div className="space-y-1">
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-white">{p.title}</h4>
+                  <p className="text-[11px] text-[#8d9bad] leading-snug font-medium">{p.desc}</p>
                 </div>
               </div>
             ))}
@@ -243,72 +380,70 @@ export function Home() {
         </div>
       </section>
 
-      {/* 3. SERVICE SECTORS */}
-      <section className="py-24 bg-slate-50 dark:bg-[#0d121c] relative">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 border-b border-slate-200 dark:border-white/10 pb-8">
+      {/* 3. UPCOMING EVENTS & GATE TICKETS SECTION */}
+      <section className="py-20 bg-[#0b0e14]/90 backdrop-blur-md border-b border-[#172533]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#172533] pb-6">
             <div className="space-y-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Production Disciplines</p>
-              <h2 className="text-3xl sm:text-6xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white">
-                Featured Production Portfolios
+              <span className="px-3 py-1 bg-[#f4cf69]/10 text-[#f4cf69] border border-[#f4cf69]/30 text-[10px] font-black uppercase tracking-widest rounded-none">
+                <Calendar size={12} className="inline mr-1" /> Live Gate Passes
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+                Upcoming Featured Events
               </h2>
+              <p className="text-xs sm:text-sm text-[#8d9bad] max-w-xl font-medium">
+                Reserve your seat or gate pass online with instant M-Pesa payment and encrypted QR code ticket delivery.
+              </p>
             </div>
+
             <Link
-              to="/services"
-              className="h-12 px-8 rounded-none bg-[#0b0e14] dark:bg-white/10 text-white font-black text-[10px] uppercase tracking-widest hover:bg-gold hover:text-black transition-all flex items-center gap-2 shrink-0 shadow-md"
+              to="/events"
+              className="h-12 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest rounded-none flex items-center justify-center gap-2 shadow-xl transition-all shrink-0 cursor-pointer"
             >
-              Explore All Services <ArrowRight size={14} />
+              Browse All Events →
             </Link>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
-            {serviceSectors.map((sector) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {upcomingEventsList.map((evt) => (
               <div
-                key={sector.id}
-                className="group relative flex flex-col bg-white dark:bg-[#121722] border border-slate-200 dark:border-white/10 rounded-none overflow-hidden hover:border-gold transition-all duration-500 shadow-md"
+                key={evt.id}
+                className="bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
               >
-                <div className="h-64 relative overflow-hidden">
-                  <img
-                    src={sector.img}
-                    alt={sector.title}
-                    className="h-full w-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:scale-110 transition-all duration-700"
-                  />
-                  <div className="absolute top-4 left-4 px-3 py-1 bg-gold text-black font-black text-[9px] uppercase tracking-widest shadow-md">
-                    {sector.badge}
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                <div className="relative h-44 overflow-hidden">
+                  <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/40">
+                    {evt.tier}
+                  </span>
                 </div>
 
-                <div className="p-8 space-y-6 flex-1 flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <div className="space-y-1">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gold">{sector.subtitle}</p>
-                      <h3 className="text-2xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white group-hover:text-gold transition-colors">
-                        {sector.title}
-                      </h3>
-                    </div>
-
-                    <ul className="space-y-2.5 pt-2 border-t border-slate-100 dark:border-white/5">
-                      {sector.features.map((feat, fIdx) => (
-                        <li key={fIdx} className="flex items-center gap-3 text-xs font-bold text-slate-600 dark:text-gray-400">
-                          <CheckCircle2 size={14} className="text-gold shrink-0" />
-                          <span>{feat}</span>
-                        </li>
-                      ))}
-                    </ul>
+                <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{evt.category}</span>
+                    <h3 className="text-sm font-bold text-white uppercase leading-snug group-hover:text-[#f4cf69] transition-colors">
+                      {evt.title}
+                    </h3>
+                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                      <MapPin size={12} className="text-[#f4cf69]" /> {evt.location}
+                    </p>
+                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                      <Calendar size={12} className="text-[#f4cf69]" /> {evt.date}
+                    </p>
                   </div>
 
-                  <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex items-center justify-between gap-4">
+                  <div className="pt-3 border-t border-[#172533] flex items-center justify-between gap-2">
                     <div>
-                      <p className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Estimated Investment</p>
-                      <p className="text-base font-black text-gold font-mono">From {formatKes(sector.startingFrom)}</p>
+                      <span className="text-[8px] uppercase tracking-widest text-[#8d9bad] block">Pass Price</span>
+                      <strong className="text-sm font-mono text-[#f4cf69]">
+                        {evt.price === 0 ? "FREE PASS" : formatKes(evt.price)}
+                      </strong>
                     </div>
 
                     <Link
-                      to="/booking"
-                      className="h-11 px-5 rounded-none bg-gold text-black font-black text-[9px] uppercase tracking-widest flex items-center gap-1 hover:bg-black hover:text-white transition-all shadow-sm"
+                      to="/events"
+                      className="h-9 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center gap-1 shadow-md transition-all cursor-pointer"
                     >
-                      Inquire <ArrowRight size={12} />
+                      Reserve Gate Ticket →
                     </Link>
                   </div>
                 </div>
@@ -318,52 +453,141 @@ export function Home() {
         </div>
       </section>
 
-      {/* 4. INTERACTIVE COST ESTIMATOR */}
-      <section className="py-24 bg-white dark:bg-[#0b0e14] border-y border-slate-200 dark:border-white/10">
+      {/* 4. ACCESSIBLE SERVICE SECTORS FOR ALL LEVELS */}
+      <section className="py-24 bg-[#0b0e14]/85 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <p className="text-xs font-black uppercase tracking-[0.3em] text-[#f4cf69]">Tailored Solutions</p>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              Accessible Event Packages For Everyone
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8d9bad] font-medium">
+              From small family gatherings to multinational corporate summits, TOQUE REAL EVENTS LIMITED delivers transparent quality at every budget level.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {serviceSectors.map((sector) => (
+              <div
+                key={sector.id}
+                className="bg-[#121722]/90 backdrop-blur-md border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <img src={sector.img} alt={sector.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <span className="absolute top-3 right-3 px-3 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/30">
+                    {sector.badge}
+                  </span>
+                </div>
+
+                <div className="p-6 space-y-4 flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#f4cf69]">{sector.subtitle}</p>
+                      <h3 className="text-lg font-black uppercase tracking-tight text-white group-hover:text-[#f4cf69] transition-colors">
+                        {sector.title}
+                      </h3>
+                    </div>
+
+                    <ul className="space-y-2 pt-2 border-t border-[#172533]">
+                      {sector.features.map((feat, fIdx) => (
+                        <li key={fIdx} className="flex items-center gap-2 text-xs font-medium text-[#c7d0da]">
+                          <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-4 border-t border-[#172533] flex items-center justify-between gap-2">
+                    <div>
+                      <p className="text-[8px] font-black uppercase tracking-widest text-[#8d9bad]">Starting From</p>
+                      <p className="text-sm font-black text-[#f4cf69] font-mono">{formatKes(sector.startingFrom)}</p>
+                    </div>
+
+                    <Link
+                      to="/booking"
+                      className="h-10 px-4 rounded-none bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest flex items-center gap-1 shadow-md transition-all cursor-pointer"
+                    >
+                      Inquire Quote <ArrowRight size={12} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INTERACTIVE COST ESTIMATOR & CURRENCY CONVERTER */}
+      <section className="py-24 bg-[#0b0e14]/90 border-y border-[#172533]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-5 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-gold/10 border border-gold/30 text-gold text-[10px] font-black uppercase tracking-widest">
-                <Calculator size={14} /> Instant Cost Calculator
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-none bg-[#f4cf69]/10 border border-[#f4cf69]/30 text-[#f4cf69] text-[10px] font-black uppercase tracking-widest">
+                <Calculator size={14} /> Instant Cost Estimator
               </div>
-              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white leading-tight">
-                Estimate Your Event Investment
+              <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white leading-tight">
+                Estimate Your Event Budget
               </h2>
-              <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed font-medium">
-                Get an instant estimated range for your upcoming project. Our transparent pricing model includes full production, technical AV, and M-Pesa gate ticketing capabilities.
+              <p className="text-sm text-[#8d9bad] leading-relaxed font-medium">
+                Simple, transparent cost estimates for everyone—from small family celebrations to multi-currency corporate conferences.
               </p>
 
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-none space-y-3">
-                <div className="flex items-center gap-3 text-gold">
-                  <Clock size={18} />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-foreground">Guaranteed 24H Proposal Turnaround</p>
+              {/* Currency Selector Box */}
+              <div className="p-4 bg-[#121722]/90 border border-[#243343] rounded-none space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-[#f4cf69] flex items-center gap-1.5">
+                  <DollarSign size={14} /> Select Preferred Currency *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {currencies.map((curr) => (
+                    <button
+                      key={curr.code}
+                      type="button"
+                      onClick={() => setSelectedCurrency(curr.code)}
+                      className={cn(
+                        "py-2 px-2.5 rounded-none text-xs font-mono font-bold border transition-all cursor-pointer text-center",
+                        selectedCurrency === curr.code
+                          ? "bg-[#f4cf69] text-black border-[#f4cf69] shadow-md font-black"
+                          : "bg-[#0b0e14] border-[#243343] text-[#c7d0da] hover:border-[#f4cf69]"
+                      )}
+                    >
+                      {curr.code} ({curr.symbol})
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-slate-600 dark:text-gray-400">
-                  Submitting your brief triggers a dedicated senior producer review within 12 business hours.
+              </div>
+
+              <div className="p-6 bg-[#121722]/90 border border-[#243343] rounded-none space-y-3">
+                <div className="flex items-center gap-3 text-[#f4cf69]">
+                  <Clock size={18} />
+                  <p className="text-[10px] font-black uppercase tracking-widest text-white">Fast Proposal Turnaround</p>
+                </div>
+                <p className="text-xs text-[#8d9bad]">
+                  Submitting your details triggers a dedicated producer review within 12 business hours.
                 </p>
               </div>
             </div>
 
-            <div className="lg:col-span-7 bg-slate-50 dark:bg-[#121722] border border-slate-200 dark:border-white/10 p-8 sm:p-10 rounded-none space-y-8 shadow-xl">
+            <div className="lg:col-span-7 bg-[#121722]/90 border border-[#243343] p-8 sm:p-10 rounded-none space-y-8 shadow-2xl">
               <div className="space-y-6">
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground block mb-2">
-                    Event Discipline / Category
+                  <label className="text-[10px] font-black uppercase tracking-widest text-[#8d9bad] block mb-2">
+                    Event Category & Level *
                   </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {["Corporate Summit", "Luxury Wedding", "Stadium Concert"].map((cat) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    {["Community & Private Gatherings", "Corporate Conferences & AGMs", "Luxury Weddings & Galas", "Stadium Concerts & Festivals"].map((cat) => (
                       <button
                         key={cat}
                         type="button"
                         onClick={() => setEstCategory(cat)}
                         className={cn(
-                          "py-3 px-3 rounded-none text-[10px] font-black uppercase tracking-widest border transition-all text-center",
+                          "py-3 px-2 rounded-none text-[9px] font-black uppercase tracking-wider border transition-all text-center cursor-pointer",
                           estCategory === cat
-                            ? "bg-gold text-black border-gold shadow-md"
-                            : "bg-white dark:bg-black/30 border-slate-200 dark:border-white/10 text-foreground hover:border-gold"
+                            ? "bg-[#f4cf69] text-black border-[#f4cf69] shadow-md font-black"
+                            : "bg-[#0b0e14] border-[#243343] text-white hover:border-[#f4cf69]"
                         )}
                       >
-                        {cat}
+                        {cat.split(" ")[0]} {cat.split(" ")[1]}
                       </button>
                     ))}
                   </div>
@@ -371,55 +595,57 @@ export function Home() {
 
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-[#8d9bad]">
                       Guest Capacity
                     </label>
-                    <span className="font-mono text-sm font-black text-gold">{estGuests} Guests</span>
+                    <span className="font-mono text-sm font-black text-[#f4cf69]">{estGuests} Guests</span>
                   </div>
                   <input
                     type="range"
-                    min="50"
-                    max="2000"
-                    step="50"
+                    min="10"
+                    max="3000"
+                    step="10"
                     value={estGuests}
                     onChange={(e) => setEstGuests(Number(e.target.value))}
-                    className="w-full accent-gold cursor-pointer h-2 bg-slate-200 dark:bg-white/10 rounded-none"
+                    className="w-full accent-[#f4cf69] cursor-pointer h-2 bg-[#0b0e14] rounded-none"
                   />
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <label className="flex items-center gap-3 p-4 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-none cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 bg-[#0b0e14] border border-[#243343] rounded-none cursor-pointer">
                     <input
                       type="checkbox"
                       checked={includeAv}
                       onChange={(e) => setIncludeAv(e.target.checked)}
-                      className="accent-gold h-4 w-4"
+                      className="accent-[#f4cf69] h-4 w-4"
                     />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Include Pro 4K AV & Lighting</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Include Sound & Lighting</span>
                   </label>
 
-                  <label className="flex items-center gap-3 p-4 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-none cursor-pointer">
+                  <label className="flex items-center gap-3 p-4 bg-[#0b0e14] border border-[#243343] rounded-none cursor-pointer">
                     <input
                       type="checkbox"
                       checked={includeTicketing}
                       onChange={(e) => setIncludeTicketing(e.target.checked)}
-                      className="accent-gold h-4 w-4"
+                      className="accent-[#f4cf69] h-4 w-4"
                     />
-                    <span className="text-xs font-bold uppercase tracking-wider text-foreground">Include M-Pesa QR Gate Pass</span>
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">Include M-Pesa QR Gate Passes</span>
                   </label>
                 </div>
               </div>
 
-              {/* Estimate Calculation Banner */}
-              <div className="p-6 bg-gold/10 border border-gold/40 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4">
+              {/* Estimate Calculation Banner with Green Action Button */}
+              <div className="p-6 bg-[#f4cf69]/10 border border-[#f4cf69]/40 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Estimated Turnkey Budget</p>
-                  <p className="text-2xl font-black text-gold font-mono">{formatKes(calculateEstimate())}</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-[#8d9bad]">Estimated Budget ({selectedCurrency})</p>
+                  <p className="text-2xl sm:text-3xl font-black text-[#f4cf69] font-mono">
+                    {formatCurrency(calculateEstimateInKes(), selectedCurrency)}
+                  </p>
                 </div>
 
                 <Link
                   to="/booking"
-                  className="h-12 px-8 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md shrink-0"
+                  className="h-12 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 shadow-xl shrink-0 w-full sm:w-auto transition-all cursor-pointer rounded-none"
                 >
                   Book Estimate <ArrowRight size={14} />
                 </Link>
@@ -429,59 +655,47 @@ export function Home() {
         </div>
       </section>
 
-      {/* 5. CORPORATE TRUSTED PARTNERS MARQUEE */}
-      <section className="py-16 bg-slate-100 dark:bg-[#0b0e14] border-b border-slate-200 dark:border-white/10">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center space-y-8">
-          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground">
-            Trusted By Industry Leaders Across East Africa
-          </p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 hover:opacity-100 transition-opacity">
-            {["SAFARICOM", "KCB BANK", "UNEP", "COCA-COLA", "BMW KENYA", "AIRTEL"].map((brand) => (
-              <span key={brand} className="text-xl md:text-2xl font-black tracking-tighter text-[#0b0e14] dark:text-white font-sans">
-                {brand}
-              </span>
-            ))}
+      {/* 6. CLIENT TESTIMONIALS & TRUST REVIEWS */}
+      <section className="py-24 bg-[#0b0e14]/85 border-b border-[#172533]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-black uppercase tracking-widest rounded-none">
+              <Star size={12} className="inline mr-1 fill-emerald-400" /> Rated 4.9/5
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+              Trusted By Clients Across Kenya
+            </h2>
+            <p className="text-xs sm:text-sm text-[#8d9bad]">
+              Here is what event organizers, corporate directors, and couples say about TOQUE REAL EVENTS LIMITED.
+            </p>
           </div>
-        </div>
-      </section>
 
-      {/* 6. CALL TO ACTION */}
-      <section className="py-24 bg-white dark:bg-[#0d121c]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="relative rounded-none border border-gold/40 bg-gradient-to-r from-gold/10 via-slate-50 to-gold/10 dark:from-gold/10 dark:via-[#0b0e14] dark:to-gold/10 p-12 sm:p-20 text-center space-y-8 shadow-2xl">
-            <div className="max-w-3xl mx-auto space-y-4">
-              <h2 className="text-4xl sm:text-7xl font-black uppercase tracking-tight text-[#0b0e14] dark:text-white leading-tight">
-                Ready To Launch Your <br />
-                <span className="text-gold text-gradient-gold">Next Event?</span>
-              </h2>
-              <p className="text-slate-700 dark:text-gray-300 text-sm sm:text-lg font-medium max-w-xl mx-auto">
-                Connect with our executive production directors to turn your vision into an unforgettable experience.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-4 pt-4">
-              <Link
-                to="/booking"
-                className="h-16 px-12 rounded-none bg-gold text-black font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {clientReviews.map((rev, idx) => (
+              <div
+                key={idx}
+                className="p-6 bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69]/60 rounded-none space-y-4 shadow-xl flex flex-col justify-between"
               >
-                Inquire Strategy Brief <ArrowRight size={18} />
-              </Link>
-            </div>
+                <div className="space-y-3">
+                  <div className="flex gap-1 text-[#f4cf69]">
+                    {[...Array(rev.rating)].map((_, i) => (
+                      <Star key={i} size={14} className="fill-[#f4cf69]" />
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-300 leading-relaxed font-medium italic">
+                    "{rev.comment}"
+                  </p>
+                </div>
+
+                <div className="pt-3 border-t border-[#172533] space-y-0.5">
+                  <strong className="text-sm font-bold text-white block">{rev.name}</strong>
+                  <span className="text-[10px] font-mono text-[#8d9bad] uppercase block">{rev.role}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
     </div>
   );
 }
-
-export const Route = createFileRoute("/")({
-  head: () =>
-    createPageSeo({
-      title: "Royal Touch Events | Premier Corporate & Luxury Production Nairobi",
-      description:
-        "Nairobi's top event production agency. We deliver high-impact corporate summits, luxury weddings, and stadium concerts with instant M-Pesa ticketing and 100% technical uptime.",
-      path: "/",
-      keywords: SERVICE_KEYWORDS,
-    }),
-  component: Home,
-});

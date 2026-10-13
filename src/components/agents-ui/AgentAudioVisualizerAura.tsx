@@ -49,10 +49,8 @@ export function AgentAudioVisualizerAura({
         mainColor = color || "#1FD5F9";
       } else if (state === "listening") {
         amplitude = 9;
-        mainColor = "#f43f5e";
       } else if (state === "thinking") {
         amplitude = 5;
-        mainColor = "#f4cf69";
       } else {
         amplitude = 2.5;
         mainColor = color || "#1FD5F9";

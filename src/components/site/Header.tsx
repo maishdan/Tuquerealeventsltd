@@ -59,6 +59,26 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
     (item) => pathname === item.to || pathname.startsWith(`${item.to}/`)
   );
 
+  // Language Changer State
+  const [langOpen, setLangOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState("ENG");
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  const languages = [
+    { code: "ENG", name: "English", flag: "🇬🇧" },
+    { code: "SWA", name: "Kiswahili", flag: "🇰🇪" },
+    { code: "FRA", name: "Français", flag: "🇫🇷" },
+    { code: "CHN", name: "中文", flag: "🇨🇳" },
+  ];
+
+  const handleSelectLanguage = (code: string, name: string) => {
+    setCurrentLang(code);
+    setLangOpen(false);
+    setToastMsg(`✓ Language updated to ${name} (${code})`);
+    setTimeout(() => setToastMsg(null), 2500);
+  };
+
   // Click outside handlers
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -67,6 +87,9 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
       }
       if (bookingEventsRef.current && !bookingEventsRef.current.contains(event.target as Node)) {
         setBookingEventsOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -83,13 +106,13 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 h-full flex items-center justify-between gap-4">
           {/* Left: Logo & Brand */}
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <div className="h-10 w-10 rounded-full overflow-hidden border border-gold/20 shadow-lg shadow-gold/10">
-              <img src={eventsLogo} alt="Royal Touch Events" className="h-full w-full object-cover" />
+            <div className="h-10 w-10 rounded-full overflow-hidden border border-gold/20 shadow-lg shadow-gold/10 bg-black">
+              <img src="/new logo.png" alt="TOQUE REAL EVENTS LIMITED" className="h-full w-full object-cover" />
             </div>
             <span className={cn(
-              "font-display text-xl uppercase tracking-tighter font-black hidden lg:block text-white"
+              "font-display text-lg uppercase tracking-tight font-black hidden lg:block text-white"
             )}>
-              Royal <span className="text-gold">Touch</span> Events
+              TOQUE REAL <span className="text-gold">EVENTS</span> LIMITED
             </span>
           </Link>
 
@@ -253,6 +276,50 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
               )}
             </button>
 
+            {/* LANGUAGE CHANGER BUTTON NEXT TO FAVORITES */}
+            <div
+              className="relative py-2"
+              ref={langRef}
+              onMouseEnter={() => setLangOpen(true)}
+              onMouseLeave={() => setLangOpen(false)}
+            >
+              <button
+                type="button"
+                onClick={() => setLangOpen((prev) => !prev)}
+                className="flex items-center gap-1.5 p-1.5 rounded border border-gold/30 bg-black/40 hover:border-gold transition-all cursor-pointer group"
+                title="Select Language"
+              >
+                <img src="/language.jpeg" alt="Language" className="h-5 w-5 rounded-full object-cover border border-gold/40 group-hover:scale-110 transition-transform" />
+                <span className="text-[10px] font-mono font-bold text-gold uppercase">{currentLang}</span>
+                <ChevronDown size={10} className={cn("text-gold transition-transform duration-200", langOpen && "rotate-180")} />
+              </button>
+
+              {langOpen && (
+                <div className="absolute top-full right-0 mt-1 w-44 bg-[#0b0e14] border border-gold/40 shadow-[0_20px_50px_rgba(0,0,0,0.9)] p-1 z-50 animate-in fade-in duration-200 space-y-0.5 font-sans">
+                  <div className="px-3 py-1.5 border-b border-white/10 text-[8px] font-black uppercase tracking-widest text-gold font-mono">
+                    Select Language
+                  </div>
+                  {languages.map((lang) => (
+                    <button
+                      type="button"
+                      key={lang.code}
+                      onClick={() => handleSelectLanguage(lang.code, lang.name)}
+                      className={cn(
+                        "w-full flex items-center justify-between px-3 py-2 text-xs font-bold transition-all cursor-pointer hover:bg-gold/10 hover:text-gold text-left",
+                        currentLang === lang.code ? "text-gold bg-gold/10 font-black" : "text-gray-300"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span>{lang.flag}</span>
+                        <span>{lang.name}</span>
+                      </span>
+                      <span className="text-[9px] font-mono opacity-80">({lang.code})</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {/* GET STARTED / PORTAL BUTTON */}
             {user ? (
               <Link
@@ -409,6 +476,13 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
       {/* FAVORITES MODAL */}
       <FavoritesModal isOpen={favoritesModalOpen} onClose={() => setFavoritesModalOpen(false)} />
+
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-[99999] px-5 py-3 bg-[#142231] border border-[#f4cf69]/50 text-white text-xs font-mono font-bold shadow-2xl rounded-lg animate-in slide-in-from-bottom-4 duration-300">
+          {toastMsg}
+        </div>
+      )}
     </>
   );
 }

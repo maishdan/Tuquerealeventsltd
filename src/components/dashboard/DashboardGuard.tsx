@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import type { UserRole } from "@/lib/database.types";
+import { LoadingScreen } from "@/components/common/LoadingScreen";
 
 export function DashboardGuard({
   children,
@@ -13,26 +14,38 @@ export function DashboardGuard({
   const { loading, session, role } = useAuth();
   const navigate = useNavigate();
 
+  const email = session?.user?.email?.toLowerCase();
+  const isAdminEmail =
+    session?.user?.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+    email === "realtoque0@gmail.com" ||
+    email === "eventsroyaltouch7@gmail.com" ||
+    email === "abigaelmuthoni29@gmail.com";
+
+  const effectiveRole: UserRole | null = isAdminEmail ? "admin" : role;
+
+  const isAuthorized = (() => {
+    if (!requiredRole) return true;
+    if (effectiveRole === "admin") return true; // CEO & Super Admins have full access
+    if (requiredRole === "staff" && (effectiveRole === "staff" || effectiveRole === "admin")) return true;
+    return effectiveRole === requiredRole;
+  })();
+
   useEffect(() => {
     if (loading) return;
     if (!session) {
       navigate({ to: "/sign-in" });
       return;
     }
-    if (requiredRole && role !== requiredRole) {
-      navigate({ to: role === "admin" ? "/admin" : "/dashboard" });
+    if (!isAuthorized) {
+      navigate({ to: effectiveRole === "admin" ? "/admin" : effectiveRole === "staff" ? "/staff" : "/dashboard" });
     }
-  }, [loading, session, role, requiredRole, navigate]);
+  }, [loading, session, isAuthorized, effectiveRole, navigate]);
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-strong rounded-2xl px-8 py-6 text-sm text-muted-foreground">Loading dashboard…</div>
-      </div>
-    );
+    return <LoadingScreen title="Authenticating Executive Session..." />;
   }
 
-  if (!session || (requiredRole && role !== requiredRole)) return null;
+  if (!session || !isAuthorized) return null;
 
-  return children;
+  return <>{children}</>;
 }

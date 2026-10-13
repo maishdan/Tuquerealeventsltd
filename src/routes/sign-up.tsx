@@ -41,7 +41,7 @@ const schema = z
     path: ["confirmPassword"],
   });
 
-export function SignUp() {
+function SignUp() {
   const navigate = useNavigate();
   const auth = useAuth();
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -52,11 +52,19 @@ export function SignUp() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
   useEffect(() => {
+    if (auth?.loading) return;
     if (auth?.user) {
-      const to = auth.profile?.role === "admin" ? "/admin" : "/dashboard";
+      const email = auth.user.email?.toLowerCase();
+      const isAdmin =
+        auth.profile?.role === "admin" ||
+        auth.user.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
+        email === "eventsroyaltouch7@gmail.com" ||
+        email === "abigaelmuthoni29@gmail.com";
+
+      const to = isAdmin ? "/admin" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
 
   // Password Visibility
   const [showPassword, setShowPassword] = useState(false);
@@ -120,7 +128,7 @@ export function SignUp() {
   }
 
   return (
-    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 overflow-x-hidden">
+    <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 overflow-x-hidden">
       {/* Hero Background Images */}
       <div className="absolute inset-0 z-0">
         {heroImages.map((src, idx) => (

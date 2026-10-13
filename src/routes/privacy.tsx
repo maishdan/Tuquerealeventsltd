@@ -35,7 +35,7 @@ function PrivacyPage() {
           </div>
           <div>
             <h2 className="text-foreground font-display text-2xl">Your Rights</h2>
-            <p>You may request access, correction, or deletion of your personal data at any time by writing to <a href="mailto:eventsroyaltouch7@gmail.com" className="text-gold">eventsroyaltouch7@gmail.com</a>.</p>
+            <p>You may request access, correction, or deletion of your personal data at any time by writing to <a href="mailto:realtoque0@gmail.com" className="text-gold underline">realtoque0@gmail.com</a>.</p>
           </div>
           <div>
             <h2 className="text-foreground font-display text-2xl">Security</h2>

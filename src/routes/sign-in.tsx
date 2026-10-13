@@ -45,7 +45,7 @@ const schema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters").max(128),
 });
 
-export function SignIn() {
+function SignIn() {
   const navigate = useNavigate();
   const auth = useAuth();
   const search = Route.useSearch();
@@ -56,11 +56,20 @@ export function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    if (auth?.loading) return;
     if (auth?.user) {
-      const to = auth.profile?.role === "admin" ? "/admin" : "/dashboard";
+      const email = auth.user.email?.toLowerCase();
+      const isAdmin =
+        auth.profile?.role === "admin" ||
+        email === "realtoque0@gmail.com" ||
+        email === "eventsroyaltouch7@gmail.com" ||
+        email === "abigaelmuthoni29@gmail.com";
+      const isStaff = auth.profile?.role === "staff";
+
+      const to = isAdmin ? "/admin" : isStaff ? "/staff" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -90,8 +99,17 @@ export function SignIn() {
     try {
       if (!auth) throw new Error("Auth system unavailable");
       const role = await auth.signIn(res.data.email, res.data.password);
-      if (role === "admin") {
+      const isTargetAdmin =
+        role === "admin" ||
+        res.data.email.toLowerCase() === "realtoque0@gmail.com" ||
+        res.data.email.toLowerCase() === "eventsroyaltouch7@gmail.com" ||
+        res.data.email.toLowerCase() === "abigaelmuthoni29@gmail.com";
+      const isTargetStaff = role === "staff";
+
+      if (isTargetAdmin) {
         navigate({ to: "/admin" });
+      } else if (isTargetStaff) {
+        navigate({ to: "/staff" });
       } else {
         navigate({ to: "/dashboard" });
       }
@@ -103,7 +121,7 @@ export function SignIn() {
   }
 
   return (
-    <div className="relative min-w-0 bg-[#f8fafc] dark:bg-[#0b0e14] text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 transition-colors duration-300 overflow-x-hidden">
+    <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 overflow-x-hidden">
       {/* Hero Background Images */}
       <div className="absolute inset-0 z-0">
         {heroImages.map((src, idx) => (
@@ -184,7 +202,7 @@ export function SignIn() {
           </form>
 
           <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col items-center gap-3 text-center">
-            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to Royal Touch Events?</p>
+            <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to TOQUE REAL EVENTS LIMITED?</p>
             <Link
               to="/sign-up"
               className="h-12 px-8 border border-slate-300 dark:border-white/10 text-foreground hover:border-gold font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center transition-all cursor-pointer w-full"
