@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
+import { AdminFloatingAIChatbot } from "@/components/dashboard/AdminFloatingAIChatbot";
 import { adminNav } from "@/lib/dashboard-nav";
 import { createPageSeo } from "@/lib/seo";
 
@@ -25,6 +26,8 @@ function AdminLayout() {
         role="admin"
       >
         <Outlet />
+        {/* Floating Talking AI Assistant strictly for Admin Dashboard ONLY */}
+        <AdminFloatingAIChatbot />
       </DashboardLayout>
     </DashboardGuard>
   );

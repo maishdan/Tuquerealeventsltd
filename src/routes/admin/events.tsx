@@ -1,852 +1,765 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
-import { GlassPanel } from "@/components/dashboard/GlassPanel";
-import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
 import {
   useAdminEvents,
+  useAdminTickets,
+  useAdminProspects,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
-  formatKes
+  useIssueTicket,
+  formatKes,
 } from "@/hooks/use-dashboard-data";
+import { useAuth } from "@/contexts/AuthContext";
+import { createPageSeo } from "@/lib/seo";
 import { uploadEventPoster } from "@/lib/api/events";
 import {
-  PartyPopper,
+  Search,
+  ChevronDown,
+  Power,
+  Settings,
+  Mail,
+  HelpCircle,
+  LogOut,
+  User,
+  Plus,
+  Edit,
+  Trash2,
+  Ticket as TicketIcon,
+  QrCode,
+  CheckCircle2,
   Calendar,
   MapPin,
-  Wallet,
-  ArrowRight,
-  Sparkles,
   Globe,
-  Users,
-  Plus,
-  Search,
-  Filter,
-  X,
-  Ticket as TicketIcon,
-  CheckCircle2,
-  Clock,
-  ShieldCheck,
-  Trash2,
-  Tag,
   Loader2,
-  Edit,
+  Sparkles,
+  Wallet,
+  Home,
+  Flame,
+  PlusCircle,
+  ExternalLink,
+  Layers,
+  Bot,
+  Crown,
   Image as ImageIcon,
-  Check,
-  Gift
+  Users,
+  TrendingUp,
+  Zap,
+  Bell,
+  FileText
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventRecord, TicketClass, EventLifecycleState } from "@/lib/database.types";
+import type { EventRecord, ProspectRecord } from "@/lib/database.types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/admin/events")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    action: search.action as string | undefined,
+  }),
+  head: () =>
+    createPageSeo({
+      title: "Event Registry & AI Event Planner | Royal Touch Admin",
+      description: "Manage Royal Touch events, ticket classes, VIP passes, and venue pricing.",
+      path: "/admin/events",
+      noindex: true,
+    }),
   component: AdminEvents,
 });
 
-const defaultPosterPresets = [
-  "/back/e1.jfif",
-  "/back/e2.jfif",
-  "/back/e3.jfif",
-  "/back/e4.jfif",
-  "/back/e5.jfif",
-  "/back/e7.jpg",
-  "/back/e8.jpg",
-  "/back/e9.jpg",
-];
-
 export function AdminEvents() {
-  const { data: events = [], isLoading } = useAdminEvents();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  // Database Hooks
+  const { data: events = [], isLoading: isLoadingEvents } = useAdminEvents();
+  const { data: tickets = [] } = useAdminTickets();
+  const { data: prospects = [] } = useAdminProspects();
+
+  // Mutations
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
 
+  // Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventRecord | null>(null);
-  const [filterState, setFilterState] = useState<string>("ALL");
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // Form State (Used for both Create and Edit)
-  const [name, setName] = useState("");
-  const [eventType, setEventType] = useState("Technology");
-  const [description, setDescription] = useState("");
-  const [organizerName, setOrganizerName] = useState("Royal Touch Events");
-  const [organizerEmail, setOrganizerEmail] = useState("eventsroyaltouch7@gmail.com");
-  const [organizerPhone, setOrganizerPhone] = useState("+254795365334");
-  const [eventDate, setEventDate] = useState("2026-09-20");
-  const [startTime, setStartTime] = useState("08:00 AM");
-  const [endTime, setEndTime] = useState("06:00 PM");
-  const [venue, setVenue] = useState("Kisii University Main Auditorium");
-  const [posterUrl, setPosterUrl] = useState("/back/e1.jfif");
-  const [uploadingPoster, setUploadingPoster] = useState(false);
-  const [posterError, setPosterError] = useState("");
+  // Form State
+  const [formName, setFormName] = useState("");
+  const [formType, setFormType] = useState("Corporate Event");
+  const [formVenue, setFormVenue] = useState("");
+  const [formDate, setFormDate] = useState("");
+  const [formBudget, setFormBudget] = useState(500000);
+  const [formPosterUrl, setFormPosterUrl] = useState("");
 
-  const handlePosterFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setPosterError("Please choose an image file.");
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setPosterError("Image must be under 5MB.");
-      return;
-    }
-    setPosterError("");
-    setUploadingPoster(true);
-    try {
-      const url = await uploadEventPoster(file);
-      setPosterUrl(url);
-    } catch {
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        if (evt.target?.result) {
-          setPosterUrl(String(evt.target.result));
-        }
-      };
-      reader.readAsDataURL(file);
-    } finally {
-      setUploadingPoster(false);
-    }
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
   };
-  const [lifecycleState, setLifecycleState] = useState<EventLifecycleState>("PUBLISHED");
 
-  // Ticket Classes Builder State
-  const [ticketClasses, setTicketClasses] = useState<TicketClass[]>([
+  const emailLower = (user?.email || profile?.email || "").toLowerCase();
+  const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
+
+  const adminInfo = (() => {
+    if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
+      return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
+    }
+    if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
+      return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
+    }
+    const fallback = rawName || (emailLower ? emailLower.split("@")[0].toUpperCase() : "ADMINISTRATOR");
+    return { fullName: fallback, badge: "EXECUTIVE ADMIN" };
+  })();
+
+  const userInitials = profile?.full_name
+    ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()
+    : "JO";
+
+  // Always loaded AI Discovered Leads (combines live DB prospects + AI scanner leads)
+  const displayLeads = prospects.length > 0 ? prospects : [
     {
-      id: "tc-1",
-      name: "Regular",
-      description: "General admission ticket",
-      price: 500,
-      quantity_available: 500,
-      quantity_sold: 0,
-      benefits: ["General Entrance", "Standard Seating"],
+      id: "lead-fallback-1",
+      event: "ABC Association — Annual Leadership & Tech Summit 2026",
+      company_name: "ABC Association Kenya",
+      contact_name: "Dr. Richard O. Ombati",
+      location: "Villa Rosa Kempinski, Nairobi City County, Kenya",
+      budget: 3500000,
+      lead_score: 95,
+      date: "2026-11-20",
     },
     {
-      id: "tc-2",
-      name: "VIP",
-      description: "VIP fast-track entrance & VIP seating",
-      price: 1500,
-      quantity_available: 100,
-      quantity_sold: 0,
-      benefits: ["Priority Entrance", "VIP Reserved Seating", "Conference Materials"],
+      id: "lead-fallback-2",
+      event: "Intimate Karen 30th Birthday Soirée & Gala",
+      company_name: "Wambui Private Soirée",
+      contact_name: "Jane Wambui",
+      location: "Karen Country Club, Nairobi City County, Kenya",
+      budget: 85000,
+      lead_score: 98,
+      date: "2026-10-25",
     },
     {
-      id: "tc-3",
-      name: "Free Student Pass",
-      description: "Free student & public entry",
-      price: 0,
-      quantity_available: 200,
-      quantity_sold: 0,
-      benefits: ["Free General Entry", "Exhibition Access"],
+      id: "lead-fallback-3",
+      event: "Safaricom Foundation — Youth Tech Expo 2026",
+      company_name: "Safaricom Foundation",
+      contact_name: "Grace K. Njeri",
+      location: "KICC Nairobi Main Auditorium, Kenya",
+      budget: 4500000,
+      lead_score: 96,
+      date: "2026-12-05",
     },
-  ]);
+  ];
 
   const openCreateModal = () => {
     setEditingEvent(null);
-    setName("");
-    setEventType("Technology");
-    setDescription("");
-    setOrganizerName("Royal Touch Events");
-    setEventDate("2026-09-20");
-    setStartTime("08:00 AM");
-    setEndTime("06:00 PM");
-    setVenue("Kisii University Main Auditorium");
-    setPosterUrl("/back/e1.jfif");
-    setLifecycleState("PUBLISHED");
-    setTicketClasses([
-      {
-        id: "tc-1",
-        name: "Regular",
-        description: "General admission ticket",
-        price: 500,
-        quantity_available: 500,
-        quantity_sold: 0,
-        benefits: ["General Entrance"],
-      },
-      {
-        id: "tc-2",
-        name: "VIP",
-        description: "VIP fast-track entrance & seating",
-        price: 1500,
-        quantity_available: 100,
-        quantity_sold: 0,
-        benefits: ["Priority Entrance", "VIP Seating"],
-      },
-      {
-        id: "tc-3",
-        name: "Free Admission Pass",
-        description: "Complimentary admission pass",
-        price: 0,
-        quantity_available: 100,
-        quantity_sold: 0,
-        benefits: ["Free General Entry"],
-      },
-    ]);
+    setFormName("");
+    setFormType("Corporate Event");
+    setFormVenue("");
+    setFormDate(new Date().toISOString().slice(0, 10));
+    setFormBudget(500000);
+    setFormPosterUrl("");
     setIsCreateModalOpen(true);
+  };
+
+  const openModalFromLead = (p: any) => {
+    setEditingEvent(null);
+    setFormName(p.event || p.company_name || p.contact_name || "Custom AI Lead Event");
+    setFormType("Corporate Event");
+    setFormVenue(p.location || "Nairobi Venue");
+    setFormDate(p.date || new Date().toISOString().slice(0, 10));
+    setFormBudget(p.budget || 1500000);
+    setFormPosterUrl("");
+    setIsCreateModalOpen(true);
+    showToast(`✓ Pre-filled Event Planner for '${p.event || p.company_name}'`);
   };
 
   const openEditModal = (evt: EventRecord) => {
     setEditingEvent(evt);
-    setName(evt.name);
-    setEventType(evt.event_type || "General");
-    setDescription(evt.description || "");
-    setOrganizerName(evt.organizer_name || "Royal Touch Events");
-    setEventDate(evt.event_date || "2026-09-20");
-    setStartTime(evt.start_time || "08:00 AM");
-    setEndTime(evt.end_time || "06:00 PM");
-    setVenue(evt.venue || "Nairobi Venue");
-    setPosterUrl(evt.poster_url || "/back/e1.jfif");
-    setLifecycleState(evt.lifecycle_state || "PUBLISHED");
-    setTicketClasses(
-      evt.ticket_classes && evt.ticket_classes.length > 0
-        ? evt.ticket_classes
-        : [
-            {
-              id: "tc-1",
-              name: "Regular",
-              description: "General admission",
-              price: 500,
-              quantity_available: 500,
-              quantity_sold: 0,
-              benefits: ["General Entrance"],
-            },
-          ]
-    );
+    setFormName(evt.name);
+    setFormType(evt.event_type);
+    setFormVenue(evt.venue || "");
+    setFormDate(evt.event_date || "");
+    setFormBudget(evt.budget || 0);
+    setFormPosterUrl(evt.poster_url && !evt.poster_url.startsWith("/back/") ? evt.poster_url : "");
     setIsCreateModalOpen(true);
   };
 
-  const addTicketClass = () => {
-    setTicketClasses((prev) => [
-      ...prev,
-      {
-        id: `tc-${Date.now()}`,
-        name: "Custom Class",
-        description: "Custom pass description",
-        price: 1000,
-        quantity_available: 100,
-        quantity_sold: 0,
-        benefits: ["General Entrance"],
-      },
-    ]);
+  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploadingImage(true);
+    try {
+      const publicUrl = await uploadEventPoster(file);
+      setFormPosterUrl(publicUrl);
+      showToast("✓ Custom Event Poster uploaded directly to Supabase Storage!");
+    } catch (err: any) {
+      showToast("Error uploading poster image");
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
-  const addFreeTicketClass = () => {
-    setTicketClasses((prev) => [
-      ...prev,
-      {
-        id: `tc-free-${Date.now()}`,
-        name: "Free Entry Pass",
-        description: "Complimentary & free admission pass",
-        price: 0,
-        quantity_available: 200,
-        quantity_sold: 0,
-        benefits: ["Free General Entry", "Exhibition Access"],
-      },
-    ]);
-  };
-
-  const removeTicketClass = (id: string) => {
-    setTicketClasses((prev) => prev.filter((tc) => tc.id !== id));
-  };
-
-  const updateTicketClass = (id: string, field: keyof TicketClass, value: any) => {
-    setTicketClasses((prev) =>
-      prev.map((tc) => {
-        if (tc.id === id) {
-          if (field === "benefits" && typeof value === "string") {
-            return { ...tc, benefits: value.split(",").map((b) => b.trim()) };
-          }
-          return { ...tc, [field]: value };
-        }
-        return tc;
-      })
-    );
-  };
-
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!formName || !formVenue || !formDate) {
+      showToast("Please fill in all required event details");
+      return;
+    }
 
-    const payload: Partial<EventRecord> = {
-      name,
-      event_type: eventType,
-      description,
-      organizer_name: organizerName,
-      organizer_email: organizerEmail,
-      organizer_phone: organizerPhone,
-      event_date: eventDate,
-      start_time: startTime,
-      end_time: endTime,
-      venue,
-      poster_url: posterUrl,
-      lifecycle_state: lifecycleState,
-      ticket_classes: ticketClasses,
-      status: "upcoming",
-      budget: ticketClasses.reduce((acc, tc) => acc + tc.price * tc.quantity_available, 0),
+    const payload = {
+      name: formName,
+      event_type: formType,
+      venue: formVenue,
+      event_date: formDate,
+      budget: formBudget,
+      poster_url: formPosterUrl || null,
+      status: "upcoming" as const,
+      lifecycle_state: "PUBLISHED" as const,
     };
 
-    if (editingEvent) {
-      updateEventMutation.mutate(
-        { id: editingEvent.id, updates: payload },
-        {
-          onSuccess: () => {
-            setIsCreateModalOpen(false);
-            setEditingEvent(null);
-          },
-        }
-      );
-    } else {
-      createEventMutation.mutate(payload, {
-        onSuccess: () => {
-          setIsCreateModalOpen(false);
-        },
-      });
+    try {
+      if (editingEvent) {
+        await updateEventMutation.mutateAsync({ id: editingEvent.id, ...payload });
+        showToast(`✓ Updated Event '${formName}'`);
+      } else {
+        await createEventMutation.mutateAsync(payload);
+        showToast(`✓ Published New Event '${formName}' to Live Database!`);
+      }
+      setIsCreateModalOpen(false);
+    } catch (err) {
+      showToast("Error saving event to database");
     }
   };
 
-  const handleDeleteEvent = (evt: EventRecord) => {
-    if (confirm(`Are you sure you want to delete the event "${evt.name}"? This action cannot be undone.`)) {
-      deleteEventMutation.mutate(evt.id);
+  const handleDelete = async (id: string, name: string) => {
+    if (confirm(`Are you sure you want to delete '${name}'?`)) {
+      try {
+        await deleteEventMutation.mutateAsync(id);
+        showToast(`Deleted event '${name}'`);
+      } catch (err) {
+        showToast("Error deleting event");
+      }
     }
   };
-
-  const filteredEvents = events.filter((e) => {
-    if (filterState === "ALL") return true;
-    return e.lifecycle_state === filterState;
-  });
 
   return (
-    <div className="space-y-10 pb-20 font-sans">
-      {/* Header Section */}
-      <div className="flex flex-wrap items-end justify-between gap-6 animate-in fade-in slide-in-from-top-4 duration-700">
-        <div>
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gold">Production & Ticketing Hub</p>
-          <h2 className="mt-2 font-display text-4xl md:text-5xl font-black uppercase tracking-tighter text-foreground">
-            Events & Ticket Classes
-          </h2>
+    <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed bottom-6 right-6 z-[300] px-5 py-3 bg-[#142231] border border-[#3c4d5e] text-white text-xs font-bold shadow-2xl rounded-lg animate-in slide-in-from-bottom-4 duration-300">
+          {toastMsg}
         </div>
-        <div className="flex flex-wrap items-center gap-4">
-          <button
-            onClick={openCreateModal}
-            className="h-14 px-8 rounded-none bg-gold text-black font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-black hover:text-gold transition-all shadow-xl shadow-gold/20 cursor-pointer"
-          >
-            <Plus size={16} /> Add Event & Set Ticket Prices
-          </button>
-        </div>
-      </div>
+      )}
 
-      {/* KPI Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-card border border-border p-6 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-gold">
-            <Globe size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Published Events</span>
+      {/* App Shell Grid */}
+      <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[70px_1fr]" : "grid-cols-[212px_1fr]")}>
+        {/* SIDEBAR */}
+        <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
+          <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
+            <Crown size={22} className="text-[#f4cf69]" />
+            {!isMenuCollapsed && (
+              <>
+                <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
+                <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
+              </>
+            )}
           </div>
-          <p className="text-3xl font-black text-foreground tracking-tight">
-            {events.filter((e) => e.lifecycle_state !== "DRAFT").length}
-          </p>
-        </div>
 
-        <div className="bg-card border border-border p-6 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-emerald-500">
-            <TicketIcon size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Ticket Classes</span>
-          </div>
-          <p className="text-3xl font-black text-emerald-500 tracking-tight">
-            {events.reduce((acc, e) => acc + (e.ticket_classes?.length || 0), 0)}
-          </p>
-        </div>
+          <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
+            {[
+              { to: "/admin", label: "Dashboard", icon: Home },
+              { to: "/admin/users", label: "Clients", icon: Users },
+              { to: "/admin/prospects", label: "Prospects", icon: Sparkles },
+              { to: "/admin/customers", label: "Customers", icon: Users },
+              { to: "/admin/events", label: "Events", icon: Calendar, active: true },
+              { to: "/admin/bookings", label: "Sales & CRM", icon: FileText },
+              { to: "/admin/proposals", label: "Proposals", icon: FileText },
+              { to: "/admin/payments", label: "Payments", icon: TrendingUp },
+              { to: "/admin/finance", label: "Finance", icon: TrendingUp },
+              { to: "/admin/ai", label: "AI & Insights", icon: Sparkles },
+              { to: "/admin/admin-booking", label: "Booking", icon: Calendar },
+              { to: "/admin/contacts", label: "Notifications", icon: Bell },
+              { to: "/admin/contacts", label: "Messages", icon: Mail },
+              { to: "/admin/team", label: "Team", icon: Users },
+              { to: "/admin/marketing", label: "Marketing", icon: Zap },
+              { to: "/admin/reports", label: "Reports", icon: FileText },
+              { to: "/admin/settings", label: "Settings", icon: Settings },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={idx}
+                  to={item.to}
+                  className={cn(
+                    "flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1 justify-center md:justify-start",
+                    item.active
+                      ? "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white shadow-lg shadow-[#b48224]/20 font-bold"
+                      : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
+                  )}
+                >
+                  <Icon size={16} className={cn("shrink-0", item.active ? "text-white" : "text-[#f1c35a]")} />
+                  {!isMenuCollapsed && <span className="hidden md:inline">{item.label}</span>}
+                </Link>
+              );
+            })}
+          </nav>
+        </aside>
 
-        <div className="bg-card border border-border p-6 rounded-none space-y-2">
-          <div className="flex items-center justify-between text-gold">
-            <Wallet size={20} />
-            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Total Capacity</span>
-          </div>
-          <p className="text-3xl font-black text-gold tracking-tight">
-            {events.reduce(
-              (acc, e) =>
-                acc + (e.ticket_classes?.reduce((sum, tc) => sum + tc.quantity_available, 0) || 500),
-              0
-            )}{" "}
-            Passes
-          </p>
-        </div>
-      </div>
-
-      {/* Active Events List */}
-      <GlassPanel title="Event Registry & Ticket Pricing" subtitle="Configured event pages, posters, ticket classes, and edit/delete controls">
-        {/* Lifecycle Filter Bar */}
-        <div className="flex items-center gap-2 py-4 border-b border-border overflow-x-auto">
-          {["ALL", "PUBLISHED", "DRAFT", "COMPLETED"].map((st) => (
+        {/* MAIN PAGE CONTAINER */}
+        <div className="flex flex-col min-w-0 bg-[#03070d]">
+          {/* EXACT DEFAULT TOPBAR HEADER */}
+          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
             <button
-              key={st}
-              onClick={() => setFilterState(st)}
-              className={cn(
-                "px-4 py-2 rounded-none text-[9px] font-black uppercase tracking-widest border transition-all cursor-pointer",
-                filterState === st
-                  ? "bg-gold text-black border-gold shadow-md"
-                  : "bg-muted/40 border-border text-foreground hover:border-gold"
-              )}
+              type="button"
+              onClick={() => {
+                setIsMenuCollapsed(!isMenuCollapsed);
+                showToast(isMenuCollapsed ? "Sidebar Menu Expanded" : "Sidebar Menu Collapsed");
+              }}
+              className="h-9 w-9 rounded-lg border border-[#314354] bg-[#121d29] text-[#e6b83f] flex items-center justify-center text-lg font-bold hover:border-[#e6b83f] transition-all cursor-pointer shrink-0"
+              title="Toggle Menu"
             >
-              {st}
+              ☰
             </button>
-          ))}
-        </div>
 
-        {isLoading ? (
-          <div className="py-24 flex flex-col items-center justify-center space-y-4">
-            <Loader2 size={40} className="text-gold animate-spin" />
-            <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Retrieving Event Database...</p>
-          </div>
-        ) : filteredEvents.length === 0 ? (
-          <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
-            <Globe size={40} className="text-muted-foreground" />
-            <p className="text-sm font-bold uppercase tracking-tight text-foreground">No events found for this filter.</p>
-          </div>
-        ) : (
-          <div className="grid gap-8 py-6">
-            {filteredEvents.map((evt) => (
-              <div
-                key={evt.id}
-                className="group relative overflow-hidden bg-card border border-border hover:border-gold p-6 sm:p-8 rounded-none transition-all duration-300 space-y-6 shadow-md"
-              >
-                <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
-                  {/* Event Poster Image Preview */}
-                  <div className="w-full lg:w-48 h-48 bg-black/40 border border-border overflow-hidden shrink-0 relative">
-                    <img
-                      src={evt.poster_url || "/back/e1.jfif"}
-                      alt={evt.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
-                    />
-                    <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/80 text-gold text-[8px] font-black uppercase">
-                      {evt.event_type}
-                    </div>
-                  </div>
-
-                  {/* Main Event Details */}
-                  <div className="space-y-3 flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 bg-gold/10 border border-gold/30 text-gold text-[9px] font-black uppercase tracking-widest">
-                        {evt.event_type}
-                      </span>
-                      <span
-                        className={cn(
-                          "px-3 py-1 text-[9px] font-black uppercase tracking-widest border",
-                          evt.lifecycle_state === "DRAFT"
-                            ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
-                            : "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
-                        )}
-                      >
-                        {evt.lifecycle_state || "PUBLISHED"}
-                      </span>
-                    </div>
-
-                    <h3 className="text-2xl font-black uppercase tracking-tight text-foreground group-hover:text-gold transition-colors">
-                      {evt.name}
-                    </h3>
-
-                    <p className="text-xs text-muted-foreground font-medium leading-relaxed max-w-2xl">
-                      {evt.description || "Executive production by Royal Touch Events."}
-                    </p>
-
-                    <div className="flex flex-wrap gap-6 text-xs font-bold text-muted-foreground pt-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} className="text-gold" />
-                        <span>{evt.event_date || "Date Confirmed"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock size={14} className="text-gold" />
-                        <span>{evt.start_time || "08:00 AM"} - {evt.end_time || "06:00 PM"}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} className="text-gold" />
-                        <span>{evt.venue || "Nairobi Venue"}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons: Edit, Delete, View */}
-                  <div className="flex flex-row lg:flex-col gap-3 shrink-0 justify-end">
-                    <button
-                      type="button"
-                      onClick={() => openEditModal(evt)}
-                      className="h-11 px-5 bg-gold text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer"
-                    >
-                      <Edit size={14} /> Edit Event & Prices
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteEvent(evt)}
-                      className="h-11 px-5 bg-rose-500/10 border border-rose-500/30 text-rose-500 font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:bg-rose-500 hover:text-white transition-all cursor-pointer"
-                    >
-                      <Trash2 size={14} /> Delete Event
-                    </button>
-
-                    <Link
-                      to="/booking"
-                      search={{ eventId: evt.id }}
-                      className="h-11 px-5 border border-border text-foreground font-black text-[9px] uppercase tracking-widest rounded-none flex items-center justify-center gap-2 hover:border-gold transition-all cursor-pointer"
-                    >
-                      Public Booking <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Configured Ticket Classes Table with Seats Available */}
-                <div className="pt-4 border-t border-border space-y-3">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gold">Configured Ticket Classes & Seat Capacities</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {(evt.ticket_classes || []).map((tc) => {
-                      const availableSeats = Math.max(0, tc.quantity_available - tc.quantity_sold);
-                      const isFree = tc.price === 0;
-                      return (
-                        <div key={tc.id} className="p-4 bg-muted/40 border border-border rounded-none space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-black text-xs uppercase tracking-widest text-foreground">{tc.name}</span>
-                            <span className="font-mono text-sm font-black text-gold">
-                              {isFree ? "FREE ENTRY" : formatKes(tc.price)}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-muted-foreground">{tc.description}</p>
-                          <div className="text-[9px] text-muted-foreground font-mono flex justify-between pt-1 border-t border-border/50">
-                            <span>Available: {availableSeats} / {tc.quantity_available}</span>
-                            <span className={cn("font-bold", availableSeats === 0 ? "text-rose-500" : "text-emerald-500")}>
-                              {availableSeats === 0 ? "SOLD OUT" : "SEATS READY"}
-                            </span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </GlassPanel>
-
-      {/* CREATE / EDIT EVENT & TICKET CLASSES MODAL */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="relative w-full max-w-3xl bg-white dark:bg-[#0d121c] border border-gold/40 rounded-none p-8 space-y-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-border pb-4">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 bg-gold text-black flex items-center justify-center font-black">
-                  <Globe size={20} />
-                </div>
-                <div>
-                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-gold">Admin Creator</p>
-                  <h3 className="text-lg font-black uppercase tracking-tight text-foreground">
-                    {editingEvent ? "Edit Event & Ticket Prices" : "Create Event & Set Prices"}
-                  </h3>
-                </div>
-              </div>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="h-10 w-10 bg-muted border border-border flex items-center justify-center text-muted-foreground hover:text-foreground cursor-pointer"
-              >
-                <X size={18} />
-              </button>
+            {/* Universal Global Search Bar */}
+            <div className="relative w-full max-w-[425px] h-9 border border-[#314354] rounded-lg bg-[#121d29] flex items-center px-3 gap-2.5">
+              <span className="text-[#8d9bad] text-sm">⌕</span>
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search registered clients, emails, roles..."
+                className="w-full bg-transparent border-0 outline-none text-xs text-white placeholder:text-[#8291a2]"
+              />
             </div>
 
-            <form onSubmit={handleFormSubmit} className="space-y-8">
-              {/* SECTION A: BASIC INFO */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
-                  SECTION A: BASIC EVENT & ORGANIZER INFO
-                </p>
+            <div className="ml-auto flex items-center gap-3">
+              {/* Website Home Button */}
+              <Link
+                to="/"
+                className="h-9 px-3.5 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
+                title="Go to Public Website Home"
+              >
+                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
+              </Link>
 
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Event Title *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ex: Kisii University Tech & Innovation Summit 2026"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
+              {/* Notifications Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f] outline-none group"
+                    title="Notifications Overview"
+                  >
+                    <Bell size={18} />
+                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12] group-hover:scale-110 transition-transform">
+                      {tickets.length || 3}
+                    </span>
+                  </button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" sideOffset={8} className="w-80 bg-[#09141f] border border-[#f4cf69]/40 text-white p-3 shadow-2xl rounded-xl space-y-2 z-[999999]">
+                  <div className="flex items-center justify-between px-2 py-1">
+                    <span className="text-xs font-black text-[#f4cf69] uppercase tracking-wider">
+                      Executive Notifications
+                    </span>
+                    <span className="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full">
+                      {tickets.length || 3} New
+                    </span>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Category</label>
-                    <input
-                      type="text"
-                      value={eventType}
-                      onChange={(e) => setEventType(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
 
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Organizer Name</label>
-                    <input
-                      type="text"
-                      value={organizerName}
-                      onChange={(e) => setOrganizerName(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-
-                  <div className="space-y-2 sm:col-span-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Description</label>
-                    <textarea
-                      rows={3}
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Detailed event synopsis for public listing and tickets..."
-                      className="w-full bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none p-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION B: POSTER IMAGE SELECTOR / UPLOADER */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
-                  SECTION B: EVENT POSTER & IMAGE BRANDING
-                </p>
-
-                <div className="space-y-3">
-                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                    Upload Event Image From Your Device
-                  </label>
-
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="h-24 w-24 border border-border overflow-hidden bg-black/20 flex items-center justify-center shrink-0">
-                      {posterUrl ? (
-                        <img src={posterUrl} alt="Event poster preview" className="h-full w-full object-cover" />
-                      ) : (
-                        <ImageIcon size={22} className="text-muted-foreground" />
-                      )}
-                    </div>
-
-                    <label className="h-12 px-6 border border-gold/50 text-gold font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 cursor-pointer hover:bg-gold hover:text-black transition-all">
-                      {uploadingPoster ? <Loader2 size={14} className="animate-spin" /> : <ImageIcon size={14} />}
-                      {uploadingPoster ? "Uploading..." : "Upload Image"}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={uploadingPoster}
-                        onChange={handlePosterFile}
-                      />
-                    </label>
-
-                    {posterError && (
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-red-500">{posterError}</p>
-                    )}
-                  </div>
-
-                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block pt-2">
-                    Or Choose Event Poster Preset / Custom Image URL
-                  </label>
-
-                  <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
-                    {defaultPosterPresets.map((imgSrc) => (
-                      <button
-                        key={imgSrc}
-                        type="button"
-                        onClick={() => setPosterUrl(imgSrc)}
-                        className={cn(
-                          "aspect-square border overflow-hidden relative cursor-pointer group",
-                          posterUrl === imgSrc ? "border-gold ring-2 ring-gold" : "border-border opacity-70 hover:opacity-100"
-                        )}
-                      >
-                        <img src={imgSrc} alt="Preset" className="w-full h-full object-cover" />
-                        {posterUrl === imgSrc && (
-                          <div className="absolute inset-0 bg-gold/30 flex items-center justify-center text-black font-black">
-                            <Check size={16} />
-                          </div>
-                        )}
-                      </button>
+                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
+                    {tickets.slice(0, 3).map((t) => (
+                      <div key={t.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
+                          <span>New M-Pesa Ticket Order</span>
+                          <span className="text-[#8391a0] font-mono">{new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                        </div>
+                        <p className="text-[#c7d0da] text-[11px] leading-snug">
+                          {t.holder_name} paid {formatKes(t.price)} via M-Pesa for {t.ticket_tier} Pass.
+                        </p>
+                      </div>
                     ))}
                   </div>
 
-                  <div className="space-y-2 pt-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block">
-                      Custom Image / Poster URL
-                    </label>
-                    <input
-                      type="text"
-                      value={posterUrl}
-                      onChange={(e) => setPosterUrl(e.target.value)}
-                      placeholder="Ex: /back/e1.jfif or https://images.unsplash.com/..."
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-mono font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-                </div>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/admin/contacts"
+                      className="w-full py-2.5 bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:bg-gold transition-all cursor-pointer"
+                    >
+                      View All Notifications & Messages →
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
+
+              {/* Date */}
+              <div className="text-xs text-[#d8dee6] hidden sm:flex items-center gap-2 font-mono">
+                <span>▣</span> {new Date().toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
               </div>
 
-              {/* SECTION C: DATE, TIME & VENUE */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold border-b border-border pb-2">
-                  SECTION C: DATE, TIME & VENUE COORDINATES
-                </p>
+              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
 
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Event Date</label>
-                    <input
-                      type="date"
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Start Time</label>
-                    <input
-                      type="text"
-                      value={startTime}
-                      onChange={(e) => setStartTime(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">End Time</label>
-                    <input
-                      type="text"
-                      value={endTime}
-                      onChange={(e) => setEndTime(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-
-                  <div className="space-y-2 sm:col-span-3">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Venue & Address</label>
-                    <input
-                      type="text"
-                      value={venue}
-                      onChange={(e) => setVenue(e.target.value)}
-                      className="w-full h-12 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-4 text-xs font-bold text-foreground outline-none focus:border-gold"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION D: TICKET CLASSES & PRICING BUILDER */}
-              <div className="space-y-4">
-                <div className="flex flex-wrap justify-between items-center gap-2 border-b border-border pb-2">
-                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">
-                    SECTION D: SET TICKET PRICES & FREE ENTRY OPTIONS
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={addFreeTicketClass}
-                      className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/40 text-emerald-500 text-[9px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-black transition-all cursor-pointer flex items-center gap-1"
-                    >
-                      <Gift size={12} /> + Add Free Ticket Class
-                    </button>
-                    <button
-                      type="button"
-                      onClick={addTicketClass}
-                      className="px-3 py-1.5 bg-gold/10 border border-gold/40 text-gold text-[9px] font-black uppercase tracking-widest hover:bg-gold hover:text-black transition-all cursor-pointer"
-                    >
-                      + Add Paid Class
-                    </button>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  {ticketClasses.map((tc, idx) => (
-                    <div key={tc.id} className="p-4 bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-none space-y-3 relative">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-gold flex items-center gap-2">
-                          Class #{idx + 1}
-                          {tc.price === 0 && (
-                            <span className="px-2 py-0.5 bg-emerald-500 text-black font-black text-[8px]">
-                              FREE ADMISSION
-                            </span>
-                          )}
-                        </span>
-                        {ticketClasses.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeTicketClass(tc.id)}
-                            className="text-rose-500 hover:text-rose-700 p-1 cursor-pointer"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="grid sm:grid-cols-3 gap-3">
-                        <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Class Name</label>
-                          <input
-                            type="text"
-                            value={tc.name}
-                            onChange={(e) => updateTicketClass(tc.id, "name", e.target.value)}
-                            className="w-full h-10 bg-white dark:bg-black/40 border border-border rounded-none px-3 text-xs font-bold text-foreground"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Price (KES) (Set 0 For Free)</label>
-                          <input
-                            type="number"
-                            value={tc.price}
-                            onChange={(e) => updateTicketClass(tc.id, "price", Number(e.target.value))}
-                            className="w-full h-10 bg-white dark:bg-black/40 border border-border rounded-none px-3 text-xs font-bold text-foreground"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Total Quantity / Capacity</label>
-                          <input
-                            type="number"
-                            value={tc.quantity_available}
-                            onChange={(e) => updateTicketClass(tc.id, "quantity_available", Number(e.target.value))}
-                            className="w-full h-10 bg-white dark:bg-black/40 border border-border rounded-none px-3 text-xs font-bold text-foreground"
-                          />
-                        </div>
-
-                        <div className="sm:col-span-3">
-                          <label className="text-[8px] font-black uppercase text-muted-foreground block mb-1">Benefits (Comma Separated)</label>
-                          <input
-                            type="text"
-                            value={tc.benefits.join(", ")}
-                            onChange={(e) => updateTicketClass(tc.id, "benefits", e.target.value)}
-                            className="w-full h-10 bg-white dark:bg-black/40 border border-border rounded-none px-3 text-xs font-bold text-foreground"
-                          />
-                        </div>
-                      </div>
+              {/* User Avatar & Dropdown Menu */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2.5 group cursor-pointer outline-none">
+                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-transparent group-hover:ring-[#f4cf69] transition-all">
+                      {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt="Admin Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        userInitials
+                      )}
                     </div>
-                  ))}
+                    <div className="text-left hidden md:block">
+                      <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
+                        {adminInfo.fullName}
+                      </strong>
+                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
+                    </div>
+                    <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
+                  <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
+                    {adminInfo.fullName} ({adminInfo.badge})
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+                  <DropdownMenuItem onClick={() => navigate({ to: "/admin/settings" })} className="cursor-pointer">
+                    <Settings size={15} className="mr-2 text-[#f4cf69]" /> Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setShowLogoutConfirmModal(true)} className="text-rose-400 cursor-pointer">
+                    <LogOut size={15} className="mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </header>
+
+          {/* MAIN CONTENT AREA */}
+          <main className="p-6 lg:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
+            {/* AI DISCOVERED LEADS SECTION (ALWAYS LOADED & READY) */}
+            <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4 shadow-xl">
+              <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
+                <div>
+                  <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider block">AI Lead Scanner Pipeline</span>
+                  <h3 className="text-sm font-black uppercase text-white flex items-center gap-2">
+                    <Flame className="text-rose-400" size={16} /> AI Discovered Trending Leads — Click "Plan This Event"
+                  </h3>
                 </div>
+                <Link to="/admin/ai" className="text-xs text-[#f4cf69] font-bold hover:underline">View AI Engine →</Link>
               </div>
 
-              {/* SECTION E: PUBLISH CONTROLS */}
-              <div className="p-6 bg-gold/10 border border-gold/40 rounded-none flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div>
-                  <label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground block mb-1">Event Status</label>
-                  <select
-                    value={lifecycleState}
-                    onChange={(e) => setLifecycleState(e.target.value as EventLifecycleState)}
-                    className="h-10 bg-white dark:bg-black/60 border border-border rounded-none px-4 text-xs font-bold text-foreground cursor-pointer"
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {displayLeads.slice(0, 3).map((p: any) => (
+                  <div key={p.id} className="p-4 bg-[#0c1a28] border border-[#1d3244] hover:border-[#f4cf69] rounded-xl space-y-3 transition-all">
+                    <div className="flex justify-between items-start gap-2">
+                      <span className="text-xs font-bold text-white leading-snug">{p.event || p.company_name || p.contact_name}</span>
+                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px] shrink-0">
+                        Score: {p.lead_score || 95}
+                      </span>
+                    </div>
+
+                    <div className="text-[11px] text-[#899cb0] space-y-1">
+                      <p>📍 Location: <span className="text-white font-medium">{p.location || "Nairobi, Kenya"}</span></p>
+                      <p>💰 Budget: <span className="text-[#f4cf69] font-mono font-bold">{formatKes(p.budget || 1500000)}</span></p>
+                    </div>
+
+                    <button
+                      onClick={() => openModalFromLead(p)}
+                      className="w-full py-2 bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-1 hover:scale-105 transition-all shadow cursor-pointer"
+                    >
+                      + Plan This Event
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* LIVE EVENTS GRID */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <Calendar className="text-[#f4cf69]" /> Live Event Catalog ({events.length})
+                </h3>
+                <button
+                  onClick={openCreateModal}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5"
+                >
+                  <Plus size={15} /> + Plan Custom Event
+                </button>
+              </div>
+
+              {events.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {events.map((evt) => {
+                    const hasCustomPoster = evt.poster_url && !evt.poster_url.startsWith("/back/") && evt.poster_url !== "/placeholder-event.png";
+
+                    return (
+                      <div
+                        key={evt.id}
+                        className="bg-[#081522] border border-[#203348] hover:border-[#f4cf69] rounded-xl overflow-hidden shadow-xl transition-all group space-y-3"
+                      >
+                        {/* Event Poster / "EVENT IMAGE COMING SOON" Badge */}
+                        <div className="relative h-48 w-full bg-[#0d1c2a] flex items-center justify-center border-b border-[#1c3044] overflow-hidden">
+                          {hasCustomPoster ? (
+                            <img src={evt.poster_url!} alt={evt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          ) : (
+                            <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
+                              <div className="h-12 w-12 rounded-full bg-[#142637] border border-[#f4cf69]/40 flex items-center justify-center text-[#f4cf69]">
+                                <ImageIcon size={22} />
+                              </div>
+                              <span className="text-xs font-black uppercase tracking-widest text-[#f4cf69] bg-[#07131e] px-3 py-1 rounded border border-[#f4cf69]/40 shadow-inner">
+                                Event Image Coming Soon
+                              </span>
+                            </div>
+                          )}
+
+                          <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 backdrop-blur-md text-[#f4cf69] text-[10px] font-black uppercase rounded border border-[#f4cf69]/40 font-mono">
+                            {evt.event_type}
+                          </span>
+                        </div>
+
+                        {/* Event Content Details */}
+                        <div className="p-5 space-y-3">
+                          <h4 className="text-base font-black text-white group-hover:text-[#f4cf69] transition-colors leading-snug">
+                            {evt.name}
+                          </h4>
+
+                          <div className="space-y-1.5 text-xs text-[#899cb0] font-sans">
+                            <div className="flex items-center gap-1.5">
+                              <MapPin size={14} className="text-[#f4cf69] shrink-0" />
+                              <span className="truncate">{evt.venue || "Nairobi Venue"}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5 font-mono text-emerald-400">
+                              <Calendar size={14} className="shrink-0" />
+                              <span>{evt.event_date || "Upcoming Date"}</span>
+                            </div>
+                          </div>
+
+                          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl text-xs font-mono flex items-center justify-between text-[#a0b2c6]">
+                            <span>Budget Allocation:</span>
+                            <span className="text-[#f4cf69] font-bold">{formatKes(evt.budget || 0)}</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="pt-2 border-t border-[#1d3043] flex items-center justify-between gap-2">
+                            <button
+                              onClick={() => openEditModal(evt)}
+                              className="px-3 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Edit size={13} /> Edit Event
+                            </button>
+
+                            <button
+                              onClick={() => handleDelete(evt.id, evt.name)}
+                              className="px-3 py-1.5 rounded-lg bg-rose-950/60 border border-rose-500/50 text-rose-400 text-xs font-bold uppercase hover:bg-rose-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
+                            >
+                              <Trash2 size={13} /> Delete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-12 bg-[#081522] border border-[#203348] rounded-xl text-center space-y-4">
+                  <div className="mx-auto h-16 w-16 rounded-full bg-[#0d1c2a] border border-[#f4cf69]/40 flex items-center justify-center text-[#f4cf69]">
+                    <Calendar size={32} />
+                  </div>
+                  <h4 className="text-lg font-black text-white uppercase tracking-wider">No Live Events Published</h4>
+                  <p className="text-xs text-[#899cb0] max-w-md mx-auto">
+                    The database event catalog is clean and ready for real operational data. Click below to publish your first event!
+                  </p>
+                  <button
+                    onClick={openCreateModal}
+                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-xl inline-flex items-center gap-2"
                   >
-                    <option value="PUBLISHED">PUBLISHED (Publicly Available)</option>
-                    <option value="DRAFT">DRAFT (Admin Hidden)</option>
+                    <Plus size={16} /> + Plan & Publish First Event
+                  </button>
+                </div>
+              )}
+            </div>
+          </main>
+        </div>
+      </div>
+
+      {/* CREATE / EDIT EVENT MODAL (CLOSES ON BACKDROP CLICK & FITS ALL SCREENS) */}
+      {isCreateModalOpen && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsCreateModalOpen(false);
+            }
+          }}
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6 font-sans animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#081522] border-2 border-[#f4cf69] p-4 sm:p-6 lg:p-8 rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl space-y-5 text-white cursor-default scrollbar-thin scrollbar-thumb-[#243343]"
+          >
+            <div className="flex justify-between items-center border-b border-[#1d3043] pb-4">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider">TOQUE REAL Production Hub</span>
+                <h3 className="text-base sm:text-lg font-black uppercase text-white">{editingEvent ? `Edit Event: ${editingEvent.name}` : "Plan & Publish Event"}</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="h-8 w-8 rounded-lg bg-[#142637] text-[#9caec2] hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEvent} className="space-y-4 text-xs font-sans">
+              <div>
+                <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Name / Title *</label>
+                <input
+                  type="text"
+                  required
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  placeholder="e.g. Annual Leadership Gala 2026"
+                  className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Category *</label>
+                  <select
+                    value={formType}
+                    onChange={(e) => setFormType(e.target.value)}
+                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                  >
+                    <option value="Corporate Event">Corporate Conference & Summit</option>
+                    <option value="Luxury Wedding">Luxury Wedding & Gala</option>
+                    <option value="Birthday Party">Birthday Party & Celebration</option>
+                    <option value="Exhibition & Expo">Exhibition & Trade Fair</option>
+                    <option value="Concert & Live Show">Concert & Musical Festival</option>
                   </select>
                 </div>
 
+                <div>
+                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Venue Location *</label>
+                  <input
+                    type="text"
+                    required
+                    value={formVenue}
+                    onChange={(e) => setFormVenue(e.target.value)}
+                    placeholder="e.g. Villa Rosa Kempinski, Nairobi"
+                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Date *</label>
+                  <input
+                    type="date"
+                    required
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Production Budget (KES) *</label>
+                  <input
+                    type="number"
+                    value={formBudget}
+                    onChange={(e) => setFormBudget(Number(e.target.value))}
+                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* CUSTOM FILE UPLOAD TO SUPABASE BUCKET */}
+              <div className="p-4 bg-[#0d1c2b] border border-[#1f3246] rounded-xl space-y-3">
+                <label className="block font-bold text-[#f4cf69] uppercase tracking-wider text-[11px]">
+                  Custom Event Poster Upload (Supabase Storage)
+                </label>
+
+                {formPosterUrl ? (
+                  <div className="relative h-40 w-full rounded-xl overflow-hidden border border-[#f4cf69] shadow-lg">
+                    <img src={formPosterUrl} alt="Event Poster" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => setFormPosterUrl("")}
+                      className="absolute top-2 right-2 px-2 py-1 bg-rose-600 text-white text-[10px] font-bold rounded uppercase shadow cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-6 border-2 border-dashed border-[#203548] rounded-xl text-center space-y-2">
+                    <ImageIcon size={28} className="mx-auto text-[#f4cf69]" />
+                    <p className="text-xs text-[#899cb0]">Upload custom poster file or leave empty for "Event Image Coming Soon"</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <span className="block font-bold text-[#899cb0] uppercase text-[10px] mb-1">Upload File:</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageFileUpload}
+                      disabled={isUploadingImage}
+                      className="w-full text-xs text-[#a0b2c6] file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gradient-to-r file:from-[#d5a637] file:to-[#f4cf69] file:text-black hover:file:opacity-90 cursor-pointer"
+                    />
+                  </div>
+
+                  <div>
+                    <span className="block font-bold text-[#899cb0] uppercase text-[10px] mb-1">Or Image URL:</span>
+                    <input
+                      type="text"
+                      value={formPosterUrl}
+                      onChange={(e) => setFormPosterUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-xs text-white focus:border-[#f4cf69] focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl bg-[#142637] text-[#899cb0] text-xs font-bold uppercase hover:text-white cursor-pointer"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
-                  disabled={createEventMutation.isPending || updateEventMutation.isPending}
-                  className="h-12 px-8 bg-gold text-black font-black text-[10px] uppercase tracking-widest rounded-none flex items-center gap-2 hover:bg-black hover:text-gold transition-all shadow-md cursor-pointer disabled:opacity-50"
+                  disabled={isUploadingImage}
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-xl disabled:opacity-50"
                 >
-                  {createEventMutation.isPending || updateEventMutation.isPending ? (
-                    <Loader2 size={16} className="animate-spin" />
-                  ) : editingEvent ? (
-                    "Save Event Changes & Ticket Prices"
-                  ) : (
-                    "Publish Event & Set Ticket Prices"
-                  )}
+                  {isUploadingImage ? "Uploading Image..." : editingEvent ? "Save Changes" : "Publish Event"}
                 </button>
               </div>
             </form>
