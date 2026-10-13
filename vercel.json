@@ -1,6 +1,6 @@
 {
   "framework": "vite",
-  "installCommand": "cd royaltouchevents && npm install --legacy-peer-deps",
-  "buildCommand": "cd royaltouchevents && npm run build",
-  "outputDirectory": "royaltouchevents/dist/client"
+  "installCommand": "npm install --legacy-peer-deps",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/client"
 }
