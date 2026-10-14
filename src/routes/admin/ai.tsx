@@ -1348,11 +1348,11 @@ export function AdminAI() {
                           <div className="grid grid-cols-2 gap-2 text-[#c0d1e0]">
                             <div>
                               <p><strong>Name:</strong> <span className="text-white font-bold">{lead.decisionMakerName || "Procurement Lead"}</span></p>
-                              <p><strong>Role:</strong> {lead.decisionMakerTitle || "Event Coordinator"}</p>
+                              <p><strong>Role:</strong> {lead.decisionMakerTitle || "Event Operations Lead"}</p>
                             </div>
                             <div>
-                              <p><strong>Email:</strong> <span className="text-white font-mono">{lead.decisionMakerEmail || lead.organiserEmail || "eventsroyaltouch7@gmail.com"}</span></p>
-                              <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{lead.organiserPhone || "+254 795 365 334"}</span></p>
+                              <p><strong>Email:</strong> <span className="text-white font-mono truncate block">{lead.decisionMakerEmail || lead.organiserEmail || "No Direct Email"}</span></p>
+                              <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{lead.organiserPhone}</span></p>
                             </div>
                           </div>
                         </div>
@@ -1797,7 +1797,7 @@ export function AdminAI() {
             <div className="space-y-3 text-xs">
               <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
                 <p><strong>Decision Maker:</strong> <span className="text-white font-bold">{selectedMessagingLead.contact?.name || 'Executive Chair'}</span> ({selectedMessagingLead.contact?.designation || 'Coordinator'})</p>
-                <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{selectedMessagingLead.contact?.phone || '+254 795 365 334'}</span> | <strong>Email:</strong> <span className="text-white font-mono">{selectedMessagingLead.contact?.email || 'eventsroyaltouch7@gmail.com'}</span></p>
+                <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{selectedMessagingLead.contact?.phone || 'Contact on File'}</span> | <strong>Email:</strong> <span className="text-white font-mono">{selectedMessagingLead.contact?.email || 'eventsroyaltouch7@gmail.com'}</span></p>
               </div>
 
               <div>
