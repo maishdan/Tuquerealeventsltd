@@ -64,9 +64,16 @@ import {
   Receipt,
   MessageSquare,
   Send,
-  Printer
+  Printer,
+  Copy,
+  Check
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  TOQUEREAL_LEADS_MASTER_DATA,
+  TOQUEREAL_SEARCH_CONTROL_DATA,
+  type ToqueLeadRecord,
+} from "@/lib/toquereal-leads-data";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -184,6 +191,39 @@ export function AdminAI() {
       },
     },
   ]);
+
+  // VERSION 2 LEADS DATABASE STATES
+  const [activeAiVersion, setActiveAiVersion] = useState<"v1" | "v2">("v2");
+  const [v2SearchQuery, setV2SearchQuery] = useState("");
+  const [v2Campaign, setV2Campaign] = useState("All");
+  const [v2EmailStatus, setV2EmailStatus] = useState("All");
+  const [v2Tab, setV2Tab] = useState<"leads" | "search_control">("leads");
+  const [copiedIcebreakerId, setCopiedIcebreakerId] = useState<string | null>(null);
+
+  const filteredV2Leads = TOQUEREAL_LEADS_MASTER_DATA.filter((lead) => {
+    const q = v2SearchQuery.toLowerCase();
+    const matchesSearch =
+      !q ||
+      lead.eventName.toLowerCase().includes(q) ||
+      lead.organiser.toLowerCase().includes(q) ||
+      lead.city.toLowerCase().includes(q) ||
+      (lead.venue && lead.venue.toLowerCase().includes(q)) ||
+      (lead.decisionMakerName && lead.decisionMakerName.toLowerCase().includes(q)) ||
+      (lead.decisionMakerEmail && lead.decisionMakerEmail.toLowerCase().includes(q));
+
+    const matchesCampaign = v2Campaign === "All" || lead.campaign.toLowerCase() === v2Campaign.toLowerCase();
+    const matchesEmailStatus = v2EmailStatus === "All" || lead.emailStatus === v2EmailStatus;
+
+    return matchesSearch && matchesCampaign && matchesEmailStatus;
+  });
+
+  const handleCopyIcebreaker = (id: string, text: string) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedIcebreakerId(id);
+    showToast("✓ Copied AI Outreach Icebreaker to Clipboard!");
+    setTimeout(() => setCopiedIcebreakerId(null), 2000);
+  };
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
@@ -613,6 +653,160 @@ export function AdminAI() {
     showToast("✓ Downloaded Word Document Batch Report!");
   };
 
+  // VERSION 2 BATCH EXPORTER ENGINES
+  const exportV2LeadsToPdf = () => {
+    const printWin = window.open("", "_blank");
+    if (!printWin) return;
+
+    const itemsHtml = filteredV2Leads.map((lead, idx) => `
+      <div style="border: 2px solid #222; padding: 18px; margin-bottom: 20px; border-radius: 8px; background: #fff; page-break-inside: avoid;">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #d5a637; padding-bottom: 8px; margin-bottom: 12px;">
+          <span style="font-weight: 900; font-size: 14px; color: #b48224;">#${idx + 1} · ${lead.eventType} (${lead.campaign})</span>
+          <span style="background: #111; color: #f4cf69; font-weight: 800; padding: 2px 8px; border-radius: 4px; font-size: 10px;">${lead.fitScore}/10 FIT MATCH</span>
+        </div>
+
+        <h3 style="font-size: 16px; margin: 0 0 10px 0; color: #000;">${lead.eventName}</h3>
+
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 11px;">
+          <tr style="background: #f4f4f4;"><th style="padding: 6px; text-align: left; border: 1px solid #ddd; width: 30%;">Organiser</th><td style="padding: 6px; border: 1px solid #ddd;"><strong>${lead.organiser}</strong></td></tr>
+          <tr><th style="padding: 6px; text-align: left; border: 1px solid #ddd;">Organiser Website</th><td style="padding: 6px; border: 1px solid #ddd; color: #b48224;"><strong>${lead.organiserWebsite || 'Website Missing'}</strong></td></tr>
+          <tr style="background: #f4f4f4;"><th style="padding: 6px; text-align: left; border: 1px solid #ddd;">Decision Maker</th><td style="padding: 6px; border: 1px solid #ddd;"><strong>${lead.decisionMakerName || 'N/A'}</strong> (${lead.decisionMakerTitle || 'N/A'})</td></tr>
+          <tr><th style="padding: 6px; text-align: left; border: 1px solid #ddd;">Decision Maker Email</th><td style="padding: 6px; border: 1px solid #ddd;">${lead.decisionMakerEmail || 'N/A'} [${lead.emailStatus || 'unverified'}]</td></tr>
+          <tr style="background: #f4f4f4;"><th style="padding: 6px; text-align: left; border: 1px solid #ddd;">Event Date & Venue</th><td style="padding: 6px; border: 1px solid #ddd;">Date: ${lead.eventDate || 'N/A'} | Venue: ${lead.venue || 'N/A'}, ${lead.city} (${lead.country})</td></tr>
+        </table>
+
+        ${lead.icebreaker ? `<div style="font-size: 11px; padding: 10px; border-left: 3px solid #b48224; background: #fffdf5;"><strong>AI Outreach Icebreaker:</strong> ${lead.icebreaker}</div>` : ''}
+      </div>
+    `).join("");
+
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>TOQUE REAL LEADS DATABASE V2 — OFFICIAL DOSSIER</title>
+          <style>
+            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 40px; color: #111; }
+            .header { border-bottom: 3px solid #d5a637; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+            .logo { font-size: 22px; font-weight: 900; color: #b48224; letter-spacing: 2px; }
+            .sub { font-size: 11px; color: #666; text-transform: uppercase; }
+            .badge { padding: 4px 10px; background: #111; color: #f4cf69; font-weight: 800; font-size: 11px; text-transform: uppercase; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="logo">♛ TOQUE REAL LEADS DATABASE V2</div>
+              <div class="sub">Excel Lead Intelligence & Direct Outreach Dossier (${filteredV2Leads.length} Leads)</div>
+            </div>
+            <div><span class="badge">VERSION 2 ENGINE</span></div>
+          </div>
+          ${itemsHtml}
+          <script>window.onload = function() { window.print(); }</script>
+        </body>
+      </html>
+    `;
+
+    printWin.document.write(html);
+    printWin.document.close();
+    showToast("✓ Generated Version 2 PDF Lead Report!");
+  };
+
+  const exportV2LeadsToExcel = () => {
+    const headers = [
+      "Event Name",
+      "Event Type",
+      "Event Date",
+      "Venue",
+      "City",
+      "Country",
+      "Organiser",
+      "Organiser Website",
+      "Organiser Email",
+      "Organiser Phone",
+      "Fit Score",
+      "Campaign",
+      "Decision Maker Name",
+      "Decision Maker Title",
+      "Decision Maker Email",
+      "Email Status",
+      "AI Outreach Icebreaker",
+    ];
+
+    const rows = filteredV2Leads.map((lead) => [
+      lead.eventName,
+      lead.eventType,
+      lead.eventDate || "N/A",
+      lead.venue || "N/A",
+      lead.city,
+      lead.country,
+      lead.organiser,
+      lead.organiserWebsite || "N/A",
+      lead.organiserEmail || "N/A",
+      lead.organiserPhone || "N/A",
+      lead.fitScore,
+      lead.campaign,
+      lead.decisionMakerName || "N/A",
+      lead.decisionMakerTitle || "N/A",
+      lead.decisionMakerEmail || "N/A",
+      lead.emailStatus || "N/A",
+      lead.icebreaker || "",
+    ]);
+
+    const csvData = [
+      ["TOQUE REAL LEADS DATABASE V2 — EXCEL ENGINE BATCH EXPORT"],
+      [""],
+      headers,
+      ...rows,
+    ];
+
+    const csvContent = "data:text/csv;charset=utf-8," + csvData.map((e) => e.map((val) => `"${String(val).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `ToqueReal_Leads_Database_v2_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("✓ Downloaded Version 2 Excel CSV Spreadsheet!");
+  };
+
+  const exportV2LeadsToWord = () => {
+    const itemsHtml = filteredV2Leads.map((lead, idx) => `
+      <h3>#${idx + 1} · ${lead.eventName} (${lead.campaign})</h3>
+      <table border="1" cellpadding="6" cellspacing="0" style="width:100%; font-size:10pt; border-collapse:collapse; margin-bottom:15px;">
+        <tr><th style="background:#eee; text-align:left; width:30%;">Organiser</th><td><b>${lead.organiser}</b></td></tr>
+        <tr><th style="background:#eee; text-align:left;">Website</th><td>${lead.organiserWebsite || 'N/A'}</td></tr>
+        <tr><th style="background:#eee; text-align:left;">Decision Maker</th><td><b>${lead.decisionMakerName || 'N/A'}</b> (${lead.decisionMakerTitle || 'N/A'})</td></tr>
+        <tr><th style="background:#eee; text-align:left;">Decision Maker Email</th><td>${lead.decisionMakerEmail || 'N/A'} [${lead.emailStatus || 'N/A'}]</td></tr>
+        <tr><th style="background:#eee; text-align:left;">Event Date & Location</th><td>${lead.eventDate || 'N/A'} — ${lead.venue || 'N/A'}, ${lead.city} (${lead.country})</td></tr>
+        <tr><th style="background:#eee; text-align:left;">Fit Score</th><td><b>${lead.fitScore}/10</b></td></tr>
+      </table>
+      ${lead.icebreaker ? `<p><b>AI Outreach Icebreaker:</b> ${lead.icebreaker}</p>` : ''}
+      <br/>
+    `).join("");
+
+    const htmlContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head><title>TOQUE REAL Leads Database v2</title></head>
+      <body>
+        <h2>♛ TOQUE REAL LEADS DATABASE V2 (Excel Engine Report)</h2>
+        <p>Total Leads Exported: ${filteredV2Leads.length}</p>
+        ${itemsHtml}
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff' + htmlContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ToqueReal_Leads_Database_v2_${Date.now()}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("✓ Downloaded Version 2 Word Document!");
+  };
+
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
       {/* Toast Notification */}
@@ -830,14 +1024,436 @@ export function AdminAI() {
 
           {/* MAIN AI CONTENT AREA */}
           <main className="p-6 lg:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
-            {/* AI SCANNER INPUT & LOCATION DROPDOWN PANEL (SUPPORTS TINIEST MICRO-EVENTS) */}
-            <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4">
-              <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
-                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Sparkles className="text-[#f4cf69]" /> AI Lead Research & Micro-Event Scanner
-                </h3>
-                <span className="text-xs text-[#f4cf69] font-mono font-bold">47 Counties & Global Coverage</span>
+            {/* VERSION SELECTOR HEADER */}
+            <div className="p-5 bg-[#081522] border-2 border-[#f4cf69]/50 rounded-2xl flex flex-wrap items-center justify-between gap-4 shadow-2xl">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-widest font-mono">
+                    TOQUE REAL AI INTELLIGENCE ENGINE
+                  </span>
+                  <span className="px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[9px] uppercase">
+                    ONLINE & ACTIVE
+                  </span>
+                </div>
+                <h2 className="text-lg font-black uppercase text-white tracking-wider font-serif mt-0.5">
+                  Executive AI Lead Discovery & Excel Database Hub
+                </h2>
               </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveAiVersion("v2")}
+                  className={cn(
+                    "px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg",
+                    activeAiVersion === "v2"
+                      ? "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black scale-105"
+                      : "bg-[#0c1a28] text-[#899cb0] border border-[#203548] hover:text-white"
+                  )}
+                >
+                  <FileSpreadsheet size={16} /> Version 2: ToqueReal Leads Database (Excel Engine)
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveAiVersion("v1")}
+                  className={cn(
+                    "px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer shadow-lg",
+                    activeAiVersion === "v1"
+                      ? "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black scale-105"
+                      : "bg-[#0c1a28] text-[#899cb0] border border-[#203548] hover:text-white"
+                  )}
+                >
+                  <Zap size={16} /> Version 1: Real-Time Scanner
+                </button>
+              </div>
+            </div>
+
+            {/* VERSION 2 LEADS DATABASE DASHBOARD (TOQUEREAL LEADS DATABASE.XLSX) */}
+            {activeAiVersion === "v2" && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                {/* VERSION 2 KPI STATS BAR */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="p-5 bg-[#081522] border-2 border-[#f4cf69]/50 rounded-2xl shadow-xl space-y-1">
+                    <div className="flex items-center justify-between text-[#f4cf69]">
+                      <span className="text-[10px] font-black uppercase font-mono tracking-wider">Excel Database Leads</span>
+                      <FileSpreadsheet size={18} />
+                    </div>
+                    <div className="text-2xl font-black text-white font-mono">{TOQUEREAL_LEADS_MASTER_DATA.length}</div>
+                    <p className="text-[10px] text-[#899cb0] font-mono">High-Value Commercial & Corporate Leads</p>
+                  </div>
+
+                  <div className="p-5 bg-[#081522] border-2 border-emerald-500/50 rounded-2xl shadow-xl space-y-1">
+                    <div className="flex items-center justify-between text-emerald-400">
+                      <span className="text-[10px] font-black uppercase font-mono tracking-wider">Verified Decision Makers</span>
+                      <UserCheck size={18} />
+                    </div>
+                    <div className="text-2xl font-black text-white font-mono">
+                      {TOQUEREAL_LEADS_MASTER_DATA.filter((l) => l.emailStatus === "valid").length}
+                    </div>
+                    <p className="text-[10px] text-[#899cb0] font-mono">Direct Valid Emails Available</p>
+                  </div>
+
+                  <div className="p-5 bg-[#081522] border-2 border-blue-500/50 rounded-2xl shadow-xl space-y-1">
+                    <div className="flex items-center justify-between text-blue-400">
+                      <span className="text-[10px] font-black uppercase font-mono tracking-wider">Search Query Trails</span>
+                      <Search size={18} />
+                    </div>
+                    <div className="text-2xl font-black text-white font-mono">999 Logs</div>
+                    <p className="text-[10px] text-[#899cb0] font-mono">SEARCH CONTROL Matrix Queries</p>
+                  </div>
+
+                  <div className="p-5 bg-[#081522] border-2 border-purple-500/50 rounded-2xl shadow-xl space-y-1">
+                    <div className="flex items-center justify-between text-purple-400">
+                      <span className="text-[10px] font-black uppercase font-mono tracking-wider">Regional Coverage</span>
+                      <Globe size={18} />
+                    </div>
+                    <div className="text-2xl font-black text-white font-mono">5 Nations</div>
+                    <p className="text-[10px] text-[#899cb0] font-mono">Kenya, Uganda, Tanzania, Rwanda, Ethiopia</p>
+                  </div>
+                </div>
+
+                {/* VERSION 2 CONTROL & FILTER BAR */}
+                <div className="p-5 bg-[#081522] border border-[#203348] rounded-2xl space-y-4 shadow-2xl">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1f3246] pb-3">
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setV2Tab("leads")}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                          v2Tab === "leads" ? "bg-[#f4cf69] text-black font-black" : "bg-[#0c1a28] text-[#899cb0] border border-[#203548]"
+                        )}
+                      >
+                        Verified Leads ({filteredV2Leads.length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setV2Tab("search_control")}
+                        className={cn(
+                          "px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer",
+                          v2Tab === "search_control" ? "bg-[#f4cf69] text-black font-black" : "bg-[#0c1a28] text-[#899cb0] border border-[#203548]"
+                        )}
+                      >
+                        SEARCH CONTROL Logs ({TOQUEREAL_SEARCH_CONTROL_DATA.length})
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={exportV2LeadsToPdf}
+                        className="px-3.5 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase hover:bg-[#1f354c] cursor-pointer flex items-center gap-1.5 shadow"
+                      >
+                        <FileText size={13} /> PDF Dossier
+                      </button>
+                      <button
+                        onClick={exportV2LeadsToExcel}
+                        className="px-3.5 py-1.5 rounded-lg bg-[#142637] border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase hover:bg-[#1f354c] cursor-pointer flex items-center gap-1.5 shadow"
+                      >
+                        <FileSpreadsheet size={13} /> Excel CSV
+                      </button>
+                      <button
+                        onClick={exportV2LeadsToWord}
+                        className="px-3.5 py-1.5 rounded-lg bg-[#142637] border border-blue-500/50 text-blue-400 text-xs font-bold uppercase hover:bg-[#1f354c] cursor-pointer flex items-center gap-1.5 shadow"
+                      >
+                        <FileCode size={13} /> Word Doc
+                      </button>
+                    </div>
+                  </div>
+
+                  {v2Tab === "leads" && (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                      {/* Search Input */}
+                      <div>
+                        <label className="block font-bold text-[#899cb0] uppercase mb-1">Search Lead Name / Decision Maker *</label>
+                        <input
+                          type="text"
+                          value={v2SearchQuery}
+                          onChange={(e) => setV2SearchQuery(e.target.value)}
+                          placeholder="Type event name, company, email..."
+                          className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white placeholder:text-[#5a6e82] focus:border-[#f4cf69] focus:outline-none"
+                        />
+                      </div>
+
+                      {/* Campaign Filter */}
+                      <div>
+                        <label className="block font-bold text-[#899cb0] uppercase mb-1">Campaign Category *</label>
+                        <select
+                          value={v2Campaign}
+                          onChange={(e) => setV2Campaign(e.target.value)}
+                          className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none cursor-pointer"
+                        >
+                          <option value="All">All Campaigns ({TOQUEREAL_LEADS_MASTER_DATA.length})</option>
+                          <option value="Corporate Q4">Corporate Q4</option>
+                          <option value="AGMs">AGMs</option>
+                          <option value="Brand Launches">Brand Launches</option>
+                          <option value="Industry Campaigns">Industry Campaigns</option>
+                          <option value="Organiser Discovery">Organiser Discovery</option>
+                          <option value="Private and Social Events">Private & Social Events</option>
+                        </select>
+                      </div>
+
+                      {/* Email Status Filter */}
+                      <div>
+                        <label className="block font-bold text-[#899cb0] uppercase mb-1">Decision Maker Email Status *</label>
+                        <select
+                          value={v2EmailStatus}
+                          onChange={(e) => setV2EmailStatus(e.target.value)}
+                          className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none cursor-pointer"
+                        >
+                          <option value="All">All Email Statuses</option>
+                          <option value="valid">Valid Direct Email Only</option>
+                          <option value="not_found">Email Not Found</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* V2 TAB 1: 35 VERIFIED LEADS GRID */}
+                {v2Tab === "leads" && (
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    {filteredV2Leads.map((lead) => (
+                      <div key={lead.id} className="p-6 bg-[#081522] border-2 border-[#203348] hover:border-[#f4cf69] rounded-2xl shadow-2xl space-y-4 transition-all">
+                        {/* Title & Fit Score */}
+                        <div className="flex justify-between items-start gap-4 border-b border-[#1d3043] pb-3">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="px-2.5 py-0.5 rounded bg-[#f4cf69]/20 border border-[#f4cf69]/40 text-[#f4cf69] font-mono text-[9px] font-black uppercase">
+                                {lead.campaign}
+                              </span>
+                              <span className="text-[10px] text-[#899cb0] font-mono">{lead.eventType}</span>
+                            </div>
+                            <h4 className="text-base font-black text-white leading-snug mt-1">{lead.eventName}</h4>
+                          </div>
+                          <span className="px-3 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 font-mono font-black text-xs shrink-0">
+                            {lead.fitScore}/10 FIT MATCH
+                          </span>
+                        </div>
+
+                        {/* Organiser & Website */}
+                        <div className="p-3.5 bg-[#0c1a28] border border-[#1b2f40] rounded-xl text-xs space-y-1.5 font-sans">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#899cb0] font-bold">Hosting Organiser:</span>
+                            <span className="text-white font-bold">{lead.organiser}</span>
+                          </div>
+
+                          <div className="flex justify-between items-center">
+                            <span className="text-[#899cb0] font-bold">Official Website:</span>
+                            {lead.organiserWebsite ? (
+                              <a
+                                href={lead.organiserWebsite}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-[#f4cf69] font-mono font-bold hover:underline inline-flex items-center gap-1"
+                              >
+                                <Globe size={12} /> {lead.organiserWebsite.replace(/^https?:\/\//, "").replace(/\/$/, "")} <ExternalLink size={10} />
+                              </a>
+                            ) : (
+                              <span className="px-2 py-0.5 bg-[#422e0e] text-[#f4cf69] text-[9px] font-black uppercase rounded border border-[#f4cf69]/40">
+                                Website Missing (Offline)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Date & Location */}
+                        <div className="grid grid-cols-2 gap-3 text-xs font-mono">
+                          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+                            <span className="text-[#899cb0] text-[10px] block uppercase flex items-center gap-1"><Calendar size={11} /> Event Date</span>
+                            <span className="text-white font-bold block">{lead.eventDate || "TBA / Q4 2026"}</span>
+                            <span className="text-emerald-400 text-[10px] block">{lead.estimatedAttendance || "500+ Expected"}</span>
+                          </div>
+
+                          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+                            <span className="text-[#899cb0] text-[10px] block uppercase flex items-center gap-1"><MapPin size={11} /> Location & Venue</span>
+                            <span className="text-white font-bold block truncate">{lead.venue || "Premier Venue"}</span>
+                            <span className="text-[#f4cf69] text-[10px] block">{lead.city}, {lead.country}</span>
+                          </div>
+                        </div>
+
+                        {/* Decision Maker Card */}
+                        <div className="p-4 bg-[#0d1f2e] border border-[#1d3548] rounded-xl space-y-2 text-xs">
+                          <div className="flex justify-between items-center border-b border-[#1b2f40] pb-1.5">
+                            <span className="font-bold uppercase text-[#f4cf69] flex items-center gap-1.5 text-[11px]">
+                              <UserCheck size={14} /> Decision Maker
+                            </span>
+                            <span className={cn(
+                              "px-2 py-0.5 rounded text-[9px] font-mono font-black uppercase",
+                              lead.emailStatus === "valid"
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-400/40"
+                                : "bg-rose-500/20 text-rose-400 border border-rose-400/40"
+                            )}>
+                              {lead.emailStatus === "valid" ? "✓ VALID EMAIL" : "EMAIL NOT FOUND"}
+                            </span>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-2 text-[#c0d1e0]">
+                            <div>
+                              <p><strong>Name:</strong> <span className="text-white font-bold">{lead.decisionMakerName || "Procurement Lead"}</span></p>
+                              <p><strong>Role:</strong> {lead.decisionMakerTitle || "Event Coordinator"}</p>
+                            </div>
+                            <div>
+                              <p><strong>Email:</strong> <span className="text-white font-mono">{lead.decisionMakerEmail || lead.organiserEmail || "eventsroyaltouch7@gmail.com"}</span></p>
+                              <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{lead.organiserPhone || "+254 795 365 334"}</span></p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* AI Outreach Icebreaker Box */}
+                        {lead.icebreaker && (
+                          <div className="p-3.5 bg-[#091826] border border-[#f4cf69]/30 rounded-xl space-y-2 text-xs">
+                            <div className="flex justify-between items-center">
+                              <span className="font-black uppercase text-[#f4cf69] text-[10px] flex items-center gap-1">
+                                <Sparkles size={12} /> Excel AI Outreach Icebreaker Template
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => handleCopyIcebreaker(lead.id, lead.icebreaker!)}
+                                className="px-2.5 py-1 bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-[9px] font-bold uppercase rounded hover:bg-[#1f354c] cursor-pointer flex items-center gap-1"
+                              >
+                                {copiedIcebreakerId === lead.id ? "✓ Copied!" : "📋 Copy Icebreaker"}
+                              </button>
+                            </div>
+                            <p className="text-[#d5e2f0] leading-relaxed italic text-[11px] font-sans">
+                              "{lead.icebreaker}"
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Card Actions */}
+                        <div className="pt-2 border-t border-[#1d3043] flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => openMessagingModal({
+                                title: lead.eventName,
+                                organization: lead.organiser,
+                                contact: {
+                                  name: lead.decisionMakerName,
+                                  designation: lead.decisionMakerTitle,
+                                  email: lead.decisionMakerEmail || lead.organiserEmail,
+                                  phone: lead.organiserPhone,
+                                },
+                              })}
+                              className="px-3 py-2 rounded-xl bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                            >
+                              <MessageSquare size={14} /> Quick Pitch
+                            </button>
+
+                            <button
+                              onClick={() => openInvoiceModal({
+                                title: lead.eventName,
+                                organization: lead.organiser,
+                                publishedBudget: 1500000,
+                                contact: {
+                                  name: lead.decisionMakerName,
+                                  designation: lead.decisionMakerTitle,
+                                  email: lead.decisionMakerEmail || lead.organiserEmail,
+                                  phone: lead.organiserPhone,
+                                },
+                              })}
+                              className="px-3 py-2 rounded-xl bg-[#142637] border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1.5 shadow"
+                            >
+                              <Receipt size={14} /> Generate Invoice
+                            </button>
+                          </div>
+
+                          <button
+                            onClick={() => handleSaveLeadToDb({
+                              id: lead.id,
+                              title: lead.eventName,
+                              organization: lead.organiser,
+                              organizationWebsite: lead.organiserWebsite,
+                              contact: {
+                                name: lead.decisionMakerName,
+                                phone: lead.organiserPhone,
+                                email: lead.decisionMakerEmail || lead.organiserEmail,
+                              },
+                              type: lead.eventType,
+                              publishedBudget: 1500000,
+                              score: lead.fitScore * 10,
+                              companyNotes: lead.qualificationReason,
+                            })}
+                            disabled={savedLeadIds[lead.id]}
+                            className={cn(
+                              "px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer shadow-md",
+                              savedLeadIds[lead.id]
+                                ? "bg-emerald-600 text-white"
+                                : "bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black hover:scale-105"
+                            )}
+                          >
+                            {savedLeadIds[lead.id] ? "✓ Saved to CRM" : "+ Save Lead"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* V2 TAB 2: SEARCH CONTROL LOG MATRIX TABLE */}
+                {v2Tab === "search_control" && (
+                  <div className="p-6 bg-[#081522] border border-[#203348] rounded-2xl space-y-4 shadow-2xl overflow-x-auto">
+                    <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-[#f4cf69]">SEARCH CONTROL LOG MATRIX</span>
+                        <h3 className="text-base font-black uppercase text-white">ToqueReal Excel Query Executions</h3>
+                      </div>
+                      <span className="text-xs text-[#899cb0] font-mono">999 Query Log Records</span>
+                    </div>
+
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="border-b border-[#1f3246] text-[#f4cf69] font-mono uppercase text-[10px]">
+                          <th className="p-3">ID</th>
+                          <th className="p-3">Campaign</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Search Query Niche</th>
+                          <th className="p-3">Location</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3">Status Notes</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#172530] text-[#c7d0da] font-sans">
+                        {TOQUEREAL_SEARCH_CONTROL_DATA.map((sc) => (
+                          <tr key={sc.id} className="hover:bg-[#0c1a28] transition-colors">
+                            <td className="p-3 font-mono font-bold text-white">#{sc.id}</td>
+                            <td className="p-3 font-bold text-[#f4cf69]">{sc.campaign}</td>
+                            <td className="p-3">
+                              <span className="px-2 py-0.5 rounded bg-[#142637] text-slate-200 font-mono text-[10px] font-bold">
+                                {sc.searchType}
+                              </span>
+                            </td>
+                            <td className="p-3 font-semibold text-white">{sc.query}</td>
+                            <td className="p-3 font-mono text-[#899cb0]">{sc.location}</td>
+                            <td className="p-3">
+                              <span className={cn(
+                                "px-2 py-0.5 rounded font-mono text-[9px] font-black uppercase",
+                                sc.status === "completed" ? "bg-emerald-500/20 text-emerald-400" : sc.status === "ready" ? "bg-blue-500/20 text-blue-400" : "bg-rose-500/20 text-rose-400"
+                              )}>
+                                {sc.status}
+                              </span>
+                            </td>
+                            <td className="p-3 text-[11px] text-[#899cb0]">{sc.statusNotes || "Execution logged"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* VERSION 1 REAL-TIME SCANNER PANEL */}
+            {activeAiVersion === "v1" && (
+              <div className="space-y-6 animate-in fade-in duration-300">
+                {/* AI SCANNER INPUT & LOCATION DROPDOWN PANEL (SUPPORTS TINIEST MICRO-EVENTS) */}
+                <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4">
+                  <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
+                    <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
+                      <Sparkles className="text-[#f4cf69]" /> AI Lead Research & Micro-Event Scanner
+                    </h3>
+                    <span className="text-xs text-[#f4cf69] font-mono font-bold">47 Counties & Global Coverage</span>
+                  </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs">
                 {/* Kenya 47 Counties Dropdown */}
@@ -1097,6 +1713,8 @@ export function AdminAI() {
                 ))}
               </div>
             </div>
+            </div>
+            )}
           </main>
         </div>
       </div>
