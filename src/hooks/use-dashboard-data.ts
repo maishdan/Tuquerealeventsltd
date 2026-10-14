@@ -221,7 +221,7 @@ export function useUpdateTicketStatus() {
 export function useUpdateBookingStatus() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, status }: { id: status: BookingStatus }) => updateBookingStatus(id, status),
+    mutationFn: ({ id, status }: { id: string; status: BookingStatus }) => updateBookingStatus(id, status),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "bookings"] });
       qc.invalidateQueries({ queryKey: ["customer", "bookings"] });

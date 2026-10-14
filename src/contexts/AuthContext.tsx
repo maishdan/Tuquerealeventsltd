@@ -33,11 +33,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
       uid === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
       email === "eventsroyaltouch7@gmail.com" ||
+      email === "maishdan4940@gmail.com" ||
       email === "abigaelmuthoni29@gmail.com" ||
       appRole === "admin" ||
       metaRoleVal === "admin" ||
       p?.role === "admin"
     );
+  };
+
+  const resolveFullNameForUser = (uEmail?: string | null, userMetaName?: string | null, pName?: string | null): string => {
+    if (pName && pName.trim().length > 0) return pName.trim();
+    if (userMetaName && userMetaName.trim().length > 0) return userMetaName.trim();
+
+    const email = (uEmail || "").toLowerCase();
+    if (email === "eventsroyaltouch7@gmail.com") return "Japheth Owiyo";
+    if (email === "maishdan4940@gmail.com") return "Dan Maish";
+    if (email === "abigaelmuthoni29@gmail.com") return "DANIWEST";
+    if (email) {
+      const prefix = email.split("@")[0];
+      return prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    }
+    return "User";
   };
 
   const loadProfile = async (u: User) => {
@@ -51,10 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isAdmin = isAdminUser(u, p);
     const computedRole: UserRole = isAdmin ? "admin" : (p?.role ?? (u.app_metadata?.role === "admin" ? "admin" : "customer"));
 
-    const resolvedFullName =
-      p?.full_name ||
-      u.user_metadata?.full_name ||
-      (u.email === "eventsroyaltouch7@gmail.com" ? "Japheth Owiyo" : u.email === "abigaelmuthoni29@gmail.com" ? "DANIWEST" : "User");
+    const resolvedFullName = resolveFullNameForUser(u.email, u.user_metadata?.full_name, p?.full_name);
 
     setProfile({
       id: u.id,
@@ -104,10 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const isAdmin = isAdminUser(data.user, p);
     const role: UserRole = isAdmin ? "admin" : (p?.role ?? (data.user.app_metadata?.role === "admin" ? "admin" : "customer"));
 
-    const resolvedFullName =
-      p?.full_name ||
-      data.user.user_metadata?.full_name ||
-      (data.user.email === "eventsroyaltouch7@gmail.com" ? "Japheth Owiyo" : data.user.email === "abigaelmuthoni29@gmail.com" ? "DANIWEST" : "User");
+    const resolvedFullName = resolveFullNameForUser(data.user.email, data.user.user_metadata?.full_name, p?.full_name);
 
     const finalProfile: Profile = {
       id: data.user.id,
@@ -139,7 +149,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setProfile(null);
       setSession(null);
-      // Force navigation to login page is handled by individual components calling navigate
     }
   };
 

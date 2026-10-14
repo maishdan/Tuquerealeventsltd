@@ -49,12 +49,20 @@ export function AdminTeam() {
     setTimeout(() => setToastMsg(null), 2500);
   };
 
-  const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
+  const userInitials = profile?.full_name ? profile.full_name.split(" ").filter(Boolean).map((n) => n[0]).join("").toUpperCase() : (user?.email ? user.email.slice(0, 2).toUpperCase() : "AD");
 
   // Build live team roster from Supabase profiles database
   const allTeamProfiles = [...profiles];
 
   const defaultTeam = [
+    {
+      id: "usr-admin-maishdan",
+      email: "maishdan4940@gmail.com",
+      full_name: "Dan Maish",
+      role: "admin" as const,
+      title: "Executive Admin",
+      created_at: "2026-07-29T00:00:00.000Z",
+    },
     {
       id: "usr-ceo-japheth",
       email: "eventsroyaltouch7@gmail.com",

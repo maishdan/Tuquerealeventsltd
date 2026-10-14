@@ -67,6 +67,9 @@ function ProfilePage() {
     if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
       return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
     }
+    if (emailLower === "maishdan4940@gmail.com" || rawName.toLowerCase().includes("maishdan") || rawName.toLowerCase().includes("dan maish")) {
+      return { fullName: rawName || "Dan Maish", badge: "EXECUTIVE ADMIN" };
+    }
     if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
       return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
     }
@@ -82,8 +85,8 @@ function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Form States
-  const [fullName, setFullName] = useState(profile?.full_name || "Japheth Owiyo");
-  const [phone, setPhone] = useState(profile?.phone || "+254 795 365 334");
+  const [fullName, setFullName] = useState(profile?.full_name || adminInfo.fullName);
+  const [phone, setPhone] = useState(profile?.phone || "");
   const [city, setCity] = useState(profile?.city || "Nairobi");
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || "");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -485,12 +488,12 @@ function ProfilePage() {
                     </div>
 
                     <h1 className="text-2xl sm:text-3xl font-black font-serif tracking-tight text-white drop-shadow-md">
-                      {fullName || "Japheth Owiyo"}
+                      {fullName || adminInfo.fullName}
                     </h1>
 
                     <div className="flex flex-wrap gap-4 text-xs text-[#98a7b7] font-medium font-mono pt-1">
-                      <span>✉ {profile?.email || user?.email || "eventsroyaltouch7@gmail.com"}</span>
-                      <span> {phone}</span>
+                      <span>✉ {profile?.email || user?.email || "admin@royaltouchevents.co.ke"}</span>
+                      {phone && <span> {phone}</span>}
                       <span>{city}, Kenya</span>
                     </div>
                   </div>

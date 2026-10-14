@@ -89,8 +89,9 @@ export function AdminFloatingAIChatbot() {
   const adminExactName = (() => {
     if (rawName && rawName.trim().length > 0) return rawName.trim();
     if (emailLower.includes("eventsroyaltouch7@gmail.com")) return "Japheth Owiyo";
+    if (emailLower.includes("maishdan4940@gmail.com")) return "Dan Maish";
     if (emailLower.includes("abigaelmuthoni29@gmail.com")) return "Daniwest";
-    return "Japheth Owiyo";
+    return emailLower ? emailLower.split("@")[0] : "Admin";
   })();
 
   const [messages, setMessages] = useState<ChatMessage[]>([

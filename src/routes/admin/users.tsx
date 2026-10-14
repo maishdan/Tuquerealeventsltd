@@ -68,6 +68,9 @@ function AdminUsers() {
     if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
       return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
     }
+    if (emailLower === "maishdan4940@gmail.com" || rawName.toLowerCase().includes("maishdan") || rawName.toLowerCase().includes("dan maish")) {
+      return { fullName: rawName || "Dan Maish", badge: "EXECUTIVE ADMIN" };
+    }
     if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
       return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
     }
@@ -238,6 +241,13 @@ function AdminUsers() {
   const allProfiles = [...profiles];
 
   const defaultProtected = [
+    {
+      id: "usr-admin-maishdan",
+      email: "maishdan4940@gmail.com",
+      full_name: "Dan Maish",
+      role: "admin" as const,
+      created_at: "2026-07-29T00:00:00.000Z",
+    },
     {
       id: "usr-ceo-japheth",
       email: "eventsroyaltouch7@gmail.com",

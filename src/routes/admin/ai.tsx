@@ -197,6 +197,9 @@ export function AdminAI() {
     if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
       return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
     }
+    if (emailLower === "maishdan4940@gmail.com" || rawName.toLowerCase().includes("maishdan") || rawName.toLowerCase().includes("dan maish")) {
+      return { fullName: rawName || "Dan Maish", badge: "EXECUTIVE ADMIN" };
+    }
     if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
       return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
     }
@@ -204,9 +207,12 @@ export function AdminAI() {
     return { fullName: fallback, badge: "EXECUTIVE ADMIN" };
   })();
 
-  const userInitials = profile?.full_name
-    ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase()
-    : "JO";
+  const userInitials = (adminInfo.fullName || rawName || emailLower || "AD")
+    .split(" ")
+    .filter(Boolean)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
 
   // Speech Output Engine
   const speakAI = (text: string) => {

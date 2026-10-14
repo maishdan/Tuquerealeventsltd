@@ -80,8 +80,15 @@ export async function fetchAllProfiles() {
   // Active User Accounts Fallback if Supabase table returns empty or RLS restricts
   return [
     {
+      id: "usr-admin-0",
+      email: "maishdan4940@gmail.com",
+      full_name: "Dan Maish",
+      role: "admin",
+      created_at: new Date().toISOString(),
+    },
+    {
       id: "usr-admin-1",
-      email: "realtoque0@gmail.com",
+      email: "eventsroyaltouch7@gmail.com",
       full_name: "Japheth Owiyo",
       role: "admin",
       created_at: new Date().toISOString(),

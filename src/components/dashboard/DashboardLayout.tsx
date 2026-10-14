@@ -86,7 +86,9 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
     return normalizedPath === normalizedTo || normalizedPath.startsWith(`${normalizedTo}/`);
   };
 
-  const userInitials = profile?.full_name ? profile.full_name.split(" ").map(n => n[0]).join("").toUpperCase() : "JO";
+  const userInitials = profile?.full_name
+    ? profile.full_name.split(" ").filter(Boolean).map(n => n[0]).join("").toUpperCase()
+    : (user?.email ? user.email.slice(0, 2).toUpperCase() : "AD");
   const isAdmin = role === "admin";
 
   return (
@@ -225,15 +227,15 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
                       )}
                     </div>
                     <div className="text-left hidden sm:block">
-                      <strong className="block text-xs text-white font-bold">{profile?.full_name || (isAdmin ? "Japheth Owiyo" : "Valued Client")}</strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{isAdmin ? "CEO / ADMINISTRATOR" : "CLIENT / MEMBER"}</small>
+                      <strong className="block text-xs text-white font-bold">{profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}</strong>
+                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{isAdmin ? "ADMINISTRATOR" : "CLIENT / MEMBER"}</small>
                     </div>
                     <ChevronDown size={14} className="text-[#9ba6b3]" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl z-[99999]">
                   <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gold uppercase">
-                    {profile?.full_name || (isAdmin ? "Daniwest" : "Valued Client")}
+                    {profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-[#172533]" />
 
