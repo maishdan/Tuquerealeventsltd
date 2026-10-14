@@ -466,6 +466,8 @@ export function AdminSettings() {
                       <Icon size={14} /> {tab.label}
                     </button>
                   );
+                })}
+
                 {/* Quick Factory Reset Button */}
                 <button
                   type="button"
