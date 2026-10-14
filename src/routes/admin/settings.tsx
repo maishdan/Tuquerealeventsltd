@@ -466,7 +466,15 @@ export function AdminSettings() {
                       <Icon size={14} /> {tab.label}
                     </button>
                   );
-                })}
+                {/* Quick Factory Reset Button */}
+                <button
+                  type="button"
+                  onClick={() => setShowFactoryResetConfirm(true)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer shadow-md bg-rose-600 hover:bg-rose-500 text-white border border-rose-400/40"
+                  title="Reset System to Default Zero State"
+                >
+                  <RotateCcw size={14} /> ⚠️ Factory Reset
+                </button>
               </div>
             </div>
 
