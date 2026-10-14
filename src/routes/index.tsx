@@ -29,6 +29,7 @@ import wedding from "../assets/gallery-wedding.jpg";
 import concert from "../assets/gallery-concert.jpg";
 import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 import { formatKes } from "@/lib/dashboard-mock-data";
+import { useAdminEvents } from "@/hooks/use-dashboard-data";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -295,6 +296,20 @@ const currencies = [
 
 export function Home() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const { data: dbEvents = [] } = useAdminEvents();
+
+  const displayEvents = dbEvents.length > 0
+    ? dbEvents.map((e, idx) => ({
+        id: e.id,
+        title: e.name,
+        category: e.event_type || "Featured Event",
+        date: e.event_date || "2026-11-20",
+        location: e.venue || "Nairobi, Kenya",
+        price: typeof e.budget === "number" ? e.budget : parseInt(String(e.budget || 0).replace(/[^0-9]/g, "")) || 5000,
+        tier: idx === 0 ? "VIP Pass" : idx === 1 ? "Regular Pass" : idx === 2 ? "VVIP All Access" : "Free Public Pass",
+        image: e.image_url || heroImages[idx % heroImages.length],
+      }))
+    : upcomingEventsList;
 
   // Quick Estimator State
   const [estGuests, setEstGuests] = useState<number>(100);
@@ -489,7 +504,7 @@ export function Home() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {upcomingEventsList.map((evt) => (
+            {displayEvents.slice(0, 4).map((evt) => (
               <div
                 key={evt.id}
                 className="bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"

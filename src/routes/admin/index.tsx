@@ -10,7 +10,7 @@ import {
   formatKes
 } from "@/hooks/use-dashboard-data";
 import { useAuth } from "@/contexts/AuthContext";
-import { cn } from "@/lib/utils";
+import { cn, getTimeBasedGreeting } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -311,7 +311,7 @@ export function AdminDashboard() {
                   TOQUE REAL EVENTS LIMITED ADMINISTRATOR
                 </span>
                 <h1 className="text-2xl lg:text-3xl font-black font-serif text-white">
-                  Good Morning, {adminInfo.fullName}
+                  {getTimeBasedGreeting(adminInfo.fullName).greeting}
                 </h1>
                 <p className="text-xs text-[#98a7b7]">
                   Here's how your business is performing today with live database records.

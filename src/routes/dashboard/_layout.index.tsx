@@ -19,7 +19,7 @@ import { EventStatusBadge } from "@/components/dashboard/EventStatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useCustomerBookings, useCustomerEvents, useCustomerMessages } from "@/hooks/use-dashboard-data";
 import type { BookingStatus, EventStatus } from "@/lib/database.types";
-import { cn } from "@/lib/utils";
+import { cn, getTimeBasedGreeting } from "@/lib/utils";
 
 export const Route = createFileRoute("/dashboard/_layout/")({
   component: CustomerOverview,
@@ -39,13 +39,8 @@ function CustomerOverview() {
   const { data: messages = [] } = useCustomerMessages(user?.id);
   const unread = messages.filter((m) => !m.read).length;
 
-  const today = new Date();
-  const hours = today.getHours();
-  let greeting = "Evening";
-  if (hours < 12) greeting = "Morning";
-  else if (hours < 17) greeting = "Afternoon";
-  else if (hours < 21) greeting = "Evening";
-  else greeting = "Night";
+  const userDisplayName = profile?.full_name?.split(' ')[0] || "Valued Client";
+  const dynamicGreeting = getTimeBasedGreeting(userDisplayName).greeting;
 
   return (
     <div className="space-y-6 pb-12">
@@ -64,7 +59,7 @@ function CustomerOverview() {
               <Star size={10} className="fill-gold" /> Premium Member
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground truncate">
-              Good {greeting}, {profile?.full_name?.split(' ')[0] || "Valued Client"}
+              {dynamicGreeting}
             </h2>
             <p className="text-muted-foreground text-xs sm:text-sm mt-1 leading-relaxed">
               Access your personalized Royal Touch event portfolio and management tools.
