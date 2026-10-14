@@ -124,9 +124,9 @@ const serviceSectors = [
   {
     id: "sec-community",
     title: "Community & Private Gatherings",
-    subtitle: "Birthdays, Graduations, Family Events",
+    subtitle: "Graduations, Family Events & Anniversaries",
     icon: Users,
-    img: wedding,
+    img: "/back/e5.jfif",
     badge: "Budget Friendly",
     features: [
       "PA Sound System & Microphones",
@@ -134,6 +134,20 @@ const serviceSectors = [
       "Fair Pricing for Everyday Clients",
     ],
     startingFrom: 15000,
+  },
+  {
+    id: "sec-birthdays",
+    title: "Birthday Extravaganzas & Milestones",
+    subtitle: "Birthdays, Kids, Sweet 16 & Jubilee Celebrations",
+    icon: Sparkles,
+    img: "/back/e8.jpg",
+    badge: "Popular Choice",
+    features: [
+      "Custom Theme Decor & Cake Canopy",
+      "DJ & Intelligent Lighting Rig",
+      "Photo Booth & Live Entertainment",
+    ],
+    startingFrom: 25000,
   },
   {
     id: "sec-corp",
@@ -164,6 +178,62 @@ const serviceSectors = [
     startingFrom: 300000,
   },
   {
+    id: "sec-dowry",
+    title: "Traditional & Cultural Ceremonies",
+    subtitle: "Ruracio, Koito, Itara & Cultural Celebrations",
+    icon: Users,
+    img: "/back/e9.jpg",
+    badge: "Cultural Package",
+    features: [
+      "Traditional Seating & Tent Setup",
+      "Authentic Catering & Beverage Bar",
+      "High-Clarity Sound & Cultural Decor",
+    ],
+    startingFrom: 45000,
+  },
+  {
+    id: "sec-expos",
+    title: "Exhibitions, Expos & Trade Shows",
+    subtitle: "Brand Expos, Auto Shows & Product Displays",
+    icon: Globe,
+    img: "/back/e2.jfif",
+    badge: "Business Expo",
+    features: [
+      "Modular Shell Scheme Booths",
+      "Power & Accent Lighting Distribution",
+      "Digital Visitor QR Check-in System",
+    ],
+    startingFrom: 200000,
+  },
+  {
+    id: "sec-religious",
+    title: "Church, Choir & Spiritual Gatherings",
+    subtitle: "Crusades, Worship Nights & Pastoral Galas",
+    icon: Award,
+    img: "/back/e7.jpg",
+    badge: "Community Outreach",
+    features: [
+      "High-Output Choir Sound Systems",
+      "Stage Lighting & Live Broadcast Screens",
+      "Seating Setup for Large Congregations",
+    ],
+    startingFrom: 50000,
+  },
+  {
+    id: "sec-academic",
+    title: "School & Academic Ceremonies",
+    subtitle: "Proms, Sports Days & Graduation Galas",
+    icon: Award,
+    img: "/back/e1.jfif",
+    badge: "Academic Special",
+    features: [
+      "High-Energy Sound & Stage Lighting",
+      "Student Security & Entry Gate Pass",
+      "Stage Setup & Sound Engineering",
+    ],
+    startingFrom: 35000,
+  },
+  {
     id: "sec-concert",
     title: "Stadium Concerts & Festivals",
     subtitle: "Public Concerts & Festivals",
@@ -176,6 +246,20 @@ const serviceSectors = [
       "Encrypted M-Pesa QR Gate Scanning",
     ],
     startingFrom: 500000,
+  },
+  {
+    id: "sec-tailored",
+    title: "Tailored VIP Soirées & Private Dinners",
+    subtitle: "Bespoke Dinners & Tailored Event Solutions",
+    icon: Star,
+    img: "/back/e3.jfif",
+    badge: "Tailored Solutions",
+    features: [
+      "Fine Dining Setup & Sommelier Service",
+      "Live Acoustic Band / Saxophonist",
+      "Discreet Protocol & Executive Security",
+    ],
+    startingFrom: 80000,
   },
 ];
 
@@ -466,7 +550,7 @@ export function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {serviceSectors.map((sector) => (
               <div
                 key={sector.id}
@@ -575,7 +659,16 @@ export function Home() {
                     Event Category & Level *
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {["Community & Private Gatherings", "Corporate Conferences & AGMs", "Luxury Weddings & Galas", "Stadium Concerts & Festivals"].map((cat) => (
+                    {[
+                      "Community & Private Gatherings",
+                      "Birthday Extravaganzas",
+                      "Corporate Conferences & AGMs",
+                      "Luxury Weddings & Galas",
+                      "Traditional & Cultural",
+                      "Exhibitions & Expos",
+                      "Church & Spiritual",
+                      "Stadium Concerts & Festivals",
+                    ].map((cat) => (
                       <button
                         key={cat}
                         type="button"
