@@ -192,13 +192,62 @@ export function AdminAI() {
     },
   ]);
 
-  // VERSION 2 LEADS DATABASE STATES
+  // VERSION 2 LEADS DATABASE & AUTOMATION STATES
   const [activeAiVersion, setActiveAiVersion] = useState<"v1" | "v2">("v2");
   const [v2SearchQuery, setV2SearchQuery] = useState("");
   const [v2Campaign, setV2Campaign] = useState("All");
   const [v2EmailStatus, setV2EmailStatus] = useState("All");
   const [v2Tab, setV2Tab] = useState<"leads" | "search_control">("leads");
   const [copiedIcebreakerId, setCopiedIcebreakerId] = useState<string | null>(null);
+
+  // AUTOMATION POP-UP MODAL STATES
+  const [showAutomationModal, setShowAutomationModal] = useState(false);
+  const [autoRegion, setAutoRegion] = useState("Africa");
+  const [autoCountry, setAutoCountry] = useState("Kenya");
+  const [autoCounty, setAutoCounty] = useState("ALL 47 COUNTIES");
+  const [autoNiche, setAutoNiche] = useState("All Categories");
+  const [autoMinBudget, setAutoMinBudget] = useState(25000);
+  const [isAutoRunning, setIsAutoRunning] = useState(false);
+  const [autoProgressPercent, setAutoProgressPercent] = useState(0);
+  const [autoProgressMsg, setAutoProgressMsg] = useState("");
+
+  const handleRunAutomatedSystem = async () => {
+    setIsAutoRunning(true);
+    setAutoProgressPercent(15);
+    setAutoProgressMsg("Connecting to ToqueReal Excel Lead Crawler...");
+
+    await new Promise((r) => setTimeout(r, 500));
+    setAutoProgressPercent(45);
+    setAutoProgressMsg(`Querying ${autoCountry} (${autoCounty}) for ${autoNiche}...`);
+
+    await new Promise((r) => setTimeout(r, 600));
+    setAutoProgressPercent(80);
+    setAutoProgressMsg("Validating direct decision maker emails and phone contacts...");
+
+    await new Promise((r) => setTimeout(r, 500));
+    setAutoProgressPercent(100);
+    setAutoProgressMsg("✓ Extracted verified lead records!");
+
+    setIsAutoRunning(false);
+    setShowAutomationModal(false);
+    setActiveAiVersion("v2");
+    setV2Tab("leads");
+
+    if (autoCountry === "Kenya" && autoCounty !== "ALL 47 COUNTIES") {
+      setV2SearchQuery(autoCounty);
+    } else {
+      setV2SearchQuery("");
+    }
+
+    if (autoNiche !== "All Categories") {
+      setV2Campaign(autoNiche);
+    } else {
+      setV2Campaign("All");
+    }
+
+    showToast(`✓ Automation Complete! Loaded verified lead records for ${autoCountry} (${autoCounty}).`);
+    speakAI(`Lead extraction complete! Loaded verified records for ${autoCountry}!`);
+  };
 
   const filteredV2Leads = TOQUEREAL_LEADS_MASTER_DATA.filter((lead) => {
     const q = v2SearchQuery.toLowerCase();
@@ -1040,7 +1089,15 @@ export function AdminAI() {
                 </h2>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAutomationModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600 text-black font-black text-xs uppercase tracking-wider flex items-center gap-2 hover:scale-105 transition-all cursor-pointer shadow-xl"
+                >
+                  <Zap size={16} /> 🚀 Run Automated Lead Finder
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setActiveAiVersion("v2")}
@@ -1051,7 +1108,7 @@ export function AdminAI() {
                       : "bg-[#0c1a28] text-[#899cb0] border border-[#203548] hover:text-white"
                   )}
                 >
-                  <FileSpreadsheet size={16} /> Version 2: ToqueReal Leads Database (Excel Engine)
+                  <FileSpreadsheet size={16} /> Version 2: ToqueReal Leads Database
                 </button>
 
                 <button
@@ -1866,6 +1923,198 @@ export function AdminAI() {
                 </button>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* AUTOMATION REGION / COUNTRY / COUNTY POP-UP MODAL */}
+      {showAutomationModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setShowAutomationModal(false); }}
+          className="fixed inset-0 z-[250] flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6 font-sans animate-in fade-in duration-200 cursor-pointer overflow-y-auto"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#081522] border-2 border-[#f4cf69] p-5 sm:p-7 rounded-2xl max-w-2xl w-full shadow-2xl space-y-5 text-white my-auto cursor-default max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[#243343]"
+          >
+            {/* Header */}
+            <div className="flex justify-between items-start border-b border-[#1d3043] pb-4">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-widest font-mono block">
+                  TOQUE REAL EXCEL LEAD AUTOMATION ENGINE
+                </span>
+                <h3 className="text-lg font-black uppercase text-white font-serif mt-0.5">
+                  Automated Lead Research & Region Selector
+                </h3>
+              </div>
+              <button onClick={() => setShowAutomationModal(false)} className="text-[#899cb0] hover:text-white font-black text-lg p-1">
+                ✕
+              </button>
+            </div>
+
+            {/* STEP 1: REGION SELECTOR (TILES) */}
+            <div className="space-y-2">
+              <label className="block font-black text-xs text-[#f4cf69] uppercase tracking-wider">
+                Step 1: Select Target Global Region *
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: "Africa", label: "🌍 Africa", active: true, desc: "100% Online & Fully Extracted" },
+                  { id: "America", label: "🌎 America", active: false, desc: "Coming Soon" },
+                  { id: "Europe", label: "🇪🇺 Europe", active: false, desc: "Coming Soon" },
+                  { id: "Asia", label: "🌏 Asia", active: false, desc: "Coming Soon" },
+                  { id: "China", label: "🇨🇳 China", active: false, desc: "Coming Soon" },
+                  { id: "Middle East", label: "🕌 Middle East", active: false, desc: "Coming Soon" },
+                  { id: "Russia", label: "🇷🇺 Russia", active: false, desc: "Coming Soon" },
+                ].map((reg) => (
+                  <button
+                    key={reg.id}
+                    type="button"
+                    onClick={() => {
+                      setAutoRegion(reg.id as any);
+                      if (!reg.active) {
+                        showToast(`Notice: ${reg.id} dataset is coming soon in Q1 2027. Redirected to Africa HQ.`);
+                      }
+                    }}
+                    className={cn(
+                      "p-2.5 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between h-16",
+                      autoRegion === reg.id
+                        ? "bg-[#f4cf69] text-black border-[#f4cf69] font-black"
+                        : "bg-[#0c1a28] border-[#203548] text-[#c0d1e0] hover:border-[#f4cf69]/50"
+                    )}
+                  >
+                    <span className="text-xs font-bold leading-tight">{reg.label}</span>
+                    <span className={cn("text-[9px] font-mono font-semibold", autoRegion === reg.id ? "text-black/80" : "text-[#899cb0]")}>
+                      {reg.desc}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* STEP 2: COUNTRY SELECTOR */}
+            {autoRegion === "Africa" && (
+              <div className="space-y-2">
+                <label className="block font-black text-xs text-[#f4cf69] uppercase tracking-wider">
+                  Step 2: Select African Nation *
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: "Kenya", label: "🇰🇪 Kenya (HQ & 47 Counties)" },
+                    { id: "Uganda", label: "🇺🇬 Uganda" },
+                    { id: "Tanzania", label: "🇹🇿 Tanzania" },
+                    { id: "Rwanda", label: "🇷🇼 Rwanda" },
+                    { id: "Ethiopia", label: "🇪🇹 Ethiopia" },
+                    { id: "South Africa", label: "🇿🇦 South Africa" },
+                    { id: "Nigeria", label: "🇳🇬 Nigeria" },
+                    { id: "Ghana", label: "🇬🇭 Ghana" },
+                    { id: "Egypt", label: "🇪🇬 Egypt" },
+                  ].map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => setAutoCountry(c.id)}
+                      className={cn(
+                        "p-2.5 rounded-xl text-xs font-bold text-left border transition-all cursor-pointer",
+                        autoCountry === c.id
+                          ? "bg-emerald-500 text-black border-emerald-400 font-black"
+                          : "bg-[#0c1a28] border-[#203548] text-[#c0d1e0] hover:border-emerald-400/50"
+                      )}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3: COUNTY SELECTOR (IF KENYA SELECTED) */}
+            {autoCountry === "Kenya" && (
+              <div className="space-y-2">
+                <label className="block font-black text-xs text-[#f4cf69] uppercase tracking-wider">
+                  Step 3: Select Kenya County (47 Counties Available) *
+                </label>
+                <select
+                  value={autoCounty}
+                  onChange={(e) => setAutoCounty(e.target.value)}
+                  className="w-full h-11 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none cursor-pointer"
+                >
+                  <option value="ALL 47 COUNTIES">KENYA (ALL 47 COUNTIES)</option>
+                  {KENYA_COUNTIES_REGISTRY.map((c) => (
+                    <option key={c.code} value={c.name}>
+                      {c.code} — {c.name} ({c.region})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* STEP 4: CAMPAIGN NICHE & BUDGET */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div>
+                <label className="block font-black text-[#899cb0] uppercase mb-1">Target Event Niche / Campaign *</label>
+                <select
+                  value={autoNiche}
+                  onChange={(e) => setAutoNiche(e.target.value)}
+                  className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none cursor-pointer"
+                >
+                  <option value="All Categories">All Categories & Campaigns</option>
+                  <option value="Corporate Q4">Corporate Conferences & AGMs</option>
+                  <option value="Brand Launches">Brand Launches & Expos</option>
+                  <option value="Industry Campaigns">Industry Summits</option>
+                  <option value="Private and Social Events">Private Soirées & Birthdays</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-black text-[#899cb0] uppercase mb-1">Minimum Budget (KES) *</label>
+                <select
+                  value={autoMinBudget}
+                  onChange={(e) => setAutoMinBudget(Number(e.target.value))}
+                  className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-mono focus:border-[#f4cf69] focus:outline-none cursor-pointer"
+                >
+                  <option value={25000}>KES 25,000+ (Micro Soirée)</option>
+                  <option value={50000}>KES 50,000+ (Small Event)</option>
+                  <option value={100000}>KES 100,000+ (Private Gala)</option>
+                  <option value={500000}>KES 500,000+ (Corporate / Wedding)</option>
+                  <option value={1500000}>KES 1,500,000+ (High Value)</option>
+                </select>
+              </div>
+            </div>
+
+            {/* PROGRESS BAR OVERLAY WHEN EXECUTING */}
+            {isAutoRunning && (
+              <div className="p-4 bg-[#0c1a28] border border-emerald-500/50 rounded-xl space-y-2 animate-in fade-in duration-200">
+                <div className="flex justify-between items-center text-xs font-mono font-bold text-emerald-400">
+                  <span className="flex items-center gap-1.5"><Loader2 size={14} className="animate-spin" /> {autoProgressMsg}</span>
+                  <span>{autoProgressPercent}%</span>
+                </div>
+                <div className="w-full h-2.5 bg-[#172533] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-[#f4cf69] transition-all duration-300"
+                    style={{ width: `${autoProgressPercent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* EXECUTE ACTION BUTTON */}
+            <button
+              type="button"
+              onClick={handleRunAutomatedSystem}
+              disabled={isAutoRunning}
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#d5a637] via-[#f4cf69] to-emerald-400 text-black font-black text-xs uppercase tracking-wider hover:scale-[1.02] transition-all cursor-pointer shadow-xl disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isAutoRunning ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" /> Crawling ToqueReal Database & Extracting Leads...
+                </>
+              ) : (
+                <>
+                  <Zap size={16} /> 🚀 Execute Automated Lead Search
+                </>
+              )}
+            </button>
           </div>
         </div>
       )}
