@@ -151,6 +151,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
   const isDashboard = pathname.startsWith("/admin") || pathname.startsWith("/dashboard");
   const isHome = pathname === "/";
 
@@ -171,6 +172,11 @@ function RootComponent() {
         <FavoritesProvider>
           <AuthProvider>
             <div className="min-h-screen bg-background text-foreground selection:bg-gold/30">
+              {/* TOP ROUTE TRANSITION PROGRESS BAR */}
+              {isLoading && (
+                <div className="fixed top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#d5a637] via-[#f4cf69] to-emerald-400 z-[999999] animate-pulse" />
+              )}
+
               <div className="relative flex flex-col min-h-screen">
                 {!isDashboard && <Header variant={isHome ? "light" : "dark"} />}
                 <main className={cn("flex-1", !isDashboard && "pt-20")}>
