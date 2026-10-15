@@ -34,7 +34,7 @@ export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
 
-export function AdminDashboard() {
+function AdminDashboard() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

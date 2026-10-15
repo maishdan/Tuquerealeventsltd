@@ -45,7 +45,7 @@ export const Route = createFileRoute("/admin/finance")({
   component: AdminFinance,
 });
 
-export function AdminFinance() {
+function AdminFinance() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: tickets = [], isLoading: loadingTickets } = useAdminTickets();

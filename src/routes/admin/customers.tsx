@@ -47,7 +47,7 @@ export const Route = createFileRoute("/admin/customers")({
   component: AdminCustomers,
 });
 
-export function AdminCustomers() {
+function AdminCustomers() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: initialClients = [], isLoading } = useAdminClients();

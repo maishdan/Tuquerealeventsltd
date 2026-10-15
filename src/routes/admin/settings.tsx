@@ -79,7 +79,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createPageSeo } from "@/lib/seo";
 
-export function AdminSettings() {
+function AdminSettings() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();

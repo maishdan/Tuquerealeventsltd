@@ -33,7 +33,7 @@ export const Route = createFileRoute("/admin/help")({
   component: AdminHelp,
 });
 
-export function AdminHelp() {
+function AdminHelp() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

@@ -73,7 +73,7 @@ export const Route = createFileRoute("/admin/events")({
   component: AdminEvents,
 });
 
-export function AdminEvents() {
+function AdminEvents() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

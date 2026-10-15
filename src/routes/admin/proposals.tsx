@@ -36,7 +36,7 @@ export const Route = createFileRoute("/admin/proposals")({
   component: AdminProposals,
 });
 
-export function AdminProposals() {
+function AdminProposals() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

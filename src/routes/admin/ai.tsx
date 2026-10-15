@@ -100,7 +100,7 @@ export const Route = createFileRoute("/admin/ai")({
   component: AdminAI,
 });
 
-export function AdminAI() {
+function AdminAI() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

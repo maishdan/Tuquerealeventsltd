@@ -46,7 +46,7 @@ export const Route = createFileRoute("/admin/marketing")({
   component: AdminMarketing,
 });
 
-export function AdminMarketing() {
+function AdminMarketing() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

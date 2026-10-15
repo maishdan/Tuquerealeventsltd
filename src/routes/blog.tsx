@@ -102,7 +102,7 @@ const posts = [
 
 const categories = ["All", "Strategy", "Production", "Trends", "Logistics", "Operations"];
 
-export function Blog() {
+function Blog() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");

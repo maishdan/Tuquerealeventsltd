@@ -52,7 +52,7 @@ const schema = z.object({
 
 const phone = "254795365334";
 
-export function Contact() {
+function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");

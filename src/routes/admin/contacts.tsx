@@ -42,7 +42,7 @@ export const Route = createFileRoute("/admin/contacts")({
   component: AdminContacts,
 });
 
-export function AdminContacts() {
+function AdminContacts() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

@@ -31,7 +31,7 @@ export const Route = createFileRoute("/admin/admin-booking")({
   component: AdminBookingConsole,
 });
 
-export function AdminBookingConsole() {
+function AdminBookingConsole() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

@@ -56,7 +56,7 @@ export const Route = createFileRoute("/admin/reports")({
 
 type ReportTab = "overview" | "sales" | "events" | "finance" | "marketing" | "builder";
 
-export function AdminReports() {
+function AdminReports() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 

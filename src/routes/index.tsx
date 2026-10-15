@@ -294,7 +294,7 @@ const currencies = [
   { code: "TZS", symbol: "TZS ", name: "Tanzania Shillings (TZS)", rate: 20.2 },
 ];
 
-export function Home() {
+function Home() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const { data: dbEvents = [] } = useAdminEvents();
 

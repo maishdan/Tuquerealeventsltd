@@ -32,7 +32,7 @@ export const Route = createFileRoute("/admin/team")({
   component: AdminTeam,
 });
 
-export function AdminTeam() {
+function AdminTeam() {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
 

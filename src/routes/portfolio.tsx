@@ -61,7 +61,7 @@ const items = [
 
 const categories = ["All", "Corporate", "Weddings", "Concerts", "Launches", "Decor", "Private"];
 
-export function Portfolio() {
+function Portfolio() {
   const [filter, setFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentImgIndex, setCurrentImgIndex] = useState(0);

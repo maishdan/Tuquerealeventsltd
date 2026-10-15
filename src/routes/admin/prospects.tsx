@@ -52,7 +52,7 @@ export const Route = createFileRoute("/admin/prospects")({
   component: AdminProspects,
 });
 
-export function AdminProspects() {
+function AdminProspects() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: bookings = [] } = useAdminBookings();

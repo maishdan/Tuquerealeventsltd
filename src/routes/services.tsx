@@ -128,7 +128,7 @@ const serviceCategories = [
   }
 ];
 
-export function Services() {
+function Services() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const { isFavorite, toggleFavorite } = useFavorites();
 

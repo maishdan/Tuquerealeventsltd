@@ -28,7 +28,7 @@ export const Route = createFileRoute("/admin/payments")({
   component: AdminPayments,
 });
 
-export function AdminPayments() {
+function AdminPayments() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
 
