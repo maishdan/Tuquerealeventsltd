@@ -21,7 +21,7 @@ export function getTimeBasedGreeting(name: string): { greeting: string; period: 
   };
 }
 
-export function getVenueWeatherAndCoords(city: string, venueName: string): {
+type WeatherAndCoordsResult = {
   lat: number;
   lon: number;
   temp: number;
@@ -31,7 +31,11 @@ export function getVenueWeatherAndCoords(city: string, venueName: string): {
   riskLevel: "LOW" | "MEDIUM" | "HIGH";
   advisory: string;
   mapUrl: string;
-} {
+};
+
+const weatherCoordsCache = new Map<string, WeatherAndCoordsResult>();
+
+function computeVenueWeatherAndCoords(city: string, venueName: string): WeatherAndCoordsResult {
   const v = (venueName + " " + city).toLowerCase();
 
   let lat = -1.2882;
@@ -86,4 +90,14 @@ export function getVenueWeatherAndCoords(city: string, venueName: string): {
     advisory,
     mapUrl: `https://maps.google.com/maps?q=${lat},${lon}&z=15&output=embed`,
   };
+}
+
+export function getVenueWeatherAndCoords(city: string, venueName: string): WeatherAndCoordsResult {
+  const key = `${city}__${venueName}`;
+  if (weatherCoordsCache.has(key)) {
+    return weatherCoordsCache.get(key)!;
+  }
+  const result = computeVenueWeatherAndCoords(city, venueName);
+  weatherCoordsCache.set(key, result);
+  return result;
 }
