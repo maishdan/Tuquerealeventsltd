@@ -1,6 +1,6 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Menu, Star, User, Sun, Moon, LayoutDashboard, ChevronDown, ChevronRight, ArrowRight } from "lucide-react";
+import { Menu, Star, User, Sun, Moon, LayoutDashboard, ChevronDown, ChevronRight, ArrowRight, Power } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import {
   Sheet,
@@ -8,6 +8,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -38,6 +46,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
   const [bookingEventsOpen, setBookingEventsOpen] = useState(false);
   const bookingEventsRef = useRef<HTMLDivElement>(null);
 
+  const navigate = useNavigate();
   const auth = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { favorites } = useFavorites();
@@ -46,6 +55,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
   const user = auth?.user;
   const role = auth?.profile?.role;
   const portalTo = role === "admin" ? "/admin" : "/dashboard";
+  const userInitials = auth?.profile?.full_name ? auth.profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "AD";
 
   const pathname = location?.pathname || "";
 
@@ -322,13 +332,40 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
             {/* GET STARTED / PORTAL BUTTON */}
             {user ? (
-              <Link
-                to={portalTo}
-                className="flex items-center gap-2 h-10 px-5 rounded-none border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition-all duration-300 shadow-md shadow-emerald-500/10 font-black"
-              >
-                <LayoutDashboard size={14} />
-                <span className="text-[10px] font-black uppercase tracking-widest">Portal</span>
-              </Link>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 group cursor-pointer outline-none">
+                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-gold/40 group-hover:ring-gold transition-all">
+                      {auth?.profile?.avatar_url ? (
+                        <img src={auth.profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
+                      ) : (
+                        userInitials
+                      )}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border border-gold/40 text-white p-2 shadow-2xl rounded-xl z-[99999]">
+                  <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gold uppercase">
+                    {auth?.profile?.full_name || "Account Member"}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+                  <DropdownMenuItem asChild>
+                    <Link to={portalTo} className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 cursor-pointer rounded-lg">
+                      <LayoutDashboard size={15} /> Command Portal
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="bg-[#172533]" />
+                  <DropdownMenuItem
+                    onClick={async () => {
+                      if (auth?.signOut) await auth.signOut();
+                      navigate({ to: "/sign-in" });
+                    }}
+                    className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer rounded-lg"
+                  >
+                    <Power size={14} /> Sign Out & Terminate Session
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link
                 to="/sign-in"

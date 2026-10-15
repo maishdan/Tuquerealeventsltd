@@ -758,6 +758,51 @@ function AdminDashboard() {
           </div>
         </main>
       </div>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {showLogoutConfirmModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLogoutConfirmModal(false); }}
+          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-sans animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#081522] border-2 border-[#f4cf69] p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-5 text-white cursor-default text-center"
+          >
+            <div className="mx-auto h-16 w-16 bg-rose-500/10 border-2 border-rose-500/40 text-rose-500 flex items-center justify-center rounded-full">
+              <Power size={32} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black uppercase tracking-wider text-white">
+                Terminate Executive Session?
+              </h3>
+              <p className="text-xs text-[#98a7b7] font-medium leading-relaxed">
+                You are about to sign out and kill your active executive administrator session.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirmModal(false)}
+                className="py-3 rounded-xl bg-[#0c1a28] border border-[#203548] text-white font-bold text-xs uppercase tracking-wider hover:border-[#f4cf69] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowLogoutConfirmModal(false);
+                  await signOut();
+                  navigate({ to: "/sign-in" });
+                }}
+                className="py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 text-white font-black text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-xl cursor-pointer"
+              >
+                Sign Out & Kill Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

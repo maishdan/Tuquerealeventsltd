@@ -146,9 +146,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("Sign out warning:", err);
     } finally {
       setProfile(null);
       setSession(null);
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("sb-access-token");
+          localStorage.removeItem("sb-refresh-token");
+          sessionStorage.clear();
+        } catch {
+          // Ignore storage errors
+        }
+      }
     }
   };
 
