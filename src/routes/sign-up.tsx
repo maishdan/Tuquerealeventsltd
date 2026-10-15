@@ -129,19 +129,14 @@ function SignUp() {
 
   return (
     <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 overflow-x-hidden">
-      {/* Hero Background Images */}
+      {/* Hero Background Image */}
       <div className="absolute inset-0 z-0">
-        {heroImages.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[2500ms] ease-in-out scale-105",
-              idx === currentImgIndex ? "opacity-15 dark:opacity-25" : "opacity-0"
-            )}
-          />
-        ))}
+        <img
+          key={heroImages[currentImgIndex]}
+          src={heroImages[currentImgIndex]}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 opacity-20 dark:opacity-30 scale-105"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-slate-50/95 to-[#f8fafc] dark:from-[#0b0e14]/90 dark:via-[#0b0e14]/95 dark:to-[#0b0e14]" />
       </div>
 

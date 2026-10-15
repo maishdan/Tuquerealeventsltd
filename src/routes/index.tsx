@@ -294,31 +294,7 @@ const currencies = [
   { code: "TZS", symbol: "TZS ", name: "Tanzania Shillings (TZS)", rate: 20.2 },
 ];
 
-function Home() {
-  const [currentImgIndex, setCurrentImgIndex] = useState(0);
-  const { data: dbEvents = [] } = useAdminEvents();
-
-  const displayEvents = dbEvents.length > 0
-    ? dbEvents.map((e, idx) => ({
-        id: e.id,
-        title: e.name,
-        category: e.event_type || "Featured Event",
-        date: e.event_date || "2026-11-20",
-        location: e.venue || "Nairobi, Kenya",
-        price: typeof e.budget === "number" ? e.budget : parseInt(String(e.budget || 0).replace(/[^0-9]/g, "")) || 5000,
-        tier: idx === 0 ? "VIP Pass" : idx === 1 ? "Regular Pass" : idx === 2 ? "VVIP All Access" : "Free Public Pass",
-        image: e.image_url || heroImages[idx % heroImages.length],
-      }))
-    : upcomingEventsList;
-
-  // Quick Estimator State
-  const [estGuests, setEstGuests] = useState<number>(100);
-  const [estCategory, setEstCategory] = useState<string>("Community & Private Gatherings");
-  const [selectedCurrency, setSelectedCurrency] = useState<string>("KES");
-  const [includeAv, setIncludeAv] = useState<boolean>(true);
-  const [includeTicketing, setIncludeTicketing] = useState<boolean>(false);
-
-  // Real-Time Sequential Typewriter Effect State
+function TypewriterHeroTitle() {
   const line1Full = "TOQUE REAL EVENTS LIMITED";
   const line2Full = "We Plan Your Event..........";
   const line3Full = "You Celebrate....";
@@ -360,6 +336,60 @@ function Home() {
 
     return () => clearInterval(timer);
   }, []);
+
+  return (
+    <div className="space-y-2 font-display">
+      {/* Horizontal Line 1 */}
+      <div className="flex items-center justify-center gap-2 text-[#f4cf69] text-xs sm:text-sm font-black uppercase tracking-[0.25em] drop-shadow-md">
+        <Sparkles size={16} className="text-[#f4cf69] shrink-0" />
+        <span>{line1Typed}</span>
+        {line1Typed.length < line1Full.length && (
+          <span className="inline-block w-2 h-4 bg-[#f4cf69] animate-pulse ml-1" />
+        )}
+      </div>
+
+      {/* Horizontal Line 2 */}
+      <div className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-tight font-display drop-shadow-2xl">
+        <span>{line2Typed}</span>
+        {line1Typed.length >= line1Full.length && line2Typed.length < line2Full.length && (
+          <span className="inline-block w-3 h-8 sm:h-12 bg-white animate-pulse ml-1" />
+        )}
+      </div>
+
+      {/* Horizontal Line 3 */}
+      <div className="text-2xl sm:text-5xl lg:text-6xl font-black text-emerald-400 font-display drop-shadow-2xl">
+        <span>{line3Typed}</span>
+        {line2Typed.length >= line2Full.length && (
+          <span className="inline-block w-3 h-8 sm:h-12 bg-emerald-400 animate-pulse ml-1" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Home() {
+  const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const { data: dbEvents = [] } = useAdminEvents();
+
+  const displayEvents = dbEvents.length > 0
+    ? dbEvents.map((e, idx) => ({
+        id: e.id,
+        title: e.name,
+        category: e.event_type || "Featured Event",
+        date: e.event_date || "2026-11-20",
+        location: e.venue || "Nairobi, Kenya",
+        price: typeof e.budget === "number" ? e.budget : parseInt(String(e.budget || 0).replace(/[^0-9]/g, "")) || 5000,
+        tier: idx === 0 ? "VIP Pass" : idx === 1 ? "Regular Pass" : idx === 2 ? "VVIP All Access" : "Free Public Pass",
+        image: e.image_url || heroImages[idx % heroImages.length],
+      }))
+    : upcomingEventsList;
+
+  // Quick Estimator State
+  const [estGuests, setEstGuests] = useState<number>(100);
+  const [estCategory, setEstCategory] = useState<string>("Community & Private Gatherings");
+  const [selectedCurrency, setSelectedCurrency] = useState<string>("KES");
+  const [includeAv, setIncludeAv] = useState<boolean>(true);
+  const [includeTicketing, setIncludeTicketing] = useState<boolean>(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -412,30 +442,7 @@ function Home() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 relative z-10 py-20 text-center space-y-8">
           {/* Animated Typewriter 3-Horizontal Lines Directly Over Background */}
           <div className="max-w-4xl mx-auto space-y-4 font-mono text-center">
-            {/* Horizontal Line 1 */}
-            <div className="flex items-center justify-center gap-2 text-[#f4cf69] text-xs sm:text-sm font-black uppercase tracking-[0.25em] drop-shadow-md">
-              <Sparkles size={16} className="text-[#f4cf69] shrink-0" />
-              <span>{line1Typed}</span>
-              {line1Typed.length < line1Full.length && (
-                <span className="inline-block w-2 h-4 bg-[#f4cf69] animate-pulse ml-1" />
-              )}
-            </div>
-
-            {/* Horizontal Line 2 */}
-            <div className="text-3xl sm:text-6xl lg:text-7xl font-black uppercase tracking-tight text-white leading-tight font-display drop-shadow-2xl">
-              <span>{line2Typed}</span>
-              {line1Typed.length >= line1Full.length && line2Typed.length < line2Full.length && (
-                <span className="inline-block w-3 h-8 sm:h-12 bg-white animate-pulse ml-1" />
-              )}
-            </div>
-
-            {/* Horizontal Line 3 */}
-            <div className="text-2xl sm:text-5xl lg:text-6xl font-black text-emerald-400 font-display drop-shadow-2xl">
-              <span>{line3Typed}</span>
-              {line2Typed.length >= line2Full.length && (
-                <span className="inline-block w-3 h-8 sm:h-12 bg-emerald-400 animate-pulse ml-1" />
-              )}
-            </div>
+            <TypewriterHeroTitle />
           </div>
 
           <p className="max-w-2xl mx-auto text-sm sm:text-base text-gray-200 font-medium leading-relaxed font-sans">
