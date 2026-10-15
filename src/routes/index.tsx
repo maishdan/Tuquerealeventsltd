@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import {
   ShieldCheck,
@@ -22,7 +22,9 @@ import {
   Star,
   Ticket as TicketIcon,
   MessageSquare,
-  Check
+  Check,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import corporate from "../assets/gallery-corporate.jpg";
 import wedding from "../assets/gallery-wedding.jpg";
@@ -30,6 +32,7 @@ import concert from "../assets/gallery-concert.jpg";
 import { createPageSeo, SERVICE_KEYWORDS } from "../lib/seo";
 import { formatKes } from "@/lib/dashboard-mock-data";
 import { useAdminEvents } from "@/hooks/use-dashboard-data";
+import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/")({
@@ -368,8 +371,42 @@ function TypewriterHeroTitle() {
 }
 
 function Home() {
+  const navigate = useNavigate();
+  const auth = useAuth();
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
+  const [showHomeSignInModal, setShowHomeSignInModal] = useState(false);
+  const [homeEmail, setHomeEmail] = useState("");
+  const [homePassword, setHomePassword] = useState("");
+  const [homeSubmitting, setHomeSubmitting] = useState(false);
+  const [homeAuthError, setHomeAuthError] = useState("");
+
   const { data: dbEvents = [] } = useAdminEvents();
+
+  const handleHomeQuickSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHomeAuthError("");
+    setHomeSubmitting(true);
+    try {
+      if (!auth) throw new Error("Auth system unavailable");
+      const role = await auth.signIn(homeEmail, homePassword);
+      setShowHomeSignInModal(false);
+      const isTargetAdmin =
+        role === "admin" ||
+        homeEmail.toLowerCase() === "eventsroyaltouch7@gmail.com" ||
+        homeEmail.toLowerCase() === "maishdan4940@gmail.com" ||
+        homeEmail.toLowerCase() === "abigaelmuthoni29@gmail.com";
+
+      if (isTargetAdmin) {
+        navigate({ to: "/admin" });
+      } else {
+        navigate({ to: "/dashboard" });
+      }
+    } catch (err: any) {
+      setHomeAuthError(err?.message || "Sign in failed. Check email and password.");
+    } finally {
+      setHomeSubmitting(false);
+    }
+  };
 
   const displayEvents = dbEvents.length > 0
     ? dbEvents.map((e, idx) => ({
@@ -457,6 +494,12 @@ function Home() {
             >
               Plan Your Event <ArrowRight size={16} />
             </Link>
+            <button
+              onClick={() => setShowHomeSignInModal(true)}
+              className="h-14 px-8 rounded-none bg-[#f4cf69]/20 border-2 border-[#f4cf69] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all w-full sm:w-auto cursor-pointer shadow-xl"
+            >
+              <ShieldCheck size={16} /> ⚡ Executive Sign In
+            </button>
             <Link
               to="/services"
               className="h-14 px-8 rounded-none border border-white/20 bg-black/60 backdrop-blur-md text-white font-black text-xs uppercase tracking-widest flex items-center justify-center hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all w-full sm:w-auto"
@@ -811,6 +854,70 @@ function Home() {
           </div>
         </div>
       </section>
+
+      {/* QUICK SIGN IN MODAL ON HOME PAGE */}
+      {showHomeSignInModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setShowHomeSignInModal(false); }}
+          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-sans animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#081522] border-2 border-[#f4cf69] p-6 sm:p-8 rounded-2xl max-w-md w-full shadow-2xl space-y-6 text-white cursor-default"
+          >
+            <div className="flex justify-between items-center border-b border-[#1d3043] pb-3">
+              <div>
+                <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-widest font-mono">
+                  EXECUTIVE GATEWAY
+                </span>
+                <h3 className="text-lg font-black uppercase text-white font-serif">Quick Sign In</h3>
+              </div>
+              <button onClick={() => setShowHomeSignInModal(false)} className="text-[#899cb0] hover:text-white font-bold text-lg cursor-pointer">✕</button>
+            </div>
+
+            {homeAuthError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-xl flex items-center gap-2">
+                <AlertCircle size={16} />
+                <p>{homeAuthError}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleHomeQuickSignIn} className="space-y-4 text-xs font-sans">
+              <div>
+                <label className="block font-black text-[#899cb0] uppercase mb-1">Email Address *</label>
+                <input
+                  type="email"
+                  required
+                  value={homeEmail}
+                  onChange={(e) => setHomeEmail(e.target.value)}
+                  placeholder="Enter email address"
+                  className="w-full h-12 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-black text-[#899cb0] uppercase mb-1">Password *</label>
+                <input
+                  type="password"
+                  required
+                  value={homePassword}
+                  onChange={(e) => setHomePassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full h-12 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-white font-bold focus:border-[#f4cf69] focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={homeSubmitting}
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-xl disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {homeSubmitting ? <Loader2 size={16} className="animate-spin" /> : <>Sign In To Command →</>}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
