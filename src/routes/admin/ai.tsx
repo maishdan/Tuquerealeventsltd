@@ -74,7 +74,7 @@ import {
   ShieldAlert,
   Navigation
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getVenueWeatherAndCoords } from "@/lib/utils";
 import {
   TOQUEREAL_LEADS_MASTER_DATA,
   TOQUEREAL_SEARCH_CONTROL_DATA,
@@ -206,6 +206,7 @@ export function AdminAI() {
   const [v2Tab, setV2Tab] = useState<"leads" | "saved_leads" | "weather_venue" | "search_control">("leads");
   const [copiedIcebreakerId, setCopiedIcebreakerId] = useState<string | null>(null);
   const [savedLeadsList, setSavedLeadsList] = useState<any[]>([]);
+  const [activeMapLeadId, setActiveMapLeadId] = useState<string | null>(null);
 
   // WEATHER & VENUE INTELLIGENCE STATES
   const [weatherVenue, setWeatherVenue] = useState("KICC Nairobi (Kenyatta Intl Convention Centre)");
@@ -1436,6 +1437,72 @@ export function AdminAI() {
                             <span className="text-[#f4cf69] text-[10px] block">{lead.city}, {lead.country}</span>
                           </div>
                         </div>
+
+                        {/* LIVE VENUE WEATHER & GOOGLE MAPS INTELLIGENCE TILE */}
+                        {(() => {
+                          const w = getVenueWeatherAndCoords(lead.city, lead.venue);
+                          const isMapOpen = activeMapLeadId === lead.id;
+                          return (
+                            <div className="p-3.5 bg-[#0a1827] border border-sky-500/40 rounded-xl space-y-2.5 text-xs font-mono">
+                              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#182a3c] pb-2">
+                                <span className="font-bold text-sky-400 uppercase text-[10px] flex items-center gap-1">
+                                  <CloudSun size={13} /> Venue Weather & Google Maps Intelligence
+                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  <span className={cn(
+                                    "px-2 py-0.5 rounded text-[9px] font-black uppercase",
+                                    w.riskLevel === "HIGH" ? "bg-rose-500/20 text-rose-400 border border-rose-500/40" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
+                                  )}>
+                                    {w.riskLevel === "HIGH" ? "⚠️ RAIN RISK" : "✓ OPTIMAL WEATHER"}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setActiveMapLeadId(isMapOpen ? null : lead.id)}
+                                    className="px-2 py-0.5 bg-[#142637] border border-sky-400/50 text-sky-300 text-[9px] font-bold uppercase rounded hover:bg-[#1f354c] cursor-pointer flex items-center gap-1"
+                                  >
+                                    <MapPin size={10} /> {isMapOpen ? "Close Map" : "Google Map View"}
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Weather Grid */}
+                              <div className="grid grid-cols-3 gap-2 text-[11px] text-[#c0d1e0]">
+                                <div className="p-2 bg-[#0d1f30] rounded-lg">
+                                  <span className="text-[#899cb0] text-[9px] block uppercase">Temp</span>
+                                  <strong className="text-white text-xs">{w.temp}°C</strong>
+                                </div>
+                                <div className="p-2 bg-[#0d1f30] rounded-lg">
+                                  <span className="text-[#899cb0] text-[9px] block uppercase">Rain Prob</span>
+                                  <strong className={w.rainProb >= 40 ? "text-rose-400 text-xs font-black" : "text-sky-300 text-xs"}>{w.rainProb}%</strong>
+                                </div>
+                                <div className="p-2 bg-[#0d1f30] rounded-lg">
+                                  <span className="text-[#899cb0] text-[9px] block uppercase">Wind</span>
+                                  <strong className="text-teal-300 text-xs">{w.windspeed} km/h</strong>
+                                </div>
+                              </div>
+
+                              {/* Risk Advisory */}
+                              <p className="text-[10px] text-[#b8c9d9] font-sans leading-snug">
+                                {w.advisory}
+                              </p>
+
+                              {/* Inline Google Maps View when toggled */}
+                              {isMapOpen && (
+                                <div className="rounded-lg overflow-hidden border border-sky-400/40 h-48 w-full mt-2 animate-in fade-in duration-200">
+                                  <iframe
+                                    title={`Venue Map - ${lead.eventName}`}
+                                    width="100%"
+                                    height="100%"
+                                    style={{ border: 0 }}
+                                    loading="lazy"
+                                    allowFullScreen
+                                    src={w.mapUrl}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
 
                         {/* Decision Maker Card */}
                         <div className="p-4 bg-[#0d1f2e] border border-[#1d3548] rounded-xl space-y-2 text-xs">
