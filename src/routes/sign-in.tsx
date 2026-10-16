@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, User } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
@@ -49,27 +49,35 @@ function SignIn() {
   const navigate = useNavigate();
   const auth = useAuth();
   const search = Route.useSearch();
+  const [email, setEmail] = useState(search.email || "");
+  const [password, setPassword] = useState(search.password || "");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [authError, setAuthError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
+  const hasRedirectedRef = useRef(false);
+
   useEffect(() => {
     if (auth?.loading) return;
-    if (auth?.user) {
-      const email = auth.user.email?.toLowerCase();
+    if (auth?.user && auth?.profile) {
+      if (hasRedirectedRef.current) return;
+      hasRedirectedRef.current = true;
+
+      const uEmail = auth.user.email?.toLowerCase();
       const isAdmin =
-        auth.profile?.role === "admin" ||
-        email === "realtoque0@gmail.com" ||
-        email === "eventsroyaltouch7@gmail.com" ||
-        email === "abigaelmuthoni29@gmail.com";
-      const isStaff = auth.profile?.role === "staff";
+        auth.profile.role === "admin" ||
+        uEmail === "realtoque0@gmail.com" ||
+        uEmail === "eventsroyaltouch7@gmail.com" ||
+        uEmail === "maishdan4940@gmail.com" ||
+        uEmail === "abigaelmuthoni29@gmail.com";
+      const isStaff = auth.profile.role === "staff";
 
       const to = isAdmin ? "/admin" : isStaff ? "/staff" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -81,10 +89,9 @@ function SignIn() {
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setAuthError("");
-    const fd = new FormData(e.currentTarget);
     const res = schema.safeParse({
-      email: String(fd.get("email") || ""),
-      password: String(fd.get("password") || ""),
+      email,
+      password,
     });
     if (!res.success) {
       const errs: Record<string, string> = {};
@@ -122,19 +129,14 @@ function SignIn() {
 
   return (
     <div className="relative min-w-0 bg-[#0b0e14] bg-[url('/ltd.png')] bg-cover bg-center bg-fixed text-foreground font-sans min-h-screen flex flex-col items-center justify-center p-4 overflow-x-hidden">
-      {/* Hero Background Images */}
+      {/* Hero Background Image */}
       <div className="absolute inset-0 z-0">
-        {heroImages.map((src, idx) => (
-          <img
-            key={src}
-            src={src}
-            alt=""
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[2500ms] ease-in-out scale-105",
-              idx === currentImgIndex ? "opacity-15 dark:opacity-25" : "opacity-0"
-            )}
-          />
-        ))}
+        <img
+          key={heroImages[currentImgIndex]}
+          src={heroImages[currentImgIndex]}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 opacity-20 dark:opacity-30 scale-105"
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-slate-50/95 to-[#f8fafc] dark:from-[#0b0e14]/90 dark:via-[#0b0e14]/95 dark:to-[#0b0e14]" />
       </div>
 
@@ -170,7 +172,8 @@ function SignIn() {
                 id="signin-email"
                 type="email"
                 error={errors.email}
-                defaultValue={search.email}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
 
               <div className="space-y-2 relative">
@@ -180,7 +183,8 @@ function SignIn() {
                   id="signin-password"
                   type={showPassword ? "text" : "password"}
                   error={errors.password}
-                  defaultValue={search.password}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -222,14 +226,16 @@ function AuthField({
   id,
   type = "text",
   error,
-  defaultValue
+  value,
+  onChange,
 }: {
   label: string;
   name: string;
   id: string;
   type?: string;
   error?: string;
-  defaultValue?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }) {
   return (
     <div className="space-y-2">
@@ -241,7 +247,8 @@ function AuthField({
         name={name}
         type={type}
         maxLength={255}
-        defaultValue={defaultValue}
+        value={value}
+        onChange={onChange}
         placeholder={`Enter ${label.toLowerCase()}`}
         className="w-full h-14 bg-slate-50 dark:bg-black/30 border border-slate-300 dark:border-white/10 rounded-none px-5 text-xs font-bold text-foreground focus:border-gold outline-none transition-all placeholder:text-muted-foreground/40"
       />

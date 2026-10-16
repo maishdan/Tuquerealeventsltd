@@ -2,14 +2,25 @@ import { supabase } from "../supabase";
 import type { Profile, UserRole } from "../database.types";
 
 export async function fetchProfile(userId: string) {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .single();
+  try {
+    const fetchPromise = supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
 
-  if (error) throw error;
-  return data as Profile;
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Profile Fetch Timeout")), 3000)
+    );
+
+    const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
+
+    if (error) throw error;
+    return data as Profile;
+  } catch (err) {
+    console.warn("fetchProfile fallback due to timeout or RLS:", err);
+    return null;
+  }
 }
 
 export async function updateProfile(userId: string, updates: Partial<Pick<Profile, "full_name" | "phone" | "city" | "avatar_url" | "role">>) {

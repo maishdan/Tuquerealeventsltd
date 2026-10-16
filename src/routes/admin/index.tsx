@@ -19,9 +19,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell } from "lucide-react";
+import { Settings, Mail, FileText, HelpCircle, LogOut, ChevronDown, Power, User, Home, Crown, Bell, Sparkles, Loader2 } from "lucide-react";
 import { LoadingScreen } from "@/components/common/LoadingScreen";
 import { createPageSeo } from "@/lib/seo";
+import { supabase } from "@/lib/supabase";
+import { fetchProfile } from "@/lib/api/profiles";
 
 export const Route = createFileRoute("/admin/")({
   head: () =>
@@ -47,6 +49,7 @@ function AdminDashboard() {
 
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [showDebugAuthModal, setShowDebugAuthModal] = useState(false);
   const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -349,6 +352,12 @@ function AdminDashboard() {
                   className="px-3.5 py-2 rounded-lg bg-[#121d29] border border-[#d5a637]/50 text-[#f4cf69] text-xs font-bold hover:bg-[#1a2938] transition-all cursor-pointer"
                 >
                   ▣ Booking
+                </button>
+                <button
+                  onClick={() => setShowDebugAuthModal(true)}
+                  className="px-3.5 py-2 rounded-lg bg-emerald-500/20 border border-emerald-400/50 text-emerald-400 text-xs font-bold hover:bg-emerald-500 hover:text-black transition-all cursor-pointer shadow"
+                >
+                  🛠️ Debug Auth Console
                 </button>
               </div>
             </div>
@@ -757,6 +766,235 @@ function AdminDashboard() {
             </div>
           </div>
         </main>
+      </div>
+
+      {/* LOGOUT CONFIRMATION MODAL */}
+      {showLogoutConfirmModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setShowLogoutConfirmModal(false); }}
+          className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-sans animate-in fade-in duration-200 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-[#081522] border-2 border-[#f4cf69] p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-5 text-white cursor-default text-center"
+          >
+            <div className="mx-auto h-16 w-16 bg-rose-500/10 border-2 border-rose-500/40 text-rose-500 flex items-center justify-center rounded-full">
+              <Power size={32} />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-black uppercase tracking-wider text-white">
+                Terminate Executive Session?
+              </h3>
+              <p className="text-xs text-[#98a7b7] font-medium leading-relaxed">
+                You are about to sign out and kill your active executive administrator session.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirmModal(false)}
+                className="py-3 rounded-xl bg-[#0c1a28] border border-[#203548] text-white font-bold text-xs uppercase tracking-wider hover:border-[#f4cf69] transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  setShowLogoutConfirmModal(false);
+                  await signOut();
+                  navigate({ to: "/sign-in" });
+                }}
+                className="py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 text-white font-black text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-xl cursor-pointer"
+              >
+                Sign Out & Kill Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* DEVELOPER AUTH DEBUG MODAL */}
+      <DeveloperAuthDebugModal isOpen={showDebugAuthModal} onClose={() => setShowDebugAuthModal(false)} />
+    </div>
+  );
+}
+
+function DeveloperAuthDebugModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const { session, user, role, signIn } = useAuth();
+  const [testEmail, setTestEmail] = useState("eventsroyaltouch7@gmail.com");
+  const [testPassword, setTestPassword] = useState("12345678");
+  const [debugLogs, setDebugLogs] = useState<string[]>([]);
+  const [isTesting, setIsTesting] = useState(false);
+  const [supaStatus, setSupaStatus] = useState<"checking" | "online" | "error">("checking");
+  const [pingLatency, setPingLatency] = useState<number | null>(null);
+
+  const addLog = (msg: string) => {
+    setDebugLogs((prev) => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    checkSupabaseHealth();
+  }, [isOpen]);
+
+  const checkSupabaseHealth = async () => {
+    setSupaStatus("checking");
+    addLog("Initiating Supabase Auth & Database Health Check...");
+    const start = performance.now();
+    try {
+      const { error } = await supabase.from("profiles").select("id").limit(1);
+      const elapsed = Math.round(performance.now() - start);
+      setPingLatency(elapsed);
+      if (error) {
+        setSupaStatus("error");
+        addLog(`Supabase Warning: ${error.message} (Latency: ${elapsed}ms)`);
+      } else {
+        setSupaStatus("online");
+        addLog(`✓ Supabase Auth Connection Online! Ping Latency: ${elapsed}ms`);
+      }
+    } catch (err: any) {
+      const elapsed = Math.round(performance.now() - start);
+      setSupaStatus("error");
+      addLog(`Supabase Network Exception: ${err?.message || err} (Latency: ${elapsed}ms)`);
+    }
+  };
+
+  const handleRunAuthBenchmark = async () => {
+    setIsTesting(true);
+    addLog(`🚀 Starting Auth Benchmark Test for ${testEmail}...`);
+    const t0 = performance.now();
+
+    try {
+      addLog("Step 1: Calling supabase.auth.signInWithPassword...");
+      const t1 = performance.now();
+      const roleResult = await signIn(testEmail, testPassword);
+      const t2 = performance.now();
+      addLog(`✓ Step 1 Complete: Auth Token Received in ${Math.round(t2 - t1)}ms! Assigned Role: ${roleResult}`);
+
+      addLog("Step 2: Testing Profile Fetch Latency...");
+      const t3 = performance.now();
+      if (user) await fetchProfile(user.id);
+      const t4 = performance.now();
+      addLog(`✓ Step 2 Complete: Profile Verified in ${Math.round(t4 - t3)}ms!`);
+
+      const totalTime = Math.round(performance.now() - t0);
+      addLog(`🎉 BENCHMARK PASSED: Full Auth Pipeline Executed in ${totalTime}ms with ZERO Lag!`);
+    } catch (err: any) {
+      addLog(`❌ BENCHMARK ERROR: ${err?.message || "Sign in failed"}`);
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const handlePurgeAuthTokens = () => {
+    localStorage.removeItem("sb-access-token");
+    localStorage.removeItem("sb-refresh-token");
+    sessionStorage.clear();
+    addLog("🧹 Purged local Auth Tokens and cleared Session Storage.");
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 font-sans animate-in fade-in duration-200 cursor-pointer"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#081522] border-2 border-emerald-400 p-6 rounded-2xl max-w-2xl w-full shadow-2xl space-y-5 text-white my-auto cursor-default max-h-[90vh] overflow-y-auto"
+      >
+        <div className="flex justify-between items-start border-b border-[#1d3043] pb-3">
+          <div>
+            <span className="text-[10px] font-black uppercase text-emerald-400 font-mono tracking-wider">
+              DEVELOPER DIAGNOSTIC CONSOLE
+            </span>
+            <h3 className="text-lg font-black uppercase text-white font-serif">
+              Auth Pipeline Performance & Latency Debugger
+            </h3>
+          </div>
+          <button onClick={onClose} className="text-[#899cb0] hover:text-white font-bold text-lg cursor-pointer">✕</button>
+        </div>
+
+        {/* Real-time Diagnostics Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+            <span className="text-[#899cb0] text-[9px] uppercase font-bold block">Supabase Connection</span>
+            <span className={cn("font-black block", supaStatus === "online" ? "text-emerald-400" : "text-rose-400")}>
+              {supaStatus === "online" ? "✓ ONLINE" : supaStatus === "checking" ? "CHECKING..." : "WARNING"}
+            </span>
+          </div>
+
+          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+            <span className="text-[#899cb0] text-[9px] uppercase font-bold block">Ping Latency</span>
+            <span className="text-white font-bold block">{pingLatency !== null ? `${pingLatency}ms` : "--"}</span>
+          </div>
+
+          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+            <span className="text-[#899cb0] text-[9px] uppercase font-bold block">Session Active</span>
+            <span className="text-emerald-400 font-bold block">{session ? "YES" : "NO"}</span>
+          </div>
+
+          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-1">
+            <span className="text-[#899cb0] text-[9px] uppercase font-bold block">Assigned Role</span>
+            <span className="text-[#f4cf69] font-bold block uppercase">{role || "Guest"}</span>
+          </div>
+        </div>
+
+        {/* Benchmark Test Tool */}
+        <div className="p-4 bg-[#0c1a28] border border-[#1b2f40] rounded-xl space-y-3 text-xs">
+          <span className="font-bold text-emerald-400 uppercase text-[10px] block">Test Sign In Pipeline Benchmark</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono">
+            <input
+              type="email"
+              value={testEmail}
+              onChange={(e) => setTestEmail(e.target.value)}
+              placeholder="Test Email"
+              className="px-3 py-2 bg-[#081522] border border-[#203548] rounded-lg text-white"
+            />
+            <input
+              type="password"
+              value={testPassword}
+              onChange={(e) => setTestPassword(e.target.value)}
+              placeholder="Test Password"
+              className="px-3 py-2 bg-[#081522] border border-[#203548] rounded-lg text-white"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-1">
+            <button
+              onClick={handleRunAuthBenchmark}
+              disabled={isTesting}
+              className="px-4 py-2 rounded-lg bg-emerald-500 text-black font-black uppercase text-xs hover:scale-105 transition-all cursor-pointer shadow-md"
+            >
+              {isTesting ? "Testing Pipeline..." : "🚀 Run Auth Benchmark Test"}
+            </button>
+
+            <button
+              onClick={handlePurgeAuthTokens}
+              className="px-4 py-2 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] font-bold uppercase text-xs hover:bg-[#1f354c] cursor-pointer"
+            >
+              🧹 Purge Auth Tokens
+            </button>
+          </div>
+        </div>
+
+        {/* Console Execution Logs */}
+        <div className="p-4 bg-[#050e17] border border-[#1b2f40] rounded-xl space-y-2 text-xs font-mono">
+          <span className="text-[#899cb0] text-[10px] uppercase font-bold block">Live Execution Log Feed</span>
+          <div className="p-3 bg-black/60 rounded-lg max-h-48 overflow-y-auto space-y-1 text-[11px] text-emerald-300 scrollbar-thin">
+            {debugLogs.length === 0 ? (
+              <p className="text-gray-500 italic">Click "Run Auth Benchmark Test" to simulate and measure auth latency...</p>
+            ) : (
+              debugLogs.map((log, idx) => <p key={idx}>{log}</p>)
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

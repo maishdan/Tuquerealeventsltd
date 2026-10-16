@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useAdminEvents,
   useAdminBookings,
@@ -325,22 +325,24 @@ function AdminAI() {
     speakAI(`Lead extraction complete! Loaded verified records for ${autoCountry}!`);
   };
 
-  const filteredV2Leads = TOQUEREAL_LEADS_MASTER_DATA.filter((lead) => {
-    const q = v2SearchQuery.toLowerCase();
-    const matchesSearch =
-      !q ||
-      lead.eventName.toLowerCase().includes(q) ||
-      lead.organiser.toLowerCase().includes(q) ||
-      lead.city.toLowerCase().includes(q) ||
-      (lead.venue && lead.venue.toLowerCase().includes(q)) ||
-      (lead.decisionMakerName && lead.decisionMakerName.toLowerCase().includes(q)) ||
-      (lead.decisionMakerEmail && lead.decisionMakerEmail.toLowerCase().includes(q));
+  const filteredV2Leads = useMemo(() => {
+    const q = v2SearchQuery.trim().toLowerCase();
+    return TOQUEREAL_LEADS_MASTER_DATA.filter((lead) => {
+      const matchesSearch =
+        !q ||
+        lead.eventName.toLowerCase().includes(q) ||
+        lead.organiser.toLowerCase().includes(q) ||
+        lead.city.toLowerCase().includes(q) ||
+        (lead.venue && lead.venue.toLowerCase().includes(q)) ||
+        (lead.decisionMakerName && lead.decisionMakerName.toLowerCase().includes(q)) ||
+        (lead.decisionMakerEmail && lead.decisionMakerEmail.toLowerCase().includes(q));
 
-    const matchesCampaign = v2Campaign === "All" || lead.campaign.toLowerCase() === v2Campaign.toLowerCase();
-    const matchesEmailStatus = v2EmailStatus === "All" || lead.emailStatus === v2EmailStatus;
+      const matchesCampaign = v2Campaign === "All" || lead.campaign.toLowerCase() === v2Campaign.toLowerCase();
+      const matchesEmailStatus = v2EmailStatus === "All" || lead.emailStatus === v2EmailStatus;
 
-    return matchesSearch && matchesCampaign && matchesEmailStatus;
-  });
+      return matchesSearch && matchesCampaign && matchesEmailStatus;
+    });
+  }, [v2SearchQuery, v2Campaign, v2EmailStatus]);
 
   const handleCopyIcebreaker = (id: string, text: string) => {
     if (!text) return;
