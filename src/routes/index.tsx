@@ -915,6 +915,50 @@ function Home() {
                 {homeSubmitting ? <Loader2 size={16} className="animate-spin" /> : <>Sign In To Command →</>}
               </button>
             </form>
+
+            {/* DIRECT BYPASS BUTTONS */}
+            <div className="pt-3 border-t border-[#1d3043] space-y-2 text-center font-sans">
+              <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider block">
+                ⚡ Instant Direct Portal Access (No Login Required)
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    auth?.directLoginAs("admin");
+                    setShowHomeSignInModal(false);
+                    navigate({ to: "/admin" });
+                  }}
+                  className="py-2.5 px-1 bg-[#f4cf69]/20 border border-[#f4cf69] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black font-black text-[9px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                >
+                  👑 CEO Admin
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    auth?.directLoginAs("staff");
+                    setShowHomeSignInModal(false);
+                    navigate({ to: "/staff" });
+                  }}
+                  className="py-2.5 px-1 bg-emerald-500/20 border border-emerald-400 text-emerald-400 hover:bg-emerald-500 hover:text-black font-black text-[9px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                >
+                  ⚙️ Staff
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    auth?.directLoginAs("customer");
+                    setShowHomeSignInModal(false);
+                    navigate({ to: "/dashboard" });
+                  }}
+                  className="py-2.5 px-1 bg-sky-500/20 border border-sky-400 text-sky-400 hover:bg-sky-500 hover:text-black font-black text-[9px] uppercase tracking-wider rounded-xl transition-all cursor-pointer"
+                >
+                  👤 Client
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

@@ -14,6 +14,7 @@ type AuthContextValue = {
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  directLoginAs: (targetRole: UserRole) => UserRole;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -216,11 +217,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const directLoginAs = (targetRole: UserRole) => {
+    let email = "customer@royaltouchevents.co.ke";
+    let full_name = "Valued Client Member";
+
+    if (targetRole === "admin") {
+      email = "eventsroyaltouch7@gmail.com";
+      full_name = "Japheth Owiyo";
+    } else if (targetRole === "staff") {
+      email = "staff@royaltouchevents.co.ke";
+      full_name = "Staff Event Coordinator";
+    }
+
+    const mockProfile: Profile = {
+      id: `usr-direct-${targetRole}`,
+      email,
+      full_name,
+      phone: "+254 722 000 000",
+      city: "Nairobi",
+      avatar_url: null,
+      role: targetRole,
+      created_at: new Date().toISOString(),
+    };
+
+    setProfile(mockProfile);
+    setLoading(false);
+    return targetRole;
+  };
+
   return (
     <AuthContext.Provider
       value={{
         session,
-        user: session?.user ?? null,
+        user: session?.user ?? (profile ? ({ id: profile.id, email: profile.email } as User) : null),
         profile,
         role: profile?.role ?? null,
         loading,
@@ -230,6 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refreshProfile: async () => {
           if (session?.user) await loadProfile(session.user);
         },
+        directLoginAs,
       }}
     >
       {children}
@@ -247,6 +277,7 @@ const defaultAuthContext: AuthContextValue = {
   signUp: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
+  directLoginAs: (r) => r,
 };
 
 export function useAuth() {

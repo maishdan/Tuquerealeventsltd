@@ -205,6 +205,47 @@ function SignIn() {
             </button>
           </form>
 
+          {/* DIRECT BYPASS DASHBOARD BUTTONS */}
+          <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-2 font-sans">
+            <span className="text-[10px] font-black uppercase text-gold tracking-widest block text-center">
+              ⚡ Instant Direct Dashboard Access (No Password Required)
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  auth?.directLoginAs("admin");
+                  navigate({ to: "/admin" });
+                }}
+                className="py-3 px-2 bg-[#f4cf69]/15 border border-[#f4cf69] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black font-black text-[10px] uppercase tracking-wider rounded-none transition-all cursor-pointer shadow text-center"
+              >
+                👑 CEO Admin Portal
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  auth?.directLoginAs("staff");
+                  navigate({ to: "/staff" });
+                }}
+                className="py-3 px-2 bg-emerald-500/15 border border-emerald-400 text-emerald-400 hover:bg-emerald-500 hover:text-black font-black text-[10px] uppercase tracking-wider rounded-none transition-all cursor-pointer shadow text-center"
+              >
+                ⚙️ Staff Operations
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  auth?.directLoginAs("customer");
+                  navigate({ to: "/dashboard" });
+                }}
+                className="py-3 px-2 bg-sky-500/15 border border-sky-400 text-sky-400 hover:bg-sky-500 hover:text-black font-black text-[10px] uppercase tracking-wider rounded-none transition-all cursor-pointer shadow text-center"
+              >
+                👤 Client Portal
+              </button>
+            </div>
+          </div>
+
           <div className="pt-6 border-t border-slate-200 dark:border-white/10 flex flex-col items-center gap-3 text-center">
             <p className="text-[10px] text-muted-foreground font-black uppercase tracking-widest">New to TOQUE REAL EVENTS LIMITED?</p>
             <Link

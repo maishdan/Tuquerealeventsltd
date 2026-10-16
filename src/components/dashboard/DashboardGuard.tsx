@@ -15,7 +15,7 @@ export function DashboardGuard({
   const navigate = useNavigate();
   const hasNavigatedRef = useRef(false);
 
-  const email = session?.user?.email?.toLowerCase();
+  const email = (session?.user?.email || profile?.email || "").toLowerCase();
   const isAdminEmail =
     session?.user?.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
     email === "realtoque0@gmail.com" ||
@@ -32,11 +32,13 @@ export function DashboardGuard({
     return effectiveRole === requiredRole;
   })();
 
+  const hasAccess = Boolean(session || profile);
+
   useEffect(() => {
     if (loading) return;
 
-    // Unauthenticated -> Redirect to sign-in ONCE
-    if (!session) {
+    // Unauthenticated and no profile -> Redirect to sign-in ONCE
+    if (!hasAccess) {
       if (!hasNavigatedRef.current) {
         hasNavigatedRef.current = true;
         navigate({ to: "/sign-in" });
@@ -53,13 +55,13 @@ export function DashboardGuard({
       const target = effectiveRole === "admin" ? "/admin" : effectiveRole === "staff" ? "/staff" : "/dashboard";
       navigate({ to: target });
     }
-  }, [loading, session, effectiveRole, isAuthorized, navigate]);
+  }, [loading, hasAccess, effectiveRole, isAuthorized, navigate]);
 
-  if (loading || (session && !effectiveRole)) {
+  if (loading || (hasAccess && !effectiveRole)) {
     return <LoadingScreen title="Authenticating Executive Session & Permissions..." />;
   }
 
-  if (!session || !isAuthorized) return null;
+  if (!hasAccess || !isAuthorized) return null;
 
   return <>{children}</>;
 }
