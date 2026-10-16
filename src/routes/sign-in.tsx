@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, User } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
@@ -57,21 +57,27 @@ function SignIn() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
+  const hasRedirectedRef = useRef(false);
+
   useEffect(() => {
     if (auth?.loading) return;
-    if (auth?.user) {
+    if (auth?.user && auth?.profile) {
+      if (hasRedirectedRef.current) return;
+      hasRedirectedRef.current = true;
+
       const uEmail = auth.user.email?.toLowerCase();
       const isAdmin =
-        auth.profile?.role === "admin" ||
+        auth.profile.role === "admin" ||
         uEmail === "realtoque0@gmail.com" ||
         uEmail === "eventsroyaltouch7@gmail.com" ||
+        uEmail === "maishdan4940@gmail.com" ||
         uEmail === "abigaelmuthoni29@gmail.com";
-      const isStaff = auth.profile?.role === "staff";
+      const isStaff = auth.profile.role === "staff";
 
       const to = isAdmin ? "/admin" : isStaff ? "/staff" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile, navigate]);
 
   useEffect(() => {
     const timer = setInterval(() => {

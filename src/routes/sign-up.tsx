@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
 import { Loader2, ShieldCheck, ArrowRight, Check, Eye, EyeOff, AlertCircle, UserPlus } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
@@ -51,20 +51,26 @@ function SignUp() {
   const [countdown, setCountdown] = useState(5);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
 
+  const hasRedirectedRef = useRef(false);
+
   useEffect(() => {
     if (auth?.loading) return;
-    if (auth?.user) {
+    if (auth?.user && auth?.profile) {
+      if (hasRedirectedRef.current) return;
+      hasRedirectedRef.current = true;
+
       const email = auth.user.email?.toLowerCase();
       const isAdmin =
-        auth.profile?.role === "admin" ||
+        auth.profile.role === "admin" ||
         auth.user.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
         email === "eventsroyaltouch7@gmail.com" ||
+        email === "maishdan4940@gmail.com" ||
         email === "abigaelmuthoni29@gmail.com";
 
       const to = isAdmin ? "/admin" : "/dashboard";
       navigate({ to });
     }
-  }, [auth?.loading, auth?.user, auth?.profile?.role, navigate]);
+  }, [auth?.loading, auth?.user, auth?.profile, navigate]);
 
   // Password Visibility
   const [showPassword, setShowPassword] = useState(false);
