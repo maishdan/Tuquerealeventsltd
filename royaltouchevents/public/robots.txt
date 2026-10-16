@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://royaltouchevents.vercel.app/sitemap.xml

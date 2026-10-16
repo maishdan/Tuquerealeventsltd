@@ -1,0 +1,263 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Keep your @theme and other custom code below */
+
+@theme inline {
+  --font-display: "Instrument Serif", ui-serif, Georgia, serif;
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 0.5rem;
+  /* Midnight Indigo palette */
+  --background: oklch(0.14 0.04 280);
+  --foreground: oklch(0.97 0.01 270);
+
+  --card: oklch(0.18 0.05 278);
+  --card-foreground: oklch(0.97 0.01 270);
+
+  --popover: oklch(0.18 0.05 278);
+  --popover-foreground: oklch(0.97 0.01 270);
+
+  --primary: oklch(0.58 0.21 275);          /* indigo accent */
+  --primary-foreground: oklch(0.98 0.01 270);
+
+  --secondary: oklch(0.24 0.06 278);
+  --secondary-foreground: oklch(0.97 0.01 270);
+
+  --muted: oklch(0.22 0.05 278);
+  --muted-foreground: oklch(0.72 0.03 270);
+
+  --accent: oklch(0.28 0.08 278);
+  --accent-foreground: oklch(0.97 0.01 270);
+
+  --gold: oklch(0.82 0.13 85);
+  --gold-soft: oklch(0.9 0.08 85);
+
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 270);
+
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 14%);
+  --ring: oklch(0.58 0.21 275);
+}
+
+.dark {
+  --background: oklch(0.14 0.04 280);
+  --foreground: oklch(0.97 0.01 270);
+  --card: oklch(0.18 0.05 278);
+  --card-foreground: oklch(0.97 0.01 270);
+}
+
+.light {
+  --background: oklch(0.98 0.01 200);
+  --foreground: oklch(0.14 0.04 280);
+  --card: oklch(0.96 0.01 200);
+  --card-foreground: oklch(0.14 0.04 280);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0.04 280);
+  --muted: oklch(0.93 0.01 200);
+  --muted-foreground: oklch(0.40 0.05 200);
+  --accent: oklch(0.92 0.02 200);
+  --accent-foreground: oklch(0.14 0.04 280);
+  --border: oklch(0 0 0 / 12%);
+  --input: oklch(0 0 0 / 12%);
+}
+
+.classic-dark {
+  --background: oklch(0.10 0 0);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.14 0 0);
+  --border: oklch(1 0 0 / 5%);
+}
+
+@layer base {
+  * { border-color: var(--color-border); }
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+  html, body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+  h1, h2, h3, h4, .font-display { font-family: var(--font-display); letter-spacing: -0.01em; }
+  ::selection { background: oklch(0.58 0.21 275 / 0.4); color: var(--foreground); }
+  img, video, iframe { max-width: 100%; }
+}
+
+/* Light mode theme adaptation overrides */
+.light body,
+.light main {
+  background-color: oklch(0.98 0.01 200) !important;
+  color: oklch(0.14 0.04 280) !important;
+}
+
+.light header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: oklch(0.14 0.04 280) !important;
+  border-bottom-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.light .glass {
+  background: rgba(255, 255, 255, 0.85) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06) !important;
+}
+
+.light .glass-strong {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08) !important;
+}
+
+.contact-map-embed iframe {
+  filter: grayscale(0.4) invert(0.9) hue-rotate(180deg);
+}
+
+@utility text-gradient-gold {
+  background: linear-gradient(120deg, oklch(0.9 0.08 85), oklch(0.78 0.15 75));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-radial-indigo {
+  background:
+    radial-gradient(ellipse at top, oklch(0.28 0.12 275 / 0.6), transparent 60%),
+    radial-gradient(ellipse at bottom right, oklch(0.5 0.2 285 / 0.25), transparent 55%),
+    var(--background);
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@utility animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+/* ===== Glassmorphism ===== */
+@utility glass {
+  background: linear-gradient(135deg, oklch(1 0 0 / 0.10), oklch(1 0 0 / 0.04));
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid oklch(1 0 0 / 0.14);
+  box-shadow: 0 8px 32px oklch(0 0 0 / 0.35), inset 0 1px 0 oklch(1 0 0 / 0.10);
+}
+@utility glass-strong {
+  background: linear-gradient(135deg, oklch(0.22 0.06 278 / 0.78), oklch(0.16 0.05 278 / 0.62));
+  -webkit-backdrop-filter: blur(22px) saturate(150%);
+  backdrop-filter: blur(22px) saturate(150%);
+  border: 1px solid oklch(1 0 0 / 0.16);
+  box-shadow: 0 12px 40px oklch(0 0 0 / 0.45), inset 0 1px 0 oklch(1 0 0 / 0.10);
+}
+@utility glass-gold {
+  border: 1px solid oklch(0.82 0.13 85 / 0.35);
+  box-shadow: 0 0 0 1px oklch(0.82 0.13 85 / 0.15), 0 12px 40px oklch(0 0 0 / 0.45);
+}
+
+/* ===== Tech hover glow ===== */
+@utility tech-glow {
+  transition: transform .35s ease, box-shadow .35s ease, border-color .35s ease;
+}
+.tech-glow:hover {
+  transform: translateY(-4px);
+  border-color: oklch(0.82 0.13 85 / 0.55);
+  box-shadow: 0 0 0 1px oklch(0.82 0.13 85 / 0.35), 0 18px 50px oklch(0.58 0.21 275 / 0.35), 0 0 60px oklch(0.82 0.13 85 / 0.25);
+}
+
+/* ===== Flip tile ===== */
+.flip-tile { perspective: 1200px; }
+.flip-inner {
+  position: relative; width: 100%; height: 100%;
+  transition: transform .8s cubic-bezier(.2,.8,.2,1);
+  transform-style: preserve-3d;
+}
+.flip-tile:hover .flip-inner,
+.flip-tile:focus-within .flip-inner { transform: rotateY(180deg); }
+.flip-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: inherit;
+  overflow: hidden;
+}
+.flip-back { transform: rotateY(180deg); }
+
+/* ===== Dashboard progress (native <progress> — no inline width styles) ===== */
+.dashboard-progress {
+  display: block;
+  width: 100%;
+  height: 0.5rem;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: oklch(1 0 0 / 0.05);
+}
+.dashboard-progress::-webkit-progress-bar {
+  background: oklch(1 0 0 / 0.05);
+  border-radius: 9999px;
+}
+.dashboard-progress::-webkit-progress-value {
+  background: linear-gradient(to right, oklch(0.58 0.21 275), oklch(0.82 0.13 85));
+  border-radius: 9999px;
+  transition: width 0.5s ease;
+}
+.dashboard-progress::-moz-progress-bar {
+  background: linear-gradient(to right, oklch(0.58 0.21 275), oklch(0.82 0.13 85));
+  border-radius: 9999px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
+@keyframes shimmer-x { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@utility shimmer-border {
+  background: linear-gradient(110deg, transparent 30%, oklch(0.82 0.13 85 / 0.35) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer-x 3.5s linear infinite;
+}

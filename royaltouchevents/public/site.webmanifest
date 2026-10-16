@@ -1,0 +1,21 @@
+{
+  "name": "Royal Touch Events",
+  "short_name": "Royal Touch",
+  "description": "Premium event planning in Nairobi — weddings, corporate events, concerts and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1625",
+  "theme_color": "#1a1625",
+  "icons": [
+    {
+      "src": "/favicon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/og-image.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
