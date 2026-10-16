@@ -104,7 +104,7 @@ const departmentData: Record<string, [string, string, string[]]> = {
   field: ["🗺️ Field Operations", "Assignments, venue routes, arrival check-in, setup progress, incidents and completion.", ["Today's Assignments", "My Events", "Routes", "Arrival Check-In", "Setup Progress", "Incident Reports"]],
 };
 
-export function StaffDashboard() {
+function StaffDashboard() {
   const { user, profile, signOut } = useAuth();
   const { data: tickets = [] } = useAdminTickets();
   const { data: bookings = [] } = useAdminBookings();

@@ -79,6 +79,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { createPageSeo } from "@/lib/seo";
 
+export const Route = createFileRoute("/admin/settings")({
+  validateSearch: (search: Record<string, unknown>): { section?: string } => ({
+    section: search.section ? String(search.section) : undefined,
+  }),
+  head: () =>
+    createPageSeo({
+      title: "AI Security & System Settings | Royal Touch Admin",
+      description: "Manage system settings, AI Cyber Sentinel security guard, RBAC roles, and database backups.",
+      path: "/admin/settings",
+      noindex: true,
+    }),
+  component: AdminSettings,
+});
+
 function AdminSettings() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
@@ -843,19 +857,3 @@ function AdminSettings() {
     </div>
   );
 }
-
-export const Route = createFileRoute("/admin/settings")({
-  validateSearch: (search: Record<string, unknown>): { section?: string } => ({
-    section: search.section ? String(search.section) : undefined,
-  }),
-  head: () =>
-    createPageSeo({
-      title: "AI Security & System Settings | Royal Touch Admin",
-      description: "Manage system settings, AI Cyber Sentinel security guard, RBAC roles, and database backups.",
-      path: "/admin/settings",
-      noindex: true,
-    }),
-  component: AdminSettings,
-});
-
-export default AdminSettings;
