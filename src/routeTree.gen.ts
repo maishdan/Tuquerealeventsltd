@@ -9,116 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as BookingRouteImport } from './routes/booking'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as CopyrightRouteImport } from './routes/copyright'
-import { Route as EventsRouteImport } from './routes/events'
-import { Route as PortfolioRouteImport } from './routes/portfolio'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ServicesRouteImport } from './routes/services'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as StaffRouteImport } from './routes/staff'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as StaffRouteImport } from './routes/staff'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SignUpRouteImport } from './routes/sign-up'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as ServicesRouteImport } from './routes/services'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PortfolioRouteImport } from './routes/portfolio'
+import { Route as EventsRouteImport } from './routes/events'
+import { Route as CopyrightRouteImport } from './routes/copyright'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as BookingRouteImport } from './routes/booking'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
-import { Route as AdminAdminBookingRouteImport } from './routes/admin/admin-booking'
-import { Route as AdminAiRouteImport } from './routes/admin/ai'
-import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
-import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
-import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
-import { Route as AdminEventsRouteImport } from './routes/admin/events'
-import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
-import { Route as AdminHelpRouteImport } from './routes/admin/help'
-import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
-import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
-import { Route as AdminProfileRouteImport } from './routes/admin/profile'
-import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
-import { Route as AdminProspectsRouteImport } from './routes/admin/prospects'
-import { Route as AdminReportsRouteImport } from './routes/admin/reports'
-import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
-import { Route as AdminTeamRouteImport } from './routes/admin/team'
-import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as DashboardLayoutRouteImport } from './routes/dashboard/_layout'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminTeamRouteImport } from './routes/admin/team'
+import { Route as AdminSettingsRouteImport } from './routes/admin/settings'
+import { Route as AdminReportsRouteImport } from './routes/admin/reports'
+import { Route as AdminProspectsRouteImport } from './routes/admin/prospects'
+import { Route as AdminProposalsRouteImport } from './routes/admin/proposals'
+import { Route as AdminProfileRouteImport } from './routes/admin/profile'
+import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
+import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
+import { Route as AdminHelpRouteImport } from './routes/admin/help'
+import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
+import { Route as AdminEventsRouteImport } from './routes/admin/events'
+import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
+import { Route as AdminContactsRouteImport } from './routes/admin/contacts'
+import { Route as AdminBookingsRouteImport } from './routes/admin/bookings'
+import { Route as AdminAiRouteImport } from './routes/admin/ai'
+import { Route as AdminAdminBookingRouteImport } from './routes/admin/admin-booking'
+import { Route as AdminLayoutRouteImport } from './routes/admin/_layout'
 import { Route as DashboardLayoutIndexRouteImport } from './routes/dashboard/_layout.index'
-import { Route as DashboardLayoutBookEventRouteImport } from './routes/dashboard/_layout.book-event'
-import { Route as DashboardLayoutBookingsRouteImport } from './routes/dashboard/_layout.bookings'
-import { Route as DashboardLayoutEventsRouteImport } from './routes/dashboard/_layout.events'
-import { Route as DashboardLayoutHostEventRouteImport } from './routes/dashboard/_layout.host-event'
-import { Route as DashboardLayoutMessagesRouteImport } from './routes/dashboard/_layout.messages'
-import { Route as DashboardLayoutOrdersRouteImport } from './routes/dashboard/_layout.orders'
-import { Route as DashboardLayoutPaymentHistoryRouteImport } from './routes/dashboard/_layout.payment-history'
-import { Route as DashboardLayoutProfileRouteImport } from './routes/dashboard/_layout.profile'
-import { Route as DashboardLayoutReceiptsRouteImport } from './routes/dashboard/_layout.receipts'
 import { Route as DashboardLayoutSettingsRouteImport } from './routes/dashboard/_layout.settings'
+import { Route as DashboardLayoutReceiptsRouteImport } from './routes/dashboard/_layout.receipts'
+import { Route as DashboardLayoutProfileRouteImport } from './routes/dashboard/_layout.profile'
+import { Route as DashboardLayoutPaymentHistoryRouteImport } from './routes/dashboard/_layout.payment-history'
+import { Route as DashboardLayoutOrdersRouteImport } from './routes/dashboard/_layout.orders'
+import { Route as DashboardLayoutMessagesRouteImport } from './routes/dashboard/_layout.messages'
+import { Route as DashboardLayoutHostEventRouteImport } from './routes/dashboard/_layout.host-event'
+import { Route as DashboardLayoutEventsRouteImport } from './routes/dashboard/_layout.events'
+import { Route as DashboardLayoutBookingsRouteImport } from './routes/dashboard/_layout.bookings'
+import { Route as DashboardLayoutBookEventRouteImport } from './routes/dashboard/_layout.book-event'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BookingRoute = BookingRouteImport.update({
-  id: '/booking',
-  path: '/booking',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CopyrightRoute = CopyrightRouteImport.update({
-  id: '/copyright',
-  path: '/copyright',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EventsRoute = EventsRouteImport.update({
-  id: '/events',
-  path: '/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PortfolioRoute = PortfolioRouteImport.update({
-  id: '/portfolio',
-  path: '/portfolio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const StaffRoute = StaffRouteImport.update({
@@ -126,9 +66,69 @@ const StaffRoute = StaffRouteImport.update({
   path: '/staff',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesRoute = ServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PortfolioRoute = PortfolioRouteImport.update({
+  id: '/portfolio',
+  path: '/portfolio',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsRoute = EventsRouteImport.update({
+  id: '/events',
+  path: '/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CopyrightRoute = CopyrightRouteImport.update({
+  id: '/copyright',
+  path: '/copyright',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BookingRoute = BookingRouteImport.update({
+  id: '/booking',
+  path: '/booking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogRoute = BlogRouteImport.update({
+  id: '/blog',
+  path: '/blog',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -136,89 +136,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminLayoutRoute = AdminLayoutRouteImport.update({
-  id: '/admin/_layout',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminAdminBookingRoute = AdminAdminBookingRouteImport.update({
-  id: '/admin/admin-booking',
-  path: '/admin/admin-booking',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminAiRoute = AdminAiRouteImport.update({
-  id: '/admin/ai',
-  path: '/admin/ai',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminBookingsRoute = AdminBookingsRouteImport.update({
-  id: '/admin/bookings',
-  path: '/admin/bookings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminContactsRoute = AdminContactsRouteImport.update({
-  id: '/admin/contacts',
-  path: '/admin/contacts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminCustomersRoute = AdminCustomersRouteImport.update({
-  id: '/admin/customers',
-  path: '/admin/customers',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminEventsRoute = AdminEventsRouteImport.update({
-  id: '/admin/events',
-  path: '/admin/events',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminFinanceRoute = AdminFinanceRouteImport.update({
-  id: '/admin/finance',
-  path: '/admin/finance',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminHelpRoute = AdminHelpRouteImport.update({
-  id: '/admin/help',
-  path: '/admin/help',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminMarketingRoute = AdminMarketingRouteImport.update({
-  id: '/admin/marketing',
-  path: '/admin/marketing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
-  id: '/admin/payments',
-  path: '/admin/payments',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProfileRoute = AdminProfileRouteImport.update({
-  id: '/admin/profile',
-  path: '/admin/profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProposalsRoute = AdminProposalsRouteImport.update({
-  id: '/admin/proposals',
-  path: '/admin/proposals',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminProspectsRoute = AdminProspectsRouteImport.update({
-  id: '/admin/prospects',
-  path: '/admin/prospects',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminReportsRoute = AdminReportsRouteImport.update({
-  id: '/admin/reports',
-  path: '/admin/reports',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminSettingsRoute = AdminSettingsRouteImport.update({
-  id: '/admin/settings',
-  path: '/admin/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminTeamRoute = AdminTeamRouteImport.update({
-  id: '/admin/team',
-  path: '/admin/team',
+const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
+  id: '/dashboard/_layout',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminUsersRoute = AdminUsersRouteImport.update({
@@ -226,9 +146,89 @@ const AdminUsersRoute = AdminUsersRouteImport.update({
   path: '/admin/users',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardLayoutRoute = DashboardLayoutRouteImport.update({
-  id: '/dashboard/_layout',
-  path: '/dashboard',
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProspectsRoute = AdminProspectsRouteImport.update({
+  id: '/admin/prospects',
+  path: '/admin/prospects',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProposalsRoute = AdminProposalsRouteImport.update({
+  id: '/admin/proposals',
+  path: '/admin/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminProfileRoute = AdminProfileRouteImport.update({
+  id: '/admin/profile',
+  path: '/admin/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPaymentsRoute = AdminPaymentsRouteImport.update({
+  id: '/admin/payments',
+  path: '/admin/payments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/admin/marketing',
+  path: '/admin/marketing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminHelpRoute = AdminHelpRouteImport.update({
+  id: '/admin/help',
+  path: '/admin/help',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminFinanceRoute = AdminFinanceRouteImport.update({
+  id: '/admin/finance',
+  path: '/admin/finance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminEventsRoute = AdminEventsRouteImport.update({
+  id: '/admin/events',
+  path: '/admin/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminCustomersRoute = AdminCustomersRouteImport.update({
+  id: '/admin/customers',
+  path: '/admin/customers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminContactsRoute = AdminContactsRouteImport.update({
+  id: '/admin/contacts',
+  path: '/admin/contacts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminBookingsRoute = AdminBookingsRouteImport.update({
+  id: '/admin/bookings',
+  path: '/admin/bookings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/admin/ai',
+  path: '/admin/ai',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAdminBookingRoute = AdminAdminBookingRouteImport.update({
+  id: '/admin/admin-booking',
+  path: '/admin/admin-booking',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLayoutRoute = AdminLayoutRouteImport.update({
+  id: '/admin/_layout',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
@@ -236,36 +236,19 @@ const DashboardLayoutIndexRoute = DashboardLayoutIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DashboardLayoutBookEventRoute =
-  DashboardLayoutBookEventRouteImport.update({
-    id: '/book-event',
-    path: '/book-event',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutBookingsRoute = DashboardLayoutBookingsRouteImport.update({
-  id: '/bookings',
-  path: '/bookings',
+const DashboardLayoutSettingsRoute = DashboardLayoutSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DashboardLayoutEventsRoute = DashboardLayoutEventsRouteImport.update({
-  id: '/events',
-  path: '/events',
+const DashboardLayoutReceiptsRoute = DashboardLayoutReceiptsRouteImport.update({
+  id: '/receipts',
+  path: '/receipts',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DashboardLayoutHostEventRoute =
-  DashboardLayoutHostEventRouteImport.update({
-    id: '/host-event',
-    path: '/host-event',
-    getParentRoute: () => DashboardLayoutRoute,
-  } as any)
-const DashboardLayoutMessagesRoute = DashboardLayoutMessagesRouteImport.update({
-  id: '/messages',
-  path: '/messages',
-  getParentRoute: () => DashboardLayoutRoute,
-} as any)
-const DashboardLayoutOrdersRoute = DashboardLayoutOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
+const DashboardLayoutProfileRoute = DashboardLayoutProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
 const DashboardLayoutPaymentHistoryRoute =
@@ -274,21 +257,38 @@ const DashboardLayoutPaymentHistoryRoute =
     path: '/payment-history',
     getParentRoute: () => DashboardLayoutRoute,
   } as any)
-const DashboardLayoutProfileRoute = DashboardLayoutProfileRouteImport.update({
-  id: '/profile',
-  path: '/profile',
+const DashboardLayoutOrdersRoute = DashboardLayoutOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DashboardLayoutReceiptsRoute = DashboardLayoutReceiptsRouteImport.update({
-  id: '/receipts',
-  path: '/receipts',
+const DashboardLayoutMessagesRoute = DashboardLayoutMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
-const DashboardLayoutSettingsRoute = DashboardLayoutSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
+const DashboardLayoutHostEventRoute =
+  DashboardLayoutHostEventRouteImport.update({
+    id: '/host-event',
+    path: '/host-event',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
+const DashboardLayoutEventsRoute = DashboardLayoutEventsRouteImport.update({
+  id: '/events',
+  path: '/events',
   getParentRoute: () => DashboardLayoutRoute,
 } as any)
+const DashboardLayoutBookingsRoute = DashboardLayoutBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => DashboardLayoutRoute,
+} as any)
+const DashboardLayoutBookEventRoute =
+  DashboardLayoutBookEventRouteImport.update({
+    id: '/book-event',
+    path: '/book-event',
+    getParentRoute: () => DashboardLayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -618,95 +618,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/booking': {
-      id: '/booking'
-      path: '/booking'
-      fullPath: '/booking'
-      preLoaderRoute: typeof BookingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/copyright': {
-      id: '/copyright'
-      path: '/copyright'
-      fullPath: '/copyright'
-      preLoaderRoute: typeof CopyrightRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/events': {
-      id: '/events'
-      path: '/events'
-      fullPath: '/events'
-      preLoaderRoute: typeof EventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/portfolio': {
-      id: '/portfolio'
-      path: '/portfolio'
-      fullPath: '/portfolio'
-      preLoaderRoute: typeof PortfolioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/staff': {
@@ -716,11 +632,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StaffRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/portfolio': {
+      id: '/portfolio'
+      path: '/portfolio'
+      fullPath: '/portfolio'
+      preLoaderRoute: typeof PortfolioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events': {
+      id: '/events'
+      path: '/events'
+      fullPath: '/events'
+      preLoaderRoute: typeof EventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/copyright': {
+      id: '/copyright'
+      path: '/copyright'
+      fullPath: '/copyright'
+      preLoaderRoute: typeof CopyrightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/booking': {
+      id: '/booking'
+      path: '/booking'
+      fullPath: '/booking'
+      preLoaderRoute: typeof BookingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -730,123 +730,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/_layout': {
-      id: '/admin/_layout'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminLayoutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/admin-booking': {
-      id: '/admin/admin-booking'
-      path: '/admin/admin-booking'
-      fullPath: '/admin/admin-booking'
-      preLoaderRoute: typeof AdminAdminBookingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/ai': {
-      id: '/admin/ai'
-      path: '/admin/ai'
-      fullPath: '/admin/ai'
-      preLoaderRoute: typeof AdminAiRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/bookings': {
-      id: '/admin/bookings'
-      path: '/admin/bookings'
-      fullPath: '/admin/bookings'
-      preLoaderRoute: typeof AdminBookingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/contacts': {
-      id: '/admin/contacts'
-      path: '/admin/contacts'
-      fullPath: '/admin/contacts'
-      preLoaderRoute: typeof AdminContactsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/customers': {
-      id: '/admin/customers'
-      path: '/admin/customers'
-      fullPath: '/admin/customers'
-      preLoaderRoute: typeof AdminCustomersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/events': {
-      id: '/admin/events'
-      path: '/admin/events'
-      fullPath: '/admin/events'
-      preLoaderRoute: typeof AdminEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/finance': {
-      id: '/admin/finance'
-      path: '/admin/finance'
-      fullPath: '/admin/finance'
-      preLoaderRoute: typeof AdminFinanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/help': {
-      id: '/admin/help'
-      path: '/admin/help'
-      fullPath: '/admin/help'
-      preLoaderRoute: typeof AdminHelpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/marketing': {
-      id: '/admin/marketing'
-      path: '/admin/marketing'
-      fullPath: '/admin/marketing'
-      preLoaderRoute: typeof AdminMarketingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/payments': {
-      id: '/admin/payments'
-      path: '/admin/payments'
-      fullPath: '/admin/payments'
-      preLoaderRoute: typeof AdminPaymentsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/profile': {
-      id: '/admin/profile'
-      path: '/admin/profile'
-      fullPath: '/admin/profile'
-      preLoaderRoute: typeof AdminProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/proposals': {
-      id: '/admin/proposals'
-      path: '/admin/proposals'
-      fullPath: '/admin/proposals'
-      preLoaderRoute: typeof AdminProposalsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/prospects': {
-      id: '/admin/prospects'
-      path: '/admin/prospects'
-      fullPath: '/admin/prospects'
-      preLoaderRoute: typeof AdminProspectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/reports': {
-      id: '/admin/reports'
-      path: '/admin/reports'
-      fullPath: '/admin/reports'
-      preLoaderRoute: typeof AdminReportsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/settings': {
-      id: '/admin/settings'
-      path: '/admin/settings'
-      fullPath: '/admin/settings'
-      preLoaderRoute: typeof AdminSettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/team': {
-      id: '/admin/team'
-      path: '/admin/team'
-      fullPath: '/admin/team'
-      preLoaderRoute: typeof AdminTeamRouteImport
+    '/dashboard/_layout': {
+      id: '/dashboard/_layout'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/users': {
@@ -856,11 +744,123 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminUsersRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/_layout': {
-      id: '/dashboard/_layout'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardLayoutRouteImport
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/prospects': {
+      id: '/admin/prospects'
+      path: '/admin/prospects'
+      fullPath: '/admin/prospects'
+      preLoaderRoute: typeof AdminProspectsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/proposals': {
+      id: '/admin/proposals'
+      path: '/admin/proposals'
+      fullPath: '/admin/proposals'
+      preLoaderRoute: typeof AdminProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/profile': {
+      id: '/admin/profile'
+      path: '/admin/profile'
+      fullPath: '/admin/profile'
+      preLoaderRoute: typeof AdminProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/payments': {
+      id: '/admin/payments'
+      path: '/admin/payments'
+      fullPath: '/admin/payments'
+      preLoaderRoute: typeof AdminPaymentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/admin/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/help': {
+      id: '/admin/help'
+      path: '/admin/help'
+      fullPath: '/admin/help'
+      preLoaderRoute: typeof AdminHelpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/finance': {
+      id: '/admin/finance'
+      path: '/admin/finance'
+      fullPath: '/admin/finance'
+      preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/events': {
+      id: '/admin/events'
+      path: '/admin/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AdminEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/customers': {
+      id: '/admin/customers'
+      path: '/admin/customers'
+      fullPath: '/admin/customers'
+      preLoaderRoute: typeof AdminCustomersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/contacts': {
+      id: '/admin/contacts'
+      path: '/admin/contacts'
+      fullPath: '/admin/contacts'
+      preLoaderRoute: typeof AdminContactsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/bookings': {
+      id: '/admin/bookings'
+      path: '/admin/bookings'
+      fullPath: '/admin/bookings'
+      preLoaderRoute: typeof AdminBookingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/admin/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/admin-booking': {
+      id: '/admin/admin-booking'
+      path: '/admin/admin-booking'
+      fullPath: '/admin/admin-booking'
+      preLoaderRoute: typeof AdminAdminBookingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/_layout': {
+      id: '/admin/_layout'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminLayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard/_layout/': {
@@ -870,60 +870,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutIndexRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
-    '/dashboard/_layout/book-event': {
-      id: '/dashboard/_layout/book-event'
-      path: '/book-event'
-      fullPath: '/dashboard/book-event'
-      preLoaderRoute: typeof DashboardLayoutBookEventRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/bookings': {
-      id: '/dashboard/_layout/bookings'
-      path: '/bookings'
-      fullPath: '/dashboard/bookings'
-      preLoaderRoute: typeof DashboardLayoutBookingsRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/events': {
-      id: '/dashboard/_layout/events'
-      path: '/events'
-      fullPath: '/dashboard/events'
-      preLoaderRoute: typeof DashboardLayoutEventsRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/host-event': {
-      id: '/dashboard/_layout/host-event'
-      path: '/host-event'
-      fullPath: '/dashboard/host-event'
-      preLoaderRoute: typeof DashboardLayoutHostEventRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/messages': {
-      id: '/dashboard/_layout/messages'
-      path: '/messages'
-      fullPath: '/dashboard/messages'
-      preLoaderRoute: typeof DashboardLayoutMessagesRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/orders': {
-      id: '/dashboard/_layout/orders'
-      path: '/orders'
-      fullPath: '/dashboard/orders'
-      preLoaderRoute: typeof DashboardLayoutOrdersRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/payment-history': {
-      id: '/dashboard/_layout/payment-history'
-      path: '/payment-history'
-      fullPath: '/dashboard/payment-history'
-      preLoaderRoute: typeof DashboardLayoutPaymentHistoryRouteImport
-      parentRoute: typeof DashboardLayoutRoute
-    }
-    '/dashboard/_layout/profile': {
-      id: '/dashboard/_layout/profile'
-      path: '/profile'
-      fullPath: '/dashboard/profile'
-      preLoaderRoute: typeof DashboardLayoutProfileRouteImport
+    '/dashboard/_layout/settings': {
+      id: '/dashboard/_layout/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardLayoutSettingsRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
     '/dashboard/_layout/receipts': {
@@ -933,11 +884,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLayoutReceiptsRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
-    '/dashboard/_layout/settings': {
-      id: '/dashboard/_layout/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardLayoutSettingsRouteImport
+    '/dashboard/_layout/profile': {
+      id: '/dashboard/_layout/profile'
+      path: '/profile'
+      fullPath: '/dashboard/profile'
+      preLoaderRoute: typeof DashboardLayoutProfileRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/payment-history': {
+      id: '/dashboard/_layout/payment-history'
+      path: '/payment-history'
+      fullPath: '/dashboard/payment-history'
+      preLoaderRoute: typeof DashboardLayoutPaymentHistoryRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/orders': {
+      id: '/dashboard/_layout/orders'
+      path: '/orders'
+      fullPath: '/dashboard/orders'
+      preLoaderRoute: typeof DashboardLayoutOrdersRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/messages': {
+      id: '/dashboard/_layout/messages'
+      path: '/messages'
+      fullPath: '/dashboard/messages'
+      preLoaderRoute: typeof DashboardLayoutMessagesRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/host-event': {
+      id: '/dashboard/_layout/host-event'
+      path: '/host-event'
+      fullPath: '/dashboard/host-event'
+      preLoaderRoute: typeof DashboardLayoutHostEventRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/events': {
+      id: '/dashboard/_layout/events'
+      path: '/events'
+      fullPath: '/dashboard/events'
+      preLoaderRoute: typeof DashboardLayoutEventsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/bookings': {
+      id: '/dashboard/_layout/bookings'
+      path: '/bookings'
+      fullPath: '/dashboard/bookings'
+      preLoaderRoute: typeof DashboardLayoutBookingsRouteImport
+      parentRoute: typeof DashboardLayoutRoute
+    }
+    '/dashboard/_layout/book-event': {
+      id: '/dashboard/_layout/book-event'
+      path: '/book-event'
+      fullPath: '/dashboard/book-event'
+      preLoaderRoute: typeof DashboardLayoutBookEventRouteImport
       parentRoute: typeof DashboardLayoutRoute
     }
   }
