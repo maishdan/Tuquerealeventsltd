@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
-import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, Check } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -39,6 +39,8 @@ const heroImages = [
   "/back/e9.jpg",
 ];
 
+const SECRET_PASSCODE = "Xya!Toque1";
+
 const schema = z.object({
   email: z.string().trim().email("Enter a valid email").max(255),
   password: z.string().min(8, "Password must be at least 8 characters").max(128),
@@ -58,7 +60,30 @@ function SignIn() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Secret Passcode Protection State
+  const [secretInput, setSecretInput] = useState("");
+  const [isTilesUnlocked, setIsTilesUnlocked] = useState(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("royal_secret_unlocked") === "true";
+    }
+    return false;
+  });
+  const [secretError, setSecretError] = useState("");
+
   const hasRedirectedRef = useRef(false);
+
+  const handleUnlockTiles = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSecretError("");
+    if (secretInput.trim() === SECRET_PASSCODE) {
+      setIsTilesUnlocked(true);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("royal_secret_unlocked", "true");
+      }
+    } else {
+      setSecretError("Invalid Executive Secret Key. Access denied.");
+    }
+  };
 
   const handleDirectLogin = (targetRole: "admin" | "staff" | "customer", route: string) => {
     try {
@@ -190,79 +215,128 @@ function SignIn() {
             </div>
           )}
 
-          {/* DIRECT ONE-CLICK DASHBOARD ACCESS */}
-          <div className="p-5 bg-black/40 border border-gold/40 rounded-none space-y-4">
-            <div className="text-center space-y-1">
-              <span className="text-[10px] font-black uppercase text-gold tracking-[0.25em] font-mono block">
-                ⚡ INSTANT ONE-CLICK ACCESS
-              </span>
-              <p className="text-xs font-bold text-white uppercase tracking-wider">
-                Direct Dashboard Portals (No Password Required)
-              </p>
+          {/* SECRET PASSCODE PROTECTED DIRECT DASHBOARD ACCESS */}
+          {!isTilesUnlocked ? (
+            <div className="p-5 bg-black/40 border border-gold/40 rounded-none space-y-4">
+              <div className="text-center space-y-1">
+                <span className="text-[10px] font-black uppercase text-gold tracking-[0.25em] font-mono block flex items-center justify-center gap-1.5">
+                  <Lock size={12} /> EXECUTIVE SECRET DIRECT ACCESS
+                </span>
+                <p className="text-xs font-bold text-white uppercase tracking-wider">
+                  Enter Secret Key To Unlock Passwordless Portals
+                </p>
+              </div>
+
+              {secretError && (
+                <p className="text-[10px] font-bold text-rose-400 text-center uppercase tracking-widest animate-in fade-in duration-200">
+                  {secretError}
+                </p>
+              )}
+
+              <form onSubmit={handleUnlockTiles} className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="password"
+                  value={secretInput}
+                  onChange={(e) => setSecretInput(e.target.value)}
+                  placeholder="Enter secret key"
+                  className="flex-1 h-12 bg-black/60 border border-gold/40 px-4 text-xs font-mono text-white placeholder:text-gray-500 focus:border-gold outline-none"
+                />
+                <button
+                  type="submit"
+                  className="h-12 px-5 bg-gold text-black font-black text-xs uppercase tracking-wider hover:bg-white transition-all cursor-pointer shrink-0"
+                >
+                  Unlock Portals
+                </button>
+              </form>
             </div>
-
-            <div className="grid grid-cols-1 gap-3">
-              <a
-                href="/admin"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDirectLogin("admin", "/admin");
-                }}
-                className="w-full p-4 bg-gradient-to-r from-amber-500/20 via-gold/25 to-amber-500/20 border-2 border-gold hover:border-white text-gold hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded bg-gold text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
-                    👑
-                  </div>
-                  <div className="text-left">
-                    <span className="block font-bold leading-tight text-white group-hover:text-gold transition-colors">CEO Admin Dashboard</span>
-                    <span className="text-[9px] text-gray-300 font-mono font-normal block">Sales, CRM, Events, Finance & AI Assistant</span>
-                  </div>
+          ) : (
+            <div className="p-5 bg-black/40 border-2 border-emerald-500/80 rounded-none space-y-4 animate-in fade-in zoom-in-95 duration-300">
+              <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-black uppercase text-emerald-400 tracking-[0.2em] font-mono block flex items-center gap-1">
+                    <Check size={12} /> EXECUTIVE OVERRIDE ACTIVE
+                  </span>
+                  <p className="text-xs font-bold text-white uppercase tracking-wider">
+                    Direct Dashboard Portals Unlocked
+                  </p>
                 </div>
-                <ArrowRight size={18} className="text-gold group-hover:translate-x-1 transition-transform" />
-              </a>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsTilesUnlocked(false);
+                    if (typeof window !== "undefined") {
+                      sessionStorage.removeItem("royal_secret_unlocked");
+                    }
+                  }}
+                  className="text-[9px] font-mono text-gray-400 hover:text-rose-400 uppercase tracking-widest border border-gray-700 px-2 py-1 cursor-pointer"
+                >
+                  Lock Tiles 🔒
+                </button>
+              </div>
 
-              <a
-                href="/staff"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDirectLogin("staff", "/staff");
-                }}
-                className="w-full p-4 bg-gradient-to-r from-blue-500/20 via-indigo-500/25 to-blue-500/20 border-2 border-blue-400/80 hover:border-white text-blue-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded bg-blue-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
-                    🛡️
+              <div className="grid grid-cols-1 gap-3">
+                <a
+                  href="/admin"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDirectLogin("admin", "/admin");
+                  }}
+                  className="w-full p-4 bg-gradient-to-r from-amber-500/20 via-gold/25 to-amber-500/20 border-2 border-gold hover:border-white text-gold hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded bg-gold text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                      👑
+                    </div>
+                    <div className="text-left">
+                      <span className="block font-bold leading-tight text-white group-hover:text-gold transition-colors">CEO Admin Dashboard</span>
+                      <span className="text-[9px] text-gray-300 font-mono font-normal block">Sales, CRM, Events, Finance & AI Assistant</span>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <span className="block font-bold leading-tight text-white group-hover:text-blue-300 transition-colors">Staff Operations Dashboard</span>
-                    <span className="text-[9px] text-gray-300 font-mono font-normal block">Logistics, Tasks, Vendors & Schedules</span>
-                  </div>
-                </div>
-                <ArrowRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
-              </a>
+                  <ArrowRight size={18} className="text-gold group-hover:translate-x-1 transition-transform" />
+                </a>
 
-              <a
-                href="/dashboard"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleDirectLogin("customer", "/dashboard");
-                }}
-                className="w-full p-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/25 to-emerald-500/20 border-2 border-emerald-400/80 hover:border-white text-emerald-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded bg-emerald-500 text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
-                    👤
+                <a
+                  href="/staff"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDirectLogin("staff", "/staff");
+                  }}
+                  className="w-full p-4 bg-gradient-to-r from-blue-500/20 via-indigo-500/25 to-blue-500/20 border-2 border-blue-400/80 hover:border-white text-blue-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded bg-blue-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                      🛡️
+                    </div>
+                    <div className="text-left">
+                      <span className="block font-bold leading-tight text-white group-hover:text-blue-300 transition-colors">Staff Operations Dashboard</span>
+                      <span className="text-[9px] text-gray-300 font-mono font-normal block">Logistics, Tasks, Vendors & Schedules</span>
+                    </div>
                   </div>
-                  <div className="text-left">
-                    <span className="block font-bold leading-tight text-white group-hover:text-emerald-400 transition-colors">Client Portal Dashboard</span>
-                    <span className="text-[9px] text-gray-300 font-mono font-normal block">My Bookings, Tickets, Passes & Briefs</span>
+                  <ArrowRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+                </a>
+
+                <a
+                  href="/dashboard"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleDirectLogin("customer", "/dashboard");
+                  }}
+                  className="w-full p-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/25 to-emerald-500/20 border-2 border-emerald-400/80 hover:border-white text-emerald-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded bg-emerald-500 text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                      👤
+                    </div>
+                    <div className="text-left">
+                      <span className="block font-bold leading-tight text-white group-hover:text-emerald-400 transition-colors">Client Portal Dashboard</span>
+                      <span className="text-[9px] text-gray-300 font-mono font-normal block">My Bookings, Tickets, Passes & Briefs</span>
+                    </div>
                   </div>
-                </div>
-                <ArrowRight size={18} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
-              </a>
+                  <ArrowRight size={18} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                </a>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* SIGN IN WITH GOOGLE */}
           <div className="space-y-3">
