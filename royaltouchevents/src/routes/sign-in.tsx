@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import { z } from "zod";
-import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, Check } from "lucide-react";
+import { Loader2, ShieldCheck, ArrowRight, Eye, EyeOff, AlertCircle, Lock, Check, CheckCircle2, XCircle } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -60,44 +60,44 @@ function SignIn() {
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Secret Passcode Protection State
+  // Secret Passcode Verification State
   const [secretInput, setSecretInput] = useState("");
+  const [verifyingSecret, setVerifyingSecret] = useState(false);
+  const [secretStatus, setSecretStatus] = useState<"idle" | "success" | "error">("idle");
+  const [secretMsg, setSecretMsg] = useState("");
+
   const [isTilesUnlocked, setIsTilesUnlocked] = useState(() => {
     if (typeof window !== "undefined") {
       return sessionStorage.getItem("royal_secret_unlocked") === "true";
     }
     return false;
   });
-  const [secretError, setSecretError] = useState("");
 
   const hasRedirectedRef = useRef(false);
 
-  const handleSecretInputChange = (val: string) => {
-    setSecretInput(val);
-    setSecretError("");
-    const cleanVal = val.trim().toLowerCase();
-    const targetPass = SECRET_PASSCODE.toLowerCase();
-    if (cleanVal === targetPass) {
-      setIsTilesUnlocked(true);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("royal_secret_unlocked", "true");
-      }
-    }
-  };
-
   const handleUnlockTiles = (e: React.FormEvent) => {
     e.preventDefault();
-    setSecretError("");
+    setVerifyingSecret(true);
+    setSecretStatus("idle");
+    setSecretMsg("");
+
     const cleanVal = secretInput.trim().toLowerCase();
     const targetPass = SECRET_PASSCODE.toLowerCase();
-    if (cleanVal === targetPass) {
-      setIsTilesUnlocked(true);
-      if (typeof window !== "undefined") {
-        sessionStorage.setItem("royal_secret_unlocked", "true");
+
+    setTimeout(() => {
+      setVerifyingSecret(false);
+      if (cleanVal === targetPass) {
+        setSecretStatus("success");
+        setSecretMsg("✓ Secret Code Verified! Direct Dashboards Unlocked.");
+        setIsTilesUnlocked(true);
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("royal_secret_unlocked", "true");
+        }
+      } else {
+        setSecretStatus("error");
+        setSecretMsg("✕ Incorrect Secret Code. Access Denied.");
       }
-    } else {
-      setSecretError("Invalid Executive Secret Key. Access denied.");
-    }
+    }, 400);
   };
 
   const handleDirectLogin = (targetRole: "admin" | "staff" | "customer", route: string) => {
@@ -230,37 +230,53 @@ function SignIn() {
             </div>
           )}
 
-          {/* SECRET PASSCODE PROTECTED DIRECT DASHBOARD ACCESS */}
+          {/* SECRET PASSCODE VERIFICATION DIRECT DASHBOARD ACCESS */}
           {!isTilesUnlocked ? (
             <div className="p-5 bg-black/40 border border-gold/40 rounded-none space-y-4">
               <div className="text-center space-y-1">
                 <span className="text-[10px] font-black uppercase text-gold tracking-[0.25em] font-mono block flex items-center justify-center gap-1.5">
-                  <Lock size={12} /> EXECUTIVE SECRET DIRECT ACCESS
+                  <Lock size={12} /> EXECUTIVE SECRET CODE VERIFICATION
                 </span>
                 <p className="text-xs font-bold text-white uppercase tracking-wider">
-                  Enter Secret Key To Unlock Passwordless Portals
+                  Enter Secret Code To Verify Access To Direct Portals
                 </p>
               </div>
 
-              {secretError && (
-                <p className="text-[10px] font-bold text-rose-400 text-center uppercase tracking-widest animate-in fade-in duration-200">
-                  {secretError}
-                </p>
+              {secretStatus === "error" && (
+                <div className="p-3 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold rounded-none flex items-center justify-center gap-2 animate-in fade-in duration-200">
+                  <XCircle size={16} className="shrink-0" />
+                  <span>{secretMsg || "✕ Incorrect Secret Code. Access Denied."}</span>
+                </div>
+              )}
+
+              {secretStatus === "success" && (
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold rounded-none flex items-center justify-center gap-2 animate-in fade-in duration-200">
+                  <CheckCircle2 size={16} className="shrink-0" />
+                  <span>{secretMsg}</span>
+                </div>
               )}
 
               <form onSubmit={handleUnlockTiles} className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={secretInput}
-                  onChange={(e) => handleSecretInputChange(e.target.value)}
-                  placeholder="Enter secret key (e.g. Xya!Toque1)"
+                  onChange={(e) => {
+                    setSecretInput(e.target.value);
+                    if (secretStatus !== "idle") setSecretStatus("idle");
+                  }}
+                  placeholder="Enter secret key"
                   className="flex-1 h-12 bg-black/60 border border-gold/40 px-4 text-xs font-mono text-white placeholder:text-gray-500 focus:border-gold outline-none"
                 />
                 <button
                   type="submit"
-                  className="h-12 px-5 bg-gold text-black font-black text-xs uppercase tracking-wider hover:bg-white transition-all cursor-pointer shrink-0"
+                  disabled={verifyingSecret}
+                  className="h-12 px-6 bg-gold text-black font-black text-xs uppercase tracking-wider hover:bg-white transition-all cursor-pointer shrink-0 disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Unlock Portals
+                  {verifyingSecret ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <>Verify & Unlock</>
+                  )}
                 </button>
               </form>
             </div>
@@ -269,7 +285,7 @@ function SignIn() {
               <div className="flex items-center justify-between border-b border-emerald-500/30 pb-3">
                 <div className="space-y-0.5">
                   <span className="text-[10px] font-black uppercase text-emerald-400 tracking-[0.2em] font-mono block flex items-center gap-1">
-                    <Check size={12} /> EXECUTIVE OVERRIDE ACTIVE
+                    <CheckCircle2 size={13} /> VERIFIED · EXECUTIVE OVERRIDE ACTIVE
                   </span>
                   <p className="text-xs font-bold text-white uppercase tracking-wider">
                     Direct Dashboard Portals Unlocked
@@ -279,6 +295,8 @@ function SignIn() {
                   type="button"
                   onClick={() => {
                     setIsTilesUnlocked(false);
+                    setSecretStatus("idle");
+                    setSecretInput("");
                     if (typeof window !== "undefined") {
                       sessionStorage.removeItem("royal_secret_unlocked");
                     }
