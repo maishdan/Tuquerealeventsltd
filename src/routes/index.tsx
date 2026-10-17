@@ -494,12 +494,6 @@ function Home() {
             >
               Plan Your Event <ArrowRight size={16} />
             </Link>
-            <button
-              onClick={() => setShowHomeSignInModal(true)}
-              className="h-14 px-8 rounded-none bg-[#f4cf69]/20 border-2 border-[#f4cf69] text-[#f4cf69] hover:bg-[#f4cf69] hover:text-black font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all w-full sm:w-auto cursor-pointer shadow-xl"
-            >
-              <ShieldCheck size={16} /> ⚡ Executive Sign In
-            </button>
             <Link
               to="/services"
               className="h-14 px-8 rounded-none border border-white/20 bg-black/60 backdrop-blur-md text-white font-black text-xs uppercase tracking-widest flex items-center justify-center hover:border-[#f4cf69] hover:text-[#f4cf69] transition-all w-full sm:w-auto"
