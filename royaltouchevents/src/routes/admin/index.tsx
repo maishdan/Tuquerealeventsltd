@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   useAdminEvents,
   useAdminBookings,
@@ -91,10 +91,6 @@ function AdminDashboard() {
 
   const pendingBookings = bookings.filter((b) => b.status === "pending" || !b.status);
   const activeClients = clients.filter((c) => c.email);
-
-  if (isLoadingBookings || isLoadingEvents || isLoadingClients) {
-    return <LoadingScreen message="Connecting to Live Database..." />;
-  }
 
   return (
     <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">

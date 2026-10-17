@@ -54,10 +54,25 @@ function SignIn() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [authError, setAuthError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [directLoading, setDirectLoading] = useState<"admin" | "staff" | "customer" | null>(null);
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
 
   const hasRedirectedRef = useRef(false);
+
+  const handleDirectLogin = (targetRole: "admin" | "staff" | "customer", route: string) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem("royal_bypass_role", targetRole);
+      }
+      if (auth?.quickBypassSignIn) {
+        auth.quickBypassSignIn(targetRole);
+      }
+    } catch (e) {
+      console.warn("Direct login error:", e);
+    }
+    window.location.href = route;
+  };
 
   useEffect(() => {
     if (auth?.loading) return;
@@ -163,6 +178,91 @@ function SignIn() {
               <p>{authError}</p>
             </div>
           )}
+
+          {/* DIRECT ONE-CLICK DASHBOARD ACCESS (NO PASSWORD REQUIRED) */}
+          <div className="p-5 bg-black/40 border border-gold/40 rounded-none space-y-4">
+            <div className="text-center space-y-1">
+              <span className="text-[10px] font-black uppercase text-gold tracking-[0.25em] font-mono block">
+                ⚡ INSTANT ONE-CLICK ACCESS
+              </span>
+              <p className="text-xs font-bold text-white uppercase tracking-wider">
+                Direct Dashboard Portals (No Password Required)
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-3">
+              {/* 1. CEO / ADMIN DASHBOARD */}
+              <a
+                href="/admin"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDirectLogin("admin", "/admin");
+                }}
+                className="w-full p-4 bg-gradient-to-r from-amber-500/20 via-gold/25 to-amber-500/20 border-2 border-gold hover:border-white text-gold hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded bg-gold text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                    👑
+                  </div>
+                  <div className="text-left">
+                    <span className="block font-bold leading-tight text-white group-hover:text-gold transition-colors">CEO Admin Dashboard</span>
+                    <span className="text-[9px] text-gray-300 font-mono font-normal block">Sales, CRM, Events, Finance & AI Assistant</span>
+                  </div>
+                </div>
+                <ArrowRight size={18} className="text-gold group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              {/* 2. STAFF & OPERATIONS DASHBOARD */}
+              <a
+                href="/staff"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDirectLogin("staff", "/staff");
+                }}
+                className="w-full p-4 bg-gradient-to-r from-blue-500/20 via-indigo-500/25 to-blue-500/20 border-2 border-blue-400/80 hover:border-white text-blue-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded bg-blue-500 text-white flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                    🛡️
+                  </div>
+                  <div className="text-left">
+                    <span className="block font-bold leading-tight text-white group-hover:text-blue-300 transition-colors">Staff Operations Dashboard</span>
+                    <span className="text-[9px] text-gray-300 font-mono font-normal block">Logistics, Tasks, Vendors & Schedules</span>
+                  </div>
+                </div>
+                <ArrowRight size={18} className="text-blue-400 group-hover:translate-x-1 transition-transform" />
+              </a>
+
+              {/* 3. CLIENT / CUSTOMER PORTAL */}
+              <a
+                href="/dashboard"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleDirectLogin("customer", "/dashboard");
+                }}
+                className="w-full p-4 bg-gradient-to-r from-emerald-500/20 via-teal-500/25 to-emerald-500/20 border-2 border-emerald-400/80 hover:border-white text-emerald-300 hover:text-white font-black text-xs uppercase tracking-wider flex items-center justify-between transition-all cursor-pointer shadow-xl rounded-none group"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded bg-emerald-500 text-black flex items-center justify-center font-extrabold text-lg shadow-md group-hover:scale-105 transition-transform">
+                    👤
+                  </div>
+                  <div className="text-left">
+                    <span className="block font-bold leading-tight text-white group-hover:text-emerald-400 transition-colors">Client Portal Dashboard</span>
+                    <span className="text-[9px] text-gray-300 font-mono font-normal block">My Bookings, Tickets, Passes & Briefs</span>
+                  </div>
+                </div>
+                <ArrowRight size={18} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
+              </a>
+            </div>
+          </div>
+
+          <div className="relative flex py-2 items-center">
+            <div className="flex-grow border-t border-slate-300 dark:border-white/10"></div>
+            <span className="flex-shrink mx-4 text-[9px] text-muted-foreground uppercase font-black tracking-widest">
+              OR LOGIN WITH CREDENTIALS
+            </span>
+            <div className="flex-grow border-t border-slate-300 dark:border-white/10"></div>
+          </div>
 
           <form onSubmit={onSubmit} className="space-y-6" noValidate>
             <div className="space-y-5">

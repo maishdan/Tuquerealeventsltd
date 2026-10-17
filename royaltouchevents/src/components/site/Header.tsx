@@ -54,7 +54,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
   const user = auth?.user;
   const role = auth?.profile?.role;
-  const portalTo = role === "admin" ? "/admin" : "/dashboard";
+  const portalTo = role === "admin" ? "/admin" : role === "staff" ? "/staff" : "/dashboard";
   const userInitials = auth?.profile?.full_name ? auth.profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "AD";
 
   const pathname = location?.pathname || "";
