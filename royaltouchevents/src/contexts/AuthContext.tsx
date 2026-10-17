@@ -11,6 +11,7 @@ type AuthContextValue = {
   role: UserRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserRole>;
+  signInWithGoogle: () => Promise<void>;
   quickBypassSignIn: (targetRole: UserRole) => Promise<UserRole>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -238,6 +239,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return targetRole;
   };
 
+  const signInWithGoogle = async () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/dashboard`,
+      },
+    });
+    if (error) throw error;
+  };
+
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -277,6 +289,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         role: profile?.role ?? null,
         loading,
         signIn,
+        signInWithGoogle,
         quickBypassSignIn,
         signUp,
         signOut,
@@ -297,6 +310,7 @@ const defaultAuthContext: AuthContextValue = {
   role: null,
   loading: true,
   signIn: async () => "customer",
+  signInWithGoogle: async () => {},
   quickBypassSignIn: async (role) => role,
   signUp: async () => {},
   signOut: async () => {},

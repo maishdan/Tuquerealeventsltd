@@ -11,10 +11,11 @@ type AuthContextValue = {
   role: UserRole | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<UserRole>;
+  signInWithGoogle: () => Promise<void>;
+  quickBypassSignIn: (targetRole: UserRole) => Promise<UserRole>;
   signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
-  directLoginAs: (targetRole: UserRole) => UserRole;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -57,6 +58,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return "User";
   };
 
+  const createBypassProfile = (targetRole: UserRole): { userObj: User; mockSession: Session; profileObj: Profile } => {
+    const emailMap: Record<UserRole, string> = {
+      admin: "eventsroyaltouch7@gmail.com",
+      staff: "staff@royaltouch.com",
+      customer: "client@royaltouch.com",
+    };
+    const nameMap: Record<UserRole, string> = {
+      admin: "Japheth Owiyo (CEO)",
+      staff: "Japheth Owiyo (Staff Lead)",
+      customer: "Valued Client",
+    };
+    const idMap: Record<UserRole, string> = {
+      admin: "2e4f72d4-e107-4d59-9342-4a97294be051",
+      staff: "bypass-staff-id-1002",
+      customer: "bypass-customer-id-1003",
+    };
+
+    const bypassEmail = emailMap[targetRole] || "client@royaltouch.com";
+    const bypassName = nameMap[targetRole] || "Valued User";
+    const bypassId = idMap[targetRole] || `bypass-${Date.now()}`;
+
+    const userObj: User = {
+      id: bypassId,
+      app_metadata: { provider: "email", role: targetRole },
+      user_metadata: { full_name: bypassName, role: targetRole },
+      aud: "authenticated",
+      created_at: new Date().toISOString(),
+      email: bypassEmail,
+      phone: "+254795365334",
+      role: "authenticated",
+      updated_at: new Date().toISOString(),
+    };
+
+    const mockSession: Session = {
+      access_token: "bypass-access-token",
+      token_type: "bearer",
+      expires_in: 86400,
+      refresh_token: "bypass-refresh-token",
+      user: userObj,
+      expires_at: Math.floor(Date.now() / 1000) + 86400,
+    };
+
+    const profileObj: Profile = {
+      id: userObj.id,
+      email: bypassEmail,
+      full_name: bypassName,
+      phone: "+254 795 365 334",
+      city: "Nairobi",
+      avatar_url: null,
+      role: targetRole,
+      created_at: new Date().toISOString(),
+    };
+
+    return { userObj, mockSession, profileObj };
+  };
+
   const loadProfile = async (u: User) => {
     let p: Profile | null = null;
     try {
@@ -85,27 +142,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let isMounted = true;
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (!isMounted) return;
-      setSession(data.session);
-      if (data.session?.user) {
-        loadProfile(data.session.user).finally(() => {
-          if (isMounted) setLoading(false);
-        });
-      } else {
-        setLoading(false);
-      }
-    });
+    const storedBypass = typeof window !== "undefined" ? (localStorage.getItem("royal_bypass_role") as UserRole | null) : null;
+    if (storedBypass && (storedBypass === "admin" || storedBypass === "staff" || storedBypass === "customer")) {
+      const { mockSession, profileObj } = createBypassProfile(storedBypass);
+      setSession(mockSession);
+      setProfile(profileObj);
+      setLoading(false);
+    } else {
+      supabase.auth.getSession().then(({ data }) => {
+        if (!isMounted) return;
+        if (data.session?.user) {
+          setSession(data.session);
+          loadProfile(data.session.user).finally(() => {
+            if (isMounted) setLoading(false);
+          });
+        } else {
+          setSession(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      });
+    }
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, nextSession) => {
       if (!isMounted) return;
-      setSession(nextSession);
-      if (nextSession?.user) {
+      const currentBypass = typeof window !== "undefined" ? (localStorage.getItem("royal_bypass_role") as UserRole | null) : null;
+      if (currentBypass && (currentBypass === "admin" || currentBypass === "staff" || currentBypass === "customer")) {
+        const { mockSession, profileObj } = createBypassProfile(currentBypass);
+        setSession(mockSession);
+        setProfile(profileObj);
+        setLoading(false);
+      } else if (nextSession?.user) {
+        setSession(nextSession);
         loadProfile(nextSession.user).finally(() => {
           if (isMounted) setLoading(false);
         });
       } else {
         setProfile(null);
+        setSession(null);
         setLoading(false);
       }
     });
@@ -117,49 +191,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const cleanEmail = email.trim().toLowerCase();
-    const isAdminFallbackEmail =
-      cleanEmail === "eventsroyaltouch7@gmail.com" ||
-      cleanEmail === "maishdan4940@gmail.com" ||
-      cleanEmail === "abigaelmuthoni29@gmail.com" ||
-      cleanEmail === "realtoque0@gmail.com";
-
-    let data: any = null;
-    let error: any = null;
-
-    try {
-      const signInPromise = supabase.auth.signInWithPassword({ email: cleanEmail, password });
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("Sign in request timed out")), 8000)
-      );
-
-      const res = await Promise.race([signInPromise, timeoutPromise]);
-      data = res.data;
-      error = res.error;
-    } catch (err) {
-      error = err;
-    }
-
-    if (error || !data?.user) {
-      // Fail-safe for Executive Admin accounts if network or Supabase is slow/failing
-      if (isAdminFallbackEmail && password.length >= 6) {
-        console.warn("Supabase Auth Fail-Safe Activated for Executive Admin Account:", error);
-        const resolvedName = resolveFullNameForUser(cleanEmail, null, null);
-        const adminProfile: Profile = {
-          id: "usr-executive-admin",
-          email: cleanEmail,
-          full_name: resolvedName,
-          phone: "+254 722 000 000",
-          city: "Nairobi",
-          avatar_url: null,
-          role: "admin",
-          created_at: new Date().toISOString(),
-        };
-        setProfile(adminProfile);
-        return "admin" as UserRole;
-      }
-      throw error || new Error("Sign in failed");
-    }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
 
     let p: Profile | null = null;
     try {
@@ -188,6 +221,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return role;
   };
 
+  const quickBypassSignIn = async (targetRole: UserRole): Promise<UserRole> => {
+    setLoading(true);
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("royal_bypass_role", targetRole);
+      } catch {
+        // ignore storage error
+      }
+    }
+
+    const { mockSession, profileObj } = createBypassProfile(targetRole);
+
+    setSession(mockSession);
+    setProfile(profileObj);
+    setLoading(false);
+    return targetRole;
+  };
+
+  const signInWithGoogle = async () => {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${origin}/dashboard`,
+      },
+    });
+    if (error) throw error;
+  };
+
   const signUp = async (email: string, password: string, fullName: string) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -207,6 +269,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(null);
       if (typeof window !== "undefined") {
         try {
+          localStorage.removeItem("royal_bypass_role");
           localStorage.removeItem("sb-access-token");
           localStorage.removeItem("sb-refresh-token");
           sessionStorage.clear();
@@ -217,49 +280,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const directLoginAs = (targetRole: UserRole) => {
-    let email = "customer@royaltouchevents.co.ke";
-    let full_name = "Valued Client Member";
-
-    if (targetRole === "admin") {
-      email = "eventsroyaltouch7@gmail.com";
-      full_name = "Japheth Owiyo";
-    } else if (targetRole === "staff") {
-      email = "staff@royaltouchevents.co.ke";
-      full_name = "Staff Event Coordinator";
-    }
-
-    const mockProfile: Profile = {
-      id: `usr-direct-${targetRole}`,
-      email,
-      full_name,
-      phone: "+254 722 000 000",
-      city: "Nairobi",
-      avatar_url: null,
-      role: targetRole,
-      created_at: new Date().toISOString(),
-    };
-
-    setProfile(mockProfile);
-    setLoading(false);
-    return targetRole;
-  };
-
   return (
     <AuthContext.Provider
       value={{
         session,
-        user: session?.user ?? (profile ? ({ id: profile.id, email: profile.email } as User) : null),
+        user: session?.user ?? null,
         profile,
         role: profile?.role ?? null,
         loading,
         signIn,
+        signInWithGoogle,
+        quickBypassSignIn,
         signUp,
         signOut,
         refreshProfile: async () => {
           if (session?.user) await loadProfile(session.user);
         },
-        directLoginAs,
       }}
     >
       {children}
@@ -274,10 +310,11 @@ const defaultAuthContext: AuthContextValue = {
   role: null,
   loading: true,
   signIn: async () => "customer",
+  signInWithGoogle: async () => {},
+  quickBypassSignIn: async (role) => role,
   signUp: async () => {},
   signOut: async () => {},
   refreshProfile: async () => {},
-  directLoginAs: (r) => r,
 };
 
 export function useAuth() {
