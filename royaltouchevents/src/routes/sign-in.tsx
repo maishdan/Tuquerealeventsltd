@@ -72,10 +72,25 @@ function SignIn() {
 
   const hasRedirectedRef = useRef(false);
 
+  const handleSecretInputChange = (val: string) => {
+    setSecretInput(val);
+    setSecretError("");
+    const cleanVal = val.trim().toLowerCase();
+    const targetPass = SECRET_PASSCODE.toLowerCase();
+    if (cleanVal === targetPass) {
+      setIsTilesUnlocked(true);
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("royal_secret_unlocked", "true");
+      }
+    }
+  };
+
   const handleUnlockTiles = (e: React.FormEvent) => {
     e.preventDefault();
     setSecretError("");
-    if (secretInput.trim() === SECRET_PASSCODE) {
+    const cleanVal = secretInput.trim().toLowerCase();
+    const targetPass = SECRET_PASSCODE.toLowerCase();
+    if (cleanVal === targetPass) {
       setIsTilesUnlocked(true);
       if (typeof window !== "undefined") {
         sessionStorage.setItem("royal_secret_unlocked", "true");
@@ -235,10 +250,10 @@ function SignIn() {
 
               <form onSubmit={handleUnlockTiles} className="flex flex-col sm:flex-row gap-2">
                 <input
-                  type="password"
+                  type="text"
                   value={secretInput}
-                  onChange={(e) => setSecretInput(e.target.value)}
-                  placeholder="Enter secret key"
+                  onChange={(e) => handleSecretInputChange(e.target.value)}
+                  placeholder="Enter secret key (e.g. Xya!Toque1)"
                   className="flex-1 h-12 bg-black/60 border border-gold/40 px-4 text-xs font-mono text-white placeholder:text-gray-500 focus:border-gold outline-none"
                 />
                 <button

@@ -1,8 +1,3 @@
-import "@fontsource/instrument-serif/400.css";
-import "@fontsource/work-sans/300.css";
-import "@fontsource/work-sans/400.css";
-import "@fontsource/work-sans/500.css";
-import "@fontsource/work-sans/600.css";
 import "../styles.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
