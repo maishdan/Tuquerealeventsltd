@@ -130,7 +130,42 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function SystemLockdown404Screen() {
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f8f9fa] dark:bg-[#111111] text-[#6c757d] font-sans p-6 text-center select-none">
+      <div className="max-w-md space-y-6 flex flex-col items-center">
+        {/* Sad Face Icon */}
+        <div className="w-32 h-32 rounded-full border-4 border-[#888888] flex items-center justify-center text-[#888888]">
+          <svg className="w-20 h-20 fill-current" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 0zM8.5 8C7.67 8 7 8.67 7 9.5S7.67 11 8.5 11 10 10.33 10 9.5 9.33 8 8.5 8zm7 0c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5S16.33 8 15.5 8zm-7 10c2.33-1.67 4.67-1.67 7 0 .39.28.93.2 1.21-.19.28-.39.2-.93-.19-1.21-3.03-2.18-6.03-2.18-9.06 0-.39.28-.47.82-.19 1.21.28.39.82.47 1.21.19z"/>
+          </svg>
+        </div>
+
+        <h1 className="text-7xl font-light text-[#777777] tracking-tight">
+          404
+        </h1>
+
+        <div className="space-y-2">
+          <p className="text-2xl font-normal text-[#888888]">
+            Page not found
+          </p>
+          <p className="text-xs text-[#999999] max-w-sm font-sans leading-relaxed">
+            The Page you are looking for doesn't exist or an other error occurred.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function RootComponent() {
+  // EMERGENCY SYSTEM LOCKDOWN SWITCH - BLOCKS ALL PAGES WITH 404
+  const IS_EMERGENCY_LOCKDOWN = true;
+
+  if (IS_EMERGENCY_LOCKDOWN) {
+    return <SystemLockdown404Screen />;
+  }
+
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const isLoading = useRouterState({ select: (s) => s.isLoading });
