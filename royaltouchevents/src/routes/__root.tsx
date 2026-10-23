@@ -159,8 +159,8 @@ function SystemLockdown404Screen() {
 }
 
 function RootComponent() {
-  // EMERGENCY SYSTEM LOCKDOWN SWITCH - BLOCKS ALL PAGES WITH 404
-  const IS_EMERGENCY_LOCKDOWN = true;
+  // EMERGENCY SYSTEM LOCKDOWN SWITCH - SET TO FALSE TO RESTORE SYSTEM
+  const IS_EMERGENCY_LOCKDOWN = false;
 
   if (IS_EMERGENCY_LOCKDOWN) {
     return <SystemLockdown404Screen />;
