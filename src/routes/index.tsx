@@ -310,12 +310,16 @@ function TypewriterHeroTitle() {
     let index1 = 0;
     let index2 = 0;
     let index3 = 0;
+    let isWaiting = false;
+    let timeoutId: any = null;
 
     setLine1Typed("");
     setLine2Typed("");
     setLine3Typed("");
 
     const timer = setInterval(() => {
+      if (isWaiting) return;
+
       if (index1 < line1Full.length) {
         setLine1Typed(line1Full.slice(0, index1 + 1));
         index1++;
@@ -326,18 +330,23 @@ function TypewriterHeroTitle() {
         setLine3Typed(line3Full.slice(0, index3 + 1));
         index3++;
       } else {
-        setTimeout(() => {
+        isWaiting = true;
+        timeoutId = setTimeout(() => {
           index1 = 0;
           index2 = 0;
           index3 = 0;
           setLine1Typed("");
           setLine2Typed("");
           setLine3Typed("");
+          isWaiting = false;
         }, 8000);
       }
     }, 60);
 
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, []);
 
   return (

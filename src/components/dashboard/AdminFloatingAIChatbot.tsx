@@ -122,23 +122,9 @@ export function AdminFloatingAIChatbot() {
     }
   }, [messages, isOpen, windowMode]);
 
-  // One-time media permission request
+  // Media permissions requested on demand when user activates voice mic
   useEffect(() => {
-    const permKey = "ann_media_permissions_requested";
-    const alreadyRequested = localStorage.getItem(permKey);
-
-    if (!alreadyRequested && navigator.mediaDevices?.getUserMedia) {
-      localStorage.setItem(permKey, "true");
-      navigator.mediaDevices
-        .getUserMedia({ audio: true, video: true })
-        .then((stream) => stream.getTracks().forEach((track) => track.stop()))
-        .catch(() => {
-          navigator.mediaDevices
-            .getUserMedia({ audio: true })
-            .then((stream) => stream.getTracks().forEach((track) => track.stop()))
-            .catch(() => {});
-        });
-    }
+    // No automatic background getUserMedia on mount
   }, []);
 
   // Strict Zephyr Female Voice Speech Synthesis Wrapper
