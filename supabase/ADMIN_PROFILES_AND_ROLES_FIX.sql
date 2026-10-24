@@ -1,12 +1,10 @@
 -- =================================================================───────────
--- 🛡️ ROYAL TOUCH EVENTS — ADMIN PROFILES & ROLES SETUP
--- =================================================================───────────
--- Run this script in the Supabase SQL Editor to ensure all admin accounts
--- (maishdan4940@gmail.com, eventsroyaltouch7@gmail.com, abigaelmuthoni29@gmail.com)
--- have unique, non-conflicting profile names and 'admin' role permissions.
+-- 🛡️ TOQUE REAL EVENTS — GRANT ADMIN ROLE TO ABIGAEL MUTHONI
+-- User ID: b929c239-2a5a-407d-918c-a5a598a6823e
+-- Email: abigaelmuthoni29@gmail.com
 -- =================================================================───────────
 
--- 1. Ensure user_role ENUM contains 'admin'
+-- 1. Ensure user_role ENUM type exists
 DO $$ BEGIN
     CREATE TYPE user_role AS ENUM ('admin', 'staff', 'customer', 'client');
 EXCEPTION WHEN duplicate_object THEN null; END $$;
@@ -24,55 +22,41 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 3. Upsert Executive Admin Account: maishdan4940@gmail.com
-INSERT INTO public.profiles (id, email, full_name, role, created_at, updated_at)
-SELECT
+-- 3. Update auth.users metadata so Supabase Auth recognizes 'admin' role directly
+UPDATE auth.users
+SET
+  raw_app_meta_data = COALESCE(raw_app_meta_data, '{}'::jsonb) || '{"role": "admin"}'::jsonb,
+  raw_user_meta_data = COALESCE(raw_user_meta_data, '{}'::jsonb) || '{"role": "admin"}'::jsonb
+WHERE id = 'b929c239-2a5a-407d-918c-a5a598a6823e'
+   OR LOWER(email) = 'abigaelmuthoni29@gmail.com';
+
+-- 4. Upsert Admin Profile in public.profiles table
+INSERT INTO public.profiles (
   id,
   email,
-  COALESCE(raw_user_meta_data->>'full_name', 'Dan Maish') AS full_name,
-  'admin'::user_role AS role,
+  full_name,
+  avatar_url,
+  role,
+  created_at,
+  updated_at
+)
+VALUES (
+  'b929c239-2a5a-407d-918c-a5a598a6823e',
+  'abigaelmuthoni29@gmail.com',
+  'Abigael Muthoni',
+  'https://lh3.googleusercontent.com/a/ACg8ocJJwES5Jinj6dB3aZMJlZPHsJEmlsfwzMs65Q7zrfzFNK40IUA=s96-c',
+  'admin'::user_role,
   NOW(),
   NOW()
-FROM auth.users
-WHERE LOWER(email) = 'maishdan4940@gmail.com'
+)
 ON CONFLICT (id) DO UPDATE SET
   role = 'admin'::user_role,
-  full_name = CASE
-    WHEN public.profiles.full_name IS NULL OR public.profiles.full_name = 'Japheth Owiyo' THEN 'Dan Maish'
-    ELSE public.profiles.full_name
-  END;
+  full_name = EXCLUDED.full_name,
+  email = EXCLUDED.email,
+  avatar_url = EXCLUDED.avatar_url,
+  updated_at = NOW();
 
--- 4. Upsert C.E.O Account: eventsroyaltouch7@gmail.com
-INSERT INTO public.profiles (id, email, full_name, role, created_at, updated_at)
-SELECT
-  id,
-  email,
-  'Japheth Owiyo' AS full_name,
-  'admin'::user_role AS role,
-  NOW(),
-  NOW()
-FROM auth.users
-WHERE LOWER(email) = 'eventsroyaltouch7@gmail.com'
-ON CONFLICT (id) DO UPDATE SET
-  role = 'admin'::user_role,
-  full_name = 'Japheth Owiyo';
-
--- 5. Upsert Super Admin Developer Account: abigaelmuthoni29@gmail.com
-INSERT INTO public.profiles (id, email, full_name, role, created_at, updated_at)
-SELECT
-  id,
-  email,
-  'DANIWEST' AS full_name,
-  'admin'::user_role AS role,
-  NOW(),
-  NOW()
-FROM auth.users
-WHERE LOWER(email) = 'abigaelmuthoni29@gmail.com'
-ON CONFLICT (id) DO UPDATE SET
-  role = 'admin'::user_role,
-  full_name = 'DANIWEST';
-
--- 6. Helper function to check admin privileges
+-- 5. Helper function to check admin privileges
 CREATE OR REPLACE FUNCTION public.is_admin(_user_id UUID)
 RETURNS BOOLEAN
 LANGUAGE sql
@@ -82,13 +66,13 @@ SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = _user_id AND role = 'admin'
+    WHERE id = _user_id AND role = 'admin'::user_role
   )
 $$;
 
 GRANT EXECUTE ON FUNCTION public.is_admin(UUID) TO authenticated;
 
--- 7. Grant table access permissions & RLS policies
+-- 6. Grant table permissions & RLS policies
 GRANT SELECT, UPDATE ON public.profiles TO authenticated;
 GRANT ALL ON public.profiles TO service_role;
 
@@ -104,3 +88,8 @@ CREATE POLICY "profiles_admin_update_all" ON public.profiles
   FOR UPDATE TO authenticated
   USING (id = auth.uid() OR public.is_admin(auth.uid()))
   WITH CHECK (id = auth.uid() OR public.is_admin(auth.uid()));
+
+-- 7. Verify updated profile
+SELECT id, email, full_name, role, updated_at
+FROM public.profiles
+WHERE id = 'b929c239-2a5a-407d-918c-a5a598a6823e' OR LOWER(email) = 'abigaelmuthoni29@gmail.com';

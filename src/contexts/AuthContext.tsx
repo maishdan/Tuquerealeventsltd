@@ -13,7 +13,7 @@ export type AuthContextValue = {
   signIn: (email: string, password: string) => Promise<UserRole>;
   signInWithGoogle: () => Promise<void>;
   quickBypassSignIn: (targetRole: UserRole) => Promise<UserRole>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, phone?: string) => Promise<UserRole>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -93,7 +93,7 @@ const defaultAuthContext: AuthContextValue = {
   signIn: async () => "customer",
   signInWithGoogle: async () => {},
   quickBypassSignIn: async (role) => role,
-  signUp: async () => {},
+  signUp: async () => "customer",
   signOut: async () => {},
   refreshProfile: async () => {},
 };
@@ -312,39 +312,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, phone?: string): Promise<UserRole> => {
     const cleanEmail = email.trim().toLowerCase();
+    const isExecutiveEmail =
+      cleanEmail === "eventsroyaltouch7@gmail.com" ||
+      cleanEmail === "maishdan4940@gmail.com" ||
+      cleanEmail === "abigaelmuthoni29@gmail.com" ||
+      cleanEmail === "realtoque0@gmail.com";
+
+    const targetRole: UserRole = isExecutiveEmail ? "admin" : "customer";
+
     try {
       const { data, error } = await executeWithTimeout(
         supabase.auth.signUp({
           email: cleanEmail,
           password,
-          options: { data: { full_name: fullName } },
+          options: { data: { full_name: fullName, phone: phone || "" } },
         }),
         3500,
         "Sign up request timed out"
       );
 
       if (error) {
-        const { mockSession, profileObj } = createBypassProfile("customer", cleanEmail, fullName);
+        const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
         setSession(mockSession);
         setProfile(profileObj);
-        return;
+        return targetRole;
       }
 
       if (data.session) {
         setSession(data.session);
         await loadProfile(data.user!);
       } else {
-        const { mockSession, profileObj } = createBypassProfile("customer", cleanEmail, fullName);
+        const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
         setSession(mockSession);
         setProfile(profileObj);
       }
+      return targetRole;
     } catch (err: any) {
       console.warn("Supabase SignUp Warning, creating local session:", err);
-      const { mockSession, profileObj } = createBypassProfile("customer", cleanEmail, fullName);
+      const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
       setSession(mockSession);
       setProfile(profileObj);
+      return targetRole;
     }
   };
 
