@@ -798,7 +798,7 @@ function AdminDashboard() {
                 onClick={async () => {
                   setShowLogoutConfirmModal(false);
                   await signOut();
-                  navigate({ to: "/sign-in" });
+                  navigate({ to: "/admin" });
                 }}
                 className="py-3 rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 text-white font-black text-xs uppercase tracking-wider hover:scale-105 transition-all shadow-xl cursor-pointer"
               >

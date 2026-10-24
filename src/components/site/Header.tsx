@@ -1,6 +1,6 @@
-import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Menu, Star, User, Sun, Moon, LayoutDashboard, ChevronDown, ChevronRight, ArrowRight, Power } from "lucide-react";
+import { Menu, Star, Sun, Moon, ChevronDown, ChevronRight, ArrowRight } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import {
   Sheet,
@@ -8,16 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { FavoritesModal } from "./FavoritesModal";
@@ -46,16 +37,9 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
   const [bookingEventsOpen, setBookingEventsOpen] = useState(false);
   const bookingEventsRef = useRef<HTMLDivElement>(null);
 
-  const navigate = useNavigate();
-  const auth = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { favorites } = useFavorites();
   const location = useLocation();
-
-  const user = auth?.user;
-  const role = auth?.profile?.role;
-  const portalTo = role === "admin" ? "/admin" : "/dashboard";
-  const userInitials = auth?.profile?.full_name ? auth.profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "AD";
 
   const pathname = location?.pathname || "";
 
@@ -330,51 +314,14 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
               )}
             </div>
 
-            {/* GET STARTED / PORTAL BUTTON */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2 group cursor-pointer outline-none">
-                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-gold/40 group-hover:ring-gold transition-all">
-                      {auth?.profile?.avatar_url ? (
-                        <img src={auth.profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        userInitials
-                      )}
-                    </div>
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border border-gold/40 text-white p-2 shadow-2xl rounded-xl z-[99999]">
-                  <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gold uppercase">
-                    {auth?.profile?.full_name || "Account Member"}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-                  <DropdownMenuItem asChild>
-                    <Link to={portalTo} className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 cursor-pointer rounded-lg">
-                      <LayoutDashboard size={15} /> Command Portal
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-                  <DropdownMenuItem
-                    onClick={async () => {
-                      if (auth?.signOut) await auth.signOut();
-                      navigate({ to: "/sign-in" });
-                    }}
-                    className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer rounded-lg"
-                  >
-                    <Power size={14} /> Sign Out & Terminate Session
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link
-                to="/sign-in"
-                className="group flex items-center gap-2 h-10 px-5 rounded-none bg-emerald-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-emerald-600 transition-all duration-300 shadow-md shadow-emerald-500/20"
-              >
-                <span>Get Started</span>
-                <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
-              </Link>
-            )}
+            {/* GET STARTED BUTTON THAT OPENS AUTH PAGE */}
+            <Link
+              to="/sign-in"
+              className="group flex items-center gap-2 h-10 px-5 rounded-none bg-emerald-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all duration-300 shadow-md shadow-emerald-500/20 cursor-pointer"
+            >
+              <span>Get Started</span>
+              <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
+            </Link>
 
             {/* DARK / LIGHT MODE TOGGLE (SUN / MOON) */}
             <button
@@ -467,7 +414,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
                 activeProps={{ className: "bg-gold/10 text-gold" }}
-                inactiveProps={{ className: "text-gray-400 hover:bg-white/5 hover:text-white" }}
+                inactiveProps={{ className: "text-gray-400 hover:text-white" }}
                 className="rounded-none px-4 py-3 text-xs font-black uppercase tracking-widest transition border-t border-white/10 mt-2"
               >
                 Contact
@@ -487,24 +434,14 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
                   <ChevronRight size={14} />
                 </button>
 
-                {user ? (
-                  <Link
-                    to={portalTo}
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-3 px-4 py-3 rounded-none bg-gold/10 text-gold text-xs font-black uppercase tracking-widest"
-                  >
-                    <LayoutDashboard size={18} /> Portal
-                  </Link>
-                ) : (
-                  <Link
-                    to="/sign-in"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center justify-between px-4 py-3.5 rounded-none bg-gold text-black text-xs font-black uppercase tracking-widest shadow-lg"
-                  >
-                    <span>Get Started</span>
-                    <ArrowRight size={14} />
-                  </Link>
-                )}
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-between px-4 py-3.5 rounded-none bg-emerald-500 text-black text-xs font-black uppercase tracking-widest shadow-lg"
+                >
+                  <span>Get Started</span>
+                  <ArrowRight size={14} />
+                </Link>
               </div>
             </nav>
           </SheetContent>
