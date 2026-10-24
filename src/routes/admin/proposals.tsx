@@ -72,10 +72,10 @@ function AdminProposals() {
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
   const filteredProposals = bookings.filter(
-    (b) =>
-      b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.event_type.toLowerCase().includes(searchQuery.toLowerCase())
+    (b: any) =>
+      ((b.name || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((b.email || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((b.event_type || "") as string).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

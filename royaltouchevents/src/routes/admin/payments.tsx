@@ -63,10 +63,10 @@ function AdminPayments() {
   const userInitials = profile?.full_name ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase() : "JO";
 
   const filteredTickets = tickets.filter(
-    (t) =>
-      t.ticket_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.holder_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.event_name.toLowerCase().includes(searchQuery.toLowerCase())
+    (t: any) =>
+      ((t.ticket_code || t.ticket_number || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((t.holder_name || t.name || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((t.event_name || "") as string).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalSettledRevenue = tickets.reduce((acc, t) => acc + (t.price || 0), 0);

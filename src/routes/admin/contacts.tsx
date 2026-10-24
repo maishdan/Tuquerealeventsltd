@@ -97,10 +97,10 @@ function AdminContacts() {
   };
 
   const filteredInquiries = inquiries.filter(
-    (i) =>
-      i.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      i.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      i.message.toLowerCase().includes(searchQuery.toLowerCase())
+    (i: any) =>
+      ((i.name || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((i.email || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((i.message || "") as string).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

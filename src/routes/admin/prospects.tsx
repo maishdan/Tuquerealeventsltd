@@ -232,10 +232,10 @@ function AdminProspects() {
   };
 
   const filteredProspects = prospectsList.filter(
-    (p) =>
-      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.company.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.event.toLowerCase().includes(searchQuery.toLowerCase())
+    (p: any) =>
+      ((p.name || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((p.company || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((p.event || "") as string).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (

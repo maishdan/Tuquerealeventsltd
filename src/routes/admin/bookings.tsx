@@ -178,11 +178,11 @@ function AdminBookings() {
   };
 
   const filteredBookings = bookings.filter(
-    (b) =>
-      b.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      b.event_type.toLowerCase().includes(searchQuery.toLowerCase())
+    (b: any) =>
+      ((b.name || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((b.email || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((b.id || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((b.event_type || "") as string).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPipelineAmount = bookings.reduce((acc, b) => {

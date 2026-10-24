@@ -674,7 +674,7 @@ function AdminDashboard() {
                     <tbody className="divide-y divide-[#1d3043] text-white">
                       {activeClients.length > 0 ? (
                         activeClients.slice(0, 4).map((c) => {
-                          const clientTkts = tickets.filter((t) => t.holder_email.toLowerCase() === c.email.toLowerCase());
+                          const clientTkts = tickets.filter((t: any) => ((t.holder_email || t.email || "") as string).toLowerCase() === ((c.email || "") as string).toLowerCase());
                           return (
                             <tr key={c.id}>
                               <td className="py-2 font-bold">{c.full_name || "Account Member"}</td>

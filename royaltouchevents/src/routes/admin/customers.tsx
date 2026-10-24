@@ -134,10 +134,10 @@ function AdminCustomers() {
     showToast(`✓ Updated Account Status for ${cust.full_name} to ${nextStatus}!`);
   };
 
-  const filteredClients = allCustomers.filter((c) => {
+  const filteredClients = allCustomers.filter((c: any) => {
     const matchesSearch =
-      c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (c.full_name && c.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
+      ((c.email || "") as string).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ((c.full_name || "") as string).toLowerCase().includes(searchQuery.toLowerCase());
 
     if (statusFilter === "ALL") return matchesSearch;
     return matchesSearch && c.status === statusFilter;
@@ -472,7 +472,7 @@ function AdminCustomers() {
                   </thead>
                   <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
                     {filteredClients.map((c) => {
-                      const clientTkts = tickets.filter((t) => t.holder_email.toLowerCase() === c.email.toLowerCase());
+                      const clientTkts = tickets.filter((t: any) => ((t.holder_email || t.email || "") as string).toLowerCase() === ((c.email || "") as string).toLowerCase());
                       const totalSpend = clientTkts.reduce((acc, t) => acc + (t.price || 0), 0);
 
                       return (
