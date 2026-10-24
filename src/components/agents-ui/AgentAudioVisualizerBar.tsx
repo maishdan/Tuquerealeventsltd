@@ -27,22 +27,15 @@ export function AgentAudioVisualizerBar({
     const interval = setInterval(() => {
       setBarHeights(() => {
         if (state === "speaking") {
-          return Array.from({ length: barCount }, () =>
-            Math.floor(Math.random() * 70 + 30)
-          );
+          return [50, 75, 90, 60, 80];
         } else if (state === "listening") {
-          return Array.from({ length: barCount }, () =>
-            Math.floor(Math.random() * 85 + 20)
-          );
+          return [30, 60, 40, 70, 50];
         } else if (state === "thinking") {
-          const time = Date.now() / 150;
-          return Array.from({ length: barCount }, (_, i) =>
-            Math.floor(Math.sin(time + i) * 30 + 50)
-          );
+          return [40, 50, 60, 50, 40];
         }
         return [20, 20, 20, 20, 20];
       });
-    }, 100);
+    }, 1000);
 
     return () => clearInterval(interval);
   }, [state, barCount]);
@@ -64,7 +57,7 @@ export function AgentAudioVisualizerBar({
           key={idx}
           style={{ height: `${heightPercent}%` }}
           className={cn(
-            "rounded-full transition-all duration-150 ease-out shadow-sm",
+            "rounded-full transition-all duration-300 ease-out shadow-sm",
             barWidth,
             state === "speaking"
               ? "bg-gradient-to-t from-[#d5a637] via-[#f4cf69] to-[#ffffff] shadow-[0_0_10px_rgba(244,207,105,0.6)]"

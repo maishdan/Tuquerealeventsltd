@@ -127,35 +127,40 @@ export function AdminFloatingAIChatbot() {
     // No automatic background getUserMedia on mount
   }, []);
 
-  // Strict Zephyr Female Voice Speech Synthesis Wrapper
-  const speakAIResponse = (text: string) => {
-    speakWithZephyrVoice(
-      text,
-      isVoiceMuted,
-      () => setIsSpeaking(true),
-      () => setIsSpeaking(false)
-    );
-  };
-
-  // Play Zephyr Official Voice Sample Preview
-  const handleTestZephyrSample = async () => {
-    setIsSpeaking(true);
-    await playZephyrAudioSample();
+  // Speech Synthesis completely disabled per user preference
+  const speakAIResponse = (_text: string) => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // ignore
+      }
+    }
     setIsSpeaking(false);
   };
 
-  // Automatic Warm Companion Greeting on Mount with Zephyr Voice
-  useEffect(() => {
-    if (!hasGreetedRef.current && adminExactName) {
-      hasGreetedRef.current = true;
-      const welcomeMsg = `Hi ${adminExactName}! I'm Ann, your AI companion. I'm so happy to see you! How are you doing today?`;
-      const timer = setTimeout(() => {
-        speakAIResponse(welcomeMsg);
-      }, 1200);
-
-      return () => clearTimeout(timer);
+  // Sample playback disabled
+  const handleTestZephyrSample = async () => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // ignore
+      }
     }
-  }, [adminExactName]);
+    setIsSpeaking(false);
+  };
+
+  // Silence any background voice on mount
+  useEffect(() => {
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      try {
+        window.speechSynthesis.cancel();
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
 
   // Speech Recognition setup
   useEffect(() => {
