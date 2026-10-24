@@ -779,7 +779,7 @@ function StaffDashboard() {
                 onClick={async () => {
                   setShowLogoutConfirmModal(false);
                   await signOut();
-                  window.location.href = "/sign-in";
+                  window.location.href = "/admin";
                 }}
                 className="h-10 rounded-lg bg-rose-600 text-white font-black text-xs uppercase tracking-widest hover:bg-rose-700 transition-all shadow-md cursor-pointer"
               >

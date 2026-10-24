@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/contexts/AuthContext";
 import type { UserRole } from "@/lib/database.types";
@@ -10,35 +10,41 @@ export function DashboardGuard({
   children: React.ReactNode;
   requiredRole?: UserRole;
 }) {
-  const { session, profile, role } = useAuth();
+  const { session, profile, role, loading } = useAuth();
   const navigate = useNavigate();
-  const hasNavigatedRef = useRef(false);
-
-  const storedBypass = typeof window !== "undefined" ? (localStorage.getItem("royal_bypass_role") as UserRole | null) : null;
-
-  const email = (session?.user?.email || profile?.email || "").toLowerCase();
-  const isAdminEmail =
-    session?.user?.id === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
-    email === "realtoque0@gmail.com" ||
-    email === "eventsroyaltouch7@gmail.com" ||
-    email === "maishdan4940@gmail.com" ||
-    email === "abigaelmuthoni29@gmail.com" ||
-    storedBypass === "admin";
-
-  const effectiveRole: UserRole = isAdminEmail
-    ? "admin"
-    : (storedBypass || profile?.role || role || requiredRole || "admin");
 
   useEffect(() => {
-    // Only redirect if completely unauthenticated and no bypass role set
-    if (!session && !profile && !storedBypass) {
-      if (!hasNavigatedRef.current) {
-        hasNavigatedRef.current = true;
-        navigate({ to: "/sign-in" });
-      }
-    }
-  }, [session, profile, storedBypass, navigate]);
+    if (loading) return;
 
-  // DIRECTLY RENDER DASHBOARD CONTENT WITHOUT ANY LOADING SCREEN!
+    const isAuthenticated = Boolean(session || profile);
+    if (!isAuthenticated) {
+      navigate({ to: "/sign-in", replace: true });
+      return;
+    }
+
+    const currentRole = profile?.role || role || "customer";
+    if (requiredRole === "admin" && currentRole !== "admin") {
+      navigate({ to: "/dashboard", replace: true });
+    } else if (requiredRole === "staff" && currentRole !== "staff" && currentRole !== "admin") {
+      navigate({ to: "/dashboard", replace: true });
+    }
+  }, [session, profile, role, loading, requiredRole, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#070b10] text-white flex flex-col items-center justify-center p-4">
+        <div className="h-10 w-10 border-4 border-gold border-t-transparent rounded-full animate-spin" />
+        <p className="text-xs font-mono font-bold uppercase tracking-widest text-gold mt-4">
+          Verifying Access Permissions...
+        </p>
+      </div>
+    );
+  }
+
+  const isAuthenticated = Boolean(session || profile);
+  if (!isAuthenticated) {
+    return null;
+  }
+
   return <>{children}</>;
 }
