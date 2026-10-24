@@ -276,8 +276,13 @@ function AuthSplitCardPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowPassword((prev) => !prev);
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 rounded-md transition cursor-pointer z-10 select-none"
+                  title={showPassword ? "Hide password" : "Reveal password"}
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -312,12 +317,17 @@ function AuthSplitCardPage() {
                     className="w-full h-11 bg-gray-100/80 border border-gray-200 rounded-lg pl-3 pr-10 text-xs font-semibold text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-[#0d4f46] outline-none transition"
                   />
                   <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
-                  >
-                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowConfirmPassword((prev) => !prev);
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 rounded-md transition cursor-pointer z-10 select-none"
+                  title={showConfirmPassword ? "Hide password" : "Reveal password"}
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
                 </div>
                 {confirmPassword && confirmPassword !== password && (
                   <p className="text-[10px] text-rose-500 font-bold mt-1">⚠️ Passwords do not match</p>

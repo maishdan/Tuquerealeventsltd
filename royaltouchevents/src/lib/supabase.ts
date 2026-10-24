@@ -1,8 +1,9 @@
 import { createClient } from "@supabase/supabase-js";
 
 // Royal Touch Events Supabase project configuration.
-const FALLBACK_URL = "https://asakgmwsgjlsxtqhuybj.supabase.co";
-const FALLBACK_ANON_KEY = "sb_publishable_Ubqo4jnctHdgscUJRXNnLg_wMUov3AS";
+const FALLBACK_URL = "https://ywqfvlrfvxilwioifgqo.supabase.co";
+const FALLBACK_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3cWZ2bHJmdnhpbHdpb2lmZ3FvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIxNTEzMDUsImV4cCI6MjEwNzcyNzMwNX0.oUGdgZ7butv3Z3qq_KUBZRR5LPEqegU3G_5xMbFebwA";
 
 const rawUrl = (
   import.meta.env.VITE_SUPABASE_URL ||
