@@ -29,25 +29,9 @@ const executeWithTimeout = <T,>(promise: Promise<T>, timeoutMs = 3500, errorMsg 
 };
 
 const createBypassProfile = (targetRole: UserRole, customEmail?: string, customName?: string): { userObj: User; mockSession: Session; profileObj: Profile } => {
-  const emailMap: Record<UserRole, string> = {
-    admin: customEmail || "eventsroyaltouch7@gmail.com",
-    staff: customEmail || "staff@royaltouch.com",
-    customer: customEmail || "client@royaltouch.com",
-  };
-  const nameMap: Record<UserRole, string> = {
-    admin: customName || "Japheth Owiyo (CEO)",
-    staff: customName || "Royal Staff Lead",
-    customer: customName || "Valued Client",
-  };
-  const idMap: Record<UserRole, string> = {
-    admin: "2e4f72d4-e107-4d59-9342-4a97294be051",
-    staff: "bypass-staff-id-1002",
-    customer: "bypass-customer-id-1003",
-  };
-
-  const bypassEmail = emailMap[targetRole];
-  const bypassName = nameMap[targetRole];
-  const bypassId = idMap[targetRole] || `bypass-${Date.now()}`;
+  const bypassEmail = customEmail || `${targetRole}@royaltouch.co.ke`;
+  const bypassName = customName || (targetRole === "admin" ? "Executive Administrator" : targetRole === "staff" ? "Royal Staff Lead" : "Valued Client");
+  const bypassId = `bypass-${targetRole}-${Date.now()}`;
 
   const userObj: User = {
     id: bypassId,
@@ -103,35 +87,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isAdminUser = (u?: User | null, p?: Profile | null) => {
-    if (!u) return false;
-    const uid = u.id;
-    const email = (u.email || p?.email || "").toLowerCase();
-    const appRole = u.app_metadata?.role;
-    const metaRoleVal = u.user_metadata?.role;
-
-    return (
-      uid === "2e4f72d4-e107-4d59-9342-4a97294be051" ||
-      email === "eventsroyaltouch7@gmail.com" ||
-      email === "maishdan4940@gmail.com" ||
-      email === "abigaelmuthoni29@gmail.com" ||
-      email === "realtoque0@gmail.com" ||
-      appRole === "admin" ||
-      metaRoleVal === "admin" ||
-      p?.role === "admin"
-    );
+  const resolveUserRole = (u?: User | null, p?: Profile | null): UserRole => {
+    if (!u && !p) return "customer";
+    if (p?.role === "admin" || p?.role === "staff" || p?.role === "customer" || p?.role === "client") {
+      return p.role === "client" ? "customer" : p.role;
+    }
+    const appRole = u?.app_metadata?.role as UserRole;
+    if (appRole === "admin" || appRole === "staff") return appRole;
+    const metaRole = u?.user_metadata?.role as UserRole;
+    if (metaRole === "admin" || metaRole === "staff") return metaRole;
+    return "customer";
   };
 
   const resolveFullNameForUser = (uEmail?: string | null, userMetaName?: string | null, pName?: string | null): string => {
     if (pName && pName.trim().length > 0) return pName.trim();
     if (userMetaName && userMetaName.trim().length > 0) return userMetaName.trim();
-
-    const email = (uEmail || "").toLowerCase();
-    if (email === "eventsroyaltouch7@gmail.com") return "Japheth Owiyo";
-    if (email === "maishdan4940@gmail.com") return "Dan Maish";
-    if (email === "abigaelmuthoni29@gmail.com") return "DANIWEST";
-    if (email) {
-      const prefix = email.split("@")[0];
+    if (uEmail) {
+      const prefix = uEmail.split("@")[0];
       return prefix.charAt(0).toUpperCase() + prefix.slice(1);
     }
     return "User";
@@ -145,18 +117,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       p = null;
     }
 
-    const isAdmin = isAdminUser(u, p);
-    const computedRole: UserRole = isAdmin ? "admin" : (p?.role ?? (u.app_metadata?.role === "admin" ? "admin" : "customer"));
-
-    const resolvedFullName = resolveFullNameForUser(u.email, u.user_metadata?.full_name, p?.full_name);
+    const computedRole: UserRole = resolveUserRole(u, p);
+    const resolvedFullName = resolveFullNameForUser(u.email, u.user_metadata?.full_name || u.user_metadata?.name, p?.full_name);
 
     setProfile({
       id: u.id,
       email: u.email ?? p?.email ?? "",
       full_name: resolvedFullName,
-      phone: p?.phone || u.phone || null,
+      phone: p?.phone || u.phone || u.user_metadata?.phone || null,
       city: p?.city || null,
-      avatar_url: p?.avatar_url || null,
+      avatar_url: p?.avatar_url || u.user_metadata?.avatar_url || u.user_metadata?.picture || null,
       role: computedRole,
       created_at: p?.created_at || u.created_at || new Date().toISOString(),
     });
@@ -172,7 +142,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(profileObj);
       setLoading(false);
     } else {
-      executeWithTimeout(supabase.auth.getSession(), 3000, "Get session timeout")
+      executeWithTimeout(supabase.auth.getSession(), 3500, "Get session timeout")
         .then(({ data }) => {
           if (!isMounted) return;
           if (data.session?.user) {
@@ -223,64 +193,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = async (email: string, password: string): Promise<UserRole> => {
     const cleanEmail = email.trim().toLowerCase();
-    const isExecutiveEmail =
-      cleanEmail === "eventsroyaltouch7@gmail.com" ||
-      cleanEmail === "maishdan4940@gmail.com" ||
-      cleanEmail === "abigaelmuthoni29@gmail.com" ||
-      cleanEmail === "realtoque0@gmail.com";
 
-    try {
-      const { data, error } = await executeWithTimeout(
-        supabase.auth.signInWithPassword({ email: cleanEmail, password }),
-        3500,
-        "Database auth request timed out"
-      );
+    const { data, error } = await executeWithTimeout(
+      supabase.auth.signInWithPassword({ email: cleanEmail, password }),
+      4000,
+      "Database auth request timed out"
+    );
 
-      if (error) {
-        if (isExecutiveEmail) {
-          const { mockSession, profileObj } = createBypassProfile("admin", cleanEmail, resolveFullNameForUser(cleanEmail));
-          setSession(mockSession);
-          setProfile(profileObj);
-          return "admin";
-        }
-        throw new Error(error.message || "Invalid email address or password.");
-      }
-
-      let p: Profile | null = null;
-      try {
-        p = await fetchProfile(data.user.id);
-      } catch {
-        p = null;
-      }
-
-      const isAdmin = isAdminUser(data.user, p);
-      const role: UserRole = isAdmin ? "admin" : (p?.role ?? (data.user.app_metadata?.role === "admin" ? "admin" : "customer"));
-
-      const resolvedFullName = resolveFullNameForUser(data.user.email, data.user.user_metadata?.full_name, p?.full_name);
-
-      const finalProfile: Profile = {
-        id: data.user.id,
-        email: data.user.email ?? email,
-        full_name: resolvedFullName,
-        phone: p?.phone || data.user.phone || null,
-        city: p?.city || null,
-        avatar_url: p?.avatar_url || null,
-        role,
-        created_at: p?.created_at || data.user.created_at || new Date().toISOString(),
-      };
-
-      setSession(data.session);
-      setProfile(finalProfile);
-      return role;
-    } catch (err: any) {
-      if (isExecutiveEmail) {
-        const { mockSession, profileObj } = createBypassProfile("admin", cleanEmail, resolveFullNameForUser(cleanEmail));
-        setSession(mockSession);
-        setProfile(profileObj);
-        return "admin";
-      }
-      throw new Error(err?.message || "Invalid email or password. Please verify your details or register.");
+    if (error) {
+      throw new Error(error.message || "Invalid email address or password.");
     }
+
+    let p: Profile | null = null;
+    try {
+      p = await fetchProfile(data.user.id);
+    } catch {
+      p = null;
+    }
+
+    const role: UserRole = resolveUserRole(data.user, p);
+    const resolvedFullName = resolveFullNameForUser(data.user.email, data.user.user_metadata?.full_name, p?.full_name);
+
+    const finalProfile: Profile = {
+      id: data.user.id,
+      email: data.user.email ?? cleanEmail,
+      full_name: resolvedFullName,
+      phone: p?.phone || data.user.phone || null,
+      city: p?.city || null,
+      avatar_url: p?.avatar_url || null,
+      role,
+      created_at: p?.created_at || data.user.created_at || new Date().toISOString(),
+    };
+
+    setSession(data.session);
+    setProfile(finalProfile);
+    return role;
   };
 
   const quickBypassSignIn = async (targetRole: UserRole): Promise<UserRole> => {
@@ -314,48 +261,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string, fullName: string, phone?: string): Promise<UserRole> => {
     const cleanEmail = email.trim().toLowerCase();
-    const isExecutiveEmail =
-      cleanEmail === "eventsroyaltouch7@gmail.com" ||
-      cleanEmail === "maishdan4940@gmail.com" ||
-      cleanEmail === "abigaelmuthoni29@gmail.com" ||
-      cleanEmail === "realtoque0@gmail.com";
 
-    const targetRole: UserRole = isExecutiveEmail ? "admin" : "customer";
+    const { data, error } = await executeWithTimeout(
+      supabase.auth.signUp({
+        email: cleanEmail,
+        password,
+        options: { data: { full_name: fullName, phone: phone || "" } },
+      }),
+      4000,
+      "Sign up request timed out"
+    );
 
-    try {
-      const { data, error } = await executeWithTimeout(
-        supabase.auth.signUp({
-          email: cleanEmail,
-          password,
-          options: { data: { full_name: fullName, phone: phone || "" } },
-        }),
-        3500,
-        "Sign up request timed out"
-      );
+    if (error) throw error;
 
-      if (error) {
-        const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
-        setSession(mockSession);
-        setProfile(profileObj);
-        return targetRole;
+    if (data.session) {
+      setSession(data.session);
+      await loadProfile(data.session.user);
+      let p: Profile | null = null;
+      try {
+        p = await fetchProfile(data.session.user.id);
+      } catch {
+        p = null;
       }
-
-      if (data.session) {
-        setSession(data.session);
-        await loadProfile(data.user!);
-      } else {
-        const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
-        setSession(mockSession);
-        setProfile(profileObj);
-      }
-      return targetRole;
-    } catch (err: any) {
-      console.warn("Supabase SignUp Warning, creating local session:", err);
-      const { mockSession, profileObj } = createBypassProfile(targetRole, cleanEmail, fullName);
-      setSession(mockSession);
-      setProfile(profileObj);
-      return targetRole;
+      return resolveUserRole(data.session.user, p);
     }
+
+    return "customer";
   };
 
   const signOut = async () => {
@@ -402,10 +333,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export const useAuth = (): AuthContextValue => {
+export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     return defaultAuthContext;
   }
   return ctx;
-};
+}
