@@ -4,7 +4,7 @@ import { supabase } from "@/lib/supabase";
 import type { Profile, UserRole } from "@/lib/database.types";
 import { fetchProfile } from "@/lib/api/profiles";
 
-type AuthContextValue = {
+export type AuthContextValue = {
   session: Session | null;
   user: User | null;
   profile: Profile | null;
@@ -82,6 +82,20 @@ const createBypassProfile = (targetRole: UserRole, customEmail?: string, customN
   };
 
   return { userObj, mockSession, profileObj };
+};
+
+const defaultAuthContext: AuthContextValue = {
+  session: null,
+  user: null,
+  profile: null,
+  role: null,
+  loading: true,
+  signIn: async () => "customer",
+  signInWithGoogle: async () => {},
+  quickBypassSignIn: async (role) => role,
+  signUp: async () => {},
+  signOut: async () => {},
+  refreshProfile: async () => {},
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -312,7 +326,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       );
 
       if (error) {
-        // Local account registration fallback
         const { mockSession, profileObj } = createBypassProfile("customer", cleanEmail, fullName);
         setSession(mockSession);
         setProfile(profileObj);
@@ -379,24 +392,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-const defaultAuthContext: AuthContextValue = {
-  session: null,
-  user: null,
-  profile: null,
-  role: null,
-  loading: true,
-  signIn: async () => "customer",
-  signInWithGoogle: async () => {},
-  quickBypassSignIn: async (role) => role,
-  signUp: async () => {},
-  signOut: async () => {},
-  refreshProfile: async () => {},
-};
-
-export function useAuth() {
+export const useAuth = (): AuthContextValue => {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     return defaultAuthContext;
   }
   return ctx;
-}
+};
