@@ -75,62 +75,16 @@ export async function createProfile(profileData: Partial<Profile>) {
   return data as Profile;
 }
 
-export async function fetchAllProfiles() {
+export async function fetchAllProfiles(): Promise<Profile[]> {
   try {
     const { data, error } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     if (error) {
       console.warn("Supabase fetchAllProfiles Query Warning:", error);
+      return [];
     }
-    if (data && data.length > 0) {
-      return data as Profile[];
-    }
+    return (data || []) as Profile[];
   } catch (err) {
     console.warn("Supabase fetchAllProfiles Exception:", err);
+    return [];
   }
-
-  // Active User Accounts Fallback if Supabase table returns empty or RLS restricts
-  return [
-    {
-      id: "usr-admin-0",
-      email: "maishdan4940@gmail.com",
-      full_name: "Dan Maish",
-      role: "admin",
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "usr-admin-1",
-      email: "eventsroyaltouch7@gmail.com",
-      full_name: "Japheth Owiyo",
-      role: "admin",
-      created_at: new Date().toISOString(),
-    },
-    {
-      id: "usr-admin-2",
-      email: "abigaelmuthoni29@gmail.com",
-      full_name: "DANIWEST",
-      role: "admin",
-      created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-    },
-    {
-      id: "usr-staff-1",
-      email: "staff@royaltouchevents.co.ke",
-      full_name: "Staff Event Coordinator",
-      role: "staff",
-      created_at: new Date(Date.now() - 86400000 * 8).toISOString(),
-    },
-    {
-      id: "usr-client-1",
-      email: "daniel.maina@gmail.com",
-      full_name: "Daniel Maina",
-      role: "customer",
-      created_at: new Date(Date.now() - 86400000 * 12).toISOString(),
-    },
-    {
-      id: "usr-client-2",
-      email: "sarah.muthoni@abcltd.co.ke",
-      full_name: "Sarah Muthoni",
-      role: "customer",
-      created_at: new Date(Date.now() - 86400000 * 20).toISOString(),
-    },
-  ] as Profile[];
 }

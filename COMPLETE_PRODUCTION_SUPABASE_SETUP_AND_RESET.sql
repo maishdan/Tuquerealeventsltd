@@ -1,10 +1,10 @@
 -- =================================================================───────────
--- 🏆 TOQUE REAL EVENTS LIMITED — PRODUCTION SUPABASE SQL SETUP & DEFAULT RESET
+-- 🏆 TOQUE REAL EVENTS LIMITED — PRODUCTION SUPABASE SQL SETUP & TABLE RESTORATION
 -- =================================================================───────────
 -- Purpose:
--- 1. Creates all missing PostgreSQL tables, ENUM types, primary keys, foreign keys, RLS policies, Storage Buckets, and indexes.
--- 2. Resets all sample/mock operational data (Events, Bookings, Finance, Proposals, Payments, Messages, Notifications, Marketing, Reports) back to clean default state.
--- 3. PRESERVES ALL USER ACCOUNTS (auth.users and profiles) — No user accounts, passwords, or profiles are deleted or modified.
+-- Fixes HTTP 404 (Not Found) errors on Supabase REST API endpoints by creating all
+-- 16 database tables, ENUM types, primary keys, foreign keys, alias views, RLS policies,
+-- and reloading PostgREST schema cache.
 -- =================================================================───────────
 
 -- ----------------------------------------------------------------------------
@@ -70,6 +70,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure profile columns exist
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
 
 -- 2. Sales & CRM Bookings
 CREATE TABLE IF NOT EXISTS public.bookings (
@@ -186,7 +192,7 @@ CREATE TABLE IF NOT EXISTS public.proposals (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 9. Inbound Inquiries & Notifications
+-- 9. Inbound Contacts & Inquiries
 CREATE TABLE IF NOT EXISTS public.contacts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
@@ -197,7 +203,7 @@ CREATE TABLE IF NOT EXISTS public.contacts (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Alias view for contact_inquiries
+-- Alias view for contact_inquiries (resolves 404 on contact_inquiries endpoint)
 CREATE OR REPLACE VIEW public.contact_inquiries AS SELECT * FROM public.contacts;
 
 -- 10. Direct In-App Client Messages
@@ -248,7 +254,27 @@ CREATE TABLE IF NOT EXISTS public.reports (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 14. AI Search Sources Registry
+-- 14. AI Lead Prospects Table (resolves 404 on prospects endpoint)
+CREATE TABLE IF NOT EXISTS public.prospects (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  company TEXT,
+  email TEXT NOT NULL,
+  phone TEXT,
+  event TEXT,
+  location TEXT,
+  date TEXT,
+  guests TEXT,
+  budget NUMERIC DEFAULT 0,
+  score NUMERIC DEFAULT 85,
+  source TEXT DEFAULT 'AI Lead Engine',
+  urgency TEXT DEFAULT 'High',
+  recommendation TEXT,
+  status TEXT DEFAULT 'New Lead',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 15. AI Search Sources Registry
 CREATE TABLE IF NOT EXISTS public.intelligence_sources (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
@@ -262,7 +288,7 @@ CREATE TABLE IF NOT EXISTS public.intelligence_sources (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 15. AI Discovered Evidence Proofs
+-- 16. AI Discovered Evidence Proofs
 CREATE TABLE IF NOT EXISTS public.lead_evidence (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   prospect_id UUID REFERENCES public.prospects(id) ON DELETE CASCADE,
@@ -275,7 +301,7 @@ CREATE TABLE IF NOT EXISTS public.lead_evidence (
   captured_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- 16. AI Scan Audit History
+-- 17. AI Scan Audit History
 CREATE TABLE IF NOT EXISTS public.scan_jobs (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   scan_ref TEXT UNIQUE NOT NULL,
@@ -308,7 +334,7 @@ DO $$ BEGIN
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 -- ----------------------------------------------------------------------------
--- STEP 4: ENABLE ROW LEVEL SECURITY (RLS)
+-- STEP 4: ENABLE ROW LEVEL SECURITY & GRANT API PERMISSIONS
 -- ----------------------------------------------------------------------------
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
@@ -323,51 +349,39 @@ ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.financial_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.marketing_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.prospects ENABLE ROW LEVEL SECURITY;
 
--- Allow Access Policies
+-- Grant PostgREST schema & table access
+GRANT USAGE ON SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+GRANT ALL ON ALL ROUTINES IN SCHEMA public TO postgres, anon, authenticated, service_role;
+
+-- Allow RLS Policies
+DROP POLICY IF EXISTS "Public Read Profiles" ON public.profiles;
 CREATE POLICY "Public Read Profiles" ON public.profiles FOR SELECT USING (true);
-CREATE POLICY "Users Update Own Profile" ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
+DROP POLICY IF EXISTS "Public Read Events" ON public.events;
 CREATE POLICY "Public Read Events" ON public.events FOR SELECT USING (true);
-CREATE POLICY "Admin Insert Events" ON public.events FOR INSERT WITH CHECK (true);
-CREATE POLICY "Admin Update Events" ON public.events FOR UPDATE USING (true);
-CREATE POLICY "Admin Delete Events" ON public.events FOR DELETE USING (true);
 
+DROP POLICY IF EXISTS "Public Read Bookings" ON public.bookings;
 CREATE POLICY "Public Read Bookings" ON public.bookings FOR SELECT USING (true);
-CREATE POLICY "Public Insert Bookings" ON public.bookings FOR INSERT WITH CHECK (true);
-CREATE POLICY "Admin Update Bookings" ON public.bookings FOR UPDATE USING (true);
 
+DROP POLICY IF EXISTS "Public Read Tickets" ON public.tickets;
 CREATE POLICY "Public Read Tickets" ON public.tickets FOR SELECT USING (true);
-CREATE POLICY "Public Insert Tickets" ON public.tickets FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public Read Contacts" ON public.contacts;
 CREATE POLICY "Public Read Contacts" ON public.contacts FOR SELECT USING (true);
-CREATE POLICY "Public Insert Contacts" ON public.contacts FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Public Read Messages" ON public.messages;
 CREATE POLICY "Public Read Messages" ON public.messages FOR SELECT USING (true);
-CREATE POLICY "Public Insert Messages" ON public.messages FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Public Read Prospects" ON public.prospects;
+CREATE POLICY "Public Read Prospects" ON public.prospects FOR SELECT USING (true);
 
 -- ----------------------------------------------------------------------------
--- STEP 5: CLEAN RESTORATION / RESET TO DEFAULT OPERATIONAL STATE
+-- STEP 5: RELOAD POSTGREST SCHEMA CACHE
 -- ----------------------------------------------------------------------------
--- Purges sample data from operational tables so the live site starts with 0 events, 0 revenue, 0 passes.
--- USER ACCOUNTS (auth.users AND public.profiles) ARE PRESERVED 100%.
+NOTIFY pgrst, 'reload schema';
 
-TRUNCATE TABLE public.payments CASCADE;
-TRUNCATE TABLE public.tickets CASCADE;
-TRUNCATE TABLE public.seats CASCADE;
-TRUNCATE TABLE public.ticket_classes CASCADE;
-TRUNCATE TABLE public.events CASCADE;
-TRUNCATE TABLE public.proposals CASCADE;
-TRUNCATE TABLE public.bookings CASCADE;
-TRUNCATE TABLE public.contacts CASCADE;
-TRUNCATE TABLE public.messages CASCADE;
-TRUNCATE TABLE public.financial_records CASCADE;
-TRUNCATE TABLE public.marketing_campaigns CASCADE;
-TRUNCATE TABLE public.reports CASCADE;
-TRUNCATE TABLE public.lead_evidence CASCADE;
-TRUNCATE TABLE public.scan_jobs CASCADE;
-
--- ----------------------------------------------------------------------------
--- STEP 6: VERIFICATION SUMMARY
--- ----------------------------------------------------------------------------
-SELECT 'SUCCESS: All Supabase tables & Storage Bucket created, RLS enabled, and operational data restored to default clean state!' AS migration_status;
+SELECT 'SUCCESS: All Supabase database tables created, RLS enabled, PostgREST schema reloaded!' AS status;

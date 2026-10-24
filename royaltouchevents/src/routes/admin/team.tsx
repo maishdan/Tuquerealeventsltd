@@ -51,43 +51,10 @@ function AdminTeam() {
 
   const userInitials = profile?.full_name ? profile.full_name.split(" ").filter(Boolean).map((n) => n[0]).join("").toUpperCase() : (user?.email ? user.email.slice(0, 2).toUpperCase() : "AD");
 
-  // Build live team roster from Supabase profiles database
+  // Build live team roster from Supabase profiles database without hardcoded fallbacks
   const allTeamProfiles = [...profiles];
 
-  const defaultTeam = [
-    {
-      id: "usr-admin-maishdan",
-      email: "maishdan4940@gmail.com",
-      full_name: "Dan Maish",
-      role: "admin" as const,
-      title: "Executive Admin",
-      created_at: "2026-07-29T00:00:00.000Z",
-    },
-    {
-      id: "usr-ceo-japheth",
-      email: "eventsroyaltouch7@gmail.com",
-      full_name: "Japheth Owiyo",
-      role: "admin" as const,
-      title: "Protected C.E.O & Managing Director",
-      created_at: "2026-07-31T00:00:00.000Z",
-    },
-    {
-      id: "usr-dev-daniwest",
-      email: "abigaelmuthoni29@gmail.com",
-      full_name: "DANIWEST",
-      role: "admin" as const,
-      title: "Super Admin Developer",
-      created_at: "2026-07-30T00:00:00.000Z",
-    },
-  ];
-
-  defaultTeam.forEach((p) => {
-    if (!allTeamProfiles.some((existing) => existing.email.toLowerCase() === p.email.toLowerCase())) {
-      allTeamProfiles.unshift(p as any);
-    }
-  });
-
-  if (profile && !allTeamProfiles.some((p) => p.email.toLowerCase() === profile.email.toLowerCase())) {
+  if (profile && !allTeamProfiles.some((p) => p.id === profile.id || p.email.toLowerCase() === profile.email.toLowerCase())) {
     allTeamProfiles.unshift(profile);
   }
 

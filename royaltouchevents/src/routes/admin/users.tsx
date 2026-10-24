@@ -237,40 +237,10 @@ function AdminUsers() {
     }
   };
 
-  // Ensure logged-in admin & protected accounts are included in profiles array if missing
+  // Display exact live users from Supabase database without hardcoded fallbacks
   const allProfiles = [...profiles];
 
-  const defaultProtected = [
-    {
-      id: "usr-admin-maishdan",
-      email: "maishdan4940@gmail.com",
-      full_name: "Dan Maish",
-      role: "admin" as const,
-      created_at: "2026-07-29T00:00:00.000Z",
-    },
-    {
-      id: "usr-ceo-japheth",
-      email: "eventsroyaltouch7@gmail.com",
-      full_name: "Japheth Owiyo",
-      role: "admin" as const,
-      created_at: "2026-07-31T00:00:00.000Z",
-    },
-    {
-      id: "usr-dev-daniwest",
-      email: "abigaelmuthoni29@gmail.com",
-      full_name: "DANIWEST",
-      role: "admin" as const,
-      created_at: "2026-07-30T00:00:00.000Z",
-    },
-  ];
-
-  defaultProtected.forEach((p) => {
-    if (!allProfiles.some((existing) => existing.email.toLowerCase() === p.email.toLowerCase())) {
-      allProfiles.unshift(p as any);
-    }
-  });
-
-  if (profile && !allProfiles.some((p) => p.email.toLowerCase() === profile.email.toLowerCase())) {
+  if (profile && !allProfiles.some((p) => p.id === profile.id || p.email.toLowerCase() === profile.email.toLowerCase())) {
     allProfiles.unshift(profile);
   }
 
