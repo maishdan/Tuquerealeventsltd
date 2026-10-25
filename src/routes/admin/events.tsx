@@ -56,6 +56,7 @@ function AdminEventsPage() {
 
 function AdminEventsContent() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
 
   // Database Hooks
   const { data: events = [], isLoading: isLoadingEvents, refetch: refetchEvents } = useAdminEvents();
@@ -245,6 +246,15 @@ function AdminEventsContent() {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
+            <button
+              onClick={() => navigate({ to: "/admin/ai" })}
+              className="px-4 py-2.5 bg-[#0c1e30] border border-[#f4cf69]/60 text-[#f4cf69] hover:bg-[#122332] font-mono font-bold text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 cursor-pointer rounded-lg"
+              title="Go to AI Studio v2 Leads Discovery"
+            >
+              <Sparkles size={15} />
+              <span>AI Leads v2</span>
+            </button>
+
             <button
               onClick={() => refetchEvents()}
               className="p-2 bg-[#0c1e30] border border-[#203548] text-[#899cb0] hover:text-white rounded-lg transition cursor-pointer"
