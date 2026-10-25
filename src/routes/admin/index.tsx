@@ -390,7 +390,7 @@ function AdminDashboard() {
                   </div>
 
                   <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-serif tracking-tight text-white flex flex-wrap items-center gap-2 leading-tight drop-shadow-md">
-                    {getTimeBasedGreeting()}, <span className="text-[#f4cf69]">{adminInfo.fullName}</span>
+                    {getTimeBasedGreeting(adminInfo.fullName).greeting}
                   </h1>
 
                   <p className="text-xs sm:text-sm text-[#98a7b7] font-medium leading-relaxed font-sans">
