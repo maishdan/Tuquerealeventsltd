@@ -20,7 +20,7 @@ import {
   createTicket,
   updateTicketStatus as updateTicketStatusApi,
 } from "@/lib/api/tickets";
-import { fetchProspects, createProspect, updateProspectStatus, type ProspectRecord } from "@/lib/api/prospects";
+import { fetchProspects, createProspect, updateProspectStatus, deleteProspect, type ProspectRecord } from "@/lib/api/prospects";
 import type { BookingStatus, TicketStatus } from "@/lib/database.types";
 import { formatKes } from "@/lib/dashboard-mock-data";
 
@@ -32,6 +32,16 @@ export function useCreateProspect() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (p: Parameters<typeof createProspect>[0]) => createProspect(p),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "prospects"] });
+    },
+  });
+}
+
+export function useDeleteProspect() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteProspect(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "prospects"] });
     },

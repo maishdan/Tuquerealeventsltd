@@ -35,6 +35,7 @@ import { Route as AdminCustomersRouteImport } from './routes/admin/customers'
 import { Route as AdminEventsRouteImport } from './routes/admin/events'
 import { Route as AdminFinanceRouteImport } from './routes/admin/finance'
 import { Route as AdminHelpRouteImport } from './routes/admin/help'
+import { Route as AdminLeadsRouteImport } from './routes/admin/leads'
 import { Route as AdminMarketingRouteImport } from './routes/admin/marketing'
 import { Route as AdminPaymentsRouteImport } from './routes/admin/payments'
 import { Route as AdminProfileRouteImport } from './routes/admin/profile'
@@ -186,6 +187,11 @@ const AdminHelpRoute = AdminHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminLeadsRoute = AdminLeadsRouteImport.update({
+  id: '/leads',
+  path: '/leads',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
   id: '/marketing',
   path: '/marketing',
@@ -320,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -368,6 +375,7 @@ export interface FileRoutesByTo {
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -416,6 +424,7 @@ export interface FileRoutesById {
   '/admin/events': typeof AdminEventsRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/help': typeof AdminHelpRoute
+  '/admin/leads': typeof AdminLeadsRoute
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/payments': typeof AdminPaymentsRoute
   '/admin/profile': typeof AdminProfileRoute
@@ -466,6 +475,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
+    | '/admin/leads'
     | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
@@ -514,6 +524,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
+    | '/admin/leads'
     | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
@@ -561,6 +572,7 @@ export interface FileRouteTypes {
     | '/admin/events'
     | '/admin/finance'
     | '/admin/help'
+    | '/admin/leads'
     | '/admin/marketing'
     | '/admin/payments'
     | '/admin/profile'
@@ -789,6 +801,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHelpRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/leads': {
+      id: '/admin/leads'
+      path: '/leads'
+      fullPath: '/admin/leads'
+      preLoaderRoute: typeof AdminLeadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/marketing': {
       id: '/admin/marketing'
       path: '/marketing'
@@ -949,6 +968,7 @@ interface AdminRouteChildren {
   AdminEventsRoute: typeof AdminEventsRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminHelpRoute: typeof AdminHelpRoute
+  AdminLeadsRoute: typeof AdminLeadsRoute
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminPaymentsRoute: typeof AdminPaymentsRoute
   AdminProfileRoute: typeof AdminProfileRoute
@@ -971,6 +991,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminEventsRoute: AdminEventsRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminHelpRoute: AdminHelpRoute,
+  AdminLeadsRoute: AdminLeadsRoute,
   AdminMarketingRoute: AdminMarketingRoute,
   AdminPaymentsRoute: AdminPaymentsRoute,
   AdminProfileRoute: AdminProfileRoute,

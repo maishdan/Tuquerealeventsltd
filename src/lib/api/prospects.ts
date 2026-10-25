@@ -16,6 +16,7 @@ export type ProspectRecord = {
   urgency?: string | null;
   recommendation?: string | null;
   status?: string | null;
+  favorite?: boolean | null;
   created_at?: string;
 };
 
@@ -71,5 +72,14 @@ export async function updateProspectStatus(id: string, status: string) {
   } catch (err) {
     console.warn("Supabase updateProspectStatus Exception:", err);
     return null;
+  }
+}
+
+export async function deleteProspect(id: string) {
+  try {
+    const { error } = await supabase.from("prospects").delete().eq("id", id);
+    return !error;
+  } catch {
+    return false;
   }
 }

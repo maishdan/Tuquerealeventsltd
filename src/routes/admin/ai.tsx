@@ -115,6 +115,7 @@ function AdminAI() {
 
   // Mutations
   const createProspectMutation = useCreateProspect();
+  const deleteProspectMutation = useDeleteProspect();
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
@@ -207,6 +208,54 @@ function AdminAI() {
   const [v2Tab, setV2Tab] = useState<"leads" | "saved_leads" | "weather_venue" | "search_control">("leads");
   const [copiedIcebreakerId, setCopiedIcebreakerId] = useState<string | null>(null);
   const [savedLeadsList, setSavedLeadsList] = useState<any[]>([]);
+  const [savedFavoritesMap, setSavedFavoritesMap] = useState<Record<string, boolean>>({});
+
+  const allSavedLeads = useMemo(() => {
+    const list: any[] = [];
+    const seenIds = new Set<string>();
+
+    prospects.forEach((p: any) => {
+      const id = p.id || p.email;
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        list.push({
+          id: p.id,
+          title: p.event || p.name,
+          eventName: p.event || p.name,
+          organisation: p.company || p.name,
+          decisionMakerName: p.name,
+          decisionMakerEmail: p.email,
+          organiserPhone: p.phone,
+          campaign: p.source || "Supabase CRM",
+          favorite: p.favorite || false,
+          isDb: true,
+          raw: p,
+        });
+      }
+    });
+
+    savedLeadsList.forEach((s: any) => {
+      const id = s.id || s.title || s.eventName;
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        list.push({
+          id: s.id || `lead-${Date.now()}`,
+          title: s.title || s.eventName || s.name,
+          eventName: s.eventName || s.title || s.name,
+          organisation: s.organization || s.organiser || s.company,
+          decisionMakerName: s.contact?.name || s.decisionMakerName || s.name,
+          decisionMakerEmail: s.contact?.email || s.decisionMakerEmail || s.email,
+          organiserPhone: s.contact?.phone || s.organiserPhone || s.phone,
+          campaign: s.campaign || "AI Studio v2 Discovery",
+          favorite: false,
+          isDb: false,
+          raw: s,
+        });
+      }
+    });
+
+    return list;
+  }, [prospects, savedLeadsList]);
   const [activeMapLeadId, setActiveMapLeadId] = useState<string | null>(null);
 
   // WEATHER & VENUE INTELLIGENCE STATES
@@ -1282,7 +1331,7 @@ function AdminAI() {
                           v2Tab === "saved_leads" ? "bg-emerald-400 text-black font-black" : "bg-[#0c1a28] text-[#899cb0] border border-[#203548]"
                         )}
                       >
-                        Saved Leads CRM ({savedLeadsList.length || prospects.length})
+                        Saved Leads CRM ({allSavedLeads.length})
                       </button>
 
                       <button
@@ -1663,55 +1712,123 @@ function AdminAI() {
                         <h3 className="text-base font-black uppercase text-white">Live Saved Executive Leads</h3>
                       </div>
                       <span className="text-xs text-emerald-400 font-mono font-bold">
-                        {savedLeadsList.length} Saved Records
+                        {allSavedLeads.length} Saved Records
                       </span>
                     </div>
 
-                    {savedLeadsList.length === 0 ? (
+                    {allSavedLeads.length === 0 ? (
                       <div className="p-12 text-center text-[#899cb0] space-y-3">
                         <Sparkles size={36} className="mx-auto text-[#f4cf69]/60" />
                         <h4 className="text-sm font-bold uppercase text-white">No Saved Leads Yet</h4>
                         <p className="text-xs max-w-md mx-auto">
-                          Click "+ Save Lead" on any lead card in the Verified Leads tab to save it directly to your executive CRM database!
+                          Click "+ Save Lead to CRM" on any lead card in the Verified Leads tab to save it directly to your executive CRM database!
                         </p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {savedLeadsList.map((lead) => (
-                          <div key={lead.id} className="p-5 bg-[#0c1a28] border border-emerald-500/40 rounded-xl space-y-3">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{lead.campaign || lead.type || "Saved CRM Lead"}</span>
-                                <h4 className="text-base font-black text-white">{lead.title || lead.eventName}</h4>
+                        {allSavedLeads.map((lead: any) => {
+                          const isFav = Boolean(savedFavoritesMap[lead.id]);
+                          return (
+                            <div key={lead.id} className="p-5 bg-[#0c1a28] border border-emerald-500/40 rounded-xl space-y-3 flex flex-col justify-between">
+                              <div className="space-y-2">
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{lead.campaign || "Saved CRM Lead"}</span>
+                                    <h4 className="text-base font-black text-white">{lead.title || lead.eventName}</h4>
+                                  </div>
+                                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold shrink-0">
+                                    SAVED CRM
+                                  </span>
+                                </div>
+
+                                <div className="text-xs space-y-1 text-[#c0d1e0] font-mono">
+                                  <p><strong>Organisation:</strong> <span className="text-white font-bold">{lead.organisation || "Client"}</span></p>
+                                  <p><strong>Decision Maker:</strong> {lead.decisionMakerName || "Procurement Lead"}</p>
+                                  <p><strong>Email:</strong> <span className="text-white font-mono">{lead.decisionMakerEmail || "contact@client.co.ke"}</span></p>
+                                  {lead.organiserPhone && <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{lead.organiserPhone}</span></p>}
+                                </div>
                               </div>
-                              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono text-xs font-bold">
-                                SAVED CRM
-                              </span>
-                            </div>
 
-                            <div className="text-xs space-y-1 text-[#c0d1e0]">
-                              <p><strong>Organisation:</strong> <span className="text-white font-bold">{lead.organization || lead.organiser}</span></p>
-                              <p><strong>Decision Maker:</strong> {lead.contact?.name || lead.decisionMakerName || "Procurement Lead"}</p>
-                              <p><strong>Email:</strong> <span className="text-white font-mono">{lead.contact?.email || lead.decisionMakerEmail || "eventsroyaltouch7@gmail.com"}</span></p>
-                              <p><strong>Phone:</strong> <span className="text-[#f4cf69] font-mono">{lead.contact?.phone || lead.organiserPhone}</span></p>
-                            </div>
+                              <div className="pt-3 border-t border-[#1d3043] flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-2">
+                                  {/* Favorite Star Button */}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setSavedFavoritesMap((prev) => {
+                                        const next = !prev[lead.id];
+                                        showToast(next ? `⭐ Added '${lead.title}' to Favorites!` : `Removed '${lead.title}' from Favorites`);
+                                        return { ...prev, [lead.id]: next };
+                                      });
+                                    }}
+                                    className={cn(
+                                      "px-3 py-1.5 rounded-lg border text-xs font-mono font-bold flex items-center gap-1 cursor-pointer transition-all",
+                                      isFav ? "bg-amber-400 text-black border-amber-300 font-black shadow-lg" : "bg-[#142637] border-[#203548] text-[#899cb0] hover:text-white"
+                                    )}
+                                  >
+                                    <Star size={13} className={cn(isFav && "fill-black text-black")} />
+                                    <span>{isFav ? "Favorite ★" : "Favorite"}</span>
+                                  </button>
 
-                            <div className="pt-2 border-t border-[#1d3043] flex gap-2">
-                              <button
-                                onClick={() => openMessagingModal(lead)}
-                                className="px-3 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase cursor-pointer"
-                              >
-                                Message
-                              </button>
-                              <button
-                                onClick={() => openInvoiceModal(lead)}
-                                className="px-3 py-1.5 rounded-lg bg-[#142637] border border-emerald-500/50 text-emerald-400 text-xs font-bold uppercase cursor-pointer"
-                              >
-                                Invoice
-                              </button>
+                                  {/* Delete Button */}
+                                  <button
+                                    type="button"
+                                    onClick={async () => {
+                                      if (confirm(`Delete saved lead '${lead.title}'?`)) {
+                                        try {
+                                          if (lead.isDb) {
+                                            await deleteProspectMutation.mutateAsync(lead.id);
+                                            refetchProspects();
+                                          } else {
+                                            setSavedLeadsList((prev) => prev.filter((s) => s.id !== lead.id));
+                                          }
+                                          showToast(`✓ Lead '${lead.title}' deleted.`);
+                                        } catch {
+                                          showToast("❌ Failed to delete lead.");
+                                        }
+                                      }
+                                    }}
+                                    className="px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold uppercase hover:bg-rose-500/20 cursor-pointer flex items-center gap-1 font-mono"
+                                  >
+                                    <Trash2 size={13} /> Delete
+                                  </button>
+                                </div>
+
+                                {/* Approve & Promote to Event Button */}
+                                <button
+                                  type="button"
+                                  onClick={async () => {
+                                    try {
+                                      await createEventMutation.mutateAsync({
+                                        user_id: profile?.id || null,
+                                        name: lead.title || lead.eventName,
+                                        event_type: lead.campaign || "Corporate Event",
+                                        event_date: new Date().toISOString().slice(0, 10),
+                                        venue: "Nairobi Venue",
+                                        budget: 2500000,
+                                        status: "upcoming",
+                                        featured: true,
+                                        description: `Approved lead from ${lead.organisation || "Client"}. Contact: ${lead.decisionMakerEmail || "N/A"}.`,
+                                        organizer_name: lead.decisionMakerName || lead.organisation,
+                                        organizer_email: lead.decisionMakerEmail,
+                                        organizer_phone: lead.organiserPhone || "+254795365334",
+                                      });
+                                      showToast(`✓ Lead '${lead.title}' APPROVED & Published in Events Hub!`);
+                                      setTimeout(() => {
+                                        navigate({ to: "/admin/events" });
+                                      }, 800);
+                                    } catch {
+                                      showToast(`❌ Failed to promote lead to active event.`);
+                                    }
+                                  }}
+                                  className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-xs uppercase tracking-wider shadow-lg hover:scale-105 transition-all cursor-pointer flex items-center gap-1 font-mono"
+                                >
+                                  <CheckCircle2 size={13} /> Approve & Promote to Event
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     )}
                   </div>
