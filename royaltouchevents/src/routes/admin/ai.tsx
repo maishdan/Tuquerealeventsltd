@@ -8,6 +8,7 @@ import {
   useAdminContacts,
   useAdminProspects,
   useCreateProspect,
+  useDeleteProspect,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,

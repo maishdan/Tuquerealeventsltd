@@ -4,6 +4,7 @@ import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
   useAdminEvents,
+  useAdminProspects,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
@@ -23,6 +24,7 @@ import {
   MapPin,
   Sparkles,
   Star,
+  CheckCircle2,
   RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -56,6 +58,11 @@ function AdminEventsContent() {
 
   // Database Hooks
   const { data: events = [], isLoading: isLoadingEvents, refetch: refetchEvents } = useAdminEvents();
+  const { data: prospects = [] } = useAdminProspects();
+
+  const approvedLeads = prospects.filter(
+    (p: any) => p.status === "Approved" || p.status === "Approved & Promoted" || p.favorite
+  );
 
   // Mutations
   const createEventMutation = useCreateEvent();
@@ -227,6 +234,65 @@ function AdminEventsContent() {
             </p>
           </div>
         </div>
+
+        {/* APPROVED CRM LEADS PIPELINE TILE */}
+        {approvedLeads.length > 0 && (
+          <div className="p-5 bg-[#081522] border-2 border-emerald-500/50 rounded-xl shadow-2xl space-y-3 font-mono">
+            <div className="flex justify-between items-center border-b border-[#182a3c] pb-2">
+              <span className="text-xs font-black uppercase text-emerald-400 tracking-wider flex items-center gap-2">
+                <CheckCircle2 size={16} /> Approved CRM Discovery Leads ({approvedLeads.length})
+              </span>
+              <span className="text-[10px] text-[#899cb0]">Ready for Event Production</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+              {approvedLeads.slice(0, 6).map((lead: any) => (
+                <div key={lead.id} className="p-3.5 bg-[#0c1e30] border border-[#203548] hover:border-emerald-400 rounded-lg space-y-2 transition-all flex flex-col justify-between">
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <span className="text-[9px] font-bold text-emerald-400 uppercase block">{lead.event || "Approved Lead"}</span>
+                        <h4 className="text-sm font-black text-white">{lead.name}</h4>
+                      </div>
+                      <span className="text-xs font-bold text-[#f4cf69] shrink-0">{formatKes(lead.budget || 2500000)}</span>
+                    </div>
+
+                    <p className="text-[10px] text-[#899cb0] truncate">Company: {lead.company || "Corporate Client"} | Contact: {lead.email}</p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await createEventMutation.mutateAsync({
+                          user_id: profile?.id || null,
+                          name: lead.event || lead.name,
+                          event_type: lead.event || "Corporate Event",
+                          event_date: new Date().toISOString().slice(0, 10),
+                          venue: lead.location || "Nairobi Venue",
+                          budget: typeof lead.budget === "number" ? lead.budget : 2500000,
+                          status: "upcoming",
+                          featured: true,
+                          description: `Approved lead from ${lead.name} (${lead.company || "Client"}). Contact: ${lead.email}.`,
+                          organizer_name: lead.name,
+                          organizer_email: lead.email,
+                          organizer_phone: lead.phone || "+254795365334",
+                        });
+                        showToast(`✓ Lead '${lead.name}' Published as Active Event!`);
+                        refetchEvents();
+                      } catch {
+                        showToast(`❌ Failed to publish event.`);
+                      }
+                    }}
+                    className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-black text-[10px] uppercase tracking-wider rounded shadow hover:scale-102 transition-all cursor-pointer flex items-center justify-center gap-1 mt-2"
+                  >
+                    <Sparkles size={12} /> Publish as Active Event
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* HEADER CONTROLS BAR */}
         <div className="p-4 bg-[#09131d] border border-[#1b2c3d] rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
