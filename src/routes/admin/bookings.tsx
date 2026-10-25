@@ -659,46 +659,54 @@ function AdminBookings() {
                     </button>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="text-[#8d9baa] bg-[#0d1823] border-b border-[#172530]">
-                          <th className="p-3">Opportunity ID</th>
-                          <th className="p-3">Client / Organization</th>
-                          <th className="p-3">Event Brief</th>
-                          <th className="p-3 text-center">Lead Score</th>
-                          <th className="p-3 text-right">Estimated Value</th>
-                          <th className="p-3 text-center">Pipeline Stage</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
-                        {bookings.map((b) => {
-                          const scoring = calculateLeadScore(b.budget);
-                          return (
-                            <tr key={b.id} className="hover:bg-[#0d1823] transition-colors">
-                              <td className="p-3 font-mono font-bold text-[#f4cf69]">OPP-{b.id.slice(0, 6)}</td>
-                              <td className="p-3">
-                                <p className="font-bold text-white">{b.name}</p>
-                                <p className="text-[10px] text-[#8d9baa] font-mono">{b.email}</p>
-                              </td>
-                              <td className="p-3 text-[#9ca8b6] font-medium">{b.event_type}</td>
-                              <td className="p-3 text-center">
-                                <span className={cn("px-2 py-0.5 rounded text-[9px] font-black border", scoring.color)}>
-                                  {scoring.label} ({scoring.score}%)
-                                </span>
-                              </td>
-                              <td className="p-3 text-right font-mono font-black text-[#f4cf69]">{b.budget}</td>
-                              <td className="p-3 text-center">
-                                <span className="px-2.5 py-1 rounded bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[9px] font-black uppercase">
-                                  {b.status || "Proposal Sent"}
-                                </span>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
+                  {bookings.length === 0 ? (
+                    <div className="p-12 text-center text-[#8d9baa] space-y-2 font-mono">
+                      <Sparkles size={32} className="mx-auto text-[#f4cf69]/50" />
+                      <p className="font-bold text-white uppercase text-sm">No Active Customer Opportunities</p>
+                      <p className="text-xs">Inbound opportunities submitted on the website will land here.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="text-[#8d9baa] bg-[#0d1823] border-b border-[#172530]">
+                            <th className="p-3">Opportunity ID</th>
+                            <th className="p-3">Client / Organization</th>
+                            <th className="p-3">Event Brief</th>
+                            <th className="p-3 text-center">Lead Score</th>
+                            <th className="p-3 text-right">Estimated Value</th>
+                            <th className="p-3 text-center">Pipeline Stage</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#172530] text-[#dbe2e9]">
+                          {bookings.map((b) => {
+                            const scoring = calculateLeadScore(b.budget);
+                            return (
+                              <tr key={b.id} className="hover:bg-[#0d1823] transition-colors">
+                                <td className="p-3 font-mono font-bold text-[#f4cf69]">OPP-{b.id.slice(0, 6)}</td>
+                                <td className="p-3">
+                                  <p className="font-bold text-white">{b.name}</p>
+                                  <p className="text-[10px] text-[#8d9baa] font-mono">{b.email}</p>
+                                </td>
+                                <td className="p-3 text-[#9ca8b6] font-medium">{b.event_type}</td>
+                                <td className="p-3 text-center">
+                                  <span className={cn("px-2 py-0.5 rounded text-[9px] font-black border", scoring.color)}>
+                                    {scoring.label} ({scoring.score}%)
+                                  </span>
+                                </td>
+                                <td className="p-3 text-right font-mono font-black text-[#f4cf69]">{b.budget}</td>
+                                <td className="p-3 text-center">
+                                  <span className="px-2.5 py-1 rounded bg-blue-500/20 border border-blue-500/40 text-blue-400 text-[9px] font-black uppercase">
+                                    {b.status || "Proposal Sent"}
+                                  </span>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
