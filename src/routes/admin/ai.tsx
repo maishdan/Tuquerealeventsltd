@@ -41,6 +41,7 @@ import {
   Globe,
   Loader2,
   Sparkles,
+  Star,
   Flame,
   Crown,
   Home,
