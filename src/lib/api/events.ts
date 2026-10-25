@@ -83,9 +83,7 @@ export async function fetchEventById(eventId: string): Promise<EventRecord | nul
 
 export async function createEvent(eventInput: Partial<EventRecord>): Promise<EventRecord> {
   try {
-    const insertPayload = {
-      user_id: eventInput.user_id ?? null,
-      booking_id: eventInput.booking_id ?? null,
+    const insertPayload: Record<string, any> = {
       name: eventInput.name || "Untitled Event",
       event_type: eventInput.event_type || "General",
       event_date: eventInput.event_date || new Date().toISOString().slice(0, 10),
@@ -93,17 +91,15 @@ export async function createEvent(eventInput: Partial<EventRecord>): Promise<Eve
       budget: eventInput.budget ?? 0,
       status: eventInput.status || "upcoming",
       featured: eventInput.featured ?? false,
-      lifecycle_state: eventInput.lifecycle_state || "PUBLISHED",
       description: eventInput.description || "Executive production by TOQUE REAL EVENTS LIMITED.",
       organizer_name: eventInput.organizer_name || "TOQUE REAL EVENTS LIMITED",
       organizer_email: eventInput.organizer_email || "realtoque0@gmail.com",
       organizer_phone: eventInput.organizer_phone || "+254795365334",
-      start_time: eventInput.start_time || "08:00:00",
-      end_time: eventInput.end_time || "18:00:00",
       poster_url: eventInput.poster_url || "/back/e1.jfif",
-      team_count: eventInput.team_count || 1,
-      vendor_count: eventInput.vendor_count || 1,
     };
+
+    if (eventInput.user_id) insertPayload.user_id = eventInput.user_id;
+    if (eventInput.booking_id) insertPayload.booking_id = eventInput.booking_id;
 
     const { data, error } = await supabase
       .from("events")
