@@ -81,49 +81,6 @@ const trustPillars = [
   },
 ];
 
-const upcomingEventsList = [
-  {
-    id: "evt-1",
-    title: "East Africa Business & Tech Leadership Summit 2026",
-    category: "Corporate Conference",
-    date: "20 Nov 2026",
-    location: "KICC Nairobi, Kenya",
-    price: 5000,
-    tier: "VIP Pass",
-    image: "/back/e1.jfif",
-  },
-  {
-    id: "evt-2",
-    title: "Safaricom Youth Innovation & Tech Expo 2026",
-    category: "Exhibition & Expo",
-    date: "15 Oct 2026",
-    location: "Westlands, Nairobi",
-    price: 1500,
-    tier: "Regular Pass",
-    image: "/back/e2.jfif",
-  },
-  {
-    id: "evt-3",
-    title: "TOQUE REAL Grand Luxury Gala & Cultural Night",
-    category: "Luxury Gala",
-    date: "12 Dec 2026",
-    location: "Villa Rosa Kempinski Nairobi",
-    price: 15000,
-    tier: "VVIP All Access",
-    image: "/back/e3.jfif",
-  },
-  {
-    id: "evt-4",
-    title: "Nairobi Music & Cultural Festival 2026",
-    category: "Concert & Festival",
-    date: "20 Dec 2026",
-    location: "Nyayo Stadium, Nairobi",
-    price: 0,
-    tier: "Free Public Pass",
-    image: "/back/e4.jfif",
-  },
-];
-
 const serviceSectors = [
   {
     id: "sec-community",
@@ -417,18 +374,18 @@ function Home() {
     }
   };
 
-  const displayEvents = dbEvents.length > 0
-    ? dbEvents.map((e, idx) => ({
-        id: e.id,
-        title: e.name,
-        category: e.event_type || "Featured Event",
-        date: e.event_date || "2026-11-20",
-        location: e.venue || "Nairobi, Kenya",
-        price: typeof e.budget === "number" ? e.budget : parseInt(String(e.budget || 0).replace(/[^0-9]/g, "")) || 5000,
-        tier: idx === 0 ? "VIP Pass" : idx === 1 ? "Regular Pass" : idx === 2 ? "VVIP All Access" : "Free Public Pass",
-        image: e.image_url || heroImages[idx % heroImages.length],
-      }))
-    : upcomingEventsList;
+  const featuredDbEvents = dbEvents.filter((e) => Boolean(e.featured || (e as any).is_featured));
+
+  const displayEvents = featuredDbEvents.map((e, idx) => ({
+    id: e.id,
+    title: e.name,
+    category: e.event_type || "Featured Event",
+    date: e.event_date || "2026-11-20",
+    location: e.venue || "Nairobi, Kenya",
+    price: typeof e.budget === "number" ? e.budget : parseInt(String(e.budget || 0).replace(/[^0-9]/g, "")) || 5000,
+    tier: idx === 0 ? "VIP Pass" : idx === 1 ? "Regular Pass" : "VVIP All Access",
+    image: e.poster_url || (e as any).image_url || heroImages[idx % heroImages.length],
+  }));
 
   // Quick Estimator State
   const [estGuests, setEstGuests] = useState<number>(100);
@@ -556,52 +513,65 @@ function Home() {
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {displayEvents.slice(0, 4).map((evt) => (
-              <div
-                key={evt.id}
-                className="bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
-              >
-                <div className="relative h-44 overflow-hidden">
-                  <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/40">
-                    {evt.tier}
-                  </span>
-                </div>
-
-                <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{evt.category}</span>
-                    <h3 className="text-sm font-bold text-white uppercase leading-snug group-hover:text-[#f4cf69] transition-colors">
-                      {evt.title}
-                    </h3>
-                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
-                      <MapPin size={12} className="text-[#f4cf69]" /> {evt.location}
-                    </p>
-                    <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
-                      <Calendar size={12} className="text-[#f4cf69]" /> {evt.date}
-                    </p>
+          {displayEvents.length === 0 ? (
+            <div className="p-10 bg-[#121722]/90 border border-[#f4cf69]/30 text-center space-y-3">
+              <Star size={32} className="text-[#f4cf69] mx-auto animate-pulse" />
+              <p className="text-xs font-mono font-bold text-white uppercase tracking-wider">No Featured Events Starred Yet</p>
+              <p className="text-xs text-[#8d9bad] max-w-md mx-auto">
+                Admin can click the ⭐ Star icon on any event in the Admin Events Hub to feature it on this Home Page Spotlight.
+              </p>
+              <Link to="/events" className="inline-block mt-2 text-xs font-bold text-[#f4cf69] underline uppercase font-mono">
+                View All Public Events →
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {displayEvents.slice(0, 4).map((evt) => (
+                <div
+                  key={evt.id}
+                  className="bg-[#121722]/90 border border-[#243343] hover:border-[#f4cf69] rounded-none overflow-hidden shadow-2xl flex flex-col group transition-all duration-300"
+                >
+                  <div className="relative h-44 overflow-hidden">
+                    <img src={evt.image} alt={evt.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 text-[#f4cf69] text-[9px] font-black uppercase rounded-none border border-[#f4cf69]/40">
+                      {evt.tier}
+                    </span>
                   </div>
 
-                  <div className="pt-3 border-t border-[#172533] flex items-center justify-between gap-2">
-                    <div>
-                      <span className="text-[8px] uppercase tracking-widest text-[#8d9bad] block">Pass Price</span>
-                      <strong className="text-sm font-mono text-[#f4cf69]">
-                        {evt.price === 0 ? "FREE PASS" : formatKes(evt.price)}
-                      </strong>
+                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">{evt.category}</span>
+                      <h3 className="text-sm font-bold text-white uppercase leading-snug group-hover:text-[#f4cf69] transition-colors">
+                        {evt.title}
+                      </h3>
+                      <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                        <MapPin size={12} className="text-[#f4cf69]" /> {evt.location}
+                      </p>
+                      <p className="text-xs text-[#8d9bad] font-mono flex items-center gap-1">
+                        <Calendar size={12} className="text-[#f4cf69]" /> {evt.date}
+                      </p>
                     </div>
 
-                    <Link
-                      to="/events"
-                      className="h-9 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center gap-1 shadow-md transition-all cursor-pointer"
-                    >
-                      Reserve Gate Ticket →
-                    </Link>
+                    <div className="pt-3 border-t border-[#172533] flex items-center justify-between gap-2">
+                      <div>
+                        <span className="text-[8px] uppercase tracking-widest text-[#8d9bad] block">Pass Price</span>
+                        <strong className="text-sm font-mono text-[#f4cf69]">
+                          {evt.price === 0 ? "FREE PASS" : formatKes(evt.price)}
+                        </strong>
+                      </div>
+
+                      <Link
+                        to="/events"
+                        className="h-9 px-3 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-[9px] uppercase tracking-widest rounded-none flex items-center gap-1 shadow-md transition-all cursor-pointer"
+                      >
+                        Reserve Gate Ticket →
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@tanstack/react-router";
 import { useState, useRef, useEffect } from "react";
-import { Menu, Star, Sun, Moon, ChevronDown, ChevronRight, ArrowRight } from "lucide-react";
+import { Menu, Star, Sun, Moon, ChevronDown, ChevronRight, ArrowRight, LayoutDashboard, Crown, Sparkles } from "lucide-react";
 import eventsLogo from "../../assets/events-logo.jpeg";
 import {
   Sheet,
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { FavoritesModal } from "./FavoritesModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 const exploreNav = [
   { to: "/about", label: "About" },
@@ -39,9 +40,13 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
   const { theme, toggleTheme } = useTheme();
   const { favorites } = useFavorites();
+  const { session, user, profile, role } = useAuth();
   const location = useLocation();
 
   const pathname = location?.pathname || "";
+
+  const isAuthenticated = Boolean(session || user || profile);
+  const targetPortalRoute = role === "admin" ? "/admin" : role === "staff" ? "/staff" : "/dashboard";
 
   // Check if current active path is inside Explore
   const isExploreActive = exploreNav.some(
@@ -314,14 +319,26 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
               )}
             </div>
 
-            {/* GET STARTED BUTTON THAT OPENS AUTH PAGE */}
-            <Link
-              to="/sign-in"
-              className="group flex items-center gap-2 h-10 px-5 rounded-none bg-emerald-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all duration-300 shadow-md shadow-emerald-500/20 cursor-pointer"
-            >
-              <span>Get Started</span>
-              <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
+            {/* DYNAMIC PORTAL / GET STARTED BUTTON */}
+            {isAuthenticated ? (
+              <Link
+                to={targetPortalRoute}
+                className="group flex items-center gap-2 h-10 px-5 rounded-none bg-[#f4cf69] text-black font-black text-[10px] uppercase tracking-widest hover:bg-[#d5a637] transition-all duration-300 shadow-md shadow-[#f4cf69]/20 cursor-pointer"
+                title="Return to your Portal Dashboard"
+              >
+                {role === "admin" ? <Crown size={14} className="text-black" /> : <LayoutDashboard size={14} className="text-black" />}
+                <span>My Portal</span>
+                <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+            ) : (
+              <Link
+                to="/sign-in"
+                className="group flex items-center gap-2 h-10 px-5 rounded-none bg-emerald-500 text-black font-black text-[10px] uppercase tracking-widest hover:bg-emerald-400 transition-all duration-300 shadow-md shadow-emerald-500/20 cursor-pointer"
+              >
+                <span>Get Started</span>
+                <ArrowRight size={13} className="text-black group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+            )}
 
             {/* DARK / LIGHT MODE TOGGLE (SUN / MOON) */}
             <button
@@ -414,7 +431,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
                 to="/contact"
                 onClick={() => setMobileOpen(false)}
                 activeProps={{ className: "bg-gold/10 text-gold" }}
-                inactiveProps={{ className: "text-gray-400 hover:bg-white/5 hover:text-white" }}
+                inactiveProps={{ className: "text-gray-400 hover:text-white" }}
                 className="rounded-none px-4 py-3 text-xs font-black uppercase tracking-widest transition border-t border-white/10 mt-2"
               >
                 Contact
@@ -434,14 +451,25 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
                   <ChevronRight size={14} />
                 </button>
 
-                <Link
-                  to="/admin"
-                  onClick={() => setMobileOpen(false)}
-                  className="flex items-center justify-between px-4 py-3.5 rounded-none bg-emerald-500 text-black text-xs font-black uppercase tracking-widest shadow-lg"
-                >
-                  <span>Get Started</span>
-                  <ArrowRight size={14} />
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    to={targetPortalRoute}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-4 py-3.5 rounded-none bg-[#f4cf69] text-black text-xs font-black uppercase tracking-widest shadow-lg"
+                  >
+                    <span>My Portal</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                ) : (
+                  <Link
+                    to="/sign-in"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-between px-4 py-3.5 rounded-none bg-emerald-500 text-black text-xs font-black uppercase tracking-widest shadow-lg"
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight size={14} />
+                  </Link>
+                )}
               </div>
             </nav>
           </SheetContent>

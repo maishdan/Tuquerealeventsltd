@@ -6,6 +6,8 @@ import { fetchUserMessages } from "@/lib/api/messages";
 import { fetchAllProfiles, updateUserRole } from "@/lib/api/profiles";
 import {
   fetchAllEvents,
+  fetchFeaturedEvents,
+  toggleEventFeatured,
   fetchEventById,
   createEvent,
   updateEvent,
@@ -46,6 +48,21 @@ export function useAdminContacts() {
 
 export function useAdminEvents() {
   return useQuery({ queryKey: ["admin", "events"], queryFn: fetchAllEvents });
+}
+
+export function useFeaturedEvents() {
+  return useQuery({ queryKey: ["public", "featured-events"], queryFn: fetchFeaturedEvents });
+}
+
+export function useToggleEventFeatured() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, featured }: { id: string; featured: boolean }) => toggleEventFeatured(id, featured),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "events"] });
+      qc.invalidateQueries({ queryKey: ["public", "featured-events"] });
+    },
+  });
 }
 
 export { useAdminEvents as useCustomerEvents };

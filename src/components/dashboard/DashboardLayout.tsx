@@ -10,22 +10,10 @@ import {
   Search,
   Power,
   User as UserIcon,
-  Crown,
-  LayoutDashboard,
-  Users,
-  Globe,
-  ClipboardList,
-  Wallet,
   Settings,
-  ArrowLeft,
   ChevronDown,
   HelpCircle,
   LogOut,
-  Sparkles,
-  PartyPopper,
-  ShoppingCart,
-  MessageSquare,
-  Receipt,
   UserCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -55,6 +43,8 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+
   const isMobile = useIsMobile();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
@@ -95,7 +85,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
     <div className="min-h-screen flex flex-col font-sans bg-[#03070d] text-[#f4f7fb] relative selection:bg-gold selection:text-black">
       {/* LOGOUT CONFIRMATION POPUP */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md px-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/85 backdrop-blur-md px-4 font-sans">
           <div className="bg-[#09141f] border border-gold/40 p-8 sm:p-10 rounded-xl max-w-md w-full shadow-2xl animate-in zoom-in-95 duration-300">
             <div className="text-center space-y-6">
               <div className="mx-auto h-20 w-20 bg-rose-500/10 border border-rose-500/30 text-rose-500 flex items-center justify-center rounded-full">
@@ -139,9 +129,19 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
           )}
         >
           {isAdmin ? (
-            <AdminSidebar collapsed={collapsed} pathname={pathname} isLinkActive={isLinkActive} />
+            <AdminSidebar
+              collapsed={collapsed}
+              pathname={pathname}
+              isLinkActive={isLinkActive}
+              onOpenSignOutConfirm={() => setShowLogoutConfirm(true)}
+            />
           ) : (
-            <ClientSidebar collapsed={collapsed} pathname={pathname} isLinkActive={isLinkActive} />
+            <ClientSidebar
+              collapsed={collapsed}
+              pathname={pathname}
+              isLinkActive={isLinkActive}
+              onOpenSignOutConfirm={() => setShowLogoutConfirm(true)}
+            />
           )}
         </aside>
 
@@ -149,9 +149,27 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetContent side="left" className="w-[212px] p-0 border-r border-[#202c39] bg-[#02070d] text-white">
             {isAdmin ? (
-              <AdminSidebar collapsed={false} pathname={pathname} isLinkActive={isLinkActive} onNavigate={() => setMobileOpen(false)} />
+              <AdminSidebar
+                collapsed={false}
+                pathname={pathname}
+                isLinkActive={isLinkActive}
+                onNavigate={() => setMobileOpen(false)}
+                onOpenSignOutConfirm={() => {
+                  setMobileOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
+              />
             ) : (
-              <ClientSidebar collapsed={false} pathname={pathname} isLinkActive={isLinkActive} onNavigate={() => setMobileOpen(false)} />
+              <ClientSidebar
+                collapsed={false}
+                pathname={pathname}
+                isLinkActive={isLinkActive}
+                onNavigate={() => setMobileOpen(false)}
+                onOpenSignOutConfirm={() => {
+                  setMobileOpen(false);
+                  setShowLogoutConfirm(true);
+                }}
+              />
             )}
           </SheetContent>
         </Sheet>
@@ -215,74 +233,92 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 
               <div className="h-9 w-px bg-[#34404d] hidden md:block" />
 
-              {/* User Avatar & Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-3 group cursor-pointer outline-none">
-                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden">
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        userInitials
-                      )}
-                    </div>
-                    <div className="text-left hidden sm:block">
-                      <strong className="block text-xs text-white font-bold">{profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}</strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{isAdmin ? "ADMINISTRATOR" : "CLIENT / MEMBER"}</small>
-                    </div>
-                    <ChevronDown size={14} className="text-[#9ba6b3]" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl z-[99999]">
-                  <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gold uppercase">
-                    {profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-[#172533]" />
+              {/* User Avatar & Dropdown (Triggers on HOVER & CLICK) */}
+              <div
+                className="relative"
+                onMouseEnter={() => setProfileDropdownOpen(true)}
+                onMouseLeave={() => setProfileDropdownOpen(false)}
+              >
+                <DropdownMenu open={profileDropdownOpen} onOpenChange={setProfileDropdownOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                      className="flex items-center gap-3 group cursor-pointer outline-none text-left"
+                    >
+                      <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-transparent group-hover:ring-gold transition-all">
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt="User Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                          userInitials
+                        )}
+                      </div>
+                      <div className="text-left hidden sm:block">
+                        <strong className="block text-xs text-white font-bold group-hover:text-gold transition-colors">
+                          {profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}
+                        </strong>
+                        <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">
+                          {isAdmin ? "ADMINISTRATOR" : "CLIENT / MEMBER"}
+                        </small>
+                      </div>
+                      <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-gold transition-colors" />
+                    </button>
+                  </DropdownMenuTrigger>
 
-                  {isAdmin ? (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/settings" search={{ section: undefined }} className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                          <Settings size={15} className="text-gold" /> Settings
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                          <UserIcon size={15} className="text-gold" /> Profile
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                          <UserCircle size={15} className="text-gold" /> My Profile
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                          <Settings size={15} className="text-gold" /> Settings
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
+                  <DropdownMenuContent align="end" className="w-56 bg-[#09141f] border-[#243343] text-white p-2 shadow-2xl rounded-xl z-[99999]">
+                    <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gold uppercase">
+                      {profile?.full_name || (user?.email ? user.email.split("@")[0] : (isAdmin ? "Administrator" : "Valued Client"))}
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-[#172533]" />
 
-                  <DropdownMenuItem asChild>
-                    <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
-                      <HelpCircle size={15} className="text-gold" /> Help & Support
-                    </Link>
-                  </DropdownMenuItem>
+                    {isAdmin ? (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/settings" search={{ section: undefined }} className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                            <Settings size={15} className="text-gold" /> Settings
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                            <UserIcon size={15} className="text-gold" /> Profile
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/profile" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                            <UserCircle size={15} className="text-gold" /> My Profile
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to="/dashboard/settings" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                            <Settings size={15} className="text-gold" /> Settings
+                          </Link>
+                        </DropdownMenuItem>
+                      </>
+                    )}
 
-                  <DropdownMenuSeparator className="bg-[#172533]" />
+                    <DropdownMenuItem asChild>
+                      <Link to="/contact" className="flex items-center gap-3 px-3 py-2.5 text-xs font-semibold hover:bg-[#121d29] rounded-lg cursor-pointer transition-colors text-slate-200 hover:text-white">
+                        <HelpCircle size={15} className="text-gold" /> Help & Support
+                      </Link>
+                    </DropdownMenuItem>
 
-                  <DropdownMenuItem
-                    onClick={() => setShowLogoutConfirm(true)}
-                    className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer rounded-lg"
-                  >
-                    <LogOut size={14} /> Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    <DropdownMenuSeparator className="bg-[#172533]" />
+
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        setShowLogoutConfirm(true);
+                      }}
+                      className="flex items-center gap-2 px-3 py-2.5 text-xs font-bold text-rose-400 hover:bg-rose-500/10 cursor-pointer rounded-lg"
+                    >
+                      <LogOut size={14} /> Sign out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </header>
 
@@ -297,7 +333,7 @@ export function DashboardLayout({ title, subtitle, nav, role, children }: Dashbo
 }
 
 // Client Independent Sidebar Navigation
-function ClientSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
+function ClientSidebar({ collapsed, pathname, isLinkActive, onNavigate, onOpenSignOutConfirm }: any) {
   const navItems = [
     { to: "/dashboard", label: "Portal Hub", icon: "▣" },
     { to: "/dashboard/events", label: "My Events", icon: "▦" },
@@ -345,6 +381,20 @@ function ClientSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
             </Link>
           );
         })}
+
+        {/* SIDEBAR SIGN OUT BUTTON UNDER SETTINGS */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onNavigate) onNavigate();
+            if (onOpenSignOutConfirm) onOpenSignOutConfirm();
+          }}
+          className="w-full flex items-center gap-3 h-11 px-3 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer border border-transparent hover:border-rose-500/20 mt-2"
+          title="Sign Out of Session"
+        >
+          <Power size={16} className="text-rose-400 shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
       </nav>
 
       {/* Bottom Ambient Photo Card */}
@@ -361,7 +411,7 @@ function ClientSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
 }
 
 // CEO Admin Independent Sidebar Navigation
-function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
+function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate, onOpenSignOutConfirm }: any) {
   const navItems = [
     { to: "/admin", label: "Dashboard", icon: "▣" },
     { to: "/admin/users", label: "Clients", icon: "♟" },
@@ -418,6 +468,20 @@ function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate }: any) {
             </Link>
           );
         })}
+
+        {/* SIDEBAR SIGN OUT BUTTON UNDER SETTINGS */}
+        <button
+          type="button"
+          onClick={() => {
+            if (onNavigate) onNavigate();
+            if (onOpenSignOutConfirm) onOpenSignOutConfirm();
+          }}
+          className="w-full flex items-center gap-3 h-11 px-3 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all cursor-pointer border border-transparent hover:border-rose-500/20 mt-2"
+          title="Sign Out of Session"
+        >
+          <Power size={16} className="text-rose-400 shrink-0" />
+          {!collapsed && <span>Sign Out</span>}
+        </button>
       </nav>
 
       {/* Bottom Ambient Photo Card */}

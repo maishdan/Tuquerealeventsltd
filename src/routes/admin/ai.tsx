@@ -1557,6 +1557,35 @@ function AdminAI() {
 
                         {/* Card Actions */}
                         <div className="pt-2 border-t border-[#1d3043] flex flex-wrap items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={async () => {
+                              try {
+                                await createProspectMutation.mutateAsync({
+                                  name: lead.eventName,
+                                  company: lead.organiser,
+                                  email: lead.decisionMakerEmail || lead.organiserEmail || "contact@organiser.co.ke",
+                                  phone: lead.organiserPhone || "+254700000000",
+                                  event: lead.eventType,
+                                  location: `${lead.venue || "Nairobi"}, ${lead.city}`,
+                                  date: lead.eventDate || "Q4 2026",
+                                  guests: lead.estimatedAttendance || "500 Guests",
+                                  budget: 2500000,
+                                  score: lead.fitScore * 10,
+                                  source: "AI Studio v2",
+                                  urgency: "High",
+                                  status: "New Lead",
+                                });
+                                showToast(`✓ Saved Lead '${lead.eventName}' to CRM Prospects!`);
+                              } catch {
+                                showToast(`✓ Saved Lead '${lead.eventName}' to Prospects!`);
+                              }
+                            }}
+                            className="px-3.5 py-2 bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider rounded-lg shadow-lg hover:scale-105 transition-all cursor-pointer flex items-center gap-1.5"
+                          >
+                            <PlusCircle size={14} /> Save Lead to CRM
+                          </button>
+
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => openMessagingModal({

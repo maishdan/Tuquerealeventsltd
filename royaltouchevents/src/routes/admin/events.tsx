@@ -1,63 +1,32 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
+import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
   useAdminEvents,
-  useAdminTickets,
-  useAdminProspects,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
-  useIssueTicket,
+  useToggleEventFeatured,
   formatKes,
 } from "@/hooks/use-dashboard-data";
 import { useAuth } from "@/contexts/AuthContext";
 import { createPageSeo } from "@/lib/seo";
 import { uploadEventPoster } from "@/lib/api/events";
+import { adminNav } from "@/lib/dashboard-nav";
 import {
   Search,
-  ChevronDown,
-  Power,
-  Settings,
-  Mail,
-  HelpCircle,
-  LogOut,
-  User,
   Plus,
   Edit,
   Trash2,
-  Ticket as TicketIcon,
-  QrCode,
-  CheckCircle2,
   Calendar,
   MapPin,
-  Globe,
-  Loader2,
   Sparkles,
-  Wallet,
-  Home,
-  Flame,
-  PlusCircle,
-  ExternalLink,
-  Layers,
-  Bot,
-  Crown,
-  Image as ImageIcon,
-  Users,
-  TrendingUp,
-  Zap,
-  Bell,
-  FileText
+  Star,
+  RefreshCw,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { EventRecord, ProspectRecord } from "@/lib/database.types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import type { EventRecord } from "@/lib/database.types";
 
 export const Route = createFileRoute("/admin/events")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -65,713 +34,490 @@ export const Route = createFileRoute("/admin/events")({
   }),
   head: () =>
     createPageSeo({
-      title: "Event Registry & AI Event Planner | Royal Touch Admin",
-      description: "Manage Royal Touch events, ticket classes, VIP passes, and venue pricing.",
+      title: "Event Registry & Production Hub | TOQUE REAL Admin",
+      description: "Manage TOQUE REAL live events, pricing, and home page featured spotlight.",
       path: "/admin/events",
       noindex: true,
     }),
-  component: AdminEvents,
+  component: AdminEventsPage,
 });
 
-function AdminEvents() {
-  const { user, profile, signOut } = useAuth();
-  const navigate = useNavigate();
+function AdminEventsPage() {
+  return (
+    <DashboardGuard requiredRole="admin">
+      <AdminEventsContent />
+    </DashboardGuard>
+  );
+}
+
+function AdminEventsContent() {
+  const { profile } = useAuth();
 
   // Database Hooks
-  const { data: events = [], isLoading: isLoadingEvents } = useAdminEvents();
-  const { data: tickets = [] } = useAdminTickets();
-  const { data: prospects = [] } = useAdminProspects();
+  const { data: events = [], isLoading: isLoadingEvents, refetch: refetchEvents } = useAdminEvents();
 
   // Mutations
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
   const deleteEventMutation = useDeleteEvent();
+  const toggleFeaturedMutation = useToggleEventFeatured();
 
-  // Modal State
+  // State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventRecord | null>(null);
-  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const [isMenuCollapsed, setIsMenuCollapsed] = useState(false);
-  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
-  // Form State
+  // Form Fields
   const [formName, setFormName] = useState("");
-  const [formType, setFormType] = useState("Corporate Event");
-  const [formVenue, setFormVenue] = useState("");
+  const [formType, setFormType] = useState("Corporate Gala");
   const [formDate, setFormDate] = useState("");
-  const [formBudget, setFormBudget] = useState(500000);
-  const [formPosterUrl, setFormPosterUrl] = useState("");
+  const [formVenue, setFormVenue] = useState("");
+  const [formBudget, setFormBudget] = useState("");
+  const [formDescription, setFormDescription] = useState("");
+  const [formPosterUrl, setFormPosterUrl] = useState("/back/e1.jfif");
+  const [formFeatured, setFormFeatured] = useState(false);
 
   const showToast = (msg: string) => {
     setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
+    setTimeout(() => setToastMsg(null), 3500);
   };
 
-  const emailLower = (user?.email || profile?.email || "").toLowerCase();
-  const rawName = profile?.full_name || user?.user_metadata?.full_name || "";
-
-  const adminInfo = (() => {
-    if (emailLower === "eventsroyaltouch7@gmail.com" || rawName.toLowerCase().includes("japheth")) {
-      return { fullName: "Japheth Owiyo", badge: "PROTECTED C.E.O" };
-    }
-    if (emailLower === "maishdan4940@gmail.com" || rawName.toLowerCase().includes("maishdan") || rawName.toLowerCase().includes("dan maish")) {
-      return { fullName: rawName || "Dan Maish", badge: "EXECUTIVE ADMIN" };
-    }
-    if (emailLower === "abigaelmuthoni29@gmail.com" || rawName.toLowerCase().includes("daniwest")) {
-      return { fullName: "DANIWEST", badge: "SUPER ADMIN DEVELOPER" };
-    }
-    const fallback = rawName || (emailLower ? emailLower.split("@")[0].toUpperCase() : "ADMINISTRATOR");
-    return { fullName: fallback, badge: "EXECUTIVE ADMIN" };
-  })();
-
-  const userInitials = (adminInfo.fullName || rawName || emailLower || "AD")
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
-
-  // Always loaded AI Discovered Leads (combines live DB prospects + AI scanner leads)
-  const displayLeads = prospects.length > 0 ? prospects : [
-    {
-      id: "lead-fallback-1",
-      event: "ABC Association — Annual Leadership & Tech Summit 2026",
-      company_name: "ABC Association Kenya",
-      contact_name: "Dr. Richard O. Ombati",
-      location: "Villa Rosa Kempinski, Nairobi City County, Kenya",
-      budget: 3500000,
-      lead_score: 95,
-      date: "2026-11-20",
-    },
-    {
-      id: "lead-fallback-2",
-      event: "Intimate Karen 30th Birthday Soirée & Gala",
-      company_name: "Wambui Private Soirée",
-      contact_name: "Jane Wambui",
-      location: "Karen Country Club, Nairobi City County, Kenya",
-      budget: 85000,
-      lead_score: 98,
-      date: "2026-10-25",
-    },
-    {
-      id: "lead-fallback-3",
-      event: "Safaricom Foundation — Youth Tech Expo 2026",
-      company_name: "Safaricom Foundation",
-      contact_name: "Grace K. Njeri",
-      location: "KICC Nairobi Main Auditorium, Kenya",
-      budget: 4500000,
-      lead_score: 96,
-      date: "2026-12-05",
-    },
-  ];
-
-  const openCreateModal = () => {
+  const handleOpenCreateModal = () => {
     setEditingEvent(null);
     setFormName("");
-    setFormType("Corporate Event");
-    setFormVenue("");
+    setFormType("Corporate Gala");
     setFormDate(new Date().toISOString().slice(0, 10));
-    setFormBudget(500000);
-    setFormPosterUrl("");
+    setFormVenue("Villa Rosa Kempinski, Nairobi");
+    setFormBudget("2500000");
+    setFormDescription("Executive event production by TOQUE REAL EVENTS LIMITED.");
+    setFormPosterUrl("/back/e1.jfif");
+    setFormFeatured(false);
     setIsCreateModalOpen(true);
   };
 
-  const openModalFromLead = (p: any) => {
-    setEditingEvent(null);
-    setFormName(p.event || p.company_name || p.contact_name || "Custom AI Lead Event");
-    setFormType("Corporate Event");
-    setFormVenue(p.location || "Nairobi Venue");
-    setFormDate(p.date || new Date().toISOString().slice(0, 10));
-    setFormBudget(p.budget || 1500000);
-    setFormPosterUrl("");
-    setIsCreateModalOpen(true);
-    showToast(`✓ Pre-filled Event Planner for '${p.event || p.company_name}'`);
-  };
-
-  const openEditModal = (evt: EventRecord) => {
-    setEditingEvent(evt);
-    setFormName(evt.name);
-    setFormType(evt.event_type);
-    setFormVenue(evt.venue || "");
-    setFormDate(evt.event_date || "");
-    setFormBudget(evt.budget || 0);
-    setFormPosterUrl(evt.poster_url && !evt.poster_url.startsWith("/back/") ? evt.poster_url : "");
+  const handleOpenEditModal = (event: EventRecord) => {
+    setEditingEvent(event);
+    setFormName(event.name);
+    setFormType(event.event_type || "General");
+    setFormDate(event.event_date || new Date().toISOString().slice(0, 10));
+    setFormVenue(event.venue || "Nairobi Venue");
+    setFormBudget(String(event.budget || 0));
+    setFormDescription(event.description || "");
+    setFormPosterUrl(event.poster_url || "/back/e1.jfif");
+    setFormFeatured(Boolean(event.featured));
     setIsCreateModalOpen(true);
   };
 
-  const handleImageFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosterUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setIsUploadingImage(true);
     try {
-      const publicUrl = await uploadEventPoster(file);
-      setFormPosterUrl(publicUrl);
-      showToast("✓ Custom Event Poster uploaded directly to Supabase Storage!");
-    } catch (err: any) {
-      showToast("Error uploading poster image");
+      const url = await uploadEventPoster(file);
+      setFormPosterUrl(url);
+      showToast("✓ Event poster uploaded successfully!");
+    } catch {
+      showToast("❌ Image upload failed. Using fallback.");
     } finally {
       setIsUploadingImage(false);
     }
   };
 
-  const handleSaveEvent = async (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName || !formVenue || !formDate) {
-      showToast("Please fill in all required event details");
+    if (!formName.trim()) {
+      showToast("❌ Please provide an event name.");
       return;
     }
 
-    const payload = {
-      name: formName,
-      event_type: formType,
-      venue: formVenue,
-      event_date: formDate,
-      budget: formBudget,
-      poster_url: formPosterUrl || null,
-      status: "upcoming" as const,
-      lifecycle_state: "PUBLISHED" as const,
-    };
+    const numericBudget = parseInt(formBudget.replace(/[^0-9]/g, "")) || 0;
 
     try {
       if (editingEvent) {
-        await updateEventMutation.mutateAsync({ id: editingEvent.id, ...payload });
-        showToast(`✓ Updated Event '${formName}'`);
+        await updateEventMutation.mutateAsync({
+          id: editingEvent.id,
+          name: formName.trim(),
+          event_type: formType,
+          event_date: formDate,
+          venue: formVenue.trim(),
+          budget: numericBudget,
+          description: formDescription.trim(),
+          poster_url: formPosterUrl,
+          featured: formFeatured,
+        });
+        showToast(`✓ Event '${formName}' updated successfully!`);
       } else {
-        await createEventMutation.mutateAsync(payload);
-        showToast(`✓ Published New Event '${formName}' to Live Database!`);
+        await createEventMutation.mutateAsync({
+          user_id: profile?.id || null,
+          name: formName.trim(),
+          event_type: formType,
+          event_date: formDate,
+          venue: formVenue.trim(),
+          budget: numericBudget,
+          status: "upcoming",
+          featured: formFeatured,
+          description: formDescription.trim(),
+          poster_url: formPosterUrl,
+          organizer_name: "TOQUE REAL EVENTS LIMITED",
+          organizer_email: "realtoque0@gmail.com",
+          organizer_phone: "+254795365334",
+        });
+        showToast(`✓ New event '${formName}' created & saved to database!`);
       }
       setIsCreateModalOpen(false);
-    } catch (err) {
-      showToast("Error saving event to database");
+      refetchEvents();
+    } catch (err: any) {
+      showToast(`❌ Error: ${err?.message || "Failed to save event"}`);
     }
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (confirm(`Are you sure you want to delete '${name}'?`)) {
+    if (confirm(`Are you sure you want to delete event '${name}'?`)) {
       try {
         await deleteEventMutation.mutateAsync(id);
-        showToast(`Deleted event '${name}'`);
-      } catch (err) {
-        showToast("Error deleting event");
+        showToast(`✓ Deleted event '${name}'`);
+        refetchEvents();
+      } catch {
+        showToast("❌ Error deleting event.");
       }
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#03070d] text-[#f4f7fb] font-sans selection:bg-[#e6b83f] selection:text-black antialiased">
-      {/* Toast Notification */}
-      {toastMsg && (
-        <div className="fixed bottom-6 right-6 z-[300] px-5 py-3 bg-[#142231] border border-[#3c4d5e] text-white text-xs font-bold shadow-2xl rounded-lg animate-in slide-in-from-bottom-4 duration-300">
-          {toastMsg}
-        </div>
-      )}
+  const filteredEvents = events.filter((e) => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      (e.name || "").toLowerCase().includes(q) ||
+      (e.event_type || "").toLowerCase().includes(q) ||
+      (e.venue || "").toLowerCase().includes(q)
+    );
+  });
 
-      {/* App Shell Grid */}
-      <div className={cn("min-h-screen grid transition-all duration-300", isMenuCollapsed ? "grid-cols-[70px_1fr]" : "grid-cols-[212px_1fr]")}>
-        {/* SIDEBAR */}
-        <aside className="relative min-h-screen border-r border-[#202c39] bg-gradient-to-b from-[#02070d] via-[#050b12] to-[#02060b] flex flex-col z-50 sticky top-0 h-screen overflow-hidden">
-          <div className="h-[95px] flex flex-col items-center justify-center border-b border-[#17212b] text-[#f4cf69] shrink-0 sticky top-0 bg-[#02070d] z-10">
-            <Crown size={22} className="text-[#f4cf69]" />
-            {!isMenuCollapsed && (
-              <>
-                <div className="font-serif tracking-[2px] text-xs mt-1 font-bold text-center">TOQUE REAL</div>
-                <div className="font-serif tracking-[3px] text-[9px] opacity-80 mt-0.5 text-center">EVENTS LIMITED</div>
-              </>
-            )}
+  return (
+    <DashboardLayout
+      title="TOQUE REAL EVENTS LIMITED ADMINISTRATOR"
+      subtitle="Event Registry & Production Hub"
+      nav={adminNav}
+      role="admin"
+    >
+      <div className="space-y-6 font-sans">
+        {/* Toast Notification */}
+        {toastMsg && (
+          <div className="fixed top-6 right-6 z-[300] bg-[#12212d] border-2 border-[#f4cf69] text-white text-xs font-mono px-5 py-3 shadow-2xl animate-in slide-in-from-top duration-200 flex items-center gap-3">
+            <Sparkles className="text-[#f4cf69] shrink-0" size={16} />
+            <span>{toastMsg}</span>
+          </div>
+        )}
+
+        {/* GUIDANCE NOTE TILE BANNER */}
+        <div className="p-4 bg-gradient-to-r from-[#0d1d2c] via-[#091522] to-[#0d1d2c] border border-[#f4cf69]/40 rounded-xl shadow-xl flex items-center gap-3">
+          <div className="p-2.5 bg-[#f4cf69]/10 border border-[#f4cf69]/30 rounded-lg text-[#f4cf69] shrink-0">
+            <Sparkles size={18} />
+          </div>
+          <div className="space-y-0.5 text-xs">
+            <div className="font-bold text-[#f4cf69] uppercase font-mono tracking-wider flex items-center gap-2">
+              <span>💡 Event Management & Home Page Spotlight Guide</span>
+            </div>
+            <p className="text-[#9ca8b6] font-medium leading-relaxed">
+              Create and manage live production events. Click the <strong className="text-amber-300">⭐ Star icon</strong> on any event card to feature or unfeature it on the public Home Page. Converted AI Leads from the CRM automatically land here.
+            </p>
+          </div>
+        </div>
+
+        {/* HEADER CONTROLS BAR */}
+        <div className="p-4 bg-[#09131d] border border-[#1b2c3d] rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+          <div className="relative w-full md:w-96">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#899cb0]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search event name, type, venue..."
+              className="w-full pl-9 pr-4 py-2 bg-[#0c1e30] border border-[#203548] text-xs font-mono text-white placeholder:text-[#5a6e82] focus:border-[#f4cf69] outline-none transition rounded-lg"
+            />
           </div>
 
-          <nav className="p-3 space-y-1 overflow-y-auto flex-1 scrollbar-thin scrollbar-thumb-[#243343] scrollbar-track-[#07101a]">
-            {[
-              { to: "/admin", label: "Dashboard", icon: Home },
-              { to: "/admin/users", label: "Clients", icon: Users },
-              { to: "/admin/prospects", label: "Prospects", icon: Sparkles },
-              { to: "/admin/customers", label: "Customers", icon: Users },
-              { to: "/admin/events", label: "Events", icon: Calendar, active: true },
-              { to: "/admin/bookings", label: "Sales & CRM", icon: FileText },
-              { to: "/admin/proposals", label: "Proposals", icon: FileText },
-              { to: "/admin/payments", label: "Payments", icon: TrendingUp },
-              { to: "/admin/finance", label: "Finance", icon: TrendingUp },
-              { to: "/admin/ai", label: "AI & Insights", icon: Sparkles },
-              { to: "/admin/admin-booking", label: "Booking", icon: Calendar },
-              { to: "/admin/contacts", label: "Notifications", icon: Bell },
-              { to: "/admin/contacts", label: "Messages", icon: Mail },
-              { to: "/admin/team", label: "Team", icon: Users },
-              { to: "/admin/marketing", label: "Marketing", icon: Zap },
-              { to: "/admin/reports", label: "Reports", icon: FileText },
-              { to: "/admin/settings", label: "Settings", icon: Settings },
-            ].map((item, idx) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={idx}
-                  to={item.to}
-                  className={cn(
-                    "flex items-center gap-3 h-[43px] px-3 rounded-lg text-xs font-medium transition-all cursor-pointer my-1 justify-center md:justify-start",
-                    item.active
-                      ? "bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-white shadow-lg shadow-[#b48224]/20 font-bold"
-                      : "text-[#c7d0da] hover:bg-[#111b27] hover:text-white"
-                  )}
-                >
-                  <Icon size={16} className={cn("shrink-0", item.active ? "text-white" : "text-[#f1c35a]")} />
-                  {!isMenuCollapsed && <span className="hidden md:inline">{item.label}</span>}
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
-
-        {/* MAIN PAGE CONTAINER */}
-        <div className="flex flex-col min-w-0 bg-[#03070d]">
-          {/* EXACT DEFAULT TOPBAR HEADER */}
-          <header className="sticky top-0 z-[100] h-[74px] border-b border-[#202b37] bg-[#03080e]/95 backdrop-blur-md flex items-center gap-4 px-6 shadow-xl overflow-visible">
+          <div className="flex items-center gap-3 w-full md:w-auto">
             <button
-              type="button"
-              onClick={() => {
-                setIsMenuCollapsed(!isMenuCollapsed);
-                showToast(isMenuCollapsed ? "Sidebar Menu Expanded" : "Sidebar Menu Collapsed");
-              }}
-              className="h-9 w-9 rounded-lg border border-[#314354] bg-[#121d29] text-[#e6b83f] flex items-center justify-center text-lg font-bold hover:border-[#e6b83f] transition-all cursor-pointer shrink-0"
-              title="Toggle Menu"
+              onClick={() => refetchEvents()}
+              className="p-2 bg-[#0c1e30] border border-[#203548] text-[#899cb0] hover:text-white rounded-lg transition cursor-pointer"
+              title="Sync events"
             >
-              ☰
+              <RefreshCw size={15} className={isLoadingEvents ? "animate-spin text-[#f4cf69]" : ""} />
             </button>
 
-            {/* Universal Global Search Bar */}
-            <div className="relative w-full max-w-[425px] h-9 border border-[#314354] rounded-lg bg-[#121d29] flex items-center px-3 gap-2.5">
-              <span className="text-[#8d9bad] text-sm">⌕</span>
-              <input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search registered clients, emails, roles..."
-                className="w-full bg-transparent border-0 outline-none text-xs text-white placeholder:text-[#8291a2]"
-              />
+            <button
+              onClick={handleOpenCreateModal}
+              className="px-5 py-2.5 bg-[#f4cf69] hover:bg-[#d5a637] text-black font-black text-xs uppercase tracking-wider transition shadow-lg flex items-center gap-2 cursor-pointer rounded-lg font-mono"
+            >
+              <Plus size={16} />
+              <span>New Event</span>
+            </button>
+          </div>
+        </div>
+
+        {/* EVENTS LIST GRID */}
+        {filteredEvents.length === 0 ? (
+          <div className="p-12 bg-[#09131d] border border-[#1b2c3d] rounded-xl text-center space-y-4 shadow-xl">
+            <div className="w-16 h-16 rounded-full bg-[#12212d] border border-[#f4cf69]/30 text-[#f4cf69] flex items-center justify-center mx-auto">
+              <Calendar size={32} />
             </div>
-
-            <div className="ml-auto flex items-center gap-3">
-              {/* Website Home Button */}
-              <Link
-                to="/"
-                className="h-9 px-3.5 border border-[#314354] bg-[#121d29] hover:border-[#f4cf69] text-[#f4cf69] text-xs font-bold rounded-lg flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-                title="Go to Public Website Home"
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-white font-mono uppercase tracking-wider">No Events Found</h3>
+              <p className="text-xs text-[#899cb0] max-w-md mx-auto">
+                No events currently exist in the database. Click "+ New Event" or convert a lead from the AI CRM to publish an event.
+              </p>
+            </div>
+            <button
+              onClick={handleOpenCreateModal}
+              className="px-6 py-2.5 bg-[#f4cf69] text-black font-black text-xs uppercase tracking-wider rounded-lg shadow-lg cursor-pointer"
+            >
+              Create First Event
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((evt) => (
+              <div
+                key={evt.id}
+                className="bg-[#09131d] border border-[#1b2c3d] hover:border-[#f4cf69]/50 rounded-xl overflow-hidden shadow-xl transition-all flex flex-col group"
               >
-                <Home size={15} /> <span className="hidden sm:inline">Website Home</span>
-              </Link>
+                {/* Event Poster Image Header */}
+                <div className="relative h-48 bg-[#12212d] overflow-hidden">
+                  <img
+                    src={evt.poster_url || "/back/e1.jfif"}
+                    alt={evt.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#09131d] via-[#09131d]/40 to-transparent" />
 
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
-
-              {/* Notifications Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
+                  {/* Featured Badge Star Button */}
                   <button
                     type="button"
-                    className="relative h-9 w-9 flex items-center justify-center text-[#e8edf3] text-xl cursor-pointer hover:text-[#e6b83f] outline-none group"
-                    title="Notifications Overview"
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      try {
+                        await toggleFeaturedMutation.mutateAsync({ id: evt.id, featured: !evt.featured });
+                        showToast(
+                          `✓ "${evt.name}" ${!evt.featured ? "marked as FEATURED on Home Page!" : "removed from Featured events"}`
+                        );
+                        refetchEvents();
+                      } catch {
+                        showToast("❌ Failed to update featured status.");
+                      }
+                    }}
+                    className={cn(
+                      "absolute top-3 right-3 px-3 py-1.5 rounded-lg border transition-all cursor-pointer flex items-center gap-1.5 text-[10px] font-mono font-bold shadow-lg backdrop-blur-md z-10",
+                      evt.featured
+                        ? "bg-amber-400 text-black border-amber-300 font-black"
+                        : "bg-black/60 border-white/20 text-white hover:border-[#f4cf69] hover:text-[#f4cf69]"
+                    )}
+                    title={evt.featured ? "Featured on Home Page (Click to unfeature)" : "Click to Feature on Home Page"}
                   >
-                    <Bell size={18} />
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-[#f0444f] text-white font-extrabold text-[9px] flex items-center justify-center border-2 border-[#050b12] group-hover:scale-110 transition-transform">
-                      {tickets.length || 3}
-                    </span>
+                    <Star size={14} className={cn(evt.featured ? "fill-black text-black" : "text-amber-400")} />
+                    <span>{evt.featured ? "Featured ★" : "Feature"}</span>
                   </button>
-                </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" sideOffset={8} className="w-80 bg-[#09141f] border border-[#f4cf69]/40 text-white p-3 shadow-2xl rounded-xl space-y-2 z-[999999]">
-                  <div className="flex items-center justify-between px-2 py-1">
-                    <span className="text-xs font-black text-[#f4cf69] uppercase tracking-wider">
-                      Executive Notifications
-                    </span>
-                    <span className="text-[9px] bg-rose-500/20 text-rose-400 font-bold px-2 py-0.5 rounded-full">
-                      {tickets.length || 3} New
-                    </span>
+                  <div className="absolute bottom-3 left-3 px-2.5 py-1 bg-black/80 border border-[#f4cf69]/40 text-[#f4cf69] text-[10px] font-mono font-bold uppercase rounded">
+                    {evt.event_type || "General Event"}
                   </div>
-
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-
-                  <div className="space-y-1.5 max-h-64 overflow-y-auto pr-1 scrollbar-thin">
-                    {tickets.slice(0, 3).map((t) => (
-                      <div key={t.id} className="p-2.5 bg-[#111a25] border border-[#233240] rounded-lg text-xs space-y-1">
-                        <div className="flex justify-between items-center text-[10px] text-[#f4cf69] font-bold">
-                          <span>New M-Pesa Ticket Order</span>
-                          <span className="text-[#8391a0] font-mono">{new Date(t.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
-                        </div>
-                        <p className="text-[#c7d0da] text-[11px] leading-snug">
-                          {t.holder_name} paid {formatKes(t.price)} via M-Pesa for {t.ticket_tier} Pass.
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/admin/contacts"
-                      className="w-full py-2.5 bg-gradient-to-r from-[#a9741b] via-[#d5a637] to-[#896019] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-2 hover:bg-gold transition-all cursor-pointer"
-                    >
-                      View All Notifications & Messages →
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
-
-              {/* Date */}
-              <div className="text-xs text-[#d8dee6] hidden sm:flex items-center gap-2 font-mono">
-                <span>▣</span> {new Date().toLocaleDateString("en-US", { weekday: "short", day: "2-digit", month: "short", year: "numeric" })}
-              </div>
-
-              <div className="h-9 w-px bg-[#34404d] hidden sm:block" />
-
-              {/* User Avatar & Dropdown Menu */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className="flex items-center gap-2.5 group cursor-pointer outline-none">
-                    <div className="h-9 w-9 rounded-full bg-[#f2e8cd] text-[#25200f] font-extrabold text-xs flex items-center justify-center shadow-md overflow-hidden ring-2 ring-transparent group-hover:ring-[#f4cf69] transition-all">
-                      {profile?.avatar_url ? (
-                        <img src={profile.avatar_url} alt="Admin Avatar" className="h-full w-full object-cover" />
-                      ) : (
-                        userInitials
-                      )}
-                    </div>
-                    <div className="text-left hidden md:block">
-                      <strong className="block text-xs text-white leading-tight group-hover:text-[#f4cf69] transition-colors">
-                        {adminInfo.fullName}
-                      </strong>
-                      <small className="block text-[10px] text-[#9ca8b6] font-medium uppercase">{adminInfo.badge}</small>
-                    </div>
-                    <ChevronDown size={14} className="text-[#9ba6b3] group-hover:text-[#f4cf69] transition-colors" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" sideOffset={8} className="w-56 bg-[#09141f] border border-[#f4cf69]/40 text-white p-2 shadow-2xl rounded-xl space-y-1 z-[999999]">
-                  <DropdownMenuLabel className="px-3 py-2 text-xs font-black text-[#f4cf69] uppercase tracking-wider">
-                    {adminInfo.fullName} ({adminInfo.badge})
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-[#172533]" />
-                  <DropdownMenuItem onClick={() => navigate({ to: "/admin/settings" })} className="cursor-pointer">
-                    <Settings size={15} className="mr-2 text-[#f4cf69]" /> Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setShowLogoutConfirmModal(true)} className="text-rose-400 cursor-pointer">
-                    <LogOut size={15} className="mr-2" /> Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </header>
-
-          {/* MAIN CONTENT AREA */}
-          <main className="p-6 lg:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
-            {/* AI DISCOVERED LEADS SECTION (ALWAYS LOADED & READY) */}
-            <div className="p-6 bg-[#081522] border border-[#f4cf69]/40 rounded-xl space-y-4 shadow-xl">
-              <div className="flex justify-between items-center border-b border-[#1f3246] pb-3">
-                <div>
-                  <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider block">AI Lead Scanner Pipeline</span>
-                  <h3 className="text-sm font-black uppercase text-white flex items-center gap-2">
-                    <Flame className="text-rose-400" size={16} /> AI Discovered Trending Leads — Click "Plan This Event"
-                  </h3>
                 </div>
-                <Link to="/admin/ai" className="text-xs text-[#f4cf69] font-bold hover:underline">View AI Engine →</Link>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {displayLeads.slice(0, 3).map((p: any) => (
-                  <div key={p.id} className="p-4 bg-[#0c1a28] border border-[#1d3244] hover:border-[#f4cf69] rounded-xl space-y-3 transition-all">
-                    <div className="flex justify-between items-start gap-2">
-                      <span className="text-xs font-bold text-white leading-snug">{p.event || p.company_name || p.contact_name}</span>
-                      <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono font-bold text-[10px] shrink-0">
-                        Score: {p.lead_score || 95}
-                      </span>
+                {/* Event Card Details */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div className="space-y-2">
+                    <h4 className="text-base font-bold text-white tracking-tight line-clamp-1 group-hover:text-[#f4cf69] transition-colors">
+                      {evt.name}
+                    </h4>
+                    <p className="text-xs text-[#899cb0] line-clamp-2 leading-relaxed">
+                      {evt.description || "Executive event production by TOQUE REAL EVENTS LIMITED."}
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-xs font-mono text-[#c7d0da] border-t border-[#182836] pt-3">
+                    <div className="flex items-center gap-2 text-[#899cb0]">
+                      <Calendar size={14} className="text-[#f4cf69] shrink-0" />
+                      <span>{evt.event_date ? new Date(evt.event_date).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "Upcoming"}</span>
                     </div>
 
-                    <div className="text-[11px] text-[#899cb0] space-y-1">
-                      <p>📍 Location: <span className="text-white font-medium">{p.location || "Nairobi, Kenya"}</span></p>
-                      <p>💰 Budget: <span className="text-[#f4cf69] font-mono font-bold">{formatKes(p.budget || 1500000)}</span></p>
+                    <div className="flex items-center gap-2 text-[#899cb0]">
+                      <MapPin size={14} className="text-[#20e39b] shrink-0" />
+                      <span className="truncate">{evt.venue || "Nairobi Venue"}</span>
                     </div>
+
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-[10px] text-[#899cb0] uppercase">Budget / Value:</span>
+                      <span className="text-sm font-black text-white font-mono">{formatKes(evt.budget || 0)}</span>
+                    </div>
+                  </div>
+
+                  {/* Actions Bar */}
+                  <div className="flex items-center justify-between border-t border-[#182836] pt-3 gap-2">
+                    <button
+                      onClick={() => handleOpenEditModal(evt)}
+                      className="flex-1 py-2 bg-[#0c1e30] border border-[#203548] hover:border-[#f4cf69] text-white text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition cursor-pointer rounded-lg"
+                    >
+                      <Edit size={13} /> Edit
+                    </button>
 
                     <button
-                      onClick={() => openModalFromLead(p)}
-                      className="w-full py-2 bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider rounded-lg flex items-center justify-center gap-1 hover:scale-105 transition-all shadow cursor-pointer"
+                      onClick={() => handleDelete(evt.id, evt.name)}
+                      className="p-2 bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 text-rose-400 text-xs font-mono transition cursor-pointer rounded-lg"
+                      title="Delete Event"
                     >
-                      + Plan This Event
+                      <Trash2 size={15} />
                     </button>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* LIVE EVENTS GRID */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-base font-black text-white uppercase tracking-wider flex items-center gap-2">
-                  <Calendar className="text-[#f4cf69]" /> Live Event Catalog ({events.length})
-                </h3>
-                <button
-                  onClick={openCreateModal}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-md inline-flex items-center gap-1.5"
-                >
-                  <Plus size={15} /> + Plan Custom Event
-                </button>
-              </div>
-
-              {events.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {events.map((evt) => {
-                    const hasCustomPoster = evt.poster_url && !evt.poster_url.startsWith("/back/") && evt.poster_url !== "/placeholder-event.png";
-
-                    return (
-                      <div
-                        key={evt.id}
-                        className="bg-[#081522] border border-[#203348] hover:border-[#f4cf69] rounded-xl overflow-hidden shadow-xl transition-all group space-y-3"
-                      >
-                        {/* Event Poster / "EVENT IMAGE COMING SOON" Badge */}
-                        <div className="relative h-48 w-full bg-[#0d1c2a] flex items-center justify-center border-b border-[#1c3044] overflow-hidden">
-                          {hasCustomPoster ? (
-                            <img src={evt.poster_url!} alt={evt.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                          ) : (
-                            <div className="flex flex-col items-center justify-center p-6 text-center space-y-2">
-                              <div className="h-12 w-12 rounded-full bg-[#142637] border border-[#f4cf69]/40 flex items-center justify-center text-[#f4cf69]">
-                                <ImageIcon size={22} />
-                              </div>
-                              <span className="text-xs font-black uppercase tracking-widest text-[#f4cf69] bg-[#07131e] px-3 py-1 rounded border border-[#f4cf69]/40 shadow-inner">
-                                Event Image Coming Soon
-                              </span>
-                            </div>
-                          )}
-
-                          <span className="absolute top-3 right-3 px-2.5 py-1 bg-black/80 backdrop-blur-md text-[#f4cf69] text-[10px] font-black uppercase rounded border border-[#f4cf69]/40 font-mono">
-                            {evt.event_type}
-                          </span>
-                        </div>
-
-                        {/* Event Content Details */}
-                        <div className="p-5 space-y-3">
-                          <h4 className="text-base font-black text-white group-hover:text-[#f4cf69] transition-colors leading-snug">
-                            {evt.name}
-                          </h4>
-
-                          <div className="space-y-1.5 text-xs text-[#899cb0] font-sans">
-                            <div className="flex items-center gap-1.5">
-                              <MapPin size={14} className="text-[#f4cf69] shrink-0" />
-                              <span className="truncate">{evt.venue || "Nairobi Venue"}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 font-mono text-emerald-400">
-                              <Calendar size={14} className="shrink-0" />
-                              <span>{evt.event_date || "Upcoming Date"}</span>
-                            </div>
-                          </div>
-
-                          <div className="p-3 bg-[#0c1a28] border border-[#1b2f40] rounded-xl text-xs font-mono flex items-center justify-between text-[#a0b2c6]">
-                            <span>Budget Allocation:</span>
-                            <span className="text-[#f4cf69] font-bold">{formatKes(evt.budget || 0)}</span>
-                          </div>
-
-                          {/* Action Buttons */}
-                          <div className="pt-2 border-t border-[#1d3043] flex items-center justify-between gap-2">
-                            <button
-                              onClick={() => openEditModal(evt)}
-                              className="px-3 py-1.5 rounded-lg bg-[#142637] border border-[#f4cf69]/50 text-[#f4cf69] text-xs font-bold uppercase hover:bg-[#1f354c] transition-all cursor-pointer flex items-center gap-1"
-                            >
-                              <Edit size={13} /> Edit Event
-                            </button>
-
-                            <button
-                              onClick={() => handleDelete(evt.id, evt.name)}
-                              className="px-3 py-1.5 rounded-lg bg-rose-950/60 border border-rose-500/50 text-rose-400 text-xs font-bold uppercase hover:bg-rose-600 hover:text-white transition-all cursor-pointer flex items-center gap-1"
-                            >
-                              <Trash2 size={13} /> Delete
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
                 </div>
-              ) : (
-                <div className="p-12 bg-[#081522] border border-[#203348] rounded-xl text-center space-y-4">
-                  <div className="mx-auto h-16 w-16 rounded-full bg-[#0d1c2a] border border-[#f4cf69]/40 flex items-center justify-center text-[#f4cf69]">
-                    <Calendar size={32} />
-                  </div>
-                  <h4 className="text-lg font-black text-white uppercase tracking-wider">No Live Events Published</h4>
-                  <p className="text-xs text-[#899cb0] max-w-md mx-auto">
-                    The database event catalog is clean and ready for real operational data. Click below to publish your first event!
-                  </p>
-                  <button
-                    onClick={openCreateModal}
-                    className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-xl inline-flex items-center gap-2"
-                  >
-                    <Plus size={16} /> + Plan & Publish First Event
-                  </button>
-                </div>
-              )}
-            </div>
-          </main>
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* CREATE / EDIT EVENT MODAL (CLOSES ON BACKDROP CLICK & FITS ALL SCREENS) */}
+      {/* CREATE / EDIT EVENT MODAL */}
       {isCreateModalOpen && (
-        <div
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsCreateModalOpen(false);
-            }
-          }}
-          className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-md p-3 sm:p-6 font-sans animate-in fade-in duration-200 cursor-pointer"
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="bg-[#081522] border-2 border-[#f4cf69] p-4 sm:p-6 lg:p-8 rounded-2xl w-full max-w-xl max-h-[92vh] overflow-y-auto shadow-2xl space-y-5 text-white cursor-default scrollbar-thin scrollbar-thumb-[#243343]"
-          >
-            <div className="flex justify-between items-center border-b border-[#1d3043] pb-4">
-              <div>
-                <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-wider">TOQUE REAL Production Hub</span>
-                <h3 className="text-base sm:text-lg font-black uppercase text-white">{editingEvent ? `Edit Event: ${editingEvent.name}` : "Plan & Publish Event"}</h3>
-              </div>
+        <div className="fixed inset-0 z-[200] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#081522] border-2 border-[#f4cf69] p-6 sm:p-8 max-w-xl w-full space-y-5 font-sans shadow-2xl rounded-xl my-8">
+            <div className="flex items-center justify-between border-b border-[#182836] pb-4">
+              <h3 className="text-base font-black uppercase text-white font-mono tracking-wider flex items-center gap-2">
+                <Sparkles size={18} className="text-[#f4cf69]" />
+                <span>{editingEvent ? "Edit Event Production" : "Create New Event"}</span>
+              </h3>
               <button
-                type="button"
                 onClick={() => setIsCreateModalOpen(false)}
-                className="h-8 w-8 rounded-lg bg-[#142637] text-[#9caec2] hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer"
+                className="text-[#899cb0] hover:text-white font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSaveEvent} className="space-y-4 text-xs font-sans">
+            <form onSubmit={handleFormSubmit} className="space-y-4 text-xs font-mono">
               <div>
-                <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Name / Title *</label>
+                <label className="block text-[#899cb0] mb-1">Event Title / Name *</label>
                 <input
                   type="text"
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="e.g. Annual Leadership Gala 2026"
-                  className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                  placeholder="e.g. East Africa Tech Summit 2026"
+                  className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Category *</label>
+                  <label className="block text-[#899cb0] mb-1">Event Category / Type</label>
                   <select
                     value={formType}
                     onChange={(e) => setFormType(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                    className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg"
                   >
-                    <option value="Corporate Event">Corporate Conference & Summit</option>
-                    <option value="Luxury Wedding">Luxury Wedding & Gala</option>
-                    <option value="Birthday Party">Birthday Party & Celebration</option>
-                    <option value="Exhibition & Expo">Exhibition & Trade Fair</option>
-                    <option value="Concert & Live Show">Concert & Musical Festival</option>
+                    <option value="Corporate Gala">Corporate Gala</option>
+                    <option value="Technology">Technology Summit</option>
+                    <option value="Concert Production">Concert Production</option>
+                    <option value="Product Launch">Product Launch</option>
+                    <option value="Luxury Wedding">Luxury Wedding</option>
+                    <option value="AGM & Conference">AGM & Conference</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Venue Location *</label>
+                  <label className="block text-[#899cb0] mb-1">Event Date</label>
                   <input
-                    type="text"
-                    required
-                    value={formVenue}
-                    onChange={(e) => setFormVenue(e.target.value)}
-                    placeholder="e.g. Villa Rosa Kempinski, Nairobi"
-                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                    type="date"
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Event Date *</label>
+                  <label className="block text-[#899cb0] mb-1">Venue / Location</label>
                   <input
-                    type="date"
-                    required
-                    value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none"
+                    type="text"
+                    value={formVenue}
+                    onChange={(e) => setFormVenue(e.target.value)}
+                    placeholder="e.g. KICC Grand Ballroom, Nairobi"
+                    className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-[#899cb0] uppercase tracking-wider mb-1.5">Production Budget (KES) *</label>
+                  <label className="block text-[#899cb0] mb-1">Budget / Value (KES)</label>
                   <input
-                    type="number"
+                    type="text"
                     value={formBudget}
-                    onChange={(e) => setFormBudget(Number(e.target.value))}
-                    className="w-full h-11 px-3.5 bg-[#0c1a28] border border-[#203548] rounded-xl text-white focus:border-[#f4cf69] focus:outline-none font-mono"
+                    onChange={(e) => setFormBudget(e.target.value)}
+                    placeholder="e.g. 2500000"
+                    className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg"
                   />
                 </div>
               </div>
 
-              {/* CUSTOM FILE UPLOAD TO SUPABASE BUCKET */}
-              <div className="p-4 bg-[#0d1c2b] border border-[#1f3246] rounded-xl space-y-3">
-                <label className="block font-bold text-[#f4cf69] uppercase tracking-wider text-[11px]">
-                  Custom Event Poster Upload (Supabase Storage)
-                </label>
-
-                {formPosterUrl ? (
-                  <div className="relative h-40 w-full rounded-xl overflow-hidden border border-[#f4cf69] shadow-lg">
-                    <img src={formPosterUrl} alt="Event Poster" className="w-full h-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => setFormPosterUrl("")}
-                      className="absolute top-2 right-2 px-2 py-1 bg-rose-600 text-white text-[10px] font-bold rounded uppercase shadow cursor-pointer"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-6 border-2 border-dashed border-[#203548] rounded-xl text-center space-y-2">
-                    <ImageIcon size={28} className="mx-auto text-[#f4cf69]" />
-                    <p className="text-xs text-[#899cb0]">Upload custom poster file or leave empty for "Event Image Coming Soon"</p>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                  <div>
-                    <span className="block font-bold text-[#899cb0] uppercase text-[10px] mb-1">Upload File:</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageFileUpload}
-                      disabled={isUploadingImage}
-                      className="w-full text-xs text-[#a0b2c6] file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-gradient-to-r file:from-[#d5a637] file:to-[#f4cf69] file:text-black hover:file:opacity-90 cursor-pointer"
-                    />
-                  </div>
-
-                  <div>
-                    <span className="block font-bold text-[#899cb0] uppercase text-[10px] mb-1">Or Image URL:</span>
-                    <input
-                      type="text"
-                      value={formPosterUrl}
-                      onChange={(e) => setFormPosterUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="w-full h-10 px-3 bg-[#0c1a28] border border-[#203548] rounded-xl text-xs text-white focus:border-[#f4cf69] focus:outline-none"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label className="block text-[#899cb0] mb-1">Event Description & Production Brief</label>
+                <textarea
+                  rows={3}
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="Describe event setup, sound/lighting requirements, or VIP packages..."
+                  className="w-full bg-[#0c1e30] border border-[#203548] p-3 text-white outline-none focus:border-[#f4cf69] rounded-lg resize-none"
+                />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-3">
+              <div>
+                <label className="block text-[#899cb0] mb-1">Upload Event Poster Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handlePosterUpload}
+                  disabled={isUploadingImage}
+                  className="w-full bg-[#0c1e30] border border-[#203548] p-2 text-white outline-none rounded-lg text-xs"
+                />
+                {isUploadingImage && <p className="text-[10px] text-[#f4cf69] mt-1">Uploading poster to Supabase Storage...</p>}
+              </div>
+
+              {/* Mark as Featured Checkbox */}
+              <div className="pt-1">
+                <label className="flex items-center gap-2.5 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={formFeatured}
+                    onChange={(e) => setFormFeatured(e.target.checked)}
+                    className="w-4 h-4 rounded border-[#203548] bg-[#0c1e30] text-[#f4cf69] focus:ring-0"
+                  />
+                  <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <Star size={14} className="fill-amber-400 text-amber-400" />
+                    <span>Feature this event on public Home Page Spotlight</span>
+                  </span>
+                </label>
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3 border-t border-[#182836]">
                 <button
                   type="button"
                   onClick={() => setIsCreateModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl bg-[#142637] text-[#899cb0] text-xs font-bold uppercase hover:text-white cursor-pointer"
+                  className="px-4 py-2.5 border border-[#203548] text-[#899cb0] hover:text-white rounded-lg"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isUploadingImage}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#d5a637] to-[#f4cf69] text-black font-black text-xs uppercase tracking-wider hover:scale-105 transition-all cursor-pointer shadow-xl disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#f4cf69] hover:bg-[#d5a637] text-black font-black uppercase rounded-lg shadow-lg cursor-pointer"
                 >
-                  {isUploadingImage ? "Uploading Image..." : editingEvent ? "Save Changes" : "Publish Event"}
+                  {editingEvent ? "Save Changes" : "Publish Event"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
+    </DashboardLayout>
   );
 }

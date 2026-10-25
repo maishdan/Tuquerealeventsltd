@@ -92,6 +92,7 @@ export type EventRecord = {
   venue: string | null;
   budget: number | null;
   status: EventStatus;
+  featured?: boolean | null;
   lifecycle_state?: EventLifecycleState;
   description?: string | null;
   poster_url?: string | null;
