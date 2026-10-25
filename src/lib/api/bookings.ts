@@ -14,40 +14,7 @@ export type CreateBookingInput = {
   user_id?: string | null;
 };
 
-export const DEFAULT_BOOKINGS: Booking[] = [
-  {
-    id: "bk-1001",
-    user_id: "usr-client-1",
-    name: "Daniel Maina",
-    email: "daniel.maina@gmail.com",
-    phone: "+254712345678",
-    event_type: "Corporate Gala",
-    event_date: "2026-11-28",
-    guests: "250",
-    budget: "KSh 1,500,000",
-    services: ["Decor & Styling", "Sound & Lighting", "Catering"],
-    notes: "Executive gala setup with gold theme.",
-    status: "confirmed",
-    created_at: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: "bk-1002",
-    user_id: "usr-client-2",
-    name: "Sarah Muthoni",
-    email: "sarah.muthoni@abcltd.co.ke",
-    phone: "+254722998877",
-    event_type: "Product Launch",
-    event_date: "2026-12-10",
-    guests: "150",
-    budget: "KSh 800,000",
-    services: ["AV Production", "Photography", "Stage Setup"],
-    notes: "Product launch for mobile app in Westlands.",
-    status: "pending",
-    created_at: new Date(Date.now() - 86400000 * 5).toISOString(),
-  }
-];
-
-let inMemoryBookings: Booking[] = [...DEFAULT_BOOKINGS];
+let inMemoryBookings: Booking[] = [];
 
 export async function createBooking(input: CreateBookingInput): Promise<Booking> {
   const newBooking: Booking = {
@@ -65,8 +32,6 @@ export async function createBooking(input: CreateBookingInput): Promise<Booking>
     status: "pending",
     created_at: new Date().toISOString(),
   };
-
-  inMemoryBookings = [newBooking, ...inMemoryBookings];
 
   try {
     const { data, error } = await supabase
@@ -93,12 +58,12 @@ export async function fetchAllBookings(): Promise<Booking[]> {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return inMemoryBookings;
+    if (error || !data) {
+      return [];
     }
     return data as Booking[];
   } catch {
-    return inMemoryBookings;
+    return [];
   }
 }
 
@@ -110,18 +75,16 @@ export async function fetchUserBookings(userId: string, email: string): Promise<
       .or(`user_id.eq.${userId},email.eq.${email}`)
       .order("created_at", { ascending: false });
 
-    if (error || !data || data.length === 0) {
-      return inMemoryBookings.filter((b) => b.user_id === userId || b.email === email || !b.user_id);
+    if (error || !data) {
+      return [];
     }
     return data as Booking[];
   } catch {
-    return inMemoryBookings.filter((b) => b.user_id === userId || b.email === email || !b.user_id);
+    return [];
   }
 }
 
 export async function updateBookingStatus(id: string, status: BookingStatus): Promise<Booking> {
-  inMemoryBookings = inMemoryBookings.map((b) => (b.id === id ? { ...b, status } : b));
-
   try {
     const { data, error } = await supabase
       .from("bookings")
@@ -131,10 +94,10 @@ export async function updateBookingStatus(id: string, status: BookingStatus): Pr
       .single();
 
     if (error || !data) {
-      return inMemoryBookings.find((b) => b.id === id) || { ...DEFAULT_BOOKINGS[0], id, status };
+      return { id, status } as any;
     }
     return data as Booking;
   } catch {
-    return inMemoryBookings.find((b) => b.id === id) || { ...DEFAULT_BOOKINGS[0], id, status };
+    return { id, status } as any;
   }
 }
