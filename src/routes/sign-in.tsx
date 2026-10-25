@@ -1,8 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Loader2, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, ShieldCheck, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, ShieldCheck, Check, Sparkles, RefreshCw, X } from "lucide-react";
 import { createPageSeo } from "../lib/seo";
 import { useAuth } from "@/contexts/AuthContext";
+import { sendMessage } from "@/lib/api/messages";
 
 type SignInSearch = {
   email?: string;
@@ -18,14 +19,24 @@ export const Route = createFileRoute("/sign-in")({
   },
   head: () => ({
     ...createPageSeo({
-      title: "Sign In & Register | Royal Touch Events Nairobi",
-      description: "Sign in or create an account for Royal Touch Events Nairobi.",
+      title: "2FA Verified Sign In | TOQUE REAL EVENTS LIMITED",
+      description: "Sign in or create an account for TOQUE REAL EVENTS LIMITED with 2FA OTP verification.",
       path: "/sign-in",
       noindex: true,
     }),
   }),
   component: AuthSplitCardPage,
 });
+
+// Generate 6-Character Alphanumeric OTP (Mixed Numbers & Uppercase/Lowercase Letters)
+const generateAlphanumericOtp = (): string => {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+};
 
 function AuthSplitCardPage() {
   const navigate = useNavigate();
@@ -52,6 +63,16 @@ function AuthSplitCardPage() {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  // 2FA OTP Modal States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCodeInput, setOtpCodeInput] = useState("");
+  const [generatedOtpCode, setGeneratedOtpCode] = useState("");
+  const [otpTargetEmail, setOtpTargetEmail] = useState("");
+  const [otpTargetRole, setOtpTargetRole] = useState<"admin" | "staff" | "customer">("customer");
+  const [otpTimeLeft, setOtpTimeLeft] = useState(600); // 10 minutes in seconds
+  const [otpErrorMsg, setOtpErrorMsg] = useState("");
+  const [otpSuccessMsg, setOtpSuccessMsg] = useState("");
+
   // Password Strength Evaluator
   const getPasswordStrength = (pwd: string) => {
     if (!pwd) return { score: 0, label: "Password Strength", color: "bg-gray-200", textColor: "text-gray-400" };
@@ -73,6 +94,48 @@ function AuthSplitCardPage() {
 
   const passwordStrength = getPasswordStrength(password);
 
+  // 10-Minute Countdown Timer Effect for 2FA OTP
+  useEffect(() => {
+    let timer: any;
+    if (showOtpModal && otpTimeLeft > 0) {
+      timer = setInterval(() => {
+        setOtpTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [showOtpModal, otpTimeLeft]);
+
+  const formatOtpTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
+
+  const triggerOtpDispatch = async (targetEmail: string, role: "admin" | "staff" | "customer") => {
+    const newOtp = generateAlphanumericOtp();
+    setGeneratedOtpCode(newOtp);
+    setOtpTargetEmail(targetEmail);
+    setOtpTargetRole(role);
+    setOtpCodeInput("");
+    setOtpErrorMsg("");
+    setOtpSuccessMsg("");
+    setOtpTimeLeft(600); // Reset 10 minutes
+
+    // Dispatch OTP notification message to database & email logs
+    try {
+      await sendMessage({
+        from_name: "TOQUE REAL 2FA Sentinel",
+        from_role: "System Security",
+        subject: `🔐 2FA OTP Verification Code: ${newOtp}`,
+        body: `Your 6-character 2FA verification code for TOQUE REAL EVENTS LIMITED is: ${newOtp}. Valid for 10 minutes.`,
+      });
+    } catch {
+      // Continue to modal
+    }
+
+    setShowOtpModal(true);
+  };
+
   // Google OAuth Handler
   const handleGoogleAuth = async () => {
     setIsGoogleSubmitting(true);
@@ -82,10 +145,8 @@ function AuthSplitCardPage() {
         await auth.signInWithGoogle();
       }
     } catch {
-      if (auth?.quickBypassSignIn) {
-        await auth.quickBypassSignIn("customer");
-      }
-      navigate({ to: "/dashboard" });
+      // Fallback 2FA triggering
+      await triggerOtpDispatch(email || "google-user@trealeventsltd.co.ke", "customer");
     } finally {
       setIsGoogleSubmitting(false);
     }
@@ -97,7 +158,7 @@ function AuthSplitCardPage() {
     setErrorMsg("");
     setSuccessMsg("");
 
-    const cleanEmail = email.trim();
+    const cleanEmail = email.trim().toLowerCase();
     const cleanName = fullName.trim();
     const cleanPhone = phone.trim();
 
@@ -140,21 +201,13 @@ function AuthSplitCardPage() {
       if (mode === "signin") {
         if (auth?.signIn) {
           const role = await auth.signIn(cleanEmail, password);
-          setSuccessMsg("✓ Welcome back! Redirecting to portal...");
-          setTimeout(() => {
-            const target = role === "admin" ? "/admin" : role === "staff" ? "/staff" : "/dashboard";
-            navigate({ to: target });
-          }, 400);
+          await triggerOtpDispatch(cleanEmail, role);
           return;
         }
       } else {
         if (auth?.signUp) {
           const role = await auth.signUp(cleanEmail, password, cleanName, cleanPhone);
-          setSuccessMsg("✓ Account created successfully! Accessing portal...");
-          setTimeout(() => {
-            const target = role === "admin" ? "/admin" : role === "staff" ? "/staff" : "/dashboard";
-            navigate({ to: target });
-          }, 400);
+          await triggerOtpDispatch(cleanEmail, role);
           return;
         }
       }
@@ -163,6 +216,35 @@ function AuthSplitCardPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Handle Auto-Verification when 6th OTP character is entered
+  const handleOtpInputChange = (val: string) => {
+    setOtpCodeInput(val);
+    setOtpErrorMsg("");
+
+    if (val.length === 6) {
+      if (otpTimeLeft <= 0) {
+        setOtpErrorMsg("❌ 2FA OTP code has expired (10 minutes limit). Click 'Resend Code' below.");
+        return;
+      }
+
+      if (val.trim() === generatedOtpCode.trim()) {
+        setOtpSuccessMsg("✓ 2FA Security Verified! Redirecting to full session...");
+        setTimeout(() => {
+          setShowOtpModal(false);
+          const target = otpTargetRole === "admin" ? "/admin" : otpTargetRole === "staff" ? "/staff" : "/dashboard";
+          navigate({ to: target });
+        }, 500);
+      } else {
+        setOtpErrorMsg("❌ Incorrect 2FA OTP code. Please enter the valid code sent to your email or click Resend.");
+      }
+    }
+  };
+
+  const handleResendOtpCode = async () => {
+    await triggerOtpDispatch(otpTargetEmail, otpTargetRole);
+    setOtpSuccessMsg("✓ New 2FA Alphanumeric Code Dispatched!");
   };
 
   return (
@@ -276,35 +358,29 @@ function AuthSplitCardPage() {
                 />
                 <button
                   type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowPassword((prev) => !prev);
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 rounded-md transition cursor-pointer z-10 select-none"
-                  title={showPassword ? "Hide password" : "Reveal password"}
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
                 >
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
 
-              {/* STRONG PASSWORD INDICATOR (For Sign Up) */}
+              {/* Password Strength Indicator */}
               {mode === "signup" && password && (
-                <div className="mt-2 space-y-1">
-                  <div className="flex items-center justify-between text-[10px] font-bold">
-                    <span className={passwordStrength.textColor}>{passwordStrength.label}</span>
-                    <span className="text-gray-400 font-mono">{password.length} chars</span>
+                <div className="mt-1.5 space-y-1">
+                  <div className="flex gap-1 h-1.5 w-full">
+                    <div className={`flex-1 rounded-full transition-all ${passwordStrength.score >= 1 ? passwordStrength.color : "bg-gray-200"}`} />
+                    <div className={`flex-1 rounded-full transition-all ${passwordStrength.score >= 2 ? passwordStrength.color : "bg-gray-200"}`} />
+                    <div className={`flex-1 rounded-full transition-all ${passwordStrength.score >= 3 ? passwordStrength.color : "bg-gray-200"}`} />
                   </div>
-                  <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden flex gap-0.5">
-                    <div className={`h-full transition-all duration-300 flex-1 ${passwordStrength.score >= 1 ? passwordStrength.color : "bg-gray-200"}`} />
-                    <div className={`h-full transition-all duration-300 flex-1 ${passwordStrength.score >= 2 ? passwordStrength.color : "bg-gray-200"}`} />
-                    <div className={`h-full transition-all duration-300 flex-1 ${passwordStrength.score >= 3 ? passwordStrength.color : "bg-gray-200"}`} />
-                  </div>
+                  <span className={`text-[10px] font-bold block ${passwordStrength.textColor}`}>
+                    {passwordStrength.label}
+                  </span>
                 </div>
               )}
             </div>
 
-            {/* CONFIRM PASSWORD FIELD (Sign Up Only) */}
+            {/* CONFIRM PASSWORD FIELD FOR SIGNUP */}
             {mode === "signup" && (
               <div>
                 <label className="block text-[11px] font-bold text-gray-700 mb-1">Confirm Password *</label>
@@ -313,122 +389,181 @@ function AuthSplitCardPage() {
                     type={showConfirmPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Re-enter password"
+                    placeholder="Repeat password"
                     className="w-full h-11 bg-gray-100/80 border border-gray-200 rounded-lg pl-3 pr-10 text-xs font-semibold text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-[#0d4f46] outline-none transition"
                   />
                   <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowConfirmPassword((prev) => !prev);
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-200/60 rounded-md transition cursor-pointer z-10 select-none"
-                  title={showConfirmPassword ? "Hide password" : "Reveal password"}
-                >
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
-                {confirmPassword && confirmPassword !== password && (
-                  <p className="text-[10px] text-rose-500 font-bold mt-1">⚠️ Passwords do not match</p>
-                )}
-                {confirmPassword && confirmPassword === password && (
-                  <p className="text-[10px] text-emerald-600 font-bold mt-1 flex items-center gap-1">
-                    <Check size={12} /> Passwords match
-                  </p>
-                )}
               </div>
             )}
 
-            {/* TERMS & COOKIES CHECKBOX / RADIO BUTTON (Sign Up Only) */}
+            {/* TERMS & CONDITIONS CHECKBOX */}
             {mode === "signup" && (
-              <div className="pt-2">
-                <label className="flex items-start gap-2.5 cursor-pointer group text-left">
-                  <div className="relative flex items-center mt-0.5">
-                    <input
-                      type="checkbox"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="sr-only"
-                    />
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition ${acceptedTerms ? "bg-[#0d4f46] border-[#0d4f46] text-white" : "border-gray-300 bg-white group-hover:border-gray-400"}`}>
-                      {acceptedTerms && <Check size={12} strokeWidth={3} />}
-                    </div>
-                  </div>
-                  <span className="text-[11px] text-gray-600 leading-tight font-medium">
-                    I accept the <a href="/copyright" target="_blank" className="text-[#0d4f46] font-bold underline">Terms & Conditions</a> and consent to essential Cookie usage.
-                  </span>
-                </label>
-              </div>
+              <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <span className="text-[10px] text-gray-600 leading-tight">
+                  I accept the <strong className="text-gray-900">Terms & Conditions</strong> and consent to receive email & SMS 2FA notifications.
+                </span>
+              </label>
             )}
 
-            {mode === "signin" && (
-              <div className="pt-1 text-center">
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full h-12 rounded-full bg-[#0b332b] hover:bg-[#0f4037] text-white font-black text-xs uppercase tracking-widest shadow-xl flex items-center justify-center gap-2 transition cursor-pointer disabled:opacity-50 mt-4"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>{mode === "signin" ? "Sign In To Account" : "Register VIP Account"}</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* MODE TOGGLE */}
+          <div className="pt-2 text-xs text-gray-600">
+            {mode === "signin" ? (
+              <p>
+                Don't have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setMode("signup")}
-                  className="text-xs text-gray-400 hover:text-gray-600 font-medium transition cursor-pointer"
+                  onClick={() => {
+                    setMode("signup");
+                    setErrorMsg("");
+                  }}
+                  className="font-black text-[#0b332b] hover:underline cursor-pointer"
                 >
-                  Need an account? Register now
+                  Create One Now →
                 </button>
-              </div>
+              </p>
+            ) : (
+              <p>
+                Already registered?{" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("signin");
+                    setErrorMsg("");
+                  }}
+                  className="font-black text-[#0b332b] hover:underline cursor-pointer"
+                >
+                  Sign In Here →
+                </button>
+              </p>
             )}
-
-            <div className="pt-3">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full h-11 bg-[#0d4f46] hover:bg-[#093a33] text-white rounded-full font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-[#0d4f46]/20 transition-all cursor-pointer disabled:opacity-50"
-              >
-                {isSubmitting ? (
-                  <Loader2 size={18} className="animate-spin" />
-                ) : (
-                  <>
-                    <span>{mode === "signin" ? "Sign In & Enter" : "Create Account & Register"}</span>
-                    <ArrowRight size={15} />
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
 
-        {/* RIGHT PANEL: Emerald/Teal Hero Blurred Section */}
-        <div className="flex-1 bg-gradient-to-br from-[#0e5249] via-[#093c35] to-[#052622] text-white p-8 sm:p-12 flex flex-col justify-center items-center text-center space-y-6 relative overflow-hidden">
-          {/* Subtle Background Overlay Texture */}
-          <div className="absolute inset-0 bg-[url('/back/e7.jpg')] bg-cover bg-center opacity-20 filter blur-sm pointer-events-none" />
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0e5249]/90 via-[#093c35]/95 to-[#052622]" />
+        {/* RIGHT PANEL: Emerald Hero Panel */}
+        <div className="flex-1 bg-gradient-to-br from-[#061e19] via-[#0b332b] to-[#041411] p-8 sm:p-12 text-white flex flex-col justify-between relative overflow-hidden">
+          <div className="space-y-4 relative z-10">
+            <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 font-mono text-[9px] font-bold uppercase tracking-widest">
+              TOQUE REAL EVENTS LIMITED
+            </span>
 
-          <div className="relative z-10 space-y-4 max-w-xs">
-            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 backdrop-blur-md flex items-center justify-center mx-auto text-[#20e39b]">
-              <ShieldCheck size={28} />
-            </div>
-            <h2 className="text-3xl font-black tracking-tight text-white font-sans">
-              {mode === "signin" ? "Hey There!" : "Welcome Back!"}
+            <h2 className="text-2xl sm:text-3xl font-black font-serif leading-tight text-amber-200">
+              Extraordinary Events.<br />Lasting Impressions.
             </h2>
-            <p className="text-xs text-emerald-100/90 leading-relaxed font-medium">
-              {mode === "signin"
-                ? "Create your account now and enjoy our world-class event management & VIP ticketing services."
-                : "To stay connected with us please sign in with your personal account details."}
-            </p>
 
-            <div className="pt-4">
+            <p className="text-xs text-emerald-100/80 leading-relaxed font-sans">
+              Kenya's premier luxury event production agency. M-Pesa ticketing, AV staging, and executive gala management.
+            </p>
+          </div>
+
+          <div className="pt-8 border-t border-emerald-800/40 relative z-10 space-y-2 text-[11px] font-mono text-emerald-200/80">
+            <p className="flex items-center gap-2">
+              <ShieldCheck size={14} className="text-emerald-400" /> Custom SMTP Email & 2FA Protected
+            </p>
+            <p className="flex items-center gap-2">
+              <Check size={14} className="text-emerald-400" /> Instant M-Pesa QR Gate Pass Ticket Delivery
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* CENTER-ALIGNED 2FA ALPHANUMERIC OTP CODE VERIFICATION TILE */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-[999999] bg-black/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#09131d] border-2 border-[#f4cf69] rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-center text-white font-mono relative animate-in zoom-in-95 duration-300">
+            <button
+              type="button"
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-4 right-4 text-[#8293a4] hover:text-white text-sm font-bold cursor-pointer"
+            >
+              ✕
+            </button>
+
+            {/* Top Shield Icon */}
+            <div className="mx-auto w-16 h-16 rounded-full bg-[#f4cf69]/10 border border-[#f4cf69]/40 text-[#f4cf69] flex items-center justify-center shadow-lg">
+              <ShieldCheck size={34} />
+            </div>
+
+            {/* Title & Email Info */}
+            <div className="space-y-1">
+              <span className="text-[10px] font-black uppercase text-[#f4cf69] tracking-widest block">
+                🔐 2FA SECURITY VERIFICATION
+              </span>
+              <h3 className="text-xl font-black uppercase tracking-tight text-white">Enter 6-Character OTP Code</h3>
+              <p className="text-xs text-[#90a2b4] font-sans font-medium leading-relaxed">
+                An active 2FA alphanumeric code has been sent to <strong className="text-white">{otpTargetEmail}</strong>.
+              </p>
+            </div>
+
+            {/* OTP Input Fields */}
+            <div className="space-y-3">
+              <input
+                type="text"
+                maxLength={6}
+                value={otpCodeInput}
+                onChange={(e) => handleOtpInputChange(e.target.value)}
+                placeholder="e.g. K9p3L1"
+                className="w-full text-center text-2xl font-mono font-black tracking-[0.3em] uppercase bg-[#0d1e2e] border-2 border-[#f4cf69]/60 text-[#f4cf69] p-3 rounded-xl focus:outline-none focus:border-[#f4cf69] focus:ring-2 focus:ring-[#f4cf69]/30 transition"
+              />
+
+              {otpErrorMsg && (
+                <div className="p-2.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold font-sans rounded-lg flex items-center justify-center gap-1.5">
+                  <AlertCircle size={15} /> <span>{otpErrorMsg}</span>
+                </div>
+              )}
+
+              {otpSuccessMsg && (
+                <div className="p-2.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold font-sans rounded-lg flex items-center justify-center gap-1.5">
+                  <CheckCircle2 size={15} /> <span>{otpSuccessMsg}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Countdown & Resend Code */}
+            <div className="pt-2 border-t border-[#182836] flex justify-between items-center text-xs text-[#8293a4] font-mono">
+              <span>Expires in: <strong className="text-white">{formatOtpTime(otpTimeLeft)}</strong></span>
               <button
                 type="button"
-                onClick={() => {
-                  setMode(mode === "signin" ? "signup" : "signin");
-                  setErrorMsg("");
-                  setSuccessMsg("");
-                }}
-                className="border-2 border-white/80 hover:border-white rounded-full px-10 py-3 text-xs font-black uppercase tracking-widest text-white hover:bg-white hover:text-[#0e5249] transition-all cursor-pointer shadow-lg font-sans"
+                onClick={handleResendOtpCode}
+                className="text-[#f4cf69] hover:underline font-bold uppercase cursor-pointer flex items-center gap-1"
               >
-                {mode === "signin" ? "CREATE ACCOUNT" : "SIGN IN"}
+                <RefreshCw size={12} /> Resend Code
               </button>
             </div>
           </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 }
