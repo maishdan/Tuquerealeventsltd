@@ -73,6 +73,7 @@ export const adminSections: DashboardNavSection[] = [
       { key: "customers", label: "Customers", icon: UsersRound, to: "/admin/customers" },
       { key: "team", label: "Internal Team", icon: Users, to: "/admin/team" },
       { key: "users", label: "Users & Roles", icon: Fingerprint, to: "/admin/users" },
+      { key: "rbac", label: "RBAC Control", icon: ShieldCheck, to: "/admin/users" },
     ],
   },
   {

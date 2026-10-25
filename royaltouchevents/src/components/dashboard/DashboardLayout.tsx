@@ -415,6 +415,7 @@ function AdminSidebar({ collapsed, pathname, isLinkActive, onNavigate, onOpenSig
   const navItems = [
     { to: "/admin", label: "Dashboard", icon: "▣" },
     { to: "/admin/users", label: "Clients", icon: "♟" },
+    { to: "/admin/users", label: "RBAC Control", icon: "🛡️" },
     { to: "/admin/prospects", label: "Prospects", icon: "✦" },
     { to: "/admin/leads", label: "Leads Directory", icon: "✦" },
     { to: "/admin/customers", label: "Customers", icon: "♟" },
