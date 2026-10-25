@@ -32,6 +32,7 @@ import {
   LogOut,
   User,
   Plus,
+  PlusCircle,
   Edit,
   Trash2,
   Calendar,

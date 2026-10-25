@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
