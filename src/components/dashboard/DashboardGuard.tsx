@@ -25,8 +25,16 @@ export function DashboardGuard({
   const { session, profile, role, user, loading } = useAuth();
   const navigate = useNavigate();
 
+  // Detect Google OAuth User vs Email/Password User
+  const isGoogleUser = Boolean(
+    user?.app_metadata?.provider === "google" ||
+    user?.app_metadata?.providers?.includes("google") ||
+    user?.identities?.some((id) => id.provider === "google")
+  );
+
   const [is2FaVerified, setIs2FaVerified] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
+    // Google OAuth users are automatically 2FA verified
     return sessionStorage.getItem("royal_2fa_verified") === "true";
   });
 
@@ -38,7 +46,7 @@ export function DashboardGuard({
 
   const userEmail = user?.email || profile?.email || "authenticated-user@trealeventsltd.co.ke";
 
-  // Dispatch OTP code on initial load if unverified
+  // Dispatch OTP code on initial load for Email & Password Users
   const dispatchOtp = async () => {
     const code = generateAlphanumericOtp();
     setGeneratedOtpCode(code);
@@ -68,7 +76,15 @@ export function DashboardGuard({
       return;
     }
 
-    if (!is2FaVerified && !generatedOtpCode) {
+    // GOOGLE OAUTH USERS: Log in directly without requiring OTP
+    if (isGoogleUser && !is2FaVerified) {
+      sessionStorage.setItem("royal_2fa_verified", "true");
+      setIs2FaVerified(true);
+      return;
+    }
+
+    // EMAIL & PASSWORD USERS: Must complete 2FA OTP
+    if (!isGoogleUser && !is2FaVerified && !generatedOtpCode) {
       dispatchOtp();
     }
 
@@ -79,16 +95,16 @@ export function DashboardGuard({
     } else if (requiredRole === "staff" && currentRole !== "staff" && currentRole !== "admin") {
       navigate({ to: "/dashboard", replace: true });
     }
-  }, [session, profile, role, loading, requiredRole, navigate, is2FaVerified, generatedOtpCode]);
+  }, [session, profile, role, loading, requiredRole, navigate, is2FaVerified, generatedOtpCode, isGoogleUser]);
 
-  // 10-Minute Timer
+  // 10-Minute Timer for Email/Password OTP
   useEffect(() => {
     let timer: any;
-    if (!is2FaVerified && otpTimeLeft > 0) {
+    if (!isGoogleUser && !is2FaVerified && otpTimeLeft > 0) {
       timer = setInterval(() => setOtpTimeLeft((prev) => prev - 1), 1000);
     }
     return () => clearInterval(timer);
-  }, [is2FaVerified, otpTimeLeft]);
+  }, [isGoogleUser, is2FaVerified, otpTimeLeft]);
 
   const formatOtpTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -132,8 +148,8 @@ export function DashboardGuard({
   const isAuthenticated = Boolean(session || profile);
   if (!isAuthenticated) return null;
 
-  // Render Center-Aligned 2FA Verification Modal if NOT verified
-  if (!is2FaVerified) {
+  // EMAIL & PASSWORD USERS: Render Center-Aligned 2FA Verification Modal if NOT verified
+  if (!isGoogleUser && !is2FaVerified) {
     return (
       <div className="min-h-screen bg-[#070b10] text-white flex flex-col items-center justify-center p-4 font-mono relative">
         <div className="bg-[#09131d] border-2 border-[#f4cf69] rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-[0_25px_70px_rgba(0,0,0,0.9)] space-y-5 text-center text-white relative animate-in zoom-in-95 duration-300 z-50">
