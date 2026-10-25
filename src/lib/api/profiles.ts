@@ -15,7 +15,7 @@ export async function fetchProfile(userId: string): Promise<Profile | null> {
       });
 
     const timeoutPromise = new Promise<never>((_, reject) => {
-      timerId = setTimeout(() => reject(new Error("Profile Fetch Timeout")), 1200);
+      timerId = setTimeout(() => reject(new Error("Profile Fetch Timeout")), 5000);
     });
 
     const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);

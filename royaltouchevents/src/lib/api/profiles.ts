@@ -10,7 +10,7 @@ export async function fetchProfile(userId: string) {
       .single();
 
     const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Profile Fetch Timeout")), 3000)
+      setTimeout(() => reject(new Error("Profile Fetch Timeout")), 5000)
     );
 
     const { data, error } = await Promise.race([fetchPromise, timeoutPromise]);
