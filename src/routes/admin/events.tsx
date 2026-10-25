@@ -4,6 +4,7 @@ import { DashboardGuard } from "@/components/dashboard/DashboardGuard";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
 import {
   useAdminEvents,
+  useAdminProspects,
   useCreateEvent,
   useUpdateEvent,
   useDeleteEvent,
