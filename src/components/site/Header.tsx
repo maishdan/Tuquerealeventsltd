@@ -13,6 +13,7 @@ import { useTheme } from "@/contexts/ThemeContext";
 import { useFavorites } from "@/contexts/FavoritesContext";
 import { FavoritesModal } from "./FavoritesModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { PwaInstallBanner } from "@/components/common/PwaInstallBanner";
 
 const exploreNav = [
   { to: "/about", label: "About" },

@@ -99,6 +99,7 @@ export function Header({ variant = "dark" }: { variant?: "dark" | "light" }) {
 
   return (
     <>
+      <PwaInstallBanner />
       <header className={cn(
         "fixed inset-x-0 top-0 z-50 border-b h-20 bg-black border-white/10 text-white shadow-2xl transition-all duration-300"
       )}>
