@@ -25,7 +25,13 @@ import type { BookingStatus, TicketStatus } from "@/lib/database.types";
 import { formatKes } from "@/lib/dashboard-mock-data";
 
 export function useAdminProspects() {
-  return useQuery({ queryKey: ["admin", "prospects"], queryFn: fetchProspects });
+  return useQuery({
+    queryKey: ["admin", "prospects"],
+    queryFn: fetchProspects,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useCreateProspect() {
@@ -49,19 +55,43 @@ export function useDeleteProspect() {
 }
 
 export function useAdminBookings() {
-  return useQuery({ queryKey: ["admin", "bookings"], queryFn: fetchAllBookings });
+  return useQuery({
+    queryKey: ["admin", "bookings"],
+    queryFn: fetchAllBookings,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useAdminContacts() {
-  return useQuery({ queryKey: ["admin", "contacts"], queryFn: fetchContactInquiries });
+  return useQuery({
+    queryKey: ["admin", "contacts"],
+    queryFn: fetchContactInquiries,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useAdminEvents() {
-  return useQuery({ queryKey: ["admin", "events"], queryFn: fetchAllEvents });
+  return useQuery({
+    queryKey: ["admin", "events"],
+    queryFn: fetchAllEvents,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useFeaturedEvents() {
-  return useQuery({ queryKey: ["public", "featured-events"], queryFn: fetchFeaturedEvents });
+  return useQuery({
+    queryKey: ["public", "featured-events"],
+    queryFn: fetchFeaturedEvents,
+    staleTime: 0,
+    refetchInterval: 10000,
+    refetchOnWindowFocus: true,
+  });
 }
 
 export function useToggleEventFeatured() {

@@ -1,0 +1,19 @@
+{
+  "name": "TOQUE REAL EVENTS LIMITED",
+  "short_name": "TOQUE REAL",
+  "description": "TOQUE REAL EVENTS LIMITED — Kenya's Premier Event Planning, Staging & VIP Pass Agency.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#03070d",
+  "theme_color": "#03070d",
+  "icons": [
+    {
+      "src": "/new logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
